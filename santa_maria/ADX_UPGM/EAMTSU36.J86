@@ -1,0 +1,8 @@
+!At manager Override Processing
+!En la intervencion del jefe de departamento
+FUNCTION TSUPEC36 PUBLIC
+
+!call traceNUO( "UE36 TEMP1I4=" + str$(TS.TEMP1I4) + " DATA$(0)=[" + TS.IO.DATA$(0) + "]" )
+
+END FUNCTION
+

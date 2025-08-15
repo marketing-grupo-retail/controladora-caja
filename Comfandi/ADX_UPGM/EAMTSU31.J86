@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC31 PUBLIC
+%INCLUDE EAMTSE31.J86        ! EMS PRPQ
+END FUNCTION
+

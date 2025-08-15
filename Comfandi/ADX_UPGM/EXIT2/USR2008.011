@@ -1,0 +1,52 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2008.011 
+!     Punto de Entrada   =  EAMTSU20.J86
+!     Fecha de Revisi¢n  =  Ene. 10 de 1996
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 20  para CREAR
+! Articulos con Codigo de Barras y Metodo de Precio = 5.
+!
+! Se  usar   como  ALIAS, el PLU digitado en la siguiente 
+! Secuencia de Digitacion, que FUNCIONA ligada a la  User
+! Exit  USR1407.011 :
+!
+!         .----------.           .---.   .-----------------------.
+!         | AUTORIZA |   No de   | / |   | "Scan de Cod Barras"  |
+!          ----------     PLU     ---     -----------------------
+!
+!------------------------------------------------------------------------
+
+IF CREA.CODBAR% = 1   THEN BEGIN                    ! Si Flag CREACION Barras
+   IF TS.LINETYPE = 1 AND                          \! y en Venta OK
+      TS.LINEDATA = 0 THEN BEGIN                    ! para Item Normal
+         CREA.CODBAR% = 0                           ! Restaura Flag Creacion
+         TS.ER.RETURN = -1                          ! Retorna si NO Abre OK
+         OPEN "R::EAMITEMR" KEYED RECL 46 AS 75     ! Abre Arch de Articulos
+         IF TS.ER.RETURN THEN BEGIN                 ! Si Apertura esta OK
+            IR.INDICAT2$ = UNPACK$(IR.INDICAT2$)    ! Obtiene String
+            IR.INDICAT2$ = LEFT$(IR.INDICAT2$,1)    ! y salva parte Izq
+            IR.INDICAT2$ = PACK$(IR.INDICAT2$+"5")  ! Agrega Met.Precio=5
+!            IR.INDICAT1A = IR.INDICAT1A OR  40H     ! No graba EAMIMAGE
+    WRITE FORM "C6 3I1 C1 C2 C3 C1 C6 C2 C18 2I2"; \! Formato 
+                  #75;IR.CODBAR$,                  \! Cod.Barras Articulo
+                      IR.INDICAT0,                 \! Indicativo 0
+                      IR.INDICAT1,                 \! Indicativo 1
+                      IR.INDICAT1A,                \! Indicativo 1A
+                      IR.INDICAT2$,                \! Tipo PLU/Met.Precio
+                      IR.DEPARTME$,                \! No de Depto
+                      IR.FAMILYNU$,                \! Familia Cupones 
+                      IR.MPGROUP$,                 \! Grupo Multiprecio
+                      IR.ITEMCODE$,                \! Codigo ALIAS
+                      IR.LINKEDTO$,                \! Codigo Ligado
+                      IR.ITEMNAME$,                \! Descripcion Artic
+                      IR.USEREXIT1,                \! Dato Usuario 1
+                      IR.USEREXIT2                  ! Dato Ususrio 2 (Fecha)
+            CLOSE 75                                ! Cierra Archivo Artic
+         ENDIF                                      ! Fin de Apertura OK
+      ENDIF                                         ! Fin Linea PLU
+ENDIF                                               ! Fin de Cod/Bar a CREAR
+!-------------------------------------------------------------------------

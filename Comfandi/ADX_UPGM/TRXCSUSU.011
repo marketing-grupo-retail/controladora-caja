@@ -1,0 +1,21 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : TRXCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Mudulo trx en linea              *
+!**************************************************
+!*
+!Modificaciones:
+
+Sub TRXCSU01.011 External
+End Sub
+
+Sub TRXCSU02.011 External
+End Sub
+
+Sub TRXCSU12.011 External
+End Sub
+
+Sub TRXCSU16.011 External
+End Sub

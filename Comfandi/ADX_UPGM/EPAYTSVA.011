@@ -1,0 +1,60 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTSVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Definicion de variables          *
+!**************************************************
+
+String    Global  Asc.Pay.Monto$,       \! Monto de la compra
+                  Asc.Pay.Saldo$,       \! Saldo de la tarjeta
+                  Asc.Pay.Cadena$,      \! Codigo cadena
+                  Asc.Pay.Appl$,      	\! Codigo de la aplicacion
+                  Asc.Pay.tpvr$,        \! Tipo y variedad a controlar
+                  Asc.Pay.NotaNul$,     \! 
+                  Asc.Pay.NotaVen$,     \! 
+                  Asc.Pay.EstadoNota$,  \!
+                  Asc.Pay.VlrBono$,     \!
+                  Asc.Pay.NumNota$,     \! 
+                  Asc.Pay.VlrDev$,      \!
+                  Asc.Pay.VtaBono$(2),  \! 
+                  Asc.Pay.CadenaReverso$,\! String de reverso
+                  Asc.Pay.CodRta$,      \! Codigo Respuesta Appl
+                  Asc.Pay.Tmp$           ! 
+
+Integer*1 Global  Asc.Pay.Line%,        \! Modulo activo
+                  Asc.Pay.Impr%,        \! Control impresion franqueos
+                  Asc.Pay.Sesion%,      \! Sesion temporal de trabajo
+                  Asc.Pay.ManLin%,      \! Si la autorizacion en local o en linea
+                  Asc.Pay.NtCap%,       \! Nota Capturada
+                  Asc.Pay.Cambio%,      \! Control intercambio medios de pago
+                  Asc.Pay.InCambio%,    \! Control intercambio medios de pago
+                  Asc.Pay.InDevol%,     \! Indicador control devoluciones aplicacion en pago
+                  Asc.Pay.Recup%,       \! Control de recuperacion 
+                  Asc.Pay.Auditoria%,   \! Auditoria del sistema
+                  Asc.Pay.Tipo%,        \! Tipo de pago capturado
+                  Asc.Pay.Vari%,        \! Tipo de Variedad capturado
+                  Asc.Pay.Bug%,         \! Control Bug aplicacion ADD OVS 10 Feb 2006
+                  Asc.Pay.Pago%,        \! En pago de subsidio
+                  Asc.Pay.Fran%          ! Numero de franqueo a utilizar
+                  
+Integer*4 Global  Asc.Pay.Slend%,       \! Total string de la transaccion
+                  Asc.Pay.NroBon%,      \! Numero de tarjetas capturadas
+                  Asc.Pay.Motora%,      \! Numero de tecla motora
+                  Asc.Pay.Consulta%      ! Tecla sesion de consulta
+                  
+
+String    Global Asc.Pay.Rrn$,          \! RRN de la operacion
+		             Asc.Pay.Autor$,        \! numero de autorizacion
+		             Asc.Pay.Fneg$,         \! fecha de posteo
+		             Asc.Pay.Rthos$,   		  \! Rta del Host
+		             Asc.Pay.Comer$,        \! Codigo del comercio
+		             Asc.Pay.Stats$,        \! Status de la nota
+		             Asc.Pay.Trama$,        \! Trama Origen 
+		             Asc.Pay.OptTrx$,       \! Tipo de operacion 
+		             Asc.Pay.Miscelaneo$,   \! Articulo Miscelaneo
+		             Asc.Pay.Idpos$    		   ! ID del POS
+
+Integer*1 Global Asc.Pay.54%, Asc.Pay.AutPay%, Asc.Pay.Trx%
+Integer*4 Global Gr.Pay.CDLIMIT2%

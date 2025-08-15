@@ -1,0 +1,55 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Carga opciones Promociones       *
+!**************************************************
+ 
+ASC.MKP.COMPRA% = 0 
+ASC.MKP.LSTPRO$ = "0000"                                                  ! Lista promociones
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call Visores4690(1,"Error Parametros","Promo Online ",0,"L")		          ! Msg Alerta
+ Call U.Imprime("Error Carga Promo Online OE     ",6100H)									! Rastro en SJ
+ Ue.mktp.Line%     = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.MKP.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[PROMO ONLINE]" Then Begin		         								! Proyecto de Fondo de Empleados
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Ue.mktp.Line%      = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     ASC.MKP.SE1%        = Val(Mid$(TS.TEMP1$,30,2))            				  ! Numero sesion temporal
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     ASC.MKP.SE2%        = Val(Mid$(TS.TEMP1$,30,2))            			    ! Numero sesion temporal
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     ASC.MKP.NRPRO%      = Val(Mid$(TS.TEMP1$,30,3))            				  ! Numero de promociones
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     ASC.MKP.DESCRIPTOR$ = Mid$(TS.TEMP1$,30,21)                 				  ! Descriptor tiquete de Beneficios
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Gr.Mkp.DctoPago$    = Mid$(TS.TEMP1$,30,02)                 				  ! Grupo descuento para formas de pago
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Gr.Mkp.SesTmp%      = Val(Mid$(TS.TEMP1$,30,02))           				  ! Sesion Temporal proceso archivos
+     Read #94; TS.TEMP1$     																						  ! Lectura registro     
+     Gr.Mkp.LstExcen$    = Mid$(TS.TEMP1$,30,50)                 				  ! Lista dpto excentos para compra
+     
+     Call INIT.PARAMETROS.MKTPLUS                                         ! Carga de parametros Promociones
+     Call Carga.Rifas																											! Carga definicion de rifas
+
+    ! Call Alimenta.Logos																									! Carga logos en impresora 4610 SOLO en IPL
+     
+     GoTo Ue.MKP.Final																									  ! Sale del ciclo de carga
+   Endif
+ Wend
+ UE.MKP.Final:
+   Close 94																																! Cierra archivo
+
+   If Ue.mktp.Line% = -1 Then                                                \! Proyecto Activo
+      Call U.IMPRIME("MODULO MARKET ONLINE   ON 29/Ene/2013",6100H) Else     \! Msg Proyecto Cargado
+      Call U.IMPRIME("MODULO MARKET ONLINE  OFF 29/Ene/2013",6100H)           ! Msg Proyecto Cargado
+
+
+Endif

@@ -1,0 +1,35 @@
+
+!   ***************************************************************************
+!   **    Date       :  Junio de 1996                                        **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USR2003.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Estas lineas se insertaran en el archivo EAMTSU22.J86              **
+!   **    a manera  de INCLUDE para mostrar el  CUPON                        **
+!   **    de impresion, DE DESCUENTO EN EL VOLANTE QUE PRESENTA              **
+!   **    EL CLIENTE.                                                        **
+!   **                                                                       **
+!   ***************************************************************************
+
+IF IMPRIME%                   =  1   THEN BEGIN          ! Si hay peso  
+   PESO1 = SL.IT.XPRICE                         ! 
+            AUX$ = "DATOS Trans:  "              +       \! Letrero de Factura
+            RIGHT$("000"+TS.STORE$,3) + "  "     +       \! con Num Almac
+            RIGHT$("000"+STR$(SL.HD.TERMINAL),3)+ "  "  +\! la terminal
+            RIGHT$("0000"+STR$(SL.HD.TRANSNUM+1),3)       ! y la transaccion
+            WRITE FORM "C38 A1"; #35 ; AUX$               ! Y lo Imprime en CR
+            AUX$ = " FECHA DE VENTA:  "    +             \! Letrero de Fecha
+            LEFT$(UNPACK$(SL.HD.DATETIME$),2)+"/" +      \! compaginada
+            MID$(UNPACK$(SL.HD.DATETIME$),3,2)+"/"+      \! para mejor
+            MID$(UNPACK$(SL.HD.DATETIME$),5,2)            ! presentacion 
+            WRITE FORM "C38 A2"; #35 ; AUX$               ! y lo Imprime
+    TSPESO1$ = "Cupon Descuento  = $ "+STR$((PESO1*-1))   ! 
+    CALL U.IMPRIMIR(TSPESO1$,1100H)                       ! Imprime Cant x Vr
+ENDIF                                                     !
+ 
+!-------------------------------------------------------------------------

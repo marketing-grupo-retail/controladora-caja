@@ -1,0 +1,714 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSUSU.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR34278  Replaced external reference to day of week function with
+!           one that is year 2000 compliant.
+!           KHG IBM  03/04/97
+!
+!  IR35905  Correct problem with IR34278 where the return variable
+!           was defined incorrectly.
+!           CMJ MGVA 10Jul97
+!
+!  IR46321  Add new 'Could have saved' algorithm.
+!           CMJ MGVA 01Aug01
+!
+!  IR46754  Add external declaration for SAVE.PROMO function
+!           used by UserExit 67.
+!           CMJ MGVA 20Sep2001
+!
+!  IR53115  Add external declaration for GET.VAL.TYPE.
+!           CRM IBM 12Feb2004
+!
+!  IR53766  If a customer card was accepted and then the terminal
+!           goes into special signoff, the next transaction could
+!           have a second header printed.  It also could show the
+!           original customer number on the receipt even though the
+!           transaction might be from a different customer, or might
+!           not even be a Preferred Customer transaction.
+!           GGK IBM 14May2004
+!
+%INCLUDE EAMTSCSU.J86      ! COUPON ENHANCEMENT CODE
+
+!!*******************************************************************
+!!** ACCESS BASE CODE SUBROUTINES                                  **
+!!*******************************************************************
+
+!FUNCTION ABS% (P) EXTERNAL     ! take absolute value
+!INTEGER*4 ABS%, P
+!END FUNCTION
+
+!FUNCTION TSCSECTS (TIMEOUT.VALUE) EXTERNAL ! initiate a timer
+!INTEGER*4 TSCSECTS
+!INTEGER*4 TIMEOUT.VALUE
+!END FUNCTION
+
+!FUNCTION IROUND (DIVISOR, DIVIDEND, ROUNDING.METHOD) EXTERNAL
+!INTEGER*4 DIVISOR, IROUND
+!INTEGER*2 DIVIDEND, ROUNDING.METHOD
+!END FUNCTION
+
+!FUNCTION FORMAT.WEIGHT (WGT) EXTERNAL
+!INTEGER*4 WGT
+!END FUNCTION
+
+! FUNCTION FORMAT.AMOUNT (AMT1) EXTERNAL    ! FORMAT DOLLARS  ***PRPQ***
+! INTEGER*1 FORMAT.AMOUNT                                     ***PRPQ***
+! INTEGER*4 AMT1                                              ***PRPQ***
+! END FUNCTION                                                ***PRPQ***
+
+! %INCLUDE EAMTSXHC.J86        ! extended memory subroutines  ***PRPQ***
+
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER SUBROUTINES                             **
+!!*******************************************************************
+SUB GET.VAL.TYPE EXTERNAL         ! get validation type IR53115
+END SUB                           ! IR53115
+
+!SUB DISP.MSG EXTERNAL           ! DISPLAY PREFERRED CUSTOMER MESSAGE M%
+! INTEGER MNUM
+!END SUB
+
+!SUB PRINT.MSG(MNUM) EXTERNAL    ! PRINT PREFERRED CUSTOMER MESSAGE
+! INTEGER MNUM
+!END SUB
+
+!SUB CLEAR.MSG EXTERNAL          ! CLEAR PREFERRED CUSTOMER MESSAGE TEXT
+!END SUB
+
+!SUB READ.MSG EXTERNAL           ! READ PREFERRED CUSTOMER MESSAGE TEXT
+!END SUB
+
+!SUB READ.OPTS EXTERNAL          ! READ PREFERRED CUSTOMER OPTIONS
+!END SUB
+
+SUB READ.FBACT EXTERNAL         ! READ PREFERRED CUSTOMER ACTIVITY DATA
+END SUB
+
+!SUB READ.FBPEND EXTERNAL        ! READ PREFERRED CUSTOMER TRANSFER DATA
+!END SUB
+
+!SUB COMPUTE.POINTS EXTERNAL     ! COMPUTE TRANSACTION POINTS
+!END SUB
+
+!SUB FIND.LINKED.ITEM EXTERNAL   ! FIND LINKED ITEM
+!END SUB
+
+!SUB GET.POINTS.ITEM EXTERNAL    ! GET DATA FOR POINTS ONLY ITEMS
+!END SUB
+
+!SUB PC.DISCOUNT EXTERNAL                  ! PROCESS PC DISCOUNT
+!END SUB
+
+!SUB BREAK.LINK EXTERNAL         ! BREAK COUPON LINKAGE
+!END SUB
+
+!FUNCTION FIND.COUPON EXTERNAL   ! FIND LINKED COUPON
+!  INTEGER FIND.COUPON
+!END FUNCTION
+
+!FUNCTION GET.DEPT.SALES EXTERNAL ! GET SALES FOR DEPT
+!  INTEGER*4 GET.DEPT.SALES
+!END FUNCTION
+
+!FUNCTION MATCH.TARGET EXTERNAL  ! MATCH ITEM TO TARGETED COUPONS
+!  INTEGER MATCH.TARGET
+!END FUNCTION
+
+!SUB LINK.TARGET EXTERNAL        ! LINK  ITEM TO TARGETED COUPONS
+!END SUB
+
+!FUNCTION MATCH.COUPON EXTERNAL  ! MATCH COUPON TO VOID
+!  INTEGER MATCH.COUPON
+!END FUNCTION
+
+!SUB GET.POINTS.ITEM EXTERNAL    ! GET DATA FOR POINTS ONLY ITEMS
+!END SUB
+
+!SUB CHECK.REDEMPTION(IN%) EXTERNAL ! CHECK REDEMPTION AMOUNT
+! INTEGER*4 IN%
+!END SUB
+
+SUB SAVE.FB.PRN EXTERNAL         ! SAVE PRINT DATA
+END SUB
+
+SUB RESTORE.FB.PRN EXTERNAL      ! RESTORE PRINT DATA
+END SUB
+
+!SUB SAVE.FOR.LOG EXTERNAL        ! SAVE DATA FOR LOGGING
+!END SUB
+
+!SUB LOG.AND.RESTORE EXTERNAL     ! LOG AND RESTORE DATA
+!END SUB
+
+!SUB GET.VAL.TYPE EXTERNAL        ! GET VALIDATION TYPE
+!END SUB                          !  INTO EMSS.CPNVAL.TYPE
+
+!FUNCTION GET.BOUNDRY(OLD%,NEW%) EXTERNAL  ! COMPUTE POINTS BOUNDARY
+!  INTEGER GET.BOUNDRY
+!  INTEGER*4 OLD%,NEW%
+!END FUNCTION
+
+!FUNCTION FIND.WGT(IN%) EXTERNAL           ! FIND ITEM/COUPON WEIGHTS
+! INTEGER*4 FIND.WGT
+! INTEGER*2 IN%
+!END FUNCTION
+
+!FUNCTION SAVE.PROMO(AMT%,QTY%,WGT%) EXTERNAL ! SAVE PROMO CODE DATA
+!  INTEGER SAVE.PROMO, QTY%
+!  INTEGER*4 AMT%, WGT%
+!END FUNCTION
+
+!FUNCTION ADD.PERCENT.TOT(IN%) EXTERNAL    ! ADD DISCOUNTED TOTAL
+!  INTEGER*2 IN%, ADD.PERCENT.TOT
+!END FUNCTION
+
+!FUNCTION GET.PERCENT.TOT(IN%) EXTERNAL    ! GET DISCOUNTED TOTAL
+!  INTEGER*2 IN%
+!  INTEGER*4 GET.PERCENT.TOT
+!END FUNCTION
+
+!FUNCTION SAVE.WGT(WGT%) EXTERNAL          ! SAVE WEIGHT DATA
+!  INTEGER SAVE.WGT
+!  INTEGER*4 WGT%
+!END FUNCTION
+
+FUNCTION FIND.PC.UPC EXTERNAL             ! FIND UPC IN MEMORY
+  INTEGER*2 FIND.PC.UPC
+END FUNCTION
+
+FUNCTION READ.PC.UPC EXTERNAL             ! READ UPC IN MEMORY
+  INTEGER*2 READ.PC.UPC
+END FUNCTION
+
+FUNCTION SAVE.PC.UPC EXTERNAL             ! SAVE UPC IN MEMORY
+  INTEGER*2 SAVE.PC.UPC
+END FUNCTION
+
+FUNCTION CLEAR.PC.UPC EXTERNAL            ! CLEAR UPCS IN MEMORY
+  INTEGER*2 CLEAR.PC.UPC
+END FUNCTION
+
+!AIR34278
+!FUNCTION DAY.OF.WEEK EXTERNAL             ! COMPUTE DAY OF WEEK
+!  INTEGER*2 DAY.OF.WEEK
+!END FUNCTION
+
+!AIR35905 Change ?DAY.OF.MONTH to ?DAY.OF.WEEK to provide correct return
+FUNCTION ?DAY.OF.WEEK(TEST.DATE$) EXTERNAL
+    INTEGER*2 ?DAY.OF.WEEK, YEAR, MONTH, DAY, CENTURY, ADJMONTH,  \
+              ADJYEAR, MONTHCORRECTION, YEARCORRECTION, LSTTWO
+    STRING WORK$, TEST.DATE$
+END FUNCTION
+!EIR34278
+!EIR35905
+
+FUNCTION ?BLANK.ZEROES(INPUT$) EXTERNAL   ! BLANK LEADING ZEROES
+  STRING ?BLANK.ZEROES,INPUT$
+END FUNCTION
+
+FUNCTION ?DEL.ZEROES(INPUT$) EXTERNAL     ! DELETE LEADING ZEROES
+  STRING ?DEL.ZEROES,INPUT$
+END FUNCTION
+
+FUNCTION ?FIND.FIELD$(D%) EXTERNAL        ! FIND FIELD IN TLOG ENTRY
+ INTEGER D%
+ STRING ?FIND.FIELD$
+END FUNCTION
+
+FUNCTION READ.DESC(RECNO) EXTERNAL        ! READ DESC FROM EAMSDESC
+  INTEGER*1 READ.DESC
+  INTEGER*2 RECNO
+END FUNCTION
+
+!AIR46321
+SUB LOCK.IOP EXTERNAL
+END SUB
+!EIR46321
+
+!AIR46754
+FUNCTION SAVE.PROMO(AMT%,QTY%,WGT%) EXTERNAL ! SAVE PROMO CODE DATA
+  INTEGER SAVE.PROMO, QTY%
+  INTEGER*4 AMT%, WGT%
+END FUNCTION
+!EIR46754
+
+!AIR53766 Used when special signoff if a PC card was accepted
+SUB DO.GUILLOTINE.CUT EXTERNAL            ! PRINTER RECEIPT SEPARATOR
+END SUB
+!EIR53766
+
+
+!!*******************************************************************
+!!** CODE MOVED TO EAMTSFBX.BAS TO FREE SPACE IN EAMTSUPC.BAS      **
+!!*******************************************************************
+SUB TSU02.FB EXTERNAL           ! CODE FOR EXIT 02
+END SUB
+
+SUB TSU07.FB EXTERNAL           ! CODE FOR EXIT 07
+END SUB
+
+SUB TSU08.FB EXTERNAL           ! CODE FOR EXIT 08
+END SUB
+
+SUB TSU14.FB EXTERNAL           ! CODE FOR EXIT 14
+END SUB
+
+SUB TSU20.FB EXTERNAL           ! CODE FOR EXIT 20
+END SUB
+
+SUB TSU21.FB EXTERNAL           ! CODE FOR EXIT 21
+END SUB
+
+SUB TSU23.FB EXTERNAL           ! CODE FOR EXIT 23
+END SUB
+
+SUB TSU28.FB EXTERNAL           ! CODE FOR EXIT 28
+END SUB
+
+SUB TSU30.FB EXTERNAL           ! CODE FOR EXIT 30
+END SUB
+
+SUB TSU31.FB EXTERNAL           ! CODE FOR EXIT 31
+END SUB
+
+SUB TSU37.FB EXTERNAL           ! CODE FOR EXIT 37
+END SUB
+
+SUB TSU39.FB EXTERNAL           ! CODE FOR EXIT 39
+END SUB
+
+SUB TSU42.FB EXTERNAL           ! CODE FOR EXIT 42
+END SUB
+
+SUB TSU43.FB EXTERNAL           ! CODE FOR EXIT 43
+END SUB
+
+SUB TSU51.FB EXTERNAL           ! CODE FOR EXIT 51
+END SUB
+
+!!*******************************************************************
+!!** ELECTRONIC MARKETING UNIQUE EXIT CODE                         **
+!!*******************************************************************
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC01         : CALLED AFTER THE READ OF A CUSTOMER ACTIVITY
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : OP.CA.RSIZE
+\ REM!!                     OP.CA.DSOFF
+\ REM!!                     TS.STANDALONE
+\ REM!!                     TS.IO.DEVICE
+\ REM!!                     OP.RC.ID$
+\ REM!!                     EMSS.PC.KIOSK
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     CA.KEY$
+\ REM!!                     CA.DATA$
+\ REM!!                     CA.CUSTNUM$
+\ REM!!                     CA.POINTS
+\ REM!!                     CA.TRANS
+\ REM!!                     CA.REDEEMED
+\ REM!!                     CA.AUTOCOUP
+\ REM!!                     CA.DOLP$
+\ REM!!                     CA.TR.POINTS
+\ REM!!                     CA.STATUS
+\ REM!!                     CA.MSGNUM
+\ REM!!                     CA.OPTIONS
+\ REM!!                     CA.DISCG
+\ REM!!                     CA.PMULT
+\ REM!!                     CA.TARGETC$
+\ REM!!                     CA.ALT.NUM$
+\ REM!!                     CA.PERIOD$
+\ REM!!                     CA.PPOINTS
+\ REM!!                     CA.PTRANS
+\ REM!!                     CA.PREDEEM
+\ REM!!                     CA.DOLR$
+\ REM!!                     CA.SALES
+\ REM!!                     CA.CUSTOMER
+\ REM!!
+\ REM!!  COMMENTS         : THE VARIABLES USER.FBACT.READ, USER.FBACT.ERROR,
+\ REM!!                     AND USER.FBACT.NOTHOME DEFINE WHETHER THE READ
+\ REM!!                     WAS SUCCESSFUL, AND IF NOT, WHETHER THIS IS A
+\ REM!!                     HOME STORE CUSTOMER.  IF THE READ WAS SUCCESSFUL,
+\ REM!!                     THEN THIS IS A HOME STORE CUSTOMER.
+\ REM!!                     THE CODE IN USERCARD.J86 IS EXECUTED JUST
+\ REM!!                     PRIOR TO THIS EXIT.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT01.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC02         : CALLED AFTER THE READ OF A CUSTOMER TRANSFER
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     CA.OPTIONS
+\ REM!!                     CA.DATA$
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBPEND.READ
+\ REM!!                     CA.KEY$
+\ REM!!                     XF.DATA$
+\ REM!!                     XF.DOLP$
+\ REM!!                     XF.POINTS
+\ REM!!                     XF.AUTOCOUP
+\ REM!!                     XF.TRANS
+\ REM!!                     XF.TR.POINTS
+\ REM!!                     XF.TO.POINTS
+\ REM!!                     XF.TO.AUTOCOUP
+\ REM!!                     XF.TO.TRANS
+\ REM!!                     XF.RESERVE
+\ REM!!
+\ REM!!  COMMENTS         : THE CODE IN USERXFRD.J86 IS EXECUTED JUST
+\ REM!!                     PRIOR TO THIS EXIT
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT02.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC03         : CALLED AFTER THE READ OF A COUPON MESSAGE
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : TS.ER.RETURN
+\ REM!!                     C$  (RECORD KEY)
+\ REM!!                     B$  (FULL RECORD)
+\ REM!!                     TS.TEMP5I2 (COUNT OF COUPONS)
+\ REM!!                     I%         (CURRENT COUPONS)
+\ REM!!                     EMSS.TG.DESC$(I%) (FIXED PRINT DATA)
+\ REM!!                     OP.NOPRT.TMSG1
+\ REM!!                     EMSS.PC.KIOSK
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : A$  (RECORD DATA)
+\ REM!!
+\ REM!!  COMMENTS         : THE PRINTING OF COUPON MESSAGES OCCURS ONLY
+\ REM!!                     AT EOT FOR AVAILABLE TARGETED COUPONS
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT03.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC04         : CALLED AFTER THE INPUT OF A CUSTOMER NUMBER
+\ REM!!  --------           IN RESPONSE TO A PROMPT (INPUT FROM MSR)
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : OP.MSR.DATE
+\ REM!!                     TS.IO.DEVICE
+\ REM!!                     EMSS.MSR.DATA$
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : TS.GUIDANCE         (0 OR ERROR)
+\ REM!!                     TS.IO.MOTORKEY      (0, 73, OR 80)
+\ REM!!                     TS.IO.DATA$(2)      (ACCOUNT NUMBER)
+\ REM!!                     TS.IO.DATA$(4)      (EXPIRATION DATE)
+\ REM!!
+\ REM!!  COMMENTS         : CUSTOMER NUMBER INPUT MADE WITHOUT A PROMPT
+\ REM!!                     IS ACCESSIBLE IN SUPERMARKET EXIT 14.
+\ REM!!                     VALID ENTRY PROCESSED IF MOTORKEY IS 80.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT04.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC05         : CALLED AFTER VALIDATION OF A CUSTOMER NUMBER
+\ REM!!  --------
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     CA.CUSTOMER
+\ REM!!                     CA.DATA$
+\ REM!!                     TS.IO.DEVICE
+\ REM!!                     EMSS.PC.KIOSK
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : TS.GUIDANCE
+\ REM!!                     TS.IO.MOTORKEY
+\ REM!!                     TS.IO.KEYS(9)       (-1 = ERROR)
+\ REM!!                     TS.ERRPTR
+\ REM!!                     TS.ERRDISP$
+\ REM!!
+\ REM!!  COMMENTS         : IF THE CUSOMER NUMBER IS REJECTED, THEN THE
+\ REM!!                     GUIDANCE WILL BE IN TS.GUIDANCE IF MOTORKEY
+\ REM!!                     IS 0, OTHERWISE THE GUIDANCE HAS BEEN SAVED
+\ REM!!                     THROUGH TSCSEC03 FOR A POSSIBLE OVERRIDE
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT05.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC06         : CALLED AFTER COMPUTING A COUPON VALUE BASED
+\ REM!!  --------           ON THE VALUE OF MATCHING ITEMS
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : COUPON.AMOUNTS(2)
+\ REM!!                     EMSS.CPNVAL.TYPE
+\ REM!!                     EMSS.IR.COM.PCNT
+\ REM!!                     EMSS.IR.TRANS.LMT
+\ REM!!                     EMSS.IR.VAL.DISC
+\ REM!!                     EMSS.BYPASS.VALD
+\ REM!!                     EMSS.LINK.VAL
+\ REM!!                     TS.IO.KEYS(1)
+\ REM!!                     SL.IT.INDICAT1
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : SL.IT.XPRICE   (VALUE OF DISCOUNT)
+\ REM!!                     TS.TEMP2I4     (AMOUNT BEING DISCOUNTED
+\ REM!!                     EMSS.PERCENT.TOT
+\ REM!!                     EMSS.IT.XPRICE
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT APPLIES ONLY TO COUPONS USING
+\ REM!!                     PRICING METHOD 4.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT06.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC07         : CALLED BEFORE ASSURING THE MINIMUM PURCHASE
+\ REM!!  --------           FOR A COUPON IS MET
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : COUPON.AMOUNTS(2)
+\ REM!!                     EMSS.CPNVAL.TYPE
+\ REM!!                     OP.EX.NOPTS
+\ REM!!                     EMSS.TR.NOPTS
+\ REM!!                     EMSS.IR.MFR.MIN
+\ REM!!                     EMSS.IR.DEPT.MIN
+\ REM!!                     EMSS.IR.ITEMS.EXCLUDED
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : EMSS.IR.MIN.PURCHASE   (REQUIRED PURCHASE)
+\ REM!!                     TS.TEMP1I4     (AMOUNT TOWARDS MINIMUM)
+\ REM!!                     TS.ERRDISP$
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT APPLIES ONLY TO COUPONS WITH A
+\ REM!!                     MINIMUM PURCHASE REQUIREMENT IN AN ORDER
+\ REM!!                     THAT INCLUDES SALES.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT07.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC08         : CALLED AFTER COMPUTING THE POINTS VALUE OF
+\ REM!!  --------           AN ORDER
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : OP.AMTPP
+\ REM!!                     OP.PPAMT
+\ REM!!                     OP.PTS.RND
+\ REM!!                     OP.STRCPN.PTS
+\ REM!!                     OP.TAXES.PTS
+\ REM!!                     CA.PMULT
+\ REM!!                     TS.TAXES(0,0)
+\ REM!!                     TS.TENDERED(7)
+\ REM!!                     TS.TENDERED(8)
+\ REM!!                     TS.TOTALS(0,0,0)
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.TR.NOPTS
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : EMSS.TR.POINTS
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT MAY BE ENTERED MULTIPLE TIMES IN
+\ REM!!                     AN ORDER TO ASSURE ADEQUATE POINTS FOR
+\ REM!!                     REDEMPTION.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT08.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC09         : CALLED AFTER SAVING A COUPON FOR TOTAL TIME
+\ REM!!  --------
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : EMSS.DELAY.SAVE
+\ REM!!                     EMSS.DELAY.DATA(2)
+\ REM!!                     EMSS.DELAY.AMTS(1)
+\ REM!!                     EMSS.COUP.REPLAY
+\ REM!!                     EMSS.LINK.VAL
+\ REM!!                     EMSS.LINK.WGT
+\ REM!!                     TS.IO.KEYS(1)
+\ REM!!                     EMSS.WGT.SAVE
+\ REM!!                     I%               (SAVE OFFSET AT SALE)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : NONE
+\ REM!!
+\ REM!!  COMMENTS         : USE THIS EXIT TO SAVE ADDITIONAL DATA IN
+\ REM!!                     USER DEFINED VARIABLES.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT09.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC10         : CALLED AT CHECKING FOR CROSSING A POINTS
+\ REM!!  --------           BOUNDARY
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : EMSS.TR.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     XF.POINTS
+\ REM!!                     XF.TRANS
+\ REM!!                     X%             (NEW POINTS TOTAL)
+\ REM!!                     OP.PER.BNDARY
+\ REM!!                     CA.PPOINTS
+\ REM!!                     CA.POINTS
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : I%             (BOUNDRY CROSSED INDICATION)
+\ REM!!                     EMSS.BD.MSG
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT GETS CONTROL ONLY AFTER THE FINAL
+\ REM!!                     TENDER IS MADE FOR AN ORDER.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT10.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC11         : CALLED BEFORE GIVING AUTOMATIC COUPONS AT
+\ REM!!  --------           THE ENTRY OF A CUSTOMER NUMBER
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     OP.RC.ID$
+\ REM!!                     CA.CUSTNUM$
+\ REM!!                     CA.DATA$
+\ REM!!                     CA.OPTIONS
+\ REM!!                     EMSS.PC.KIOSK
+\ REM!!                     EMSS.DELAY.SAVE
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.RC.CNT
+\ REM!!                     OP.1STUSE.CPN(1)
+\ REM!!                     EMSS.TG.REJ.RPLY
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : EMSS.REPLAY.SAVE
+\ REM!!                     EMSS.REPLAY.DATA(2)
+\ REM!!                     EMSS.REPLAY.AMTS(1)
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT GETS CONTROL ONLY WHEN COUPONS ARE
+\ REM!!                     AVAILABLE AFTER ENTRY OF A VALID CUSTOMER
+\ REM!!                     NUMBER.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT11.J86
+
+\ REM!!****************************************************************
+\ REM!!  TSEMEC12         : CALLED BEFORE GIVING AUTOMATIC COUPONS AT
+\ REM!!  --------           TOTAL TIME
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     OP.RC.ID$
+\ REM!!                     CA.CUSTNUM$
+\ REM!!                     CA.DATA$
+\ REM!!                     CA.OPTIONS
+\ REM!!                     EMSS.PC.KIOSK
+\ REM!!                     EMSS.DELAY.SAVE
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : I%                 (COUNT TO REPLAY)
+\ REM!!                     EMSS.REPLAY.DATA(2)
+\ REM!!                     EMSS.REPLAY.AMTS(1)
+\ REM!!
+\ REM!!  COMMENTS         : THIS EXIT GETS CONTROL ONLY WHEN COUPONS ARE
+\ REM!!                     POTENTIALLY AVAILABLE AT TOTAL TIME.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMT12.J86
+
+!

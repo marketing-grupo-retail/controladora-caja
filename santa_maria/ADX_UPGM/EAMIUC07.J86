@@ -1,0 +1,31 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC07                                                 *!
+!*                                                                           *!
+!* Description    : Called during appending fields to create an item record  *!
+!*                  string.                                                  *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Variables      : IR.USERDATA$    This string contains the extra item      *!
+!*                                  record data (if any) that will be        *!
+!*                                  appended to the end of the record.       *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC07 PUBLIC
+
+   ! Expansion del maestro de articulos mega santamaria
+   IR.USERDATA$ = string$( 31, " " )
+   call PUTN4( IR.USERDATA$, 0, IR.PRECIVA12 )     ! Precio secundario
+   call PUTN4( IR.USERDATA$, 4, IR.CANTPESO )      ! Cantidad por caja
+   call PUTN4( IR.USERDATA$, 8, IR.UNDMIN )        ! Unidad minima de compra
+   call PUTN4( IR.USERDATA$, 12, IR.NDEPTO )       ! Codigo departamento comercial
+   call PUTN4( IR.USERDATA$, 16, IR.SKU )          ! Codigo interno mega santamaria
+   call PUTN4( IR.USERDATA$, 20, IR.CATEG )        ! Categoria
+   call PUTN4( IR.USERDATA$, 24, IR.VENC )         ! Fecha vencimiento CANASTA formato AMMDDHHMM
+
+END SUB

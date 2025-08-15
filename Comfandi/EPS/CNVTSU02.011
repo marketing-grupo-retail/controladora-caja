@@ -1,0 +1,11 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+ Call COPIA.CLIENTE
+ Call INICIALICE.EPS

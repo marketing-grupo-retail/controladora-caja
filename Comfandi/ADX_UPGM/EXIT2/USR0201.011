@@ -1,0 +1,33 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0201.011 
+!     Punto de Entrada   =  EAMTSU02.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 02 para poder  
+! restaurar el area de memoria que contiene los PLU's de  
+! una transaccion para posible Credito de Medicamentos    
+!                                                         
+!---------------------------------------------------------
+
+DIM USR.ITEMS$(500)            ! Dimension y Reset del arreglo
+USR.IND1% = 0                  ! Indice para Items
+USR.IND2% = 0                  ! Indice para Totales
+LINCR%    = 25                 ! Lineas Disponibles Totales
+LINMF%    = 25                 ! Lineas Disponibles Totales (mf)
+VRLIQ%    = 0                  ! Vr Liquidacion Ret Fte
+YALIQ%    = 0                  ! Flag de Liq Ret Fte
+PAGO.CH%  = 0                  ! 
+PROCE%    = 0                  ! 
+EPS%      = 0                  ! 
+FLAG.SR%  = 0                  ! 
+NO.CUO$   = ""  :key.op$=""    ! 
+NO.MOD$   = ""  :nom.oper$=""  ! 
+VENDIO$   = ""  
+CON.NO.FRAN% = 0               ! Flag de No Franqueo
+VRCRE$ = ""                    ! Creditos 0
+!OFERTA% = 0                    !
+!-----------------------------------------------------------------

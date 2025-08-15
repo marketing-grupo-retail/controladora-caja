@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC35 PUBLIC                                                        
+! TSUPEC34 - STANDALONE EXIT                                                    
+END FUNCTION                                                                    
+                                                                                

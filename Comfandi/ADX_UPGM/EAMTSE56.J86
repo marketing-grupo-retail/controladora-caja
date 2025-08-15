@@ -1,0 +1,70 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU56.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!
+\/**CHANGE ACTIVITY***************************************************/
+\/*                                                                  */
+\/*  IR49500  With EM option 19.3 and a paper coupon that validates  */
+\/*           by vendor number and a suspended transaction, the      */
+\/*           coupon description prints incorrectly on the retrieved */
+\/*           receipt and coupon number is incorrect in the TLOG.    */
+\/*           IBM RM/KHG 10Sep02                                     */
+\/*                                                                  */
+\/*  IR53779  This fix correctly restores altered UPCs by removing   */
+\/*           leading zeros so that large link coupons awarded       */
+\/*           before a suspend are seen by coupons awarded after     */
+\/*           the retrieve.                                          */
+\/*           IBM RM/GGK 10May2004                                   */
+\/*                                                                  */
+!!**END-OF-SPECIFICATIONS*********************************************/
+
+!AIR49500
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!********************************************************************
+!** ASSURE ALL TRANSLATED ITEMCODES ARE RESTORED PRIOR TO SUSPEND   *
+!********************************************************************
+!! NOTE THIS CODE IS A SUBSET OF THE BASE EM FUNCTION FROM EXIT 18
+!! THAT DOES THE SAME RESTORE BEFORE A WRITE TO THE TLOG THAT THIS
+!! CODE DOES BEFORE A WRITE TO THE SUSPEND FILE.  EXIT 53 NORMALLY
+!! RESTORES ALTERED UPCS BEFORE A RETRIEVE, BUT IT CANNOT HANDLE
+!! TRANSLATED UPCS BECAUSE THE TRANSLATION TABLE HAS BEEN LOST.
+
+ IF EMSS.ALTERED.UPC NE 0 AND                  \ REBUILT UPC IN TRANS
+    EMSS.XLAT.PTR > 0 THEN BEGIN               ! TRANSLATED UPC
+!AIR53779 Use L% as loop variable instead of I%
+! FOR I% = 1 TO SL.END                         ! FOR ALL ENTRIES
+!  H$ = SL.STR$(L%)                            ! GET TLOG STRING
+  FOR L% = 1 TO SL.END                         ! FOR ALL ENTRIES
+   H$ = SL.STR$(L%)                            ! GET TLOG STRING
+!EIR53779
+   IF LEN(H$) > 5 THEN                         \ ASSURE GOOD STRING
+   IF ASC(H$) = 1 THEN BEGIN                   ! IF ITEM ENTRY
+     A$ = UNPACK$(MID$(H$,3,6))                ! GET ITEM CODE
+     IF LEFT$(A$,2) = "==" THEN BEGIN          ! TRANSLATED UPC
+!AIR53779 ALLOW CORRECT RESTORE OF ALTERED UPC WITH UNDER 12 DIGITS
+!      A$ = PACK$(RESTORE.UPC(A$))             ! RESTORE UPC
+       A$ = PACK$(?DEL.ZEROES(RESTORE.UPC(A$)))! RESTORE UPC
+!EIR53779
+       H$ = LEFT$(H$,2) + A$ + MID$(H$,9,99)   ! REPLACE TLOG STRING
+!AIR53779
+!      SL.STR$(I%) = H$                        !   WITH RESTORED UPC
+       SL.STR$(L%) = H$                        !   WITH RESTORED UPC
+!EIR53779
+     ENDIF                                     ! TRANSLATED UPC
+   ENDIF                                       ! IF ITEM ENTRY
+!AIR53779
+! NEXT I%                                      ! NEXT ENTRY
+  NEXT L%                                      ! NEXT ENTRY
+!EIR53779
+ ENDIF                                         ! REBUILT UPC IN TRANS
+
+ENDIF                      ! EM PROCESSING IS ACTIVE
+!EIR49500

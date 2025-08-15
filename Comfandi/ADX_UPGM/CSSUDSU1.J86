@@ -1,0 +1,14 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** CSSUDSU1.J86 ******************************************!!
+! TITLE: Start Date of last sale program from exits
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.
+!
+ 
+FUNCTION ADXSTART(NAME$,PARM$,MESS$) EXTERNAL
+INTEGER*2 ADXSTART
+STRING    NAME$,PARM$,MESS$
+END FUNCTION
+ 

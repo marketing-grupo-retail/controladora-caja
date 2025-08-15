@@ -1,0 +1,31 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** USERFLDF.J86 ************************************************
+! TITLE: Panel Filter File Variable definitions
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!
+!********************************************************************
+!*    VARIABLES NEEDED FOR FILTERING OF PANEL DATA                  *
+!********************************************************************
+ INTEGER*1 GLOBAL EMSS.REC.MAX               ! Input record count
+ INTEGER*1 GLOBAL EMSS.KEY.MAX               ! Input key count
+ INTEGER*1 GLOBAL EMSS.FILTER(1)             ! Input by string type
+  ! Array range = 0 - 11 for string types 0 - 11
+  ! -1 = discard string, 0 = no filter, 1-125 = starting record number
+ INTEGER*1 GLOBAL EMSS.FLT.REC(2)            ! Input record data
+  ! Array range = 1 - REC.MAX for records (0 = not found, no filter)
+  !             = 0 - 19 for field count
+  !               0 = string type to which record pertains
+  !               1 - 16, 0 = keep, -1 = discard
+  !               17 = key field offset  (neg = discard string on match)
+  !               18 = key value pointer (neg = discard trans on match)
+  !               19 = key type 1 => = val, 2 => NE val, 3 => flag on,
+  !                        4 => flag off, 5 => = range, 6 => NE range
+  !                        7 => = val in 1 byte, 8 => NE val but 1 byte
+ REAL      GLOBAL EMSS.FLT.KEY(2)            ! Input key data
+  ! Array range = 1 - KEY.MAX for records (0 = no key, no filter)
+  !             = 0 and 1 for low and high range

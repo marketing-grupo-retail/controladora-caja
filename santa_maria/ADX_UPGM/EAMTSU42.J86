@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC42 PUBLIC
+! TSUPEC42 - COUPON VALUE DETERMINATION
+INTEGER*1 TSUPEC42                        ! define variable !IR89474
+END FUNCTION
+

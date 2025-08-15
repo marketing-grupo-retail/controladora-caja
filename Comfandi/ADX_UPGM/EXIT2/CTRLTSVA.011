@@ -1,0 +1,40 @@
+!***
+! Definicion de variables lectura registro de control
+!***
+
+
+STRING GLOBAL  				\! Deficion variables caracter
+       UE.CT.LLAVE$,			\! Llave del registro
+       UE.CT.NOMPRO$,			\! Nombre del proyecto
+       UE.CT.ESTPRO$,			\! Estado del proyecto
+       UE.CT.PARAM$,			\! Parametros del proyecto
+       UE.CT.BASURA$,			\! Resto del registro
+       UE.CT.NOCAM$,			\! Numero de campos
+       PAR.PROY$(2),		        \! Matriz de resultado
+       TVISOR$,				\! PRUEBAS
+       DM.LLAVE$,			\	MODIF ADM 08/23/00
+       DM.ALMACEN$,			\	
+       DM.NIT$,				\
+       DM.BASURA$
+
+!       DM.RAZON$,			
+
+INTEGER*1 GLOBAL			\
+	UE.PROYECTO(1)			 ! Estado de los Proyectos
+
+INTEGER*2 GLOBAL			\! Definicion variables numericas
+       UE.CT.JGRP(1),			\! Definiciones
+       UE.CT.NOREG%,			\! Numero de registros
+       UE.CT.NOCAMP%,			\! Numero de campos
+       UE.CT.ESTPROY%,			\! Estado del proyecto (-1) Activo
+       DM.NOPROY%			 ! MODFI ADM 08/23/00
+					 ! (0) Desactivo
+INTEGER*4 GLOBAL			\
+	VISOR%
+STRING    GLOBAL			\
+	UE.LI.LLAVE$
+INTEGER*1 GLOBAL			\
+	UE.LI.EST%
+INTEGER*4 GLOBAL			\
+	UE.LI.CODIGO%
+

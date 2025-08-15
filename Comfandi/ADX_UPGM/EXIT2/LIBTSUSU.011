@@ -1,0 +1,19 @@
+!**************************************************
+!Empresa       : COMFANDI                         *
+!Programa      : LIBTSUSU.011                     *
+!Observaciones : Definicion de rutinas Externas   *
+!**************************************************
+
+SUB TSTDEC01 EXTERNAL
+END SUB
+
+SUB SAVE.PRINT EXTERNAL
+END SUB
+
+SUB RESTORE.PRINT EXTERNAL
+END SUB
+
+!SUB U.IMPRIMIR(U.CADENA$,U.STATION) EXTERNAL
+!   STRING U.CADENA$
+!   INTEGER*2 U.STATION
+!END SUB

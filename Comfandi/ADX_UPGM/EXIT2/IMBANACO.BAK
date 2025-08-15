@@ -1,0 +1,125 @@
+!---------------------------------------------------------------------------
+!                  Subrutina para despliegue de Dato Errado
+!---------------------------------------------------------------------------
+
+!FUNCTION ASIC.DATOS$(UMSG1$,UMSG2$) External   						! Captura de datos
+!STRING UMSG1$, UMSG2$, ASIC.DATOS$     							! Definicion de variables
+!End Function
+!--- Fin Asic.Datos
+
+SUB ERRORIOP PUBLIC                                  !
+    IF MID$(IOPDATA$,14,1) <> " " THEN BEGIN         ! Si hay Errror
+       CALL VISORES4690(1,"DATO ERRADO..!"," ",1500,"C")   
+       FIS.BOR% = 9                                  ! si hay error
+    ENDIF                                            !
+END SUB                                              !
+!---------------------------------------------------------------------------
+!              Valida datos Numericos diferentes de CERO
+!---------------------------------------------------------------------------
+SUB VERIDATA PUBLIC                                  !
+    IF VAL(RIGHT$(KQ$,LEN(KQ$)-1)) = 0 THEN BEGIN    ! Valida dato
+       KQ$ = "0"                                     ! Coloca Caracter CERO
+       CALL VISORES4690(1,"..ESTE DATO","ESTA ERRADO.!",1000,"C")
+       FIS.BOR% = 0                                  !! Ignora datos Cheque
+    ENDIF                                            ! y finaliza ERROR
+END SUB                                              !
+!------------------------------------------------------------------------------
+!            Forma de Retornar al Estado MAIN desde IOPROC
+!------------------------------------------------------------------------------
+SUB FIN.LOOP PUBLIC                                  !
+          IOPDATA$ = ""                              ! Restaura Variables
+          BQ$="":CQ$="":DQ$="":EQ$="":FQ$=""         ! de IO.PROC
+          GQ$="":HQ$="":IQ$="":JQ$="":KQ$=""         !
+          LOCKDEV 32, PURGE                          ! y libera Teclado
+          DIM TS.IO.KEYS(10)                         !
+          DIM TS.IO.DATA$(10)                        ! Clear de Buckets 
+          TS.IO.MOTORKEY =  0                        ! NO Procesa mas
+          TS.IO.DATA$(5) = STR$(FIS.ENT%)            ! Recupera Procedim
+          FIS.ENT% = 0                               !
+                                                     ! TS.IO.INPUT.READY=-1
+          UNLOCKDEV 32, 10                           !
+          TS.IO.STATE = 10                           ! Restaura Estado MAIN
+END SUB                                              !
+!------------------------------------------------------------------------------
+!            Rutina de Dialogo de Datos para CHEQUE desde IOPROC
+!------------------------------------------------------------------------------
+    
+SUB TOMA.DIAGNOS PUBLIC                              !
+
+          IF NO.DGN$ <> "" THEN BEGIN                ! y sin Datos
+             CALL VISORES4690(1," Med:"+NU.MED$+" Dgn:"+NO.DGN$," #Form:"+NU.FAC$,1500,"L")
+             TS.IO.MOTORKEY = 0                      ! 
+             TS.IO.KEYS(7) = 0                       ! 
+          ENDIF ELSE BEGIN                           !
+             LOCKDEV 32,PURGE                        ! Bloquea Teclado
+             FIS.BOR% = 0                            !
+!------------------------------------------------------------------------------
+             DGN.LOOP:                               ! Inicia Loop Val Bco
+!------------------------------------------------------------------------------
+             IF NO.DGN$ =  "" THEN BEGIN             ! sin Diagnos
+                CALL VISORES4690(1," #Diagn¢stico ?"," ",0,"L")
+                UNLOCKDEV 32,11                      ! Desbl Teclado y pasa
+                WAIT 32;500                          ! al Estado ACCT NO
+                READ #32;IOPDATA$,BQ$,CQ$,DQ$,      \! Lectura Teclado y Status
+                         EQ$,FQ$,GQ$,HQ$,IQ$,JQ$,KQ$ ! teclado con 10 Datos
+                CALL ERRORIOP                        !
+                IF FIS.BOR% = 9  THEN BEGIN          ! Si hay Errror
+                   FIS.BOR%=0 : NO.DGN$=""           !
+                   GOTO DGN.LOOP                     ! si hay error
+                ENDIF                                !
+                IF MID$(IOPDATA$,13,1)="I" THEN BEGIN! si presiono borrar
+                   FIS.BOR% = FIS.BOR% + 1           !
+                   IF FIS.BOR% > 0 THEN BEGIN        !
+                      FIS.BOR% = 0                   !
+                      NO.DGN$ = ""                   !
+                      LISVAR$ = ""                   !
+                      GOTO DGN.LOOP                  !
+                   ENDIF                             !
+                ENDIF                                !
+                IF MID$(IOPDATA$,13,1)="P" THEN BEGIN! si presiono ENTER
+                   NO.DGN$ = RIGHT$(KQ$,LEN(KQ$)-1)  !
+                   NO.DGN$ = "D"+RIGHT$("0000"+NO.DGN$,4)
+                   CALL VERIDATA                     !
+                   IF FIS.BOR% = 9 THEN NO.DGN$="" :\!
+                      FIS.BOR%=0 : GOTO DGN.LOOP     !
+                   ND% = MATCH(NO.DGN$,SDGN$,1)      ! Busca Diagnostico
+                   IF ND% = 0 THEN BEGIN             ! y lo valida
+                      CALL VISORES4690(1,"Diagn¢stico Errado"," ",2000,"L")
+                      FIS.BOR%=0 : NO.DGN$=""        !
+                      GOTO DGN.LOOP                  ! si hay error
+                   ENDIF                             ! y finaliza ERROR
+                ENDIF                                ! 
+             ENDIF                                   !
+             FIS.BOR% = 0                            !
+!------------------------------------------------------------------------------
+             CALL FIN.LOOP                           !
+!------------------------------------------------------------------------------
+          DATO.IMBA:                                 !
+!------------------------------------------------------------------------------
+             IF NO.DGN$ <> ""  OR                   \!
+                VAL(NO.DGN$) = 0   THEN BEGIN       \! Si ya esta Diag
+                TS.IO.DATA$(02) =                   \!
+                RIGHT$("00000000"+NU.MED$,8)     +  \! No.Medico
+                RIGHT$("00000000"+NU.FAC$,8) +      \! No.Medico
+                RIGHT$("00000"+NO.DGN$,5)             ! No.Diagnostico
+                DIAGNOS$ = "Dgn: " + NO.DGN$ 
+                NO.DGN$="Dr.:"+NU.MED$               !
+                NU.FAC$="#Form:"+ NU.FAC$            !
+                !CALL QXL.TSUPEC21("** DATOS DE LA FORMULA: ")
+                !WRITE #36;"** DATOS DE LA FORMULA: "
+                !CALL QXL.TSUPEC21(NO.DGN$+DIAGNOS$)
+                !CALL QXL.TSUPEC21(NU.FAC$)
+                TS.IO.KEYS(10) = 63                  ! Tecla DATA-ENTRY
+                !YA.OK% = 1           	             ! Se Completaron Datos
+                !PAGO.CH% = 0                        ! Reset de Comienzo
+                TS.IO.MOTORKEY = 80                  ! Tecla Motor=intro
+                TS.IO.KEYS(2)  = 80                  ! Tecla TENDER intro 
+                no.dgn$ = ""
+                VENDE$ = ""
+                PROCE% = 0
+                ENDIF ELSE BEGIN                        ! Fin sec ENT-DATOS
+                TS.IO.MOTORKEY = 0                   !
+             ENDIF                                   !
+          ENDIF                                      !
+END SUB                                              !
+!------------------------------------------------------------------------------

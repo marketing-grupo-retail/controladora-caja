@@ -1,0 +1,20 @@
+!At tender Limit Checking
+!En la comprobacion de limite de pagos
+! TSUPEC40 - ERROR STACKING EXIT
+FUNCTION TSUPEC40 PUBLIC
+
+!call traceNUO( "UE40 AMTTENDE=" + str$(SL.TE.AMTTENDE) + " TOTALS=" + str$(TS.TOTALS(0,0,0)) + " BALDUE=" + str$(TS.BALDUE(0)) + " TENDER=" + str$(TS.TENDERED(0)) )
+
+   !Promociones
+   call NUOTPROM40
+
+   !Tarjetas Bancarias
+   call MSMTTARB40
+
+   !Cheques
+   call MSMTCHEQ40
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT40
+
+END FUNCTION

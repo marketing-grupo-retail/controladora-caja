@@ -1,0 +1,37 @@
+!----------------------------------------------------------------
+! Editamos  @ -> x
+!----------------------------------------------------------------
+   TS.SJDATA$ = TRANSLATE$(TS.SJDATA$,"@","x") 
+   TS.PRTBUF$ = TRANSLATE$(TS.PRTBUF$,"@","x") 
+
+!-----------------------------------------------------------
+!  IMPRIME PLU EN TIRA DE CLIENTE Y TIRA DE AUDITORIA 
+!-----------------------------------------------------------
+
+IF TS.LINETYPE = 1   THEN BEGIN                        ! Si es Item Sale
+
+    IF RIGHT$(TS.PRTBUF$,6) <> STRING$(6," ") THEN BEGIN 
+       IF IR.INDICAT1 AND 80H THEN                     \!  
+          TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                       " "+RIGHT$(TS.PRTBUF$,30)+ "A"  \!ncatena PLU y descripci¢n
+       ELSE                             \! 
+        IF IR.INDICAT1 AND 40H THEN      \!
+           TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                        " "+RIGHT$(TS.PRTBUF$,30)+ "B"  \!ncatena PLU y descripci¢n
+         ELSE                             \! 
+          IF IR.INDICAT1 AND 20H THEN      \!
+             TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                          " "+RIGHT$(TS.PRTBUF$,30)+ "C"  \!ncatena PLU y descripci¢n
+          ELSE                             \! 
+           IF IR.INDICAT1 AND 10H THEN      \!
+              TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                           " "+RIGHT$(TS.PRTBUF$,30)+ "D"  \!ncatena PLU y descripci¢n
+           ELSE \!
+             TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                          " "+RIGHT$(TS.PRTBUF$,30)+ "*"  \!ncatena PLU y descripci¢n
+                      
+       TS.SJDATA$ = TS.PRTBUF$  ! ADD OVS 1 Nov 2005
+                      
+   ENDIF
+  
+ENDIF							! FIN ITEM DE VENTA

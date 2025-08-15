@@ -1,0 +1,17 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : ENCUTS02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Carga Modulo Encuestas           *
+!**************************************************
+
+
+If Asc.Proy.Encuesta% = -1 then Begin
+  TS.TEMP1I4 = NumeroRandom 
+  IF TS.TEMP1I4 = -1 THEN BEGIN 
+    CALL EventoEncuesta 
+  EndIf
+EndIf
+

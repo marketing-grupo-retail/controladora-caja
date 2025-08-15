@@ -1,0 +1,258 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+! Modificaciones:
+!---------------------------------------------------
+!Mod 12Abr2010
+! Se controla en el proceso de pago si esta cerca 
+! una recogida total de caja, no permita el proceso
+! de pago y solicite al cajero realizar la recogida
+! de dinero.
+! desarrollado por Grupo Retail - OVS
+!---------------------------------------------------
+
+
+If (TS.IO.MOTORKEY >= 91 AND TS.IO.MOTORKEY <= 97) THEN BEGIN								! Si medio de pago
+ IF (Asc.Pef.Operacion% <> 0) AND (TS.BALDUE(0) < 0) THEN BEGIN 
+   TS.TEMP1I1 =  Retorna.Movimiento
+   IF TS.TEMP1I1 <> 0 THEN BEGIN 
+      Call TSHIECET
+      Call VISOR.AND.BORRAR("NO SE PERMITE CERRARESTA TRANSACCION")
+      Call VISOR.AND.BORRAR("REVERSE MOVIMIENTO  TARJETA FONEDE  ")
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10) : TS.IO.MOTORKEY = 73
+   ENDIF 
+ ENDIF 
+
+ENDIF																																				!
+
+If (TS.IO.MOTORKEY = 73) then \																							! Tecla Borrar
+ if (Asc.Pef.InDevol% = -1) Then Begin   																		! En un proceso de autorizacion
+   If ( Asc.Pef.Tipo% = VAL(LEFT$(Asc.Pef.tpvr$,1)) ) AND 							   \! Si proceso en pleno pago     
+      ( Asc.Pef.Vari% = VAL(RIGHT$(Asc.Pef.tpvr$,1))) Then Begin						! Electronico 
+      Call Visores4690(1,"REVERSANDO OPERACION",Asc.Pef.NumNota$,0,"l")     ! Reversa nota capturada anteriormente
+      Asc.Pef.Tipo%  = 0 : Asc.Pef.Vari%  = 0      													! Inicializa variables
+      Asc.Pef.InDevol% = 0																									!
+      TS.TEMP1$ = Anula.Credencial.Pef(Asc.Pef.NumNota$,"0",Unpack$(TS.OPER$))  ! Anula la credencial en la trx
+      CALL U.IMPRIME("ANUL CREDENCIAL "+Asc.Pef.NumNota$,6100H)							! Registra en SJ y CR la anulacion
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                         			! Init vectores entrada
+      TS.IO.MOTORKEY = 73                                              			! cancela proceso    
+   EndIf
+ENDIF 
+
+If TS.IO.MOTORKEY >= 91 AND TS.IO.MOTORKEY <= 97 THEN BEGIN									! Si medio de pago
+    Asc.Pef.Tipo%   = (TS.IO.MOTORKEY - 90)																	! Init variables con tipo
+    Asc.Pef.Vari%   = VAL(TS.IO.DATA$(3)) 																	! y variedad
+ENDIF																																				!
+ 
+IF Asc.Pef.NtCap% <> -1 THEN BEGIN
+ IF TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pef.tpvr$,1)) AND \
+    TS.IO.DATA$(3) = Right$(Asc.Pef.tpvr$,1) THEN BEGIN 
+    TS.IO.MOTORKEY = 0
+    DIM TS.IO.KEYS(10)
+    DIM TS.IO.DATA$(10)
+    TS.GUIDANCE = 1034     ! Msg Procedimiento no valido
+    EXIT SUB	    	         
+ ENDIF 
+ENDIF 
+
+IF (TS.IO.KEYS(5) = 61) AND (TS.IO.STATE = 20) THEN BEGIN
+  IF MATCH(STR$(VAL(TS.IO.DATA$(5))),"1234567890",1) > 1 Then Begin 
+	    IF Asc.Pef.Cambio% = 2 THEN BEGIN
+         TS.IO.MOTORKEY = 0     
+         DIM TS.IO.KEYS(10)
+         DIM TS.IO.DATA$(10)
+         TS.GUIDANCE = 1094     ! Msg Procedimiento no valido
+         EXIT SUB	    
+	    ENDIF 
+   	    
+  ENDIF
+ENDIF
+
+IF (TS.IO.MOTORKEY = Asc.Pef.Motora%) AND NOT(TS.INTRX) AND                     \! Si tecla otros pago y
+    Asc.Pef.Cambio% = 0  THEN BEGIN                                              ! no hay venta
+    IF TS.TRAINING THEN Begin                                           
+      CALL TSHIECET 																								 					   !
+      CALL VISORES4690(1,"PROCESO NO VALIDO EN","ENTRENAMIENTO",1500,"L")        !
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+    ENDIF     
+
+    If (TE.TR.AMT(1) + 50000) >= To.CDLIMIT2 Then Begin                          ! SOBREPASA LIMITE CAJON MONEDERO
+	      Call VISOR.AND.BORRAR("REALICE PROCESO DE RECOGIDA CAJERO AHORA")
+ 	      Call VISOR.AND.BORRAR("PROCESO RECAUDO CANCELADO")
+        Dim TS.IO.DATA$(10): Dim TS.IO.KEYS(10)
+        TS.IO.MOTORKEY = 73
+        Exit Sub 
+    EndIf 	
+    
+    DIM TS.IO.KEYS(10)                                               			       !
+    DIM TS.IO.DATA$(10)                                                          !
+	  CALL VISORES4690(1,"PAGO DE SUBSIDIO","DESEMPLEADO",500,"C")                 !
+    TO.MGRKEY      = 0                                                           ! Simula Cambio de bono
+    TS.IO.DATA$(5) = "1"                                                         ! por efectivo
+    TS.IO.KEYS(5)  = 61                                                          !
+    TS.IO.MOTORKEY = 61                                                          !
+    TS.IO.STATE    = 10                                                          !
+    Asc.Pef.Cambio% = 2
+ENDIF
+
+IF TS.IO.MOTORKEY = Asc.Pef.Motora% AND Asc.Pef.Cambio% = 2  THEN BEGIN  				 ! Si pago electronico no recogida
+   IF (TS.IO.PREV.KEYS(2) NE 81) AND  \                                          ! Si no presiono Total
+      (TS.IO.PREV.KEYS(2) NE 0)  THEN BEGIN                                      ! Si no presiono Total
+      TS.IO.MOTORKEY = 0
+      DIM TS.IO.KEYS(10)
+      DIM TS.IO.DATA$(10)
+      TS.GUIDANCE = 1020                                                         ! Msg presione total
+      EXIT SUB
+  ENDIF
+  ENTRADA.PEF.ELECTRONICO:
+    TS.TEMP1$ = ASIC.DATOS$("ESCANEE CREDENCIAL  ","AFILIADO FONEDE")	      	   ! Captura credencial
+    IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					     ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 0 
+       TS.NS.VOID = -1                                                           ! 
+       CALL TSCSEC10                                                             ! Genera Anulacion Total
+       CALL INIT.TRX																														 ! Inicializa transaccion
+       CALL DIM.SL.STR(GC.SL.SIZE + 10)       
+       Asc.Pef.Cambio% = 0
+       Exit Sub 																																 ! Sale de la rutina
+    ENDIF 	
+
+!--- Mod 06Ene2009
+
+!    If Asic.Device% <> 3 Then Begin 
+!       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+!       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+!       TS.IO.MOTORKEY = 0 
+!       TS.NS.VOID = -1                                                           ! 
+!       CALL TSCSEC10                                                             ! Genera Anulacion Total
+!       CALL INIT.TRX																														 ! Inicializa transaccion
+!       CALL DIM.SL.STR(GC.SL.SIZE + 10)       
+!       Asc.Pef.Cambio% = 0
+!       Exit Sub 																																 ! Sale de la rutina
+!    EndIf 																															 ! 
+
+																																		 ! 
+    Asc.Pef.NtCap% = -1																													 ! 
+    Asc.Pef.NumNota$ = TS.TEMP1$                                           !
+    TS.TEMP1$ = Asc.Pef.NumNota$
+    Asc.Pef.Operacion% = 2
+    Call Validacion.Compra.Pef.Electronico("02")                                 !
+    If Asc.Pef.Cambio% = 4 Then Begin                                            ! Si retorna proceso con fallas
+       CALL Reverso.Trama.Error.Pef    
+       TS.NS.VOID = -1                                                           ! 
+       CALL TSCSEC10                                                             ! Genera Anulacion Total
+       CALL INIT.TRX																														 ! Inicializa transaccion
+       CALL DIM.SL.STR(GC.SL.SIZE + 10)
+       EXIT SUB          																												 ! ADD OVS FEB 7 2006
+    EndIf
+    Asc.Pef.Cambio% = 0
+ENDIF
+
+
+IF TS.INTRX THEN                                                                \! En una trx de venta
+IF (TS.IO.KEYS(1) NE 70) AND                                                    \! Si no devolucion
+   (TS.IO.MOTORKEY = Asc.Pef.Motora%)  THEN BEGIN                                ! pago electronico y no devolucion
+   IF TS.TRAINING THEN Begin                                           
+      CALL TSHIECET 																														 !
+      CALL VISORES4690(1,"PROCESO NO VALIDO EN","ENTRENAMIENTO",1500,"L")          !
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+   ENDIF 
+    Asc.Pef.ManLin% = -1 																												 ! Autorizacion en linea
+    Asc.Pef.NtCap% = 0
+    If TS.IO.PREV.KEYS(6) <> 81 THEN BEGIN                                       ! No presiono tecla total antes
+           DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 0                                                    ! cancela proceso
+           TS.GUIDANCE    = 1020                                                 ! mensaje para que totalice
+           exit sub 																														 ! Sale de la sub
+    Endif 
+    TS.TEMP1$ = ASIC.DATOS$("ESCANEE CREDENCIAL  ","AFILIADO FONEDE")	           ! Captura credencial
+    IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN			     ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73																											 ! Tecla borrar
+       Exit Sub 																																 ! Sale de la rutina
+    ENDIF 			
+!--- Mod 06Ene2009
+
+!    If Asic.Device% <> 3 Then Begin 
+!       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+!       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+!       TS.IO.MOTORKEY = 73																											 ! Tecla borrar
+!       Exit Sub 																																 ! Sale de la rutina
+!    EndIf 			
+
+    Asc.Pef.NtCap% = -1																													 ! 
+    Asc.Pef.NumNota$ = TS.TEMP1$                                                 !
+    TS.TEMP1$ = Asc.Pef.NumNota$ 
+    Asc.Pef.Operacion% = 11
+    Call Validacion.Compra.Pef.Electronico("11")                                 !
+    IF Asc.Pef.Cambio% = 4 THEN \
+       CALL Reverso.Trama.Error.Pef
+       Asc.Pef.Tipo%   = (TS.IO.MOTORKEY - 90)
+       Asc.Pef.Vari%   = VAL(TS.IO.DATA$(3)) 
+       Asc.Pef.Cambio% = 0
+ENDIF
+
+IF TS.INTRX THEN                                                                \! En una trx de venta
+IF (TS.IO.KEYS(1) EQ 70) AND                                                    \! Si devolucion
+   (TS.IO.MOTORKEY = Asc.Pef.Motora%)  THEN BEGIN                                ! pago electronico y no devolucion
+   IF TS.TRAINING THEN Begin                                           
+      CALL TSHIECET 																														 !
+      CALL VISORES4690(1,"PROCESO NO VALIDO EN","ENTRENAMIENTO",1500,"L")          !
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+   ENDIF    
+    Asc.Pef.ManLin% = -1 																												 ! Autorizacion en linea
+    Asc.Pef.NtCap% = 0
+     Asc.Pef.InDevol% = 0
+    If TS.IO.PREV.KEYS(6) <> 81 THEN BEGIN                                       ! No presiono tecla total antes
+           DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 0                                                    ! cancela proceso
+           TS.GUIDANCE    = 1020                                                 ! mensaje para que totalice
+           exit sub 																														 ! Sale de la sub
+    Endif 
+    TS.TEMP1$ = ASIC.DATOS$("AN ESCANEE LA      ","CREDENCIAL AFILIADO ")		     ! Captura credencial
+    IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					     ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73																											 ! Tecla borrar
+       Exit Sub 																																 ! Sale de la rutina
+    ENDIF 																																			 ! 
+!--- Mod 06Ene2009
+
+!    If Asic.Device% <> 3 Then Begin 
+!       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+!       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+!       TS.IO.MOTORKEY = 73																											 ! Tecla borrar
+!       Exit Sub 																																 ! Sale de la rutina
+!    EndIf 			
+
+    Asc.Pef.NtCap% = -1																													 ! 
+    Asc.Pef.NumNota$ = TS.TEMP1$                                                 !
+    TS.TEMP1$ = Asc.Pef.NumNota$
+    TS.TEMP1$ = Anula.Credencial.Pef(Asc.Pef.NumNota$,"0",Unpack$(TS.OPER$))         !
+    IF VAL(TS.TEMP1$) > 0 THEN BEGIN 
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                                  ! Init vectores entrada
+       TS.IO.MOTORKEY = 0                                                        ! cancela proceso        
+       TS.IO.KEYS(1)  = 70                                                       ! Simula anulacion 
+       TS.IO.DATA$(7) = TS.TEMP1$                                                ! Valor del subsidio
+       TS.IO.DATA$(9) = Asc.Pef.NumNota$                                         ! Graba numero credencial	
+       TS.IO.KEYS(9)  = 90
+	     TS.IO.KEYS(3)  = 78                                                       ! Simula pago al tipo y variedad
+	     TS.IO.DATA$(3) = Right$(Asc.Pef.tpvr$,1)                                  ! de pago parametrizada para 
+	     TS.IO.MOTORKEY = VAL("9"+Left$(Asc.Pef.tpvr$,1))                          ! fonede
+       TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pef.tpvr$,1))                          !       
+       
+    ENDIF ELSE BEGIN 
+           DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 73                                                   ! cancela proceso    
+    ENDIF 
+ENDIF
+

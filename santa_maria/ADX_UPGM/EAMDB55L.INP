@@ -1,0 +1,15 @@
+EAMDB55L =
+          EAMDB55C,
+          EAMDB5AC,
+          EAMDB5DC,
+          EAMMMCFC,
+          EAMCSASC,
+          EAMRPIVC,
+          EAMCPU01,
+          EAMPMDBC,
+          EAMIR2BC,
+          EAMIRCMK.L86 [s],
+          EAMGAF5K.L86 [s],
+          EAMGASCK.L86 [s],
+          ADXACRCL.L86 [s],
+          ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

@@ -1,0 +1,29 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\ REM!!****************************************************************         
+\ REM!!*  TERMINAL TAX TABLE DEFINITIONS                                        
+\ REM!!****************************************************************         
+                                                                                
+INTEGER*2  GLOBAL   \                                                           
+    TX.TOPBRKT1(1), \   repeat bracket                                          
+    TX.NORANGES(1), \   #ranges in each table                                   
+    TX.AMTBRKT1(1), \   amount of 1st repeat bracket                            
+    TX.AMTBRKT2(1), \   amount of 2nd repeat bracket                            
+    TX.RPTAMT(1),   \   TAX AMOUNT OF SECOND REPEAT BRACKET                     
+    TX.INDEXBRKT1(1), \ index to second repeat bracket                          
+    TX.RANGEAMT(2), \   tax amount increment for next range                     
+    TX.RANGES(2)    !   tax range increment                                     
+                                                                                
+\ REM!!****************************************************************         
+\ REM!!*  ARRAY DIMENSION DECLARATIONS                                          
+\ REM!!****************************************************************         
+                                                                                
+! DIM TX.NORANGES  (4)                                                          
+! DIM TX.TOPBRKT1  (4)                                                          
+! DIM TX.AMTBRKT1  (4)                                                          
+! DIM TX.AMTBRKT2  (4)                                                          
+! DIM TX.RPTAMT    (4)                                                          
+! DIM TX.INDEXBRKT1(4)                                                          
+! DIM TX.RANGES    (4,nn)                                                       
+! DIM TX.RANGEAMT  (4,nn)                                                       
+                                                                                

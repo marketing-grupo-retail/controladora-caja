@@ -1,0 +1,40 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR01UV.011 
+!     Punto de Entrada   =  EAMTSUVA.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT EAMTSUVA.J86   
+! para definir las variables de almacenar los  PLU's de   
+! una transaccion en un posible Credito de Medicamentos   
+!                                                         
+!----------------------------------------------------------
+
+INTEGER*2   GLOBAL                 \
+            USR.IND1%,             \! Para indexar Items
+            USR.IND2%,             \! Para indexar Items
+            ajus1%,                \ 
+            imprime%              
+INTEGER*2   GLOBAL                 \
+            USER.SIGNO,            \
+            USER.FCTR,             \
+            CONTA%,                \
+            USER.SI.DESC,          \
+            MERCAMOS% 
+INTEGER*4   GLOBAL                 \
+            USER.SMDSCT,           \
+            USER.DSCT,             \
+            DCTO.COUP,             \
+            VAL.COUP,              \
+            TOT.COUP,              \
+            VAL.COUE,  PRICE%,     \
+            TOT.COUE
+STRING     GLOBAL                  \ ! VARIABLES para leer partes
+           USR.ITEMS$(1) , AUTO1$, \ ! Para guardar hasta 100 Items
+           BENE$,  TELE$ , NO.AUT$,\ ! 
+           LFEED$, KEY.VE$
+!---------------------------------------------------------- 
+

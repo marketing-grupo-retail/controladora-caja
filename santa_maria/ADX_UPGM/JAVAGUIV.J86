@@ -1,0 +1,473 @@
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+!  JAVAGUIV.J86
+!
+!  Variable declarations for the javagui interface
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+! Change History:
+!
+! IR43255 Module Added.
+!         RSH IBM 20Jun00
+!
+! IR48716 Added variables needed for Surevision java gui hooks
+!         TAL/MSV IBM 15Jun02
+!
+! IR52980 Modified java GUI hooks for use with VP, SureVision and AEF.
+!         KHG IBM 28Jan2004
+!
+! IR53370 Local variables need to be global as some routines were moved
+!         out of the javaguic module.
+!         CRM IBM 22Mar2004
+!
+! IO07467 Implement SCS requirements already implemented by ACE.
+!         See JAVAAEFR.BDC for details.
+!         GGK IBM 05Sep2007
+!
+! IO08970 Add virtual session failover support.
+!         CJN IBM 06Jun2008
+!
+! END-OF-SPECIFICATIONS
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+
+!AIR52980
+INTEGER*1 GLOBAL                                 \
+                  javaSOrestOptsRead,            \ flag if the restrictive item opts have been read
+\AIO08970
+                  JAVA.BYPASS.D12.SUBSTATE,      \ If set, bypass restoring the substate in display routine for D12.
+                  JAVA.BYPASS.D9.SUBSTATE,       \ If set, bypass restoring the substate in display routine for D9.
+                  JAVA.FAILOVER.ENABLED,         \ Virtual session failover enablement flag, set by F1 command tail.
+                  JAVA.NVRAM.ACTION,             \ Action flag for NVRAM record #6 (0x1 = flush, 0x2 = reset)
+                  JAVA.PAYMENT.SENT.TO.HOST,     \ Set by payment system in order to set the value of the
+                                                 \ paymentSentForHostProcessing attribute in the <transactionUpdate>
+                                                 \ event.
+                  JAVA.SIGNATURE.LINE,           \ Set by payment system to flag a printLine as a signature line.
+                  JAVA.TENDER.SIGNATURE.NEEDED,  \ Set by payment system to set the value of the signatureNeeded
+                                                 \ attribute in the <tender> event.
+                  JAVA.TENDER.REGE.PRINTED,      \ Set by payment system to set the value of the regEPrinted
+                                                 \ attribute in the <tender> event.
+                  JAVA.PINPAD.ACTIVE,            \ Set by the payment system when input may be provided at pinpad.
+\EIO08970
+                  JAVA.INIT
+
+INTEGER*4 GLOBAL                                 \
+                  jGuiSubState,                  \ substate id
+                  jGuiSavedSubState(1)           \ saved substate ids
+!EIR52980
+INTEGER*2 GLOBAL                                 \
+                                                 \
+                  javaGuiActive,                 \ Java Gui is active
+                  surevisionGuiEnabled,          \ Surevision Operator GUI enabled  !IR48716
+\AIR52980
+                  aefEnabled,                    \ AEF enabled flag
+                  callAefHooks,                  \ AEF enabled flag
+                  aefUnitOfWorkFlag,             \ flag if AEF unit of work needed
+                  tssEnabled,                    \
+                  tailPassed,                    \
+                  blockForJava,                  \
+\EIR52980
+                  javaPipeNum,                   \ Pipe Number for Java
+                                                 \
+                                                 \ Key stem definitions
+                  javaKeysActive,                \ Are keys active?
+                  javaSavedMotorKey,             \ saved motorkey
+                  javaHelpKey,                   \ Help
+                  javaPageUpKey,                 \ Page Up
+                  javaPageDnKey,                 \ Page Down
+                  javaScrollUpKey,               \ Scroll Up
+                  javaScrollDnKey,               \ Scroll Down
+                  javaTabKey,                    \ Tab to next field
+                  javaBackTabKey,                \ Back-tab
+                  javaClickKey,                  \ Click
+                  javaSelectPaneKey,             \ Select Pane
+                  javaSelectWindowKey,           \ Select next HTML window
+                                                 \
+                  updateReceiptMsg,              \ completed receipt data  1
+                  updateTotalMsg,                \                         2
+                  updateScaleMsg,                \                         3
+                  addAccountTenderMsg,           \                         4
+                  addDiscountEntryMsg,           \                         5
+                  addItemEntryMsg,               \                         6
+                  addTenderEntryMsg,             \                         7
+                  changeGivenMsg,                \                         8
+                  endAccountingTransactionMsg,   \                         9
+                  endSalesTransactionMsg,        \                         10
+                  endTransactionMsg,             \                         11
+                  operatorSignedOffMsg,          \                         12
+                  operatorSignedOnMsg,           \                         13
+                  optionsLoadedMsg,              \                         14
+                  priceVerifyMsg,                \                         15
+                  procedureCompletedMsg,         \                         16
+                  procedureStartedMsg,           \                         17
+                  procedureStartedMsg2,          \   IR52980               Needed to implement AEF
+                  startAccountingTransactionMsg, \                         18
+                  startSalesTransactionMsg,      \                         19
+                  startTransactionMsg,           \                         20
+                  reportOutputMsg,               \                         21
+                  scrollMsg,                     \                         22
+                  displayVelocityCodesMsg,       \                         23
+                  hideVelocityCodesMsg,          \                         24
+                  redrawReceiptWindowMsg,        \                         25
+                  updateStatusMsg,               \                         26
+                  customerCardScannedMsg,        \                         27
+                  javaKeysMsg,                   \                         28
+\ !AIR48716
+                  add2x20Msg,                    \
+                  terminalSubStateMsg,           \
+                  optionsLoadingStartedMsg,      \
+                  optionsLoadingEndedMsg,        \
+                  optionsDataMsg,                \
+                  itemJustAddedMsg,              \
+                  voidTransactionMsg,            \
+                  foodStampTotalMsg,             \
+                  foreignTotalMsg,               \
+                  terminalConnectionChangeMsg,   \
+                  otrMsg,                        \
+                  discountJustAddedMsg,          \
+                  operatorSpecialSignedOnMsg,    \
+                  updateTotalsDataMsg,           \
+\ !EIR48716
+                  aefUnitOfWorkMsg,              \ IR52980 unit of work indicator for AEF
+                  aefEMredemptionCpnMsg,         \ IR52980 message if sending EM based redemption coupons
+                  jGuiEndAppEvents,              \ end of Application events
+                  jGuiScaleBroken,               \ adapter offline IR51xxx
+                  tillExchangeOccurred,          \ till exchange IO07467/17667
+                  transactionUpdateMsg,          \ transaction update event IO08970
+                  tenderDeclinedMsg,             \ tender declined event IO08970
+                  efUserEvent,                   \ 54 IO12917
+                  aefUserNuoEvent,               \
+\ !AIR48716
+\ !AIR52980
+\                  jGuiSubState,                  \ substate id
+\                  jGuiSavedSubState(1),          \ saved substate ids
+\ !EIR52980
+                  jGuiSavedSubStateIndex,        \ array index
+                  jGuiMaxSavedStateIndex,        \! Maximum number of substates to save
+\ !EIR48716
+                                                 \
+                                                 \ events enumerated for customer use in UE
+                                                 \ requires extension of the java code
+                                                 \
+                                                 \
+                  jtsue01,                       \                         1001
+                  jtsue02,                       \
+                  jtsue03,                       \
+                  jtsue04,                       \
+                  jtsue05,                       \
+                  jtsue06,                       \
+                  jtsue07,                       \
+                  jtsue08,                       \
+                  jtsue09,                       \
+                  jtsue10,                       \
+                  jtsue11,                       \
+                  jtsue12,                       \
+                  jtsue13,                       \
+                  jtsue14,                       \
+                  jtsue15,                       \
+                  jtsue16,                       \
+                  jtsue17,                       \
+                  jtsue18,                       \
+                  jtsue19,                       \
+                  jtsue20,                       \
+                  jtsue21,                       \
+                  jtsue22,                       \
+                  jtsue23,                       \
+                  jtsue24,                       \
+                  jtsue25,                       \
+                  jtsue26,                       \
+                  jtsue27,                       \
+                  jtsue28,                       \
+                  jtsue29,                       \
+                  jtsue30,                       \
+                  jtsue31,                       \
+                  jtsue32,                       \
+                  jtsue33,                       \
+                  jtsue34,                       \
+                  jtsue35,                       \
+                  jtsue36,                       \
+                  jtsue37,                       \
+                  jtsue38,                       \
+                  jtsue39,                       \
+                  jtsue40,                       \
+                  jtsue41,                       \
+                  jtsue42,                       \
+                  jtsue43,                       \
+                  jtsue44,                       \
+                  jtsue45,                       \
+                  jtsue46,                       \
+                  jtsue47,                       \
+                  jtsue48,                       \
+                  jtsue49,                       \
+                  jtsue50,                       \
+                  jtsue51,                       \
+                  jtsue52,                       \
+                  jtsue53,                       \
+                  jtsue54,                       \
+                  jtsue55,                       \
+                  jtsue56,                       \
+                  jtsue57,                       \
+                  jtsue58,                       \
+                  jtsue59,                       \
+                  jtsue60,                       \
+                  jtsue61,                       \
+                  jtsue62,                       \
+                  jtsue63,                       \
+                  jtsue64,                       \
+                  jtsue65,                       \
+                  jtsue66,                       \
+                  jtsue67,                       \
+                  jtsue68,                       \
+                  jtsue69,                       \
+                  jtsue70,                       \
+                  jtsue71,                       \
+                  jtsue72,                       \
+                  jtsue73,                       \
+                  jtsue74,                       \
+                  jtsue75,                       \
+                  jtsue76,                       \
+                  jtsue77,                       \
+                  jtsue78,                       \
+                  jtsue79,                       \
+                  jtsue80,                       \
+                  jtsue81,                       \
+                  jtsue82,                       \
+                  jtsue83,                       \
+                  jtsue84,                       \
+                  jtsue85,                       \
+                  jtsue86,                       \
+                  jtsue87,                       \
+                  jtsue88,                       \
+                  jtsue89,                       \
+                  jtsue90,                       \
+                  jtsue91,                       \
+                  jtsue92,                       \
+                  jtsue93,                       \
+                  jtsue94,                       \
+                  jtsue95,                       \
+                  jtsue96,                       \
+                  jtsue97,                       \
+                  jtsue98,                       \
+                  jtsue99,                       \
+                                                 \
+                  jGuiStartUserEvent,            \                         2001
+                  jGuiEndUserEvent,              \
+                                                 \
+                  jGuiEndEventList               !
+
+!AIR48716 - set up option data msg keys
+INTEGER*2 GLOBAL                                 \
+      \Range for Store Option Keys (100)
+      StoreOptionsKeys,                          \
+      StoreInfoKey,                              \
+      \Range for Security Options Keys (200)
+      SecurityOptionsKeys,                       \
+      NoSalePriceVerifyInTransactionKey,         \
+      NegTransAtSingleTermKey,                   \
+      ManagersKeyNeededKey,                      \
+      AllowTenderCashinginTransKey,              \
+      MaxTransactionSizeKey,                     \
+      TransactionSizeWarningKey,                 \
+      RefundReasonCodes,                         \
+      \Range for Food Stamp Options Keys (300)
+      FoodStampsOptionsData,                     \
+      AllowFoodStampsKey,                        \
+      FSTenderAfterFSTotalKey,                   \
+      \Range for Tender Options Keys (400)
+      TenderOptionsData,                         \
+      TenderTypeAttributesKey,                   \
+      \Range for LoyaltyOptionsKeys (500)
+      LoyaltyOptionsKeys,                        \
+      EMCustomerIDKey,                           \
+      \Range for WIC Options Keys (600)
+      WICOptionsData,                            \
+      \Range for Suspend Options Keys (700)
+      SuspendRetrieveOptionsData,                \
+      MaxAllowedSuspendsPerTerminalKey,          \
+      \Range for Coupon Options Keys (800)
+      CouponOptionsData,                         \
+      \Range for Weight Options (900)
+      WeightOptionsData,                         \
+      TareOptionsData,                           \
+      DepartmentKeyData,                         \ IR52980
+      \Range for Tare Options Keys (1000)
+      TareOptionsKeys,                           \
+      \Discounts Options Keys (1100)
+      DiscountOptionsData,                       \
+      TransactionDiscounts,                      \
+      DepartmentDiscounts,                       \
+      LineItemDiscountOptions,                   \
+      \Reserve blocks for NRSC and/or BP's extensions (3000)
+      StartBusinessPartner,                      \
+      \Reserve blocks for customer extensions (6000)
+      StartCustomer
+
+
+INTEGER*2 GLOBAL                                  \   !Define additional substate events
+                  expectingItemEvent,             \
+                  expectingTenderEvent,           \
+                  expectingForeignTenderEvent,    \
+                  expectingCouponEvent,           \
+                  expectingManagerOverrideEvent,  \
+                  expectingOperatorOverrideEvent, \
+                  expectingProcedureEvent,        \
+                  priceVerifyOccurredEvent,       \
+                  fsBalDueOccurredEvent,          \
+                  transactionVoidedEvent,         \
+                  standaloneEvent,                \
+                  trainingModeEvent,              \
+\AIR52980
+                  ManagerOverrideSuccessEvent,    \
+                  ManagerOverrideCancelEvent,     \
+                  OperatorOverrideSuccessEvent,   \
+                  OperatorOverrideCancelEvent,    \
+                  ValidAccountEvent,              \
+                  JAVA.TS.TRAINING,               \ keep our own version of flag if in training mode
+                  ItemPromptCancelEvent,          \
+                  ItemPromptSatisfiedEvent,       \
+                  operatorSpecialSignedOffMsg,    \
+                  operatorDisplay,                \
+                  customerDisplay,                \
+                  noSaleStartMsg,                 \
+                  noSaleEndMsg,                   \
+                  wicStartEvent,                  \
+\EIR52980
+\!AIR50363
+                  expectingLoanAmount,            \
+                  expectingPickupAmount,          \
+                  expectingTenderCountAmount,     \
+                  printerPaperCoverOverride,      \ IR52980
+\AIO08970
+                  waitingForPinpad,               \ Waiting for pinpad input substate
+                  waitingForSignature,            \ Waiting for sig. capture substate
+                  waitingForAccountNumAtPINPAD,   \ Waiting for acct numb. at pinpad substate
+                  aeflt%,                         \ LineType for receipt event
+                  aeflc%,                         \ LineCategory for receipt event
+                  JAVA.LINETYPE,                  \ Used to override the TS.LINETYPE
+                                                  \ in the hook code for determining
+                                                  \ the lineType and lineCategory.
+                  JAVA.LINECATEGORY,              \ Used to override the TS.LINECATEGORY
+\EIO08970
+                  totalPressed
+!EIR50363
+
+!EIR48716
+!AIR52980
+!STRING GLOBAL                                    \
+!                  javaOptionsDataMsg,            \ IR48716 - string for surevision options msg
+!                  javaToken,                     \ Token for string splitting
+!                  javaItems,                     \ "Items:"   descriptor
+!                  javaSubTotal,                  \ "Subtotal" descriptor
+!                  javaTax,                       \ "Tax:"     descriptor
+!                  javaTotal,                     \ "Total"    descriptor
+!                  javaClosed,                    \ "Closed"   descriptor
+!                  javaNoScale,                   \ "No Scale" descriptor
+!                  javaScaleMotionErr,            \ "     " for scale in motion
+!                  javaScaleOtherErr,             \ " --- " for other scale errors
+!                  javaScaleLabelData,            \ Scale Label Data
+!                                                 \
+!                                                 \ Msg literals
+!                  javaHelpKeyMsg,                \ Help
+!                  javaPageUpKeyMsg,              \ Page Up
+!                  javaPageDnKeyMsg,              \ Page Down
+!                  javaScrollUpKeyMsg,            \ Scroll Up
+!                  javaScrollDnKeyMsg,            \ Scroll Down
+!                  javaTabKeyMsg,                 \ Tab to next field
+!                  javaBackTabKeyMsg,             \ Back-tab
+!                  javaClickKeyMsg,               \ Click
+!                  javaSelectPaneKeyMsg,          \ Select Pane
+!                  javaSelectWindowKeyMsg,        \ Select next HTML window
+!                                                 \
+!                                                 \ trace variables
+!                  javaTraceUser,                 \
+!                  javaTraceGui,                  \
+!                  javaTraceApp,                  \
+!                                                 \
+!                  javaGuiClass,                  \ Class used
+!                  jGuiSavedSubStateDesc(1),      \ corresponding TS.DESC1$ for the saved substate !IR48716
+!                  javaGuiMethod                  ! Method to call
+!
+!string            javaWork1,                     \ Work Strings
+!                  javaWork2,                     \
+!                  javaWork3,                     \
+!                  javaWork4,                     \
+!                  javaWork5                      !
+
+STRING GLOBAL                                     \
+                  javaOptionsDataMsg$,            \ IR48716 - string for surevision options msg
+                  javaToken$,                     \ Token for string splitting
+                  javaItems$,                     \ "Items:"   descriptor
+                  javaSubTotal$,                  \ "Subtotal" descriptor
+                  javaTax$,                       \ "Tax:"     descriptor
+                  javaTotal$,                     \ "Total"    descriptor
+                  javaClosed$,                    \ "Closed"   descriptor
+                  javaNoScale$,                   \ "No Scale" descriptor
+                  javaScaleMotionErr$,            \ "     " for scale in motion
+                  javaScaleOtherErr$,             \ " --- " for other scale errors
+                  javaScaleLabelData$,            \ Scale Label Data
+                                                  \
+                                                  \ Msg literals
+                  javaHelpKeyMsg$,                \ Help
+                  javaPageUpKeyMsg$,              \ Page Up
+                  javaPageDnKeyMsg$,              \ Page Down
+                  javaScrollUpKeyMsg$,            \ Scroll Up
+                  javaScrollDnKeyMsg$,            \ Scroll Down
+                  javaTabKeyMsg$,                 \ Tab to next field
+                  javaBackTabKeyMsg$,             \ Back-tab
+                  javaClickKeyMsg$,               \ Click
+                  javaSelectPaneKeyMsg$,          \ Select Pane
+                  javaSelectWindowKeyMsg$,        \ Select next HTML window
+                                                  \
+                  javaOperatorDisplay$,           \
+                  javaCustomerDisplay$,           \
+                                                  \ trace variables
+                  javaTraceUser$,                 \
+                  javaTraceGui$,                  \
+                  javaTraceApp$,                  \
+                                                  \
+                  javaGuiClass$,                  \ Class used
+                  jGuiSavedSubStateDesc$(1),      \ corresponding TS.DESC1$ for the saved substate !IR48716
+                  javaGuiMethod$                  ! Method to call
+
+!STRING            javaWork1$,                    ! Work Strings IR53370
+STRING GLOBAL     javaWork1$,                     \ Work Strings IR53370
+                  javaWork2$,                     \
+                  javaWork3$,                     \
+                  javaWork4$,                     \
+\AIO08970   These values are set by the payment system and are used in the <tender> event.
+                  javaWork5$,                     \
+                  JAVA.TENDER.CURRENCY$,          \
+                  JAVA.TENDER.REFNUM$,            \
+                  JAVA.TENDER.CARDID$,            \
+                  JAVA.TENDER.RESPONSE.CODE$,     \
+                  JAVA.TENDER.MASKED.ACCOUNT.NUMBER$, \
+                  JAVA.TENDER.APPROVAL.CODE$,     \
+                  JAVA.TENDER.RESPONSE.CODE.DESC$, \
+                  JAVA.TENDER.SEQUENCE.NUMBER$,   \
+                  JAVA.TENDER.LEGAL.TEXT$         !
+!EIO08970
+!EIR52980
+
+!INTEGER*4                                       ! IR53370
+INTEGER*4 GLOBAL                                 \  IR53370
+                  javaScaleErrn                  ! Scale Error Code
+
+!INTEGER*2                                       ! IR53370
+INTEGER*2 GLOBAL                                 \ IR53370
+                  java1i2,                       \
+                  java2i2,                       \
+                  java3i2,                       \
+                  java4i2                        !
+
+!AIR52980
+! The following variables are used to setup data for electronic marketing redemption coupons
+! If a redemption coupon has a link, (as most redemptions will), then the print line is saved
+! to be printed after the link is validated, (usually some type of award for the redemption).
+! These variables are set up in the base EM code for use by the aef code in building the XML string
+! It's hoped that this same setup will work if the customer has custom secondary points as well, (will require
+! modifications to the secondary point enhancements)
+STRING GLOBAL                                    \
+       JAVA.EM.RD.PRINTLINE$,                    \ print line of the redemption
+       JAVA.EM.RD.ITEMNAME$,                     \ item descriptor
+       JAVA.EM.RD.POINTS$,                       \ save points
+       JAVA.EM.PT.USERTYPE$                      ! allows user to set up type of points  (primary or secondary)
+!EIR52980

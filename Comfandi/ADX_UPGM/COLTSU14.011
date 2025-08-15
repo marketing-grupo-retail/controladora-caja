@@ -1,0 +1,41 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudos Colegios        *
+!**************************************************
+! Modificaciones:
+
+
+IF (TS.IO.KEYS(1) = 70 AND TS.IO.MOTORKEY = 81) THEN BEGIN                       ! Si  anulacion total
+ Asc.Col.Impr% = 0												                                       ! Init de variable control de franqueo
+ Asc.Col.Lista$     = "" 																										     ! Lista de bonos a pagar
+ Asc.Col.NotaNul$ = "" 										  																     ! Lista de Bonos Anulado
+ Asc.Col.VlrBono$   = "0"																										     ! Valor del Bono
+ Asc.Col.IndPrice%  = 0																													 !
+ Asc.Col.Devol%     = 0																											     ! Indicador devolucion
+ENDIF
+
+IF (TS.IO.KEYS(1) = 70 AND TS.IO.MOTORKEY = VAL(Asc.Col.Tecla$)) THEN BEGIN      ! Si  anulacion recibo
+     Asc.Col.Devol% = 0																													 ! Indicador devolucion
+     TS.TEMP1$ = ASIC.DATOS$("Recibo a Anular....?","")			 								     ! Captura el bono
+     IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					   ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de carga
+       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+       Exit Sub  																															   ! Sale de la rutina
+     ENDIF 					     
+     Call Anulacion.Recibos(TS.TEMP1$)																					 ! Valida Recibo capturado
+ENDIF
+
+IF TS.IO.MOTORKEY = VAL(Asc.Col.Tecla$) THEN BEGIN 															 ! Si recaudo Colegio
+     Asc.Col.Devol% = 0																											     ! Indicador devolucion
+     TS.TEMP1$ = ASIC.DATOS$("Numero Recibo......?","")			 								     ! Captura el bono
+     IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					   ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de carga
+       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+       Exit Sub  																															   ! Sale de la rutina
+     ENDIF 					     
+     Call Validacion.Recibos																										 ! Valida recibo capturado
+ENDIF 

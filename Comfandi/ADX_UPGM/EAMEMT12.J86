@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC12 PUBLIC ! BEFORE AUTOMATIC COUPONS AT TOTAL TIME
+ 
+! insert user exit code here
+ 
+ END FUNCTION

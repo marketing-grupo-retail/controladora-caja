@@ -1,0 +1,29 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK ***************************************/
+\REM!!**************************************************************!
+\REM!!**************************************************************!
+\REM!! SUSPEND RETRIEVE VARIABLE DECLARATIONS - GLOBAL          ****!
+\REM!!**************************************************************!
+\REM!!**************************************************************!
+
+STRING GLOBAL    SR.DATE$,        \ date of suspension
+                 SR.OPER$,        \ operator of suspended transaction
+                 SR.TIME$,        \ time of suspension
+                 SR.KEY$          ! record key
+
+INTEGER*4 GLOBAL SR.AMOUNT,       \ amount of suspends/retrieves
+                 SR.COUNT,        \ number of suspends/retrieves
+                 SR.POINTER,      \ pointer to record in seq. file
+                 SR.SIZEORCOUNT   ! suspended trx. size for record #7
+                                  ! OR retrieve count of actual suspends
+                                  ! for record type #4 and #6.
+
+INTEGER*1 GLOBAL SR.RETRY,        \ retry flag for tender cancelling
+                 SR.SUSPENDS,     \ store closing active susps
+                 SR.TRAINING,     \ flags a trx suspended in trng mode
+                 SR.RET.YET       ! retrieve indication flag
+
+INTEGER*2 GLOBAL SR.RESERVED1,    \ Reserved ...
+                 SR.RESERVED2,    \ Reserved ...
+                 SRKYC.FILE.NO,   \ Keyed file session number variable
+                 SRTRX.FILE.NO    ! Seq. file session nubmer variable

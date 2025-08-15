@@ -1,0 +1,31 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2303.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!----------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!  Exit que despliega la diferencia entre el TOTAL y el PAGO OBLIG.  
+!     EN EFECTIVO.
+!
+!      Algoritmo:                                                        
+!          Si se va a desplegar el PAGO OBLIGATORIO EFECTIVO ent.  
+!          Primera linea <== "PAGO EFECT." + STR$(BALDUE[1]) 
+!          Segunda linea <== "DIFERENCIA." + string$(baldue[0]-baldue[1])
+!
+!      Variables:                                                        
+!                ts.linetype:  Tipo de display.  4 ==> F.S. Balance Due  
+!                ts.io.state:  Estado actual (103-loan & 104-pick-up)    
+!                ts.disp1$:    Primera linea de despliegue               
+!                ts.disp2$:    Segunda linea de despliegue               
+!                ts.baldue(n): Arreglo de total debido:                  
+!                                ts.baldue(0) = total debido             
+!                                ts.baldue(1) = pago obligatorio en efec.
+!----------------------------------------------------------------------------
+if ts.linetype = 4 then begin
+    ts.disp1$ = "EFECT OBLIG. " + str$(ts.baldue(1))
+    ts.disp2$ = "DIFERENCIA   " + str$(ts.baldue(0) - ts.baldue(1))
+endif
+!----------------------------------------------------------------------------

@@ -1,0 +1,21 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC07                                                 *!
+!*                                                                           *!
+!* Description    : Called during appending fields to create an item record  *!
+!*                  string.                                                  *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Variables      : IR.USERDATA$    This string contains the extra item      *!
+!*                                  record data (if any) that will be        *!
+!*                                  appended to the end of the record.       *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC07 PUBLIC
+END SUB
+

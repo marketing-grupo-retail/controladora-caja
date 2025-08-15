@@ -1,0 +1,126 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0801.011 
+!     Punto de Entrada   =  EAMTSU08.J86
+!     Fecha de Revisi¢n  =  Jul. 10 de 1997
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 08  para controlar la
+! venta de Articulos de los Deptos 19, 20, y 23 interceptando  y
+! Procesando los PLU's de Drogueria y Cosmeticos como si fueran
+! Verificables.
+!                                                         
+! El Display del Operador le Indica con B105 el comienzo de la                                                         
+! Verificacion                                                           
+!------------------------------------------------------------------
+
+ IF IR.INDICAT1A AND 08H THEN \
+    CON.NO.FRAN% = 1 ELSE CON.NO.FRAN% = 0  ! Marca NO Franqueo
+
+ IF (VAL(UNPACK$(IR.DEPARTME$)) = 19    OR       \! ¢ Cosm‚ticos 
+     VAL(UNPACK$(IR.DEPARTME$)) = 21    OR       \! ¢ Abarrotes con IVA
+     VAL(UNPACK$(IR.DEPARTME$)) = 15    OR       \! ¢ Abarrotes sin IVA  
+     VAL(UNPACK$(IR.DEPARTME$)) = 18    OR       \! ¢ Papeler¡a sin IVA  
+     VAL(UNPACK$(IR.DEPARTME$)) = 34    OR       \! ¢ ABARROTES 10 %  
+     VAL(UNPACK$(IR.DEPARTME$)) = 44    OR       \! ¢ NO ALIMENTOS %  
+     VAL(UNPACK$(IR.DEPARTME$)) = 45    OR       \! ¢ NO ALIMENTOS 15%
+     VAL(UNPACK$(IR.DEPARTME$)) = 46    OR       \! ¢ NO ALIMENTOS 10%
+     VAL(UNPACK$(IR.DEPARTME$)) = 47    OR       \! ¢ GRANOS SIN IVA  
+     VAL(UNPACK$(IR.DEPARTME$)) = 53    OR       \! PANADERIA EXCLUIDA
+     VAL(UNPACK$(IR.DEPARTME$)) = 27    OR       \! PANADERIA EXCLUIDA
+     VAL(UNPACK$(IR.DEPARTME$)) = 63    OR       \! PANADERIA EXCLUIDA
+     VAL(UNPACK$(IR.DEPARTME$)) = 65    OR       \! ¢ NO ALIMENTOS 15%
+     VAL(UNPACK$(IR.DEPARTME$)) = 26)   AND      \! ¢ Licores sin IVA 
+     VAL(UNPACK$(IR.ITEMCODE$)) < 999999 OR      \! ¢ Codigo Corto
+    (VAL(UNPACK$(IR.DEPARTME$)) = 23    OR       \! ¢ Med con IVA
+     VAL(UNPACK$(IR.DEPARTME$)) = 22    OR       \! ¢ Papeleria     
+     VAL(UNPACK$(IR.DEPARTME$)) = 20    OR       \! ¢ Medicamentos
+     VAL(UNPACK$(IR.DEPARTME$)) = 37    OR       \! ¢ Medicamentos iva 10%
+     VAL(UNPACK$(IR.DEPARTME$)) = 17)   AND      \! ¢ Medicamentos
+     VERIFICA% = 1                      OR       \! Plu Digitado
+    (IR.INDICAT1A AND 04H)              OR       \! ¢ Flag Verif/Prec
+     TO.USEROPTS(1)            <> 0  THEN BEGIN   ! UsrOpt 1=Y Veri Prec
+   IF NOT USER.VERIFY.ITEM        AND            \! Si no se ha Verific
+      ((IR.INDICAT0 AND 10H) = 0) AND            \! y NO Requiere Precio
+        REPEAT.COUNT         < 1  AND            \! si Repeticion
+        TS.IO.DATA$(5)       = "" THEN BEGIN      ! Sin Precio Digitado
+           TS.PURGE.ERR      = -1                 ! Ignora Error Anter
+                                                  !
+           TS.PC.PM      = IR.PRICING.METHOD      ! Inicializacion 
+           TS.PC.PRICE1  = IR.PRICE1              !  Especial de
+           TS.PC.PRICE2  = IR.PRICE2              !   Variables de
+           TS.PC.QTY$    = UNPACK$(IR.SALEQUAN$)  !    Reg de Plus
+           TS.PC.OPRICE1 = IR.PRICE1              !     para ver las
+           TS.PC.OPRICE2 = IR.PRICE2              !      lineas de 
+           TS.PC.OQTY$   = TS.PC.QTY$             !       verificacion
+           IF VAL(TS.PC.QTY$) > 1 AND            \!        de Precios
+              TS.PC.PM < 2 THEN TS.PC.SPLIT = -1 \!
+           ELSE TS.PC.SPLIT = 0                   !
+                                                  !
+           TS.LINETYPE    = 11                    ! Despliega
+           TS.LINEDATA    = 0                     ! Item Verificado
+           TS.STACKERR(0) = 9                     ! Estado de Entrada Precio
+           I$             = TS.SAVDISP1$          ! Salva despliegue
+           J$             = TS.SAVDISP2$          ! para borrar
+           CALL TSCSEC03                          ! Despliega Error
+           TS.SAVDISP1$   = I$                    ! Restaura despliegue
+           TS.SAVDISP2$   = J$                    ! Salvado para Borrar
+                                                  !
+           USER.VERIFY.ITEM = -1                  ! Flag de Verif de Item
+           USER.SAVE.ITEM$  = TS.IO.DATA$(2)      ! Salva Plu Digitado
+           FAST.EXIT        = -1                  ! y no mas Proceso
+        ENDIF                                     ! Fin de Cond
+    ENDIF                                         ! Fin de Verific de Plu
+
+
+
+ IF (VAL(UNPACK$(IR.DEPARTME$)) = 64    OR       \! CARNES IVA 7%
+     VAL(UNPACK$(IR.DEPARTME$)) = 66    OR       \! PAPELERIA EXCENTA  
+     VAL(UNPACK$(IR.DEPARTME$)) = 67    OR       \! MEDICAMENTOS EXCENTOS
+     VAL(UNPACK$(IR.DEPARTME$)) = 62    OR       \! COMIDAS RAPIDAS      
+     VAL(UNPACK$(IR.DEPARTME$)) = 58    OR       \! DELIKATESSEN IVA 16%
+     VAL(UNPACK$(IR.DEPARTME$)) = 54)   AND      \! CAFE GOURMET      
+     VAL(UNPACK$(IR.ITEMCODE$)) < 999999 OR      \! ¢ Codigo Corto
+     (VAL(UNPACK$(IR.DEPARTME$)) = 17)   AND      \! ¢ Medicamentos
+     VERIFICA% = 1                      OR       \! Plu Digitado
+    (IR.INDICAT1A AND 04H)              OR       \! ¢ Flag Verif/Prec
+     TO.USEROPTS(1)            <> 0  THEN BEGIN   ! UsrOpt 1=Y Veri Prec
+   IF NOT USER.VERIFY.ITEM        AND            \! Si no se ha Verific
+      ((IR.INDICAT0 AND 10H) = 0) AND            \! y NO Requiere Precio
+        REPEAT.COUNT         < 1  AND            \! si Repeticion
+        TS.IO.DATA$(5)       = "" THEN BEGIN      ! Sin Precio Digitado
+           TS.PURGE.ERR      = -1                 ! Ignora Error Anter
+                                                  !
+           TS.PC.PM      = IR.PRICING.METHOD      ! Inicializacion 
+           TS.PC.PRICE1  = IR.PRICE1              !  Especial de
+           TS.PC.PRICE2  = IR.PRICE2              !   Variables de
+           TS.PC.QTY$    = UNPACK$(IR.SALEQUAN$)  !    Reg de Plus
+           TS.PC.OPRICE1 = IR.PRICE1              !     para ver las
+           TS.PC.OPRICE2 = IR.PRICE2              !      lineas de 
+           TS.PC.OQTY$   = TS.PC.QTY$             !       verificacion
+           IF VAL(TS.PC.QTY$) > 1 AND            \!        de Precios
+              TS.PC.PM < 2 THEN TS.PC.SPLIT = -1 \!
+           ELSE TS.PC.SPLIT = 0                   !
+                                                  !
+           TS.LINETYPE    = 11                    ! Despliega
+           TS.LINEDATA    = 0                     ! Item Verificado
+           TS.STACKERR(0) = 9                     ! Estado de Entrada Precio
+           I$             = TS.SAVDISP1$          ! Salva despliegue
+           J$             = TS.SAVDISP2$          ! para borrar
+           CALL TSCSEC03                          ! Despliega Error
+           TS.SAVDISP1$   = I$                    ! Restaura despliegue
+           TS.SAVDISP2$   = J$                    ! Salvado para Borrar
+                                                  !
+           USER.VERIFY.ITEM = -1                  ! Flag de Verif de Item
+           USER.SAVE.ITEM$  = TS.IO.DATA$(2)      ! Salva Plu Digitado
+           FAST.EXIT        = -1                  ! y no mas Proceso
+        ENDIF                                     ! Fin de Cond
+    ENDIF                                         ! Fin de Verific de Plu
+           
+
+  IF    VAL(UNPACK$(IR.DEPARTME$)) = 74  THEN     \! DELIKATESSEN IVA 16%
+                IMPRIME% = 1 
+
+!-------------------------------------------------------------------------

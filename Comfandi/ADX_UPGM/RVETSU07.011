@@ -1,0 +1,126 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda - Colombia     *
+!Programa      : RVETSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+Locate #30;1,1,OFF                          									            ! Ubica Cursor
+Write Form "2C20";#30;"  RECARGA EN LINEA  ", \                           ! Msg de alerta
+                      "         Ver. 1.06  "					                    !
+Call TSHIECET																	                            ! Tono de alerta
+Wait;800																		                              ! Time Espera
+%INCLUDE ADX_UPGM:PINTSU01.011																					  ! Init Variables Appl
+Ue.Pin.Tarj% = 0                                                          ! Numero tarjetas definidas
+Ue.Pin.Tmp%  = 0                                                          ! Lectura de registros
+Ue.Pin.TotIng% = 0 
+Ue.Pin.Devol%  = 0 
+UE.PIN.CELL% = 00 					      																				! Proyecto desactivado
+Dim Ue.Pin.MsgErr$(100)																										! Mensajes Error Aplicativo
+Dim Ue.Pin.Msg$(15,50)																										!
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ADX_IDT1:PINCNFG.DAT" AS 90					   												! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call Msg.Visor("ERROR PARAMETROS    RECARGA EN LINEA")		                ! Msg Alerta
+ Call Msg.Visor("RECARGA EN LINEA    NO OPERATIVO")				                ! Msg Alerta
+ Call Pin.Imprime("ERROR CARGA RECARGA EN LINEA",6100H)	       						! Rastro en SJ
+ UE.PIN.CELL%       = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ Dim Ue.Pin.Ean$(200,2)                                                   ! Tarjetas Definidas
+ UE.PIN.TMP% = 0 
+ IF END #90 THEN UE.PIN.FINAL		       																	  ! Si es EOF
+  While (Ue.Pin.Tmp% = 0)								  																! Recorre archivo
+    Read #90; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[RECARGA EN LINEA]" Then Begin											  ! Proyecto de Lealtad
+     UE.PIN.CELL%       = -1 																							! Proyecto Activo
+     Call Pin.Imprime("RECARGA EN LINEA OK",2100H)		   							    ! Mensaje en SJ
+     Read #90; TS.TEMP1$																									! Lectura registro
+     UE.PIN.CELL%       = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #90; TS.TEMP1$																									! Lectura registro
+     UE.PIN.Cadena$     =    (Mid$(TS.TEMP1$,30,3))				    						! Codigo de la cadena     
+     Read #90; TS.TEMP1$																									! Lectura registro
+     UE.PIN.Almacen$    =    (Mid$(TS.TEMP1$,30,3))				    						! Codigo del Almacen
+     Read #90; TS.TEMP1$																									! Lectura registro
+     UE.PIN.Sesion%     = Val(Mid$(TS.TEMP1$,30,2))				    						! Nro Sesion Temporal
+     Read #90; TS.TEMP1$																									! Lectura registro
+     Ue.Pin.Ttl%        = Val(Mid$(TS.TEMP1$,30,5))  			    						! Time To Loose
+     Read #90; TS.TEMP1$																									! Lectura registro
+     Ue.Pin.Intentos%   = Val(Mid$(TS.TEMP1$,30,2))  			    						! Numero de reintentos
+     While (1)     
+       Read #90; TS.TEMP1$                     						  							! Lectura registro
+       Ue.Pin.Tarj% = Ue.Pin.Tarj% + 1                                    ! Numero tarjetas parametrizadas
+       TS.TEMP1I4  = MATCH(";",TS.TEMP1$,1)                               ! Primer Sepadador
+       TS.TEMP2I4  = MATCH(";",TS.TEMP1$,TS.TEMP1I4+1)                    ! Segundo separador
+       TS.TEMP2$   = MID$(TS.TEMP1$,1,TS.TEMP1I4-1)                       ! Toma el EAN
+       UE.PIN.EAN$(Ue.Pin.Tarj%,0) = TS.TEMP2$                            ! Almacena EAN
+       TS.TEMP2$   = MID$(TS.TEMP1$,TS.TEMP1I4+1,4)                       ! Toma el Operador
+       UE.PIN.EAN$(Ue.Pin.Tarj%,1) = TS.TEMP2$                            ! Almacena Operador
+       TS.TEMP2$   = MID$(TS.TEMP1$,TS.TEMP2I4+1,12)                      ! Toma el Plu
+       UE.PIN.EAN$(Ue.Pin.Tarj%,2) = TS.TEMP2$                            ! Almacena Plu       
+     Wend
+   Endif
+ Wend
+ UE.PIN.FINAL:
+   Close 90																																! Cierra archivo
+   IF UE.PIN.CELL% <> -1 THEN BEGIN 																		  ! Proyecto No definido
+      Call Msg.Visor("ERROR PARAMETROS    RECARGA EN LINEA")		          ! Msg Alerta
+      Call Msg.Visor("RECARGA EN LINEA    NO OPERATIVO")				          ! Msg Alerta
+      Call Pin.Imprime("MODULO NO DEFINIDO PINCNFG  ",6100H)	  					! Rastro en SJ
+      UE.PIN.CELL%       = 00 																						! Proyecto desactivado
+      EXIT SUB 
+   ENDIF 
+!--- Carga mensajes de aplicacion   
+   TS.ER.RETURN = -1																											! Ctrl Errores
+   FOR I% = 0 TO 100
+      Ue.Pin.MsgErr$(I%) = "MENSAJE DESCONOCIDO"
+   NEXT I%
+   OPEN "R::ADX_IDT1:PINRTMSG.DAT" AS 90								   							! Apertura archivo Msg Errores
+   If TS.ER.RETURN <> -1 THEN BEGIN																				! Error en la apertura
+      Call Msg.Visor("ERROR PARAMETROS    RECARGA EN LINEA")		          ! Msg Alerta
+      Call Msg.Visor("RECARGA EN LINEA    NO OPERATIVO")				          ! Msg Alerta
+      Call Pin.Imprime("ERROR CARGA RECARGA EN LINEA",2100H)	    				! Rastro en SJ
+      Call Pin.Imprime("MENSAJES DE ERROR NO EXISTE ",2100H)	    				! Rastro en SJ
+      UE.PIN.CELL%       = 00 																						! Proyecto desactivado
+      EXIT SUB 
+   EndIf Else Begin									      																! Apertura OK
+     IF END #90 THEN UE.PIN.MSGFINAL		       													  ! Si es EOF
+     While (1)     																												! Mientras no EOF
+       Read #90; TS.TEMP1$, TS.TEMP2$          						  							! Lectura registro
+       Ue.Pin.Tmp% = VAL(TS.TEMP1$)																		    ! Numero del mensaje
+       Ue.Pin.MsgErr$(Ue.Pin.Tmp%) = TS.TEMP2$                            ! Almacena mensaje
+     Wend
+   EndIf
+   UE.PIN.MSGFINAL:
+     Close 90
+     TS.ER.RETURN = -1 
+     OPEN "R::ADX_IDT1:PINLNMSG.DAT" AS 90	  												! Apertura archivo formato mensajes
+     IF TS.ER.RETURN = -1 THEN BEGIN 
+        K% = 0																														!
+        IF END #90 THEN UE.PIN.MSGLINEA		       												  ! Si es EOF
+        While (1)																													!
+	        Read #90;A$																											! Lectura registro hasta eof()
+	        If Left$(A$,1) = "<" Then Begin																	! Carga los mensajes 
+		         I% = Match(">",A$,1)																				  ! que van a utilizar 
+		         J% = Val(MID$(A$,2,I%-2))																		! c/u de los operadores
+		         K% = 1																												! telefonicos
+	        Endif Else Begin																								!
+		         UE.Pin.Msg$ (J%,K%) = A$																			!
+		         UE.Pin.Msg$ (J%,0) = STR$(K%)																!
+		         K% = K% + 1																									!
+	        EndIf																														!
+        Wend																															!         
+     ENDIF ELSE BEGIN 
+      Call Msg.Visor("ERROR PARAMETROS    RECARGA EN LINEA")		          ! Msg Alerta
+      Call Msg.Visor("RECARGA EN LINEA    NO OPERATIVO")				          ! Msg Alerta
+      Call Pin.Imprime("ERROR CARGA RECARGA EN LINEA",2100H)	    				! Rastro en SJ
+      Call Pin.Imprime("MENSAJES TIQUETE  NO EXISTE ",2100H)	    				! Rastro en SJ
+      UE.PIN.CELL%       = 00 																						! Proyecto desactivado
+      EXIT SUB 
+     ENDIF 
+     
+   UE.PIN.MSGLINEA:
+     CLOSE 90
+      
+EndIf

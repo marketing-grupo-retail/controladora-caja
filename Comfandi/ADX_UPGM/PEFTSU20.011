@@ -1,0 +1,23 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN
+ IF (TS.TOTALS(0,0,0) > 0)  THEN BEGIN
+     Asc.Pef.Slend% = SL.END								! Total de strings
+ EndIf
+EndIf
+
+IF TS.INTRX THEN                                       \! En una trx de venta
+IF MATCH(TS.SDESC$(59),TS.PRTBUF$,1) > 0 THEN BEGIN     ! Si se registro anulacion total
+   Asc.Pef.Impr% = 2                                    ! Indica anulacion total de la transaccion
+ENDIF
+
+IF NOT(TS.INTRX) THEN                                  \! 
+IF MATCH(TS.SDESC$(190),TS.PRTBUF$,1) > 0 THEN BEGIN    ! Si se registro anulacion total
+   Asc.Pef.Bug% = -1
+ENDIF

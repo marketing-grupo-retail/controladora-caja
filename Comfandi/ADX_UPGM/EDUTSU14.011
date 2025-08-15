@@ -1,0 +1,49 @@
+!************************************************** 
+!Programa      : EDUTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudos Colegios        *
+!**************************************************
+! Modificaciones:
+
+
+IF (TS.IO.KEYS(1) = 70 AND TS.IO.MOTORKEY = 81) THEN BEGIN                       ! Si  anulacion total
+ Asc.Edu.Impr% = 0												                                       ! Init de variable control de franqueo
+ Asc.Edu.Lista$     = "" 																										     ! Lista de bonos a pagar
+ Asc.Edu.NotaNul$   = "" 										  																     ! Lista de Bonos Anulado
+ Asc.Edu.VlrPago1$   = "0"																										     ! Valor del Bono
+ Asc.Edu.IndPrice%  = 0																													 !
+ Asc.Edu.Devol%     = 0																											     ! Indicador devolucion
+ENDIF
+
+IF (TS.IO.KEYS(1) = 70 AND TS.IO.MOTORKEY = VAL(Asc.Edu.Tecla$)) THEN BEGIN      ! Si  anulacion recibo
+     Asc.Edu.Devol% = 0																													 ! Indicador devolucion
+     TS.TEMP1$ = Entrada.Datos.Varios$("Recibo a Anular....?","")						     ! Captura el bono
+     IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					   ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de carga
+       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+       Exit Sub  																															   ! Sale de la rutina
+     ENDIF 					     
+     Call Anulacion.Recibos.Educando(TS.TEMP1$)		  														 ! Valida Recibo capturado
+ENDIF
+
+IF TS.IO.MOTORKEY = VAL(Asc.Edu.Tecla$) THEN BEGIN 		 ! Si recaudo Colegio
+     Asc.Edu.Devol% = 0																											     ! Indicador devolucion
+     TS.TEMP1$ = Entrada.Datos.Varios$("Datos del Recibo...?","")			 			     ! Captura el bono
+     IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					   ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de carga
+       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+       Exit Sub  																															   ! Sale de la rutina
+     ENDIF 					     
+     Call Validacion.Recibos.Educando																				     ! Valida recibo capturado     
+ENDIF 
+
+!IF (TS.IO.PREV.KEYS(1) <> 70) THEN 
+
+If (TS.IO.PREV.DATA$(2) = Asc.Edu.Item$) Then Begin	                             ! Si articulo anterior es recaudo
+ DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	       ! Init vectores de carga
+ DIM TS.IO.PREV.DATA$(10) : DIM TS.IO.PREV.KEYS(10)												       ! Init vectores de carga
+ TS.IO.MOTORKEY = 73																										         ! Tecla Borrar
+ TS.GUIDANCE = 1020																															 ! Mensaje de totalizar
+EndIF 

@@ -1,0 +1,81 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2101.011 
+!     Punto de Entrada   =  EAMTSU21.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para IMPRIMIR  
+!         el codigo de PLU en la Tira de Auditoria.
+!     Cuando la Terminal esta en Modo Autonomo, el Codigo o
+!     PLU se toma de TS.IO.DATA$(10).
+!     El PLU DEBE Digitarse siempre.. en MODO AUTONOMO.
+!-----------------------------------------------------------
+
+ STRING PRTLINE
+ INTEGER*1 TRAINING.EXIT                        ! 971015     IR36947
+ INTEGER*2 I                                    ! 971008     IR36947
+
+ TS.PRTBUF$ = TRANSLATE$(TS.PRTBUF$,"@","x")
+ TS.SJDATA$ = TRANSLATE$(TS.SJDATA$,"@","x")
+
+
+   IF TS.LINETYPE = 1 AND                          \! Si es Linea Item
+      RIGHT$(TS.PRTBUF$,6) <> "      " THEN BEGIN   ! con dato de Valor
+     ! CALL SAVE.PRINT
+      IF IR.INDICAT1 AND 80H THEN                  \! Si hay Indic Plan A
+         TS.SAVPRT$ = "A"+RIGHT$(TS.SJDATA$,37)   :\! asigna letra que 
+       TS.SAVPRT.OPT=2100H : TS.LINETYPE=29 : CALL TSPREC01 :\
+       ts.sjdata$ = ""                             \!
+      ELSE                                         \! si no,
+      IF IR.INDICAT1 AND 40H THEN                  \! Si hay Plan B
+         TS.SJDATA$ = "B"+RIGHT$(TS.SJDATA$,37)    \! asigna letra que 
+      ELSE                                         \! si no,
+      IF IR.INDICAT1 AND 20H THEN                  \! Si hay plan C
+         TS.SJDATA$ = "C"+RIGHT$(TS.SJDATA$,37)    \! asigna letra que 
+      ELSE                                         \!
+      IF IR.INDICAT1 AND 10H THEN                  \! Si hay plan C
+         TS.SJDATA$ = "D"+RIGHT$(TS.SJDATA$,37)    \! asigna letra que 
+      ELSE BEGIN                                    ! si no,
+         TS.SJDATA$ = "*"+RIGHT$(TS.SJDATA$,37)     ! asigna letra que 
+         EXENTO = 0                                 ! 
+      ENDIF                                         !
+      !CALL RESTORE.PRINT
+   ENDIF                                            !
+
+
+
+   COD$ = UNPACK$(IR.ITEMCODE$)                 ! Desempaqueta Codigo
+   COD$ = STR$(VAL(COD$))                       ! y quita CEROS Izq
+   IF LEN(COD$) >=7 THEN BEGIN                  ! Si Cod > 7 Digitos
+      COD$ = ITEMCODE$                          ! Variable PLU EAMTSWKG
+      COD$ = STR$(VAL(UNPACK$(COD$)))           ! y desempaqueta
+   ENDIF                                        ! Fin de Condic
+   IF FLAG.SR% = 1 THEN BEGIN                   ! Si hubo recuperac
+      COD$ = UNPACK$(IR.ITEMCODE$)              ! Desempaqueta Codigo
+      COD$ = RIGHT$("       "+STR$(VAL(COD$)),7)! y quita CEROS Izq
+   ENDIF                                        !
+   COD$ = RIGHT$("       " + COD$,7)            ! Justifica a la Derecha
+   IF LEFT$(COD$,4) = " 888"  THEN BEGIN        ! Si es PLU Concesion
+      COD$ = "    " + RIGHT$(COD$,3)            ! muestra No.Concesion
+   ENDIF                                        ! Fin de Plu Concesion
+   IF LEFT$(COD$,5) = " 9999" THEN BEGIN        ! Si es Tecla Deptal
+      COD$ = "       "                          ! No muestra el PLU
+   ENDIF                                        ! Fin de Tecla Depto
+IF TS.LINETYPE = 1 THEN BEGIN                   ! Es Linea de Item?
+   LF$ =LEFT$(TS.SJDATA$,7)                     ! Halla contenido SJ
+   IF LF$ = "       " THEN BEGIN                ! Si NO hay #Item
+      TS.SJDATA$ = COD$+" "+IR.ITEMNAME$        ! Arma string con PLU
+   ENDIF ELSE BEGIN                             ! Si trae Multiplicacion
+      IF RIGHT$(TS.PRTBUF$,5) <> "     "       \! sin datos del Item
+         THEN BEGIN                             ! entonces
+!        PRTLINE = LF$ : CALL QXL.TSUPEC21(PRTLINE)
+         TS.SJDATA$ = COD$+" "+IR.ITEMNAME$     ! Arma string con PLU 
+         PRTLINE = TS.JDATA$ : CALL QXL.TSUPEC21(PRTLINE)
+      ENDIF                                     ! Fin Cant x Vr Long     
+   ENDIF                                        ! Fin si NO Blancos Derecha
+ENDIF                                           ! Fin de Item Sale
+!--------------------------------------------------------------------
+

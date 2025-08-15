@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC04 PUBLIC
+! TSUPEC04 - BEFORE NS
+CALL QXL.TSUPEC04      ! EJ V2
+END FUNCTION
+

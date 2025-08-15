@@ -1,0 +1,7 @@
+!------------------------------------------------------------------------------
+! NUO PROMOCIONES VARIABLES GLOBALES DEL MODULO
+! definición de variables globales para incorporar a otros modulos
+!------------------------------------------------------------------------------
+
+INTEGER*1 global \
+   simutar

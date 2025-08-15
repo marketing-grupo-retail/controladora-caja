@@ -1,0 +1,88 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : GRIVTUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Carga Parametros Modulo IVAS     *
+!**************************************************
+INTEGER*1 GLOBAL \
+     UE.TARIFA%, \
+     UE.SGN%,    \
+     UE.TRX.ANUL%
+
+INTEGER*2 GLOBAL \
+     UE.LINEA, UE.PORCENTAJE, UE.NIT, UE.DEPTO  	
+
+INTEGER*4 GLOBAL \
+    UE.TABLAIVA(1), \
+    UE.TOTALS(1),   \
+    UE.CONSUMO(1),  \
+    UE.INDI1%,      \
+    Gr.Total.Base%, \
+    Gr.Total.Impto%,\
+    Gr.Total.Consumo%
+
+
+STRING GLOBAL        \
+    FORMATO$,        \
+    UE.BIN$,         \
+    PrtLine,        \
+    Gr.Ind.Iva$,    \
+    Gr.Oper.Name$,  \
+    Gr.Fis.Linea1$, \
+    Gr.Fis.Linea2$, \
+    Gr.Fis.Linea3$, \
+    Gr.Fis.Linea4$, \
+    Gr.Fis.Linea5$, \
+    Gr.Fis.Linea6$, \                
+    Gr.Fis.Linea7$, \                
+    Gr.Fis.Linea8$, \                
+    Gr.Fis.Linea9$, \                        
+    Gr.Fis.LineaA$, \                        
+    Gr.Fis.LineaB$, \                        
+    Gr.Fis.LineaC$, \
+    Gr.Fis.LineaD$, \
+    Gr.Fis.LineaE$, \
+    Gr.Fis.LineaF$, \
+    Gr.Fis.LineaG$, \
+    Gr.Fis.LineaH$, \
+    Gr.Fis.LineaI$, \
+    Ue.Iva.Item$,    \
+    Ue.Iva.Name$          
+
+Integer*1 Global       \
+    Gr.DSC.TARIFA%,   \
+    Gr.Est.Tarifa%,   \ Tarifa empresas estatales
+    Gr.Vtas.IndAnul%, \
+    Gr.DSC.INDICAT1
+
+String Global        \
+    Gr.DSC.DEPARTME$    
+
+String    Global     \
+    Gr.Fis.Estatal$, \! Control empresas estatales    
+    Gr.Iva.ImpQty$
+
+Integer*1 Global     \
+    Gr.Vtas.ImpxMayor%, \
+    Gr.Iva.Rtrx%
+
+Integer*4 Global     \
+    Gr.Vtas.TotxMayor%, \
+    Gr.Iva.Iconsumo%
+
+!-- Variables impuesto a la bolsa 13Jul2023
+Integer*1 Global Gr.Iva.IndBol%					! Activación proyecto bolsa
+integer*4 Global Gr.Iva.TaxBol%,       \! Valor impuesto bolsa
+                 Gr.Iva.PluBol%,       \! PLU bolsas plasticas
+                 Gr.Iva.VlrBol%         ! Valor impuesto bolsa 
+
+!-- Variables para manejo impuesto ICUI
+Integer*1 Global Gr.Iva.IndIcui%	 		  ! Activación proyecto ICUI
+integer*4 Global Gr.Iva.TaxIcui%,      \! Valor impuesto Icui en trx
+                 Gr.Iva.PtgIcui%        ! Porcentaje impuesto ICUI
+String    Global Gr.Iva.flgIcui$,      \! Flag ICUI
+                 Gr.Iva.DscIcui$        ! Descriptor ICUI
+
+    

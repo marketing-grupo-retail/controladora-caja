@@ -1,0 +1,19 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+If Match("BIENVENIDO SR(A)",TS.DISP1$,1) > 0 Then Begin
+   Gr.Lcl.Tmp1$ = TS.DISP1$
+   Gr.Lcl.Tmp2$ = TS.DISP2$
+   CALL VISOR.AND.BORRAR("TIPIFICACION CLIENTE"+Gr.Lcl.Tipifica$)
+   TS.DISP1$ = Gr.Lcl.Tmp1$
+   TS.DISP2$ = Gr.Lcl.Tmp2$
+EndIf 

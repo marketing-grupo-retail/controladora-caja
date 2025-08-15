@@ -1,0 +1,50 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda - Colombia     *
+!Programa      : RVETSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+
+Integer*1 Global Ue.Pin.Cell%,           \! Control de proyecto
+                 Ue.Pin.Imp%,            \! Control de Impresion
+                 Ue.Pin.InPrice%,        \! Control de precio
+                 Ue.Pin.MaxDig%,         \! Maximo numero digitos
+                 Ue.Pin.Recup% ,         \! Procedimiento de recuperacion
+                 Ue.Pin.AutAnul%,        \! Autorizacion Anulacion Total
+                 Ue.Pin.AnulItm%,        \! Anulacion ITEM
+                 Ue.Pin.IrPrice%,        \! Control cambio precio
+                 Ue.Pin.Capturadas%,     \! Tarjetas capturadas
+                 Ue.Pin.Devol%,          \! Devoluciones
+                 Ue.Pin.Ok%,             \! Total movimiento OK
+                 Ue.Pin.Sesion%           ! Sesion temporal 
+
+Integer*4 Global Ue.Pin.Tarj%,           \! Numero de tarjetas definidas
+                 Ue.Pin.PosMem%,         \! Posicion Memoria vector telefonos
+                 Ue.Pin.MntoMin%,        \! Monto minimo de compra
+                 Ue.Pin.MntoMax%,        \! Monto Maximo de compra
+                 Ue.Pin.Apun%,           \! Apuntador Strings
+                 Ue.Pin.Ttl%,            \! Time To Loose 
+                 Ue.Pin.Intentos%,       \! Numero de reintentos
+                 Ue.Pin.Multiplo%,       \! Valores Multiplos
+                 Ue.Pin.Slend%,          \! Numero total stings 
+                 Ue.Pin.Total%,          \! Control total de la transaccion
+                 Ue.Pin.TotIng%,         \! Total ingresadas
+                 Ue.Pin.Posimp%,         \! Posicion de memoria impresa
+                 Ue.Pin.Tmp%              ! Variable temporal
+
+String    Global Ue.Pin.EAN$(2),         \! Lista de EAN parametrizados
+                 Ue.Pin.Cadena$,         \! Codigo Cadena
+                 Ue.Pin.Almacen$,        \! Codigo Almacen
+                 Ue.Pin.Phones$,         \! Lista de telefonos vendidos
+                 Ue.Pin.Oper$,           \! Codigo del Operador
+                 Ue.Pin.Vlr$,            \! Valor de compra
+                 Ue.Pin.MsgErr$(1),      \! Mensajes de Error aplicactivo
+                 Ue.Pin.Msg$(2),         \! Mensajes Venta Recarga
+                 Ue.Pin.Numeros$(2),     \! Telefonos a recargar
+                 Ue.Pin.Rtas$(1),        \! Respuestas entregadas
+                 Ue.Pin.Traid$,          \! Codigo Autorizacion recarga
+                 Ue.Pin.Prefijos$,       \! Prefijos de telefonos autorizados
+                 Ue.Pin.Tmp$              ! Variable Temporal

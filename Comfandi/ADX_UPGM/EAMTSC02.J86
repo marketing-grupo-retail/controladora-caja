@@ -1,0 +1,33 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSU02.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+\/* CHANGE ACTIVITY                                                 */
+\/* IR29835 - Set foodstampability of coupons validated by          */
+\/*           sub-total group.                                      */
+\/*           JEO MGVA  6/27/95                                     */
+\/*                                                                 */
+!
+!!***** CODE FOR UPC E STORE COUPONS ***
+ EMSS.XLAT.PTR = 0                  ! CLEAR SAVED XLATE DATA
+ DIM EMSS.XLAT2(EMSS.XLAT.LMT)      ! Dimension array
+ DIM EMSS.XLAT4(EMSS.XLAT.LMT)      ! Dimension array
+
+!!***** SCANNED COUPON AS 1ST ENTRY  ***
+ TS.TRX.STATUS = 4   ! ALLOW 1ST ENTRY IN TRANS TO BE UPC5 COUPON
+
+!!***** VALIDATE BY DEPT SUBTOTAL ******
+!!*******************************************************************
+!!** VALIDATE DEPARTMENT COUPONS BY DEPARTMENT SUBTOTAL GROUPS     **
+!!*******************************************************************
+ IF EMSS.MINDEP < EMSS.MAXDEP THEN BEGIN ! DEPARTMENT SUBTOTALS
+   DIM EMSS.COUP.CNT(2,EMSS.NUMGRP)      ! RESET COUPON COUNTS
+   DIM EMSS.GRP.AMT(EMSS.NUMGRP)         ! RESET SUBTOTAL AMTS
+   DIM EMSS.GRP.NONFS(EMSS.NUMGRP)       ! RESET SUBTOTAL NON-FS AMTS !IR29835
+ ENDIF
+

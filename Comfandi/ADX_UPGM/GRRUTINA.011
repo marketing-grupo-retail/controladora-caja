@@ -1,0 +1,153 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : GRRUTINA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion librerias Grupo       *
+!                Retail                           *
+!**************************************************
+!Observaciones:
+
+Function  VISORES4690(U.D.VISOR%, U.D.LINEA1$, U.D.LINEA2$,U.D.TIEMPO%,U.D.POSICION$) External ! Msg Display
+String U.d.Linea1$, U.d.Linea2$, U.d.Posicion$															! Variables de
+Integer*2 U.d.visor%, U.d.tiempo%   																				! trabajo
+String U.D.Linea1$, U.D.Linea2$		
+End Function
+!--- Fin manejo de visores
+
+Function U.IMPRIME(UE.STRING$,UE.STATION) External					! Rutina de Impresion
+String UE.STRING$, LF$ 											! Variables temporales
+INTEGER*2 UE.STATION											!
+End Function
+!--- Fin rutina de impresion 
+
+SUB ESTADO.TERMINAL External
+END SUB
+
+Sub GRMBONOS(XOPT%) External 																					    	! Modulo Bonos Lealtad
+Integer*4 Xopt%                                                             !
+END SUB 																																		!
+
+Sub CONTROL.CLIENTE(U.EXIT%) External																				! Rutinas Control de Clientes
+Integer*4 U.Exit%																														!
+End Sub 																																		!
+
+Sub LIBLINE(GRUE%, GRLN%) External																					! Modulo rutinas Comfandi
+Integer*2 GRUE%, GRLN%																											!
+End Sub																																			!
+
+Sub REMISION(XUE%) External																									! Modulo Remisiones
+Integer*2 Xue%																															!
+End Sub																																			!
+
+Sub PROPINA(XOPT%) External																									! Modulo Propinas empacadores
+Integer*4 XOPT%																															!
+End Sub																																			!
+
+Sub GRMOVRMS(XOPT%) External																								! Movimiento remisiones internas
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub PRMFPAGO(XOPT%) External																								! Modulo recaudo Propinas
+Integer*4 XOPT%, XAUX%																										  ! Variables 
+End Sub																																			!
+
+Sub ESCALONADO(XOPT%) External																							! Modulo Dscto Escalonado
+Integer*4 XOPT%																															!
+End Sub																																			!
+
+Sub GRPFIZER(XOPT%) External																					   		! Dscto Escalonado Pfizer
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub GRFAMILIAS(XOPT%) External   	 																					! Familias en Accion
+Integer*4 Xopt%																															!
+End Sub																																			!
+
+Sub CRDEMPRESAS(XOPT%) External 	  																				! Credito empresas
+Integer*4 Xopt%                                                             !
+End Sub
+
+Sub BONOCOMPRAS(XOPT%) External	  																				  ! Bonos Recompra
+Integer*4 Xopt%                                                             !
+End Sub 
+
+Sub SUBSIDIO.MPAC(Xopt%) External																						! Mecanismo proteccion al cesante
+Integer*4 Xopt%																															! MPAC
+End Sub
+
+Sub CREDITOSOCIAL(XOPT%) External	 																				  ! Credito Social 
+Integer*4 Xopt%                                                             !
+End Sub
+
+Sub SUBSIDIO.SAPCORE(XOPT%) External																				! PES SAP CORE
+Integer*4 Xopt%                        																			!
+End Sub																																			!
+
+Sub SUBSIDIO.FOSFEC(Xopt%) External																					! FOSFEC SAPCORE
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub BONOCOMPRASPAGO(XOPT%) External 	  																		! Bonos Recompra forma de pago
+Integer*4 Xopt%       																											!
+End Sub
+
+Sub GRABBOT(XOPT%) External																					   			! Dscto Escalonado Abbot
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub PRECIO.TECHO(XOPT%) External																			   		! Control precio techo
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub GRMIMEI(XOPT%) External  																					      ! Captura Imei Telefono
+Integer*4 Xopt%                                                             !
+End Sub 
+
+Sub PROMOCIONV2(Xopt%) External																						  ! Motor Promociones V2
+Integer*4 Xopt%, Gi%																												! UE ejecutar
+End Sub 
+
+Sub BRCOMPRAPAGO(XOPT%) External	 																				  ! Bono recompra pago
+Integer*4 Xopt%                                                             !
+End Sub 
+
+Sub GR.DIA.SINIVA(Xopt%) External																					  ! Dia Sin iva
+Integer*4 Xopt%     																												! UE ejecutar
+End Sub 
+
+Sub GRABJSN(XOPT%) External																					   			! Dscto Escalonado Abbot Json
+Integer*4 Xopt%																															!
+End Sub 																																		!
+
+Sub Autoriza.Precio(Xopt%) External																					! Modulo Cambio Precio
+Integer*4 Xopt%, Xj%
+End Sub 
+
+Sub BONOS.ELECTRO(Xopt%) External																				    ! Modulo bonos electrofiesta
+Integer*4 Xopt%     
+End Sub
+
+Sub BONOS.KUPI(Xopt%) External																				  		! Modulo bonos kupi
+Integer*4 Xopt%     
+End Sub
+
+Sub RedePremioLeal(Xopt%) External																					! Redencion premios Leal
+Integer*4 Xopt%
+End Sub
+
+Sub GR.FE.NATURAL(Xopt%) External																					  ! Factura electronica personas naturales
+Integer*4 Xopt%           																									! UE ejecutar
+End Sub
+
+Sub BONOS.ELECTROSUPDRG(Xopt%) External																	    ! Modulo bonos SUPDRG
+Integer*4 Xopt%     
+End Sub 
+
+Sub BONODEVPAGO(XOPT%) External	 																				  	! Bono devolucion pago
+Integer*4 Xopt%                                                             !
+End Sub 																																		!
+
+Sub NOTASCREDITOPOS(Xopt%) External																					! Modulo Notas Credito
+Integer*4 Xopt%, Gri%
+End Sub 

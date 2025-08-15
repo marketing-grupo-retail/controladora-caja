@@ -1,0 +1,34 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+If Left$(TS.DISP1$,4) = "B008" Then Begin         													! En un proceso de autorizacion
+   Asc.Pay.InDevol% = -1
+Endif
+
+If Left$(TS.DISP1$,4) = "B060" Then Begin         													! En un proceso de autorizacion
+   Asc.Pay.InDevol% = -1
+Endif
+
+If Left$(TS.DISP1$,4) = "B083" Then Begin         													! Proceso de recogida obligatoria
+ If Asc.Pay.NtCap% = -1 Then Begin                                          ! Tarjeta Capturada
+    Call Reverso.Trama.Error(Asc.Pay.NumNota$)													    ! Genera reverso de operacion 
+    Asc.Pay.Trx% = 0 																											  ! Inicializacion de variables
+    Asc.Pay.OptTrx$ = "00"
+    Asc.Pay.NtCap% = 0
+ EndIf 
+Endif
+
+IF (Asc.Pay.Pago% = -1) AND (Left$(TS.DISP2$,5) = "TOTAL") THEN BEGIN
+   Call Format.Amount( Val(Asc.Pay.VlrBono$) )
+   CALL TSHIECET
+   TS.TEMP1$ = Right$("          "+TS.TEMP1$,10)
+   TS.TEMP2$ = TS.TEMP1$+"/ TOTAL   "
+   Call VISORES4690(1,"PREPARE  SUBSIDIO  :",TS.TEMP2$,800,"L")
+   CALL TSCSECRK
+ENDIF 

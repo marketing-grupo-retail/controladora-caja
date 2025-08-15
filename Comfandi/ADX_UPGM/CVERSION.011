@@ -1,0 +1,20 @@
+!**************************************************
+!Empresa       : Grupo Retail - Comfandi          *
+!Programa      : VERSION.011                      *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Control Versionamiento CheckOut  *
+!**************************************************
+! Mod 10Dic2019
+! Se modifica libreria RMSCEXIT cambiando nombre
+! de variable similar a modulo de reservas hoteleras
+! evitando basura para proceso de remisiones.
+! Desarrollado por Grupo Retail - OVS
+!--------------------------------------------------
+! Mod 08Mov2021
+! Implementacion modulo transacciones en línea 
+! Reporte numeracion fiscal TF:NMFECO  30/Abr/2024
+!---------------------------------------------------
+
+Call ADXSERVE(PP,26,1,"Check-Out Ver. 09-May-2024")
+Wait ; 5000

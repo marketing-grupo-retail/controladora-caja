@@ -1,0 +1,46 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+\ REM!!***************************************************************!!        
+\ REM!!                   EAMUSE.J86                                  !!        
+\ REM!!  THIS INCLUDE FILE CONTAINS THE USE COMMAND STATEMENT         !!        
+\ REM!!                                                               !!        
+\ REM!!***************************************************************!!        
+                                                                                
+        DIM   FKEY.CHECK(10)       ! Array dimension for common functions !!    
+        DIM   MM.SCRN.INPUT$(10)   ! Array dimension for use statement          
+        USE   MM.CHAINFROM$,       \ Name of program chained from               
+              MM.SCRN.INPUT$(1),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(2),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(3),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(4),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(5),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(6),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(7),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(8),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(9),   \ Input from previous screen                 
+              MM.SCRN.INPUT$(10),  \ Input from previous screen                 
+              MM11POID$,       \ Operator ID, Key to Authorization File         
+              MM11PDMA$,       \ Display Manager Control Codes                  
+              MM.OPTIONSK$,    \ Key to options authorization files             
+              MM.INDICAT2,     \ Main menu authorization                        
+              MM.INDICAT3,     \ Accounting Support                             
+              MM.INDICAT4,     \ Reports                                        
+              MM.INDICAT5,     \ Reports                                        
+              MM.INDICAT6,     \ Reports                                        
+              MM.INDICAT7,     \ User reports                                   
+              MM.INDICAT8,     \ Delayed maintenance                            
+              MM.INDICAT9,     \ Delayed maintenance                            
+              MM.INDICAT10,    \ Data maintenance                               
+              MM.INDICAT11,    \ Data maintenance                               
+              MM.INDICAT12,    \ Data maintenance                               
+              MM.INDICAT13,    \ Shelf label print                              
+              MM.INDICAT14,    \ Personalization                                
+              MM.INDICAT15,    \ User procedure                                 
+              MM.ACCOUNT.TYPE, \ Accountability type                            
+              MM.STORACCT,     \ If store-wide totals are kept                  
+              MM.STATUS$,      \ Status string from ADXSERVE                    
+              MM.RECNUM,       \ Used by reports generator                      
+              MM.REPORT,       \ Used by reports generator                      
+              MM11PCMP$,       \ Completion Code                                
+              MM14PCN1$        ! Control String                                 
+                                                                                

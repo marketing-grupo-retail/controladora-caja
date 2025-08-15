@@ -1,0 +1,69 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2006.011 
+!     Punto de Entrada   =  EAMTSU20.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!   Franqueo de concesiones definidas con PLUs, cuyo #Depto 
+!   esta en el rango de 801 a 899.
+!-----------------------------------------------------------
+
+!  IF CON.NO.FRAN% = 1 THEN BEGIN                    ! y  es Conces SIN Franq
+!     CON.NO.FRAN% = 0                               ! Restaura Franqueo
+!     GOTO NOFRAN                                    ! No Franquea
+!  ENDIF                                             ! 
+
+  IF TS.LINETYPE = 1 THEN BEGIN                     ! Si es Linea de Item
+     FRA.DEP$ = UNPACK$(IR.DEPARTME$)               ! Halla Depto asociado
+     FRA.COD$ = UNPACK$(IR.ITEMCODE$)               ! y Codigo Item
+     FRA.LIN$ = LEFT$(TS.PRTBUF$,2)          +     \! Arma franqueo
+                RIGHT$(FRA.COD$,3)     + " " +     \! con Codigo
+                LEFT$(IR.ITEMNAME$,18)              ! descripcion
+     IF VAL(FRA.DEP$)  > 800  AND                  \! Si Depto. > 800
+        VAL(FRA.DEP$)  < 999  AND                  \! y  Depto. < 920
+        TS.IO.DATA$(10) <> "" AND                  \!
+        CON.NO.FRAN% = 0 THEN BEGIN                 ! Nulo si se Susp/Recup
+          FACTU$ = TS.IO.DATA$(10)                  ! Halla No. Factura
+          VALO$ = MID$(TS.PRTBUF$,27,2)+           \! Toma Vr sin","
+                  MID$(TS.PRTBUF$,30,3)+           \! Toma Vr sin","
+                  MID$(TS.PRTBUF$,34,3)             ! Toma Vr sin","
+           SIGNO$ = RIGHT$(TS.PRTBUF$,2)            ! Guarda el Signo
+           WRITE #34; "VARIABLE FRANQUEO" +" "+ STR$(CON.NO.FRAN%)
+           FRA.LIN$= FRA.LIN$+SIGNO$+VALO$          ! y Edita valor
+           CALL U.IMPRIME(FRA.LIN$,1100H)          ! Escribe en D.I.
+           FRA.TIM$ = TIME$                         ! Toma Hora Sistema
+           FRA.H$  = LEFT$(FRA.TIM$,2)              ! Arma horas
+           FRA.M$  = MID$(FRA.TIM$,3,2)             ! Arma minutos
+           FRA.S$  = RIGHT$(FRA.TIM$,2)             ! Arma segundos
+           FRA.FEC$= DATE$                          ! Toma Fecha Sistema
+           FRA.AA$ = LEFT$(FRA.FEC$,2)              ! Arma ano
+           FRA.MM$ = MID$(FRA.FEC$,3,2)             ! Arma mes
+           FRA.DD$ = RIGHT$(FRA.FEC$,2)             ! Arma dia
+           FRA.LIN$=FRA.H$+":"+FRA.M$+":"+FRA.S$ + \! Arma la Linea
+                    "  "+FRA.DD$+"/"+FRA.MM$+"/" + \! de Franqueo con
+                    FRA.AA$+"  Fact:"+FACTU$        ! Hora, Fecha y Fact
+	         FRA.LIN$ = LEFT$(FRA.LIN$+STRING$(38," "),38)
+           CALL U.IMPRIME(FRA.LIN$,1100H)          ! Escribe en D.I.
+           FRA.LIN$= "Caja="+CAJA$+" Ope="       + \! Arma la linea
+                      OPE$+" "+NOMOPER$             ! Term, Oper y Nombre
+	         FRA.LIN$ = LEFT$(FRA.LIN$+STRING$(38," "),38)
+           CALL U.IMPRIME(FRA.LIN$,1100H)          ! Nombre Op en D.I.
+           FRA.LIN$="** Comfandi - "             + \! Arma la Linea Fran
+                    " Nit N¦ 890.303.208-5 **"      ! con Empresa y Nit
+	         FRA.LIN$ = LEFT$(FRA.LIN$+STRING$(38," "),38)
+           CALL U.IMPRIME(FRA.LIN$,1100H)          ! Escribe en D.I.
+           CALL U.EXPLUSADI													! Expulsa papel
+    ENDIF                                           ! Fin
+
+!  ------------  Prevenir fragmentacion del Heap   ------------
+
+NOFRAN:
+     FRA.DEP$ = "" : FRA.COD$ = ""  : FRA.LIN$ = "" !
+     FRA.TIM$ = "" : FRA.FEC$ = ""  : FRA.M$   = "" !
+     FRA.H$   = "" : FRA.S$   = ""  : FRA.AA$  = "" ! 
+     FRA.MM$  = "" : FRA.DD$  = ""                  !
+ ENDIF                                              ! Fin
+!----------------------------------------------------------------------

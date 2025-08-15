@@ -1,0 +1,76 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCRD5.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: Read the selected Foreign Currency      */
+\/*                        Tracking File Store Record with KEYED   */
+\/*                        READ without AUTOLOCK/AUTOUNLOCK.       */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Michael Coffman                                   */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/*  IR40090 - Modify Record Layout for design change.             */
+\/*            RSH MGVA 17Mar99                                    */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\!********************************************************************
+\!*     FOREIGN CURRENCY TRACKING STORE     RECORD KEYED READ        *
+\!********************************************************************
+!AIR40090
+!READ FORM "T10,5I4,2I2,C3";           \ formatted keyed read
+!  #FC.FILE KEY FC.KEY$;               \ session number for keyed read
+!  FC.LOAN.AMOUNT,                     \ loan amount
+!  FC.PICK.AMOUNT,                     \ pickup amount
+!  FC.TEND.AMOUNT,                     \ tender count amount
+!  FC.NET.AMOUNT,                      \ net tender amount
+!  FC.OBAL.AMOUNT,                     \ opening balance amount
+!  FC.LOAN.COUNT,                      \ loan count
+!  FC.PICK.COUNT,                      \ pickup count
+!  WORK3$                              ! user field
+
+
+READ FORM "T10,C5,C2,13I4,3I2,C2,2I4";    \ Formatted Keyed read
+          # FC.FILE KEY FC.KEY$;          \ Plain read
+          FC.DATETIME$,                   \ Date/Time of period
+          FC.TERMINAL$,                   \ Terminal # to last update
+          FC.RESTART,                     \ Restart field
+          FC.LOAN.AMOUNT,                 \ Loan Amount
+          FC.PICK.AMOUNT,                 \ Pickup Amount
+          FC.TEND.AMOUNT,                 \ Tender Count Amount
+          FC.NET.AMOUNT,                  \ Net tender amount
+          FC.OBAL.AMOUNT,                 \ Opening Balance Amount
+          FC.AMTMISCE,                    \ Amount of Misc Trx
+\
+          LC.LOAN.AMOUNT,                 \ Loan Amount              LOCAL
+          LC.PICK.AMOUNT,                 \ Pickup Amount            LOCAL
+          LC.TEND.AMOUNT,                 \ Tender Count Amount      LOCAL
+          LC.NET.AMOUNT,                  \ Net tender amount        LOCAL
+          LC.OBAL.AMOUNT,                 \ Opening Balance Amount   LOCAL
+          LC.AMTMISCE,                    \ Amount of Misc Trx       LOCAL
+\
+          FC.LOAN.COUNT,                  \ Count of Loans
+          FC.PICK.COUNT,                  \ Count of Pickups
+          FC.MISCE.COUNT,                 \ Misc Trx Count
+          FC.RESERVED$,                   \ Reserved
+          FC.USER1I4,                     \ User Integer
+          FC.USER2I4                      ! User Integer
+
+!EIR40090
+
+\/******************************************************************/
+\/* END OF EAMMCRD5.J86                                            */
+\/******************************************************************/

@@ -1,0 +1,74 @@
+\/* TIME STAMP BLOCK *************************************************
+\*PROM  JT40 ADXHS5LF J86      01/29/93 23:49:23 FEBLD    IT40 IR97809          
+\*RTIME JT40 ADXHS5LF J86      01/20/93 12:23:00 FEBLD    IT40 IR97809          
+\*PROM  IT40 ADXHS5LF J86      01/20/93 12:08:53 FEBLD    CT40 IR97809          
+\*RTIME IT40 ADXHS5LF J86      01/14/93 12:16:15 FEBLD    CT40 IR97809          
+\*PROM  CT40 ADXHS5LF J86      01/14/93 11:51:11 LEVERETT BT40 IR97809          
+\*RTIME CT40 ADXHS5LF J86      12/07/92 11:12:27 LEVERETT BT40 IR97809          
+\*PROM  BT40 ADXHS5LF J86      12/07/92 11:11:04 LEVERETT MT40 IR97809          
+\*RTIME BT40 ADXHS5LF J86      11/11/92 07:42:22 LEVERETT MT40 IR97809          
+\*LIB   MT40 ADXHS5LF J86      11/11/92 07:41:51 BITZ     *    IR97809          
+\*LIB   MT40 ADXHS5LF J86      11/05/92 20:10:58 LEVERETT *    IR97809
+\*PROM  BT42 ADXHS5LF J86      11/04/92 21:17:06 BITZ     MT42 IR97809
+\*RTIME BT42 ADXHS5LF J86      11/04/92 21:08:55 BITZ     MT42 IR97809
+\*LIB   MT42 ADXHS5LF J86      11/04/92 21:08:46 BITZ     *    IR97809
+\*PROM  BT42 ADXHS5LF J86      11/03/92 22:33:49 BITZ     MT42 IR97809
+\*RTIME BT42 ADXHS5LF J86      11/03/92 22:32:40 BITZ     MT42 IR97809
+\*LIB   MT42 ADXHS5LF J86      11/03/92 22:32:31 BITZ     *    IR97809
+\*PROM  CT42 ADXHS5LF J86      09/15/92 13:13:39 LEVERETT BT42 *
+\*RTIME CT42 ADXHS5LF J86      09/15/92 12:00:01 LEVERETT BT42 *
+\*PROM  BT42 ADXHS5LF J86      09/15/92 11:59:48 V$E015   MT42 IR97809
+\*RTIME BT42 ADXHS5LF J86      09/14/92 16:02:43 V$E015   MT42 IR97809
+\*LIB   MT42 ADXHS5LF J86      09/14/92 16:02:27 V$E015   *    IR97809
+\** END OF TIME STAMP BLOCK *****************************************/
+
+REM******************************************************************
+REM
+REM  THIS IS THE X25 API VERB RETURN CODE DECLARATION FILE
+REM  TO BE INCLUDED BY CBASIC PROGRAMS
+REM  INCLUDE ADXHS5MF.J86 FOR INITIALIZATION OF RETURN CODE VALUES
+REM
+REM   CHANGE ACTIVITY:
+REM
+
+REM********************************************************************
+REM     X25 API VERB RETURN CODE DECLARATIONS FOR CBASIC           *
+REM********************************************************************
+
+integer*4 XA.OK                                 ! 0
+
+integer*4 XA.ERR.ADAPTER                        ! 0x80B21280
+integer*4 XA.ERR.RESOURCE                       ! 0x80B21281
+integer*4 XA.ERR.LINE.NOT.LOADED                ! 0x80B21282
+
+integer*4 XA.PVC.INUSE                          ! 0x80B21290
+integer*4 XA.NO.SVC.AVAILABLE                   ! 0x80B21291
+integer*4 XA.NOTHING.RECEIVED.IN.DELAY          ! 0x80B21292
+integer*4 XA.TIMEOUT                            ! 0x80B21293
+integer*4 XA.IN.PROGRESS                        ! 0x80B21294
+integer*4 XA.EVENT                              ! 0x80B21295
+integer*4 XA.NO.EVENT                           ! 0x80B21296
+integer*4 XA.INVALID.RESPONSE.XSEND             ! 0x80B21297
+integer*4 XA.INVALID.RESPONSE.XCLOSE            ! 0x80B21298
+integer*4 XA.INVALID.RESPONSE.XRESET            ! 0x80B21299
+integer*4 XA.INVALID.RESPONSE.XIT               ! 0x80B2129A
+integer*4 XA.TIMEOUT.CALL.CONNECT               ! 0x80B2129B
+
+integer*4 XA.ERR.PARAMETER                      ! 0x80B212A0
+integer*4 XA.ERR.CONNECTION.ID                  ! 0x80B212A1
+integer*4 XA.ERR.TIMEOUT                        ! 0x80B212A2
+integer*4 XA.ERR.D.BIT                          ! 0x80B212A3
+integer*4 XA.ERR.M.BIT                          ! 0x80B212A4
+integer*4 XA.RESERVED1                          ! 0x80B212A5
+integer*4 XA.ERR.CALLED.LENGTH                  ! 0x80B212A6
+integer*4 XA.ERR.CALLING.LENGTH                 ! 0x80B212A7
+integer*4 XA.ERR.DATA.LENGTH                    ! 0x80B212A8
+integer*4 XA.ERR.FACILITIES.LENGTH              ! 0x80B212A9
+integer*4 XA.ERR.VCR.NAME.LENGTH                ! 0x80B212AA
+integer*4 XA.RESERVED2                          ! 0x80B212AB
+integer*4 XA.ERR.REMOTE.APPL.LENGTH             ! 0x80B212AC
+integer*4 XA.ERR.RECEIPT.DELAY                  ! 0x80B212AD
+
+integer*4 XA.ERR.CONFIGURATION                  ! 0x80B212B0
+integer*4 XA.ERR.NOT.PVC                        ! 0x80B212B1
+integer*4 XA.ERR.NOT.SVC                        ! 0x80B212B2

@@ -1,0 +1,43 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0700.011 
+!     Punto de Entrada   =  EAMTSU07.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!    Esta linea se inserta para abrir el archivo ADXIMBA.DAT
+!-----------------------------------------------------------
+!
+  SMED$ = "M"                                          ! 
+  SDGN$ = "D"                                          !
+  FILIMB$ = "R::C:\ADXIMBA.DAT"                        ! Archivo Ctrl Almacen
+  OPEN FILIMB$ AS 59 BUFFSIZE 1024 NOWRITE NODEL        ! Archivo Ctrl Almacen
+  IF END #59 THEN SALIR                                !
+  LEAIMBA:
+     READ #59;LINE RALMA$                              ! Lee Control Almac
+!     WRITE FORM "C38"; #34; RALMA$
+     IF MID$(RALMA$,49,1) = "1" THEN BEGIN             !Si medico
+        COME$ = MID$(RALMA$,3,8)                       !
+!        NOME$ = MID$(RALMA$,11,40)                     !
+        SMED$ = SMED$ + COME$ + "M"                    !
+!        SNOM$ = SNOM$ + NOME$                          !
+
+!        WRITE FORM "C38"; #36; COME$
+     ENDIF                                             !
+      IF MID$(RALMA$,49,1) = "2" THEN BEGIN             ! SI diagnostico
+        CODG$ = MID$(RALMA$,7,4)                       !
+!        NODG$ = MID$(RALMA$,11,42)                     !
+        SDGN$ = SDGN$ + CODG$ + "D"                    !
+!        SDIA$ = SDIA$ + NODG$                          !
+     
+ !       WRITE FORM "C38"; #34; CODG$
+     ENDIF                                             !
+     GOTO LEAIMBA                                      !
+  SALIR:                                               !
+!     WRITE FORM "C38"; #34; SMED$
+!     WRITE FORM "C38"; #34; SDGN$
+     CLOSE 59                                          !
+     
+!-------------------------------------------------------------------------------

@@ -1,0 +1,135 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFMTSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico FONEDE          *
+!**************************************************
+
+SUB JavaCall.Initialize.Request(ClassName,MethodName,TheRequest) EXTERNAL
+  STRING ClassName
+  STRING MethodName
+  STRING TheRequest
+END SUB
+
+SUB JavaCall.AddParameter.String(TheRequest,TheParameter) EXTERNAL
+  STRING TheRequest
+  STRING TheParameter
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnString(TheRequest,ReturnValue, Exception) EXTERNAL
+  STRING TheRequest
+  STRING ReturnValue
+  STRING Exception
+END SUB
+
+Sub SALVAR.DISPLAY External
+End Sub
+
+Sub RESTAURA.DISPLAY External
+End Sub
+
+
+SUB SALVAR.VARIABLES External
+END SUB
+ 
+SUB RESTAURA.VARIABLES Public
+END SUB
+
+Function  VISORES4690(U.D.VISOR%, U.D.LINEA1$, U.D.LINEA2$,U.D.TIEMPO%,U.D.POSICION$) External		! Msg Display
+String U.d.Linea1$, U.d.Linea2$, U.d.Posicion$								! Variables de
+Integer*2 U.d.visor%, U.d.tiempo%, u.t.visor%, ud.pos%							! trabajo
+String U.D.Linea1$, U.D.Linea2$										!
+End FUNCTION												!
+!--- Fin despliege de mensajes a los visores 
+
+FUNCTION ASIC.DATOS$(UMSG1$,UMSG2$) External     								! Captura de datos
+STRING UMSG1$, UMSG2$, ASIC.DATOS$
+END FUNCTION
+!--- Fin entrada de datos
+
+!Parametros a pasar UE.STRING$ = String a Imprimir
+!  	            UE.STATION = Destino de la impresion
+!                		4000H  - print on CR
+!                		2000H  - print on SJ
+!                		1000H  - print on DI
+!                   6000h  - print on CR and SJ 
+!                		0100H  - number of linefeeds (eg here = 1)
+Function U.IMPRIME(UE.STRING$,UE.STATION) External					! Rutina de Impresion
+String UE.STRING$, LF$ 											! Variables temporales
+INTEGER*2 UE.STATION											!
+End Function
+!--- Fin rutina de impresion 
+
+FUNCTION U.EXPLUSADI External										! Expulsa papel en el 
+END FUNCTION												!
+!--- Fin Rutina Expulsion Papel DI				
+
+FUNCTION U.CORTACR External										! Corta Papel en 
+END FUNCTION
+!--- Fin Rutina corte de papel
+
+Function Rutina.Java(Java.CLASS$, Java.METHOD$, Java.MESSAGE$) External 					! Inicializacion Clases de Java
+String Java.METHOD$, Java.REQUEST$, Java.EXCEPTION$, Java.CLASS$,             			       \! Def. Variables Tmp
+       Java.RETURNVALUE$, Java.MESSAGE$, Rutina.Java            					!
+End Function
+!--- Fin invocacion rutinas de Java
+
+Function Armar.Trama.Msg(U.X1$, U.X2$, U.X3$,U.X4$,U.X5$,U.X6$) External			! Armar trama mensajeria
+String U.X1$, U.X2$, U.X3$, U.X4$, Armar.Trama.Msg, U.Tmp1$, U.Tmp2$			! Definicion Variables
+String U.Tmp3$, U.X5$, U.X6$
+End Function
+!--- Fin de la rutina armada de trama de mensajes
+
+Function Armar.Trama.Fonede(U.X1$, U.X2$, U.X3$,U.X4$,U.X5$,U.X6$) External			! Armar trama mensajeria
+String U.X1$, U.X2$, U.X3$, U.X4$, Armar.Trama.Fonede, U.Tmp1$, U.Tmp2$			! Definicion Variables
+String U.Tmp3$, U.X5$, U.X6$
+End Function
+!--- Fin de la rutina armada de trama de mensajes
+
+Function Grabacion.String.Usuario(X.clave$,X.datos$) External
+String X.clave$, X.datos$
+End Function
+!--- Fin grabacion de datos
+
+Function Grabacion.Cadena.Usuario(X.clave$,X.datos$) External
+String X.clave$, X.datos$
+End Function
+!--- Fin grabacion de datos
+Function Valida.Rta(x.rta$) external						! Validacion de la respuesta
+string x.rta, valida.rta
+end function 
+
+Function Status.Rta(X.rta$) External                                        ! Valida Rta entregada por rutina java
+String x.rta$ 
+Integer*2 Status.Rta
+End Function
+
+Function ASIC.GETUNPK(X.B$,X.J%) External 
+INTEGER*2 X.J%, X.K%
+STRING    X.B$, ASIC.GETUNPK
+End Function
+
+Function ASIC.GETUNPK2(X.B$,X.J%) External 
+INTEGER*2 X.J%, X.K%
+STRING    X.B$, ASIC.GETUNPK2
+End Function
+
+Function ASIC.GETUNPK3(X.B$,X.J%) External 
+INTEGER*2 X.J%, X.K%
+STRING    X.B$, ASIC.GETUNPK3
+End Function
+
+Function ASIC.GETUNPK4(X.B$,X.J%) External 
+INTEGER*2 X.J%, X.K%
+STRING    X.B$, ASIC.GETUNPK4
+End Function
+
+Sub VISOR.AND.BORRAR(X.MSG$) External
+  STRING X.MSG$
+End Sub
+
+Function Linea.Detalle(X.Ses%)   External                  											! Imprime Detalle de la operacion
+	STRING Linea.Detalle
+	Integer*1 X.Ses%
+End Function

@@ -1,0 +1,5 @@
+PIPE1.286= PIPE1.OBJ ,
+             BASROUT.OBJ,
+             ADXACRCL.L86,
+             EAMCSASC.OBJ,
+             ADXADMBL.L86

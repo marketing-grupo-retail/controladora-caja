@@ -1,0 +1,15 @@
+!USER EXIT CALLED BEFORE WRITING A LINE TO THE DOCUMENT INSERT STATION
+! Antes de escribir una linea a la estacion de insersion de documentos
+FUNCTION TSUPEC22 PUBLIC
+
+!CALL SUBSTR(TS.PRTBUF$,34,"EC22",0,4)
+!call traceNUO( "UE22 LT=" + str$(TS.LINETYPE) + " LD=" + str$(TS.LINEDATA) + \
+!      " PROC=" + str$(TS.PROCEDURE) + " [" + TS.PRTBUF$ + "]" )
+
+   ! Nota de Credito
+   call MSMTNCRE22
+
+   ! Retenciones
+   call MSMTRETE22
+
+END FUNCTION

@@ -1,0 +1,17 @@
+!
+! jguiu05.j86
+!
+!
+
+! javagui key stem validation
+! subroutine javaAEFUserExit
+!
+! Parms: eventNum  - number of the event (application or user)
+!        eventData - data associated with the event
+! javaGuiUserExit
+!  INTEGER*2 eventnum                             ! event number
+!  STRING    eventData$                           ! return data
+
+! insert user code here
+!call traceNUO( "JGUIU05" )
+

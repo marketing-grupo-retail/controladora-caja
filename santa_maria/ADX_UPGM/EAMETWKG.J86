@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+\ REM!!*****************************************************************        
+\ REM!!  EFT TERMINAL WORKING STORAGE                                           
+\ REM!!*****************************************************************        
+                                                                                
+!AIR77123                                                                       
+%INCLUDE EAMETWKA.J86     ! broken the includes up to save                      
+%INCLUDE EAMETWKB.J86     ! symbol table space in TS11                          
+!EIR77123                                                                       
+                                                                                
+                                                                                

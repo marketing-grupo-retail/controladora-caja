@@ -1,0 +1,49 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Definicion de subrutinas         *
+!**************************************************
+
+SUB EPSMTS01.011 EXTERNAL               ! Rutina Inicio de Transac Var Dialog
+END SUB                                 !
+                                        !
+SUB EPSMTS02.011 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS07.011 EXTERNAL               ! Rutina de Lectura Variables Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS08.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS14.011 EXTERNAL               ! Rutina de Manejo Teclado Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS20.011 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS20.012 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !                                        
+                                        !
+SUB EPSMTS23.011 EXTERNAL               ! Rutina de Manejo Teclado Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS30.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS43.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+
+SUB EPSMTS53.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+                                        !
+SUB EPSMTS60.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+
+SUB EPSMTS66.011(X.Callparm%) EXTERNAL  ! Rutina de Recuperacion Dialogo
+INTEGER*1 X.Callparm%
+END SUB                                 !
+

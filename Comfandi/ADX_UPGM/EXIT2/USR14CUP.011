@@ -1,0 +1,51 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR14CUP.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  enero 2002 
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!     bono descuento para articulos       
+!------------------------------------------------------------------------------
+
+!WRITE #34;VERIFICA% 
+
+VERIFICA% = 1                                       ! No Verificar
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN 
+   TS.IO.KEYS(2)  = 80   AND                       \! Si hay ENTER
+   LEN(TS.IO.DATA$(2)) = 12 THEN BEGIN              ! Si Long = 12
+   IF MID$(TS.IO.DATA$(2),6,1) = " " THEN BEGIN     ! y trae PLU/PREC
+      TS.IO.DATA$(2) = "0" + TS.IO.DATA$(2)         ! agrega un CERO
+      VERIFICA% = 0                                 ! Si Lect PLU/PRECIO
+   ENDIF ELSE BEGIN                                 !
+      TS.IO.DATA$(2) = "1" + TS.IO.DATA$(2)         ! agrega Dato Literal
+      VERIFICA% = 0                                 ! Si Lect PLU/PRECIO
+   ENDIF                                            ! Fin de Condic
+ENDIF                                               ! Fin de Condic
+
+
+!IF TS.IO.STATE = 10     AND                          \! Si esta en MAIN y se
+!   TS.IO.DATA$(3) = "4" AND                          \! digita variedad,
+ !  TOT.COUP = 0         AND                          \! digita variedad,
+  ! TS.IO.DATA$(7) = ""  AND                          \! y NO se digita valor
+   !TS.IO.KEYS(7) = 93          THEN BEGIN             ! a Otros Pagos
+               TOT.SIN% =  TS.BALDUE(0) 
+   !VAL.COUP =INT(((TOT.SIN%) * 5)/100)                ! calcula VALOR
+    !   TS.IO.DATA$(7) = STR$(INT(VAL.COUP))           ! Del pago=5% AFILIADOS
+   !TOT.COUP = 1                                       ! 
+!ENDIF ELSE BEGIN
+!IF TS.IO.MOTORKEY = 81 THEN  TOT.COUP = 0
+!ENDIF
+
+!-----------------------------------------------------------------------------
+! cupones abril afiliados
+!IF TS.IO.STATE = 10     AND                          \! Si esta en MAIN y se
+!   TS.IO.DATA$(3) = "6" AND                          \! digita variedad,
+!   TS.IO.DATA$(7) = ""  AND                          \! y NO se digita valor
+1   TS.IO.KEYS(7) = 91          THEN BEGIN             ! a Efectivo
+1   VAL.COUP =((TOT.COUP) * 10)/100                    ! calcula VALO
+!   TS.IO.DATA$(7) = STR$(INT(VAL.COUP))               ! Del pago=15% AFILIADOS
+!   TOT.COUP = 0
+!ENDIF  
+
+
+!-----------------------------------------------------------------------------

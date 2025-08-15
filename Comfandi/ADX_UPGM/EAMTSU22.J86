@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC22 PUBLIC                                                        
+!CALL SUBSTR(TS.PRTBUF$,34,"EC22",0,4)                                          
+CALL LIBLINE(22,1)         ! Imprime Factura con Formato Especial
+END FUNCTION                                                                    
+                                                                                

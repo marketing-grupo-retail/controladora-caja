@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC16 PUBLIC
+
+! insert user exit code here
+
+CALL REMCSU16.011                ! REMATES SANTA MARIA
+
+ END FUNCTION

@@ -1,0 +1,43 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Definicion de variables          *
+!**************************************************
+
+String    Global  Asc.Edu.Item$,         \! Monto del bono de devolucion
+                  Asc.Edu.Saldo$,        \! Saldo del bono en la consulta
+                  Asc.Edu.Cadena$,       \! Codigo cadena
+                  Asc.Edu.Appl$,         \! Codigo de la aplicac
+                  Asc.Edu.tpvr$,         \! Tipo y variedad a controlar
+                  Asc.Edu.NotaNul$,      \! Notas Anuladas
+                  Asc.Edu.EstadoNota$,   \!
+                  Asc.Edu.VlrPago$,     \! Valor Pago Sin Descuento
+                  Asc.Edu.VlrPago1$,     \! Valor Pago Con Descuento
+                  Asc.Edu.VlrPago2$,     \! Valor Pago Sin Descuento
+                  Asc.Edu.FechaPago$,   \! Valor Pago Sin Descuento
+ 									Asc.Edu.PluPack$,      \! Plu Empaquetado
+                  Asc.Edu.Tecla$,        \! Tecla de control
+                  Asc.Edu.Tmp$,           \! Temporal de trabajo
+            		  X.fecha$
+
+Integer*1 Global  Asc.Edu.Line%,        \! Modulo activo
+                  Asc.Edu.Sesion%,      \! Sesion temporal
+                  Asc.Edu.Impr%,        \! Control impresion franqueos
+                  Asc.Edu.IndPrice%,    \! Indicador de precio
+                  Asc.Tmp.Apun%,        \! Apuntador recuperacion String
+                  Asc.Edu.Devol%,       \! Indicador de una devolucion
+                  Asc.Edu.Captura%,     \! Control de registro
+                  Asc.Edu.Fran%          ! Numero de franqueo a utilizar
+                  
+Integer*4 Global  Asc.Edu.Slend%         ! Total string de la transaccion
+                  
+
+String    Global  Asc.Edu.Lista$,       \! Lista de bonos a pagar
+                  Asc.Edu.Fecha$,				\! fecha del recibo
+                  Ue.Cencos$,           \! Centro de costo
+                  Asc.Edu.NoRec$             !       
+		             
+		           !  Asc.Edu.Item$,       

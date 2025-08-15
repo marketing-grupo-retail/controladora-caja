@@ -1,0 +1,9 @@
+
+
+
+!--------- Control para captura de medico despues de anulacion 
+
+   if val(nitim$) = 890307200001 then begin
+     DIAGNOS$ = ""          
+     PROCE% = 0
+   endif

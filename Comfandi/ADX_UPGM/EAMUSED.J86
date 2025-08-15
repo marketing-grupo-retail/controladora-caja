@@ -1,0 +1,39 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+\ REM!!***************************************************************!!        
+\ REM!! THE FOLLOWING DEFINES THE CHAIN PARAMETERS.                   !!        
+\ REM!! EAMUSED.J86                                                   !!        
+\ REM!!***************************************************************!!        
+                                                                                
+  STRING GLOBAL           \                                                     
+     MM.CHAINFROM$,       \ Name of program chained from                        
+     MM.SCRN.INPUT$(1),   \ Array of screen input from previous screen          
+     MM11POID$,           \ Operator id and key to authorization file           
+     MM11PDMA$,           \ Display manager control codes                       
+     MM.OPTIONSK$,        \ Key to options authorization file                   
+     MM.STATUS$,          \ Key to options authorization file                   
+     MM11PCMP$,           \ Completion code                                     
+     MM14PCN1$            ! Control string                                      
+                                                                                
+  INTEGER*1 GLOBAL        \                                                     
+     MM.INDICAT2,         \                                                     
+     MM.INDICAT3,         \                                                     
+     MM.INDICAT4,         \                                                     
+     MM.INDICAT5,         \                                                     
+     MM.INDICAT6,         \                                                     
+     MM.INDICAT7,         \                                                     
+     MM.INDICAT8,         \                                                     
+     MM.INDICAT9,         \                                                     
+     MM.INDICAT10,        \                                                     
+     MM.INDICAT11,        \                                                     
+     MM.INDICAT12,        \                                                     
+     MM.INDICAT13,        \                                                     
+     MM.INDICAT14,        \                                                     
+     MM.INDICAT15,        \                                                     
+     MM.RECNUM,           \                                                     
+     MM.REPORT            !                                                     
+                                                                                
+  INTEGER*2 GLOBAL        \                                                     
+     MM.ACCOUNT.TYPE,     \                                                     
+     MM.STORACCT          ! If store -wide totals are kept                      
+                                                                                

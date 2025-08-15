@@ -1,0 +1,155 @@
+REAL        IV,        CIENP                 !
+STRING      AA$,       BB$,       HH$,     DEPI$,    \!
+            TI$(2),    FISCO$,    PRETR$,  NUFIS$,   \!
+            DEPA$,     IVGR$,     TPVA$,   ALI$, CONT$
+INTEGER*1   GRDES%,    PESA%,     TFI%,    NOSU%,   \!
+            IND1,      IND1A,     SGN%, GRFLAG%               !
+INTEGER*2   NT%,       TR%,       CADE%,   SREC%,   \!
+            ANOT%,     MEST%,     DIAT%,   NAC%      !
+INTEGER*4   ASIZE,     TOTDES%,   PAGO%     ! MAX A$ RECORDS 
+INTEGER*4   IVATRA%(1)
+INTEGER*4   STR99%, IV.TF%(3), TRF%(2),   TRFI%, \   !
+            Vta.TComf%, NTTIC%, IV.TF2%(3)           ! Add OVS 16 Sept 2008
+INTEGER*4   BLK.NUM,   REC.LEN,   KEY.LEN,          \!
+            CHA.TRE,   LON.CHA,   RES.UNO, TOT.REA, \!
+            REA.UPD,   TOT.ADD,   WRI.UPD, RES.DOS, \!
+            TOT.DEL,   TWR.1DE,   TWR.2DE, TWR.3DE, \!
+            TWR.MAS,   TOT.OPE,   TOT.CLO, TOT.CLW, \!
+            TOT.REL,   ESPERADO%, AC%                ! FOR K/FILE
+INTEGER*4   TAMA%,     BASE%,    REBAJ%,   CAN%,    \!
+            CANCON%,   VARCON%, TPG%(3) ,           \!
+            IVAT%(2),  IVAD%(2),  IVATR%,   VRUNPLU% !
+
+Integer*4   Global Asc.Vta.Domic%                    ! Add OVS 12 Ene 2006
+Integer*4   Global Vta.Fonede%,NTFN%								 ! Add OVS 10 Jul 2006
+Integer*4   Global Vta.Convenios%, NTCNV%						 ! Add OVS 27 Dic 2006
+String      Global Old.Pago$, Doc.Crd$,Nit.Crd$      ! Add OVS 27 Dic 2006
+Integer*4   Global NRGTD%, VTATD%
+
+Integer*1   Global Gr.Ind.Rem%, Gr.Ind.Pago%
+Integer*4 Global As%, NAS%, NCRI%, VCRI%             ! Add GR-OVS 22 Nov 2011
+Integer*1                  \  !
+       P%,                 \  !
+       Q%,                 \  ! Longiud de ADXALMA.DAT
+       IR,                 \  ! Indicador de identificacion de registro
+       FTS,                \  !
+       FT                     ! Indicador de primer ciclo
+
+Integer*1                                                \
+       A,                B,           C,                 \
+       D,                E,           F,                 \
+       N,                I,                              \
+                         L,           TLOG,              \
+       FIL1,             FIL2,        LONG,              \
+       FIL3,             FIL4,        FIL5,              \
+       FIL6,             FIL7,        FIL8,              \
+       FIL9,             FIL10,       FIL11,             \    
+       BB.PCR.FLAG,      BB.FLAG,     BB.FLAG2,          \
+       FTV,              MES,         CREDI%, Gr.Remi%
+
+Integer*2                                                \
+                         ICON%,       FECR%,             \
+       P,                Q,                              \
+       PP,               QQ,          KK,       JJ,      \
+       CONSE,            POSI%,                          \
+       POS%,             II%,         I%, K, J,          \
+       SI%,              CONLI%,      DEPI%
+
+Integer*4                NREC9% ,     NREC%,             \
+       FLAG,             VALWRK,      VALOR,             \
+       CHG,              NRO,         ICO%,              \
+       NEF%,             NCH%,        NOT%,              \
+       NRM%,             NTC%,        NCR%,              \
+       EF%,              CH%,         OT%,               \
+       NSU%,             CS%,         NCC%,              \
+       NNC%,             NC%,         TD%,               \
+       NCB%,             CC%,         CB%, VF%, NVF%,    \
+       RM%,              TC%,         CR%,               \
+       BB.PRECIO,        BB.AR.PRECIO(1),                \
+       MTOTRAN, NTD%, FO%, NFO%
+       
+Integer*4                  \  !
+       YY%,                \  !
+       S%,                 \  !
+       SX%,                \  !
+       HX%,                \  !
+       SUM%,               \  !
+       TOT,                \  !
+       BASES%,             \  !
+       AMTFEES,            \  !
+       HD.GROSSPOS,        \  !
+       HD.GROSSNEG,        \  !
+       HD.NUMTRANS,        \  !
+       LO.AMTCASH,         \  !
+       PK.AMTCASH,         \  !
+       CT.AMTCASH,         \  !
+       SO.AMTCASH,         \  !
+       SO.AMTCHECK,        \  !
+       SO.AMTFOODS,        \  !
+       SO.AMTMISC1,        \  !
+       SO.AMTMISC2,        \  !
+       SO.AMTMISC3,        \  !
+       SO.AMTMANUF,        \  !
+       SO.AMTSTORE,        \  !
+       SA.AMTDISCO,        \  !
+       TO.DISVOID,         \  !
+       TT.CLI,             \  !
+       TT.CONTEO,          \  !
+       TT.SOBFAL,          \  !
+       TT.SOB,             \  !
+       TT.FAL,             \  !
+       TT.COM,             \  !
+       TT.LOAN%,           \  !
+       TT.PICKUP%,         \  !
+       TOTTRAN%,           \  !
+       TT.VALDEP,    TDC%, NTDC%, \!
+       NTRM%, VTA.REMISION%, \! Add 28 Ene 2011
+       NTCM%, VTA.COOMEVA%    ! Add 04 FEB 2011
+
+  STRING                                                      \ 
+            A$,               B$,          H$,  F$,           \
+            C$,               D$,          E$,	G$,           \
+            FEC1$,            NUAL$,       NOAL$,             \
+            ALMA$,            TM$(1),                       \
+            BB.AR.KEYTV$(1),  BB.KEYTV$,   CONSEC$,           \
+            BB.AR.COMPR(1),   BB.COMPR,    BB.AR.FINAL(1),    \
+            BB.FINAL,         BB.AGENC,    BB.AR.AGENC(1),    \
+            AR.VALPAG(1),     AR.CUOT(1),  AR.CPR(1),         \
+            AR.AUT(1),        NETVEN$(1),  INAREA$,           \
+            RESP$,            ALMACEN$,    TITULO$,           \
+            VALPAG,           NUMOPE$,     NTR,               \
+            NRWRK$,           NUT,         TIPTRA,            \
+            TIPPAG$,          FR$   ,      COMPRO,            \
+            TIPTRA1,          FECTRA,      FECHEQUE,          \
+            KEYCF1$,          REGCF1$,     HORA$,             \
+            CUOT$,            CPR$,        AUT$,              \
+            NITEM$,           SIGNO$,      NUMPAG$,           \
+            FIN$,             AGENC$,      VEND$,             \
+            NETOPO$,          DEP$,        COD$,              \
+            FRA.H$,           FRA.M$,      FRA.S$,            \
+            FRA.TIM$,         FRA.FEC$,    FRA.AA$,           \
+            FRA.MM$,          FRA.DD$,     FRA.LIN$,          \
+            NOCUE$,           AMT$,        CCOSTO$,           \
+            AMT1$,            AMT2$,       AMT3$,             \
+            AMT9$,            FACTURA$,    ZETA$,             \
+            NUMEF$,           NUMCH$,      NUMOT$,            \
+            NUMRM$,           NUMTC$,      NUMCR$,            \
+            TOTEF$,           TOTCH$,      TOTOT$,            \
+            TOTRM$,           TOTTC$,      TOTCR$,            \
+            BANCO$,           CHEQUE$,     CTACTE$,           \
+            DATO4$,           DATO5$,      DATO6$,            \
+            HORATR$,          CHANGE$,     VALCHQ,            \
+            TIPPAW$,          TIREG$,      APROB$,            \
+            HD.TYPE,          HD.OPERATOR, HD.DATETIME,       \
+            DAT5$,            VALIC$,      NO.FACTURA$,       \
+            AUTO$,            CUOMOD$,     TOTTRAN$,SIGNO1$,  \
+            TOTCB$,           TOTVF$,      NUMCB$,  EDUCA$,   \
+            NUMVF$,           BAN1$,       BANCO1$, GASOCC$,   \
+            NUMAC$,           TOTAC$ ,     DESCUE$,  VALEDU$, GR.DATA$
+!***************************************************************
+!-- Variables impuesto a la bolsa 13Jul2023
+String    Global Gr.Iva.DptBol$
+Integer*1 Global Gr.Iva.IndBol%					! Activación proyecto bolsa
+integer*4 Global Gr.Iva.TaxBol%,       \! Valor impuesto bolsa
+                 Gr.Iva.PluBol%,       \! PLU bolsas plasticas
+                 Gr.Iva.VlrBol%         ! Valor impuesto bolsa 

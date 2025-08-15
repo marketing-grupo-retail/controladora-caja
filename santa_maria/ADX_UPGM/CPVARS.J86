@@ -1,0 +1,69 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/*                                                                */  
+\/*  IO01022 - Add code for padding output strings for 4610        */
+\/*            printers using large checks (seven inches or more). */
+\/*            Padding turned on via user exit coding.             */
+\/*                      IBM   (CRM)  04/22/05                     */
+\/*                                                                */
+\/******************************************************************/
+REM!!  The following are general variable declarations for check printing
+
+INTEGER*1 GLOBAL  \
+          ROW,                 \Row number of current check field
+          FONT,                \Font number of current check field
+          DS,                  \Double strike
+          CPFIELD              !Check field number currently active
+
+
+INTEGER*4 GLOBAL  \
+          STARTCOL,            \Starting column of current check field
+          ENDCOL,              \Ending column of current check field
+          FIELDLENGTH,         \Length of current check field in columns
+          DATALENGTH           !Length of data in a check field
+
+INTEGER*2 GLOBAL  \
+          RD.CPFORMAT,         \Check format read in from file
+          CPFORMAT             !Check format number currently active
+
+STRING    GLOBAL                  \
+          INSERT$,                \Field data to insert into check line
+          LEGAL.HUND.SEP$(1),     \Legal amount hundredths seperator
+          LEGAL.CENT.SEP$(1),     \Legal amount cents seperator
+          LEGAL.CENT.DESC$(1),    \Cents descriptor
+          LEGAL.DOL.DESC$(1),     \Dollars descriptor
+          LEGAL.ONE.DOL.DESC$(1), \Dollar descriptor (when one dollar is taken)
+          LEGAL.EXACT$(1),        \Exact amount descriptor
+          CONV.SEP$(1),           \Convenience amount seperator
+          CP.DENOM$(1),           \Monetary strings
+          CP.MONTH$(1),           \Month abbreviations
+          CHECK.PRINT$(2)         !Array printing strings
+                               ! - index one is for 15 / 7.5 CPI lines
+                               ! - index two is for 12 CPI lines
+
+INTEGER*1 GLOBAL           \
+          SPEC.PROC,       \Special process. option for countries IR94225
+          FF.ROW(2),       \Row of a check field
+          FF.FONT(2),      \Font type of a check field
+          FF.DS(2),        \Double strike a check field ON/OFF
+          FF.CASE(2),      \Character case type
+          FF.PAD.BEFORE(2),\Fill characters before field data
+          FF.PAD.AFTER(2), \Fill characters after field data
+          CP.DATEFORM(1)   !Format of the date field
+                           !(1 = System format)
+                           !(2 = DDMMMYY   [month is three letter abrv.])
+
+
+INTEGER*2 GLOBAL           \
+          FF.PAD.CHAR(2)   !Character to fill field with
+
+
+REAL      GLOBAL        \
+          FF.START(2),  \Starting position of a check field
+          FF.LENGTH(2), \Length of a check field in inches
+          START,        \Starting position of current check field
+          LENGTH        !Length of current check field
+          
+REAL  GLOBAL PAD.INCHES    !IO01022 padding for 4610 positioning
+
+

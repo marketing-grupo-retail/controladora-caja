@@ -1,0 +1,54 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU13.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!
+\/* CHANGE ACTIVITY                                                 */
+\/* IR26150 - Checkout support ABENDs with a CU error on session    */
+\/*           64 if an error occurs for which additional diagnostic */
+\/*           information is to be printed.                         */
+\/*           BAH MGVA  09May94                                     */
+\/*                                                                 */
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** PRINT ADDITIONAL DIAGNOSTIC DATA FOR SELECTED FAILURES        **
+!!*******************************************************************
+
+IF ERR = "AC" OR \
+   ERR = "AE" OR \
+   ERR = "DE" OR \
+   ERR = "IH" OR \
+   ERR = "OI" OR \
+   ERR = "SS" OR \
+   ERR = "SU" THEN BEGIN
+
+  OPEN "PRN:" AS 1
+! WRITE #1; "ERROR DETECTED, ERR = " + ERR
+  WRITE #1;   EMSS.ERROR$(1) + ERR
+  WORK4$ = STRING$(35," ")
+  FOR I% = 1 TO 10
+     IF CS.TRC(I%) NE 0 THEN        \
+     CALL PUTN2(WORK4$, (I%-1)*3, CS.TRC(I%))
+     IF I% NE 10 THEN               \
+     CALL SUBSTR(WORK4$, (I%*3)-1, ".", 0,1)
+  NEXT I%                           !
+! WRITE #1; "MODULE TRACE = " + WORK4$ \
+!         + "LAST ENTRY = " + STR$(CS.TRCPTR -1)
+  WRITE #1; EMSS.ERROR$(2) + WORK4$ + EMSS.ERROR$(3) + STR$(CS.TRCPTR -1)
+  WRITE #1; "                    " + " 1  2  3  4  5  6  7  8  9  0 "
+  IF ERRL NE 0 THEN BEGIN
+! WRITE #1; "LAST LINE NUMBER IN EXIT CODE = " + STR$(ERRL)
+  WRITE #1; EMSS.ERROR$(4) + STR$(ERRL)
+  ENDIF
+
+  CLOSE 1
+! CLOSE 64                                               !IR26150
+ENDIF
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

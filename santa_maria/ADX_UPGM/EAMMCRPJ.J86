@@ -1,0 +1,365 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCRPJ.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL FUNCTION PROTOTYPE CALLES      */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Ralph Gustafson IBM NRSC                          */
+\/*              Michael Coffman IBM NRSC                          */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/*  IR39277 - Add support for new Tender Listing file.            */
+\/*            MBC IBM 04Feb99                                     */
+\/*                                                                */
+\/*  IR40697 - Remove Multiple Currency code from Cash Drawer      */
+\/*            Position report.                                    */
+\/*            RSH MGVA 25May99                                    */
+\/*                                                                */
+\/*  IR43524   Add Multiple Currency Feature PRPQ support for      */
+\/*            Cash-Store Totals Recap-Over/Short reports.         */
+\/*            CMJ SysTech 1Aug2000                                */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM!!***** External SMKT Multiple Currency Subroutine calls *****
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.FEATURE.STATUS
+\REM!!
+\REM!!      PURPOSE - Determine if Multiple Currency Feature is active
+\REM!!                and read files and descriptors if it is.
+\REM!!************************************************************************!!
+SUB MC.FEATURE.STATUS EXTERNAL        ! Call to get feature active flag
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CAPTURE.X63.RECORD
+\REM!!
+\REM!!      PURPOSE - Capture X63 records found
+\REM!!************************************************************************!!
+SUB CAPTURE.X63.RECORD EXTERNAL       ! If X63 record, Capture it
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: PROC.X63.RECORD(STR.TYPE$)
+\REM!!
+\REM!!      PURPOSE -  Process found X63 records.
+\REM!!************************************************************************!!
+SUB PROC.X63.RECORD(STR.TYPE%) EXTERNAL ! Process found X63 records
+INTEGER*2 STR.TYPE%
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: OPEN.FCTRACK
+\REM!!
+\REM!!      PURPOSE -  Open FC Tracking File
+\REM!!************************************************************************!!
+SUB OPEN.FCTRACK EXTERNAL             ! Opens foreign currency tracking file
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: READ.FCTRACK
+\REM!!
+\REM!!      PURPOSE -  Read FC Tracking File.
+\REM!!************************************************************************!!
+SUB READ.FCTRACK(FC.KEY$) EXTERNAL    ! Read foreign cur track file
+  STRING FC.KEY$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.RESET.TENDERS
+\REM!!
+\REM!!      PURPOSE -  Reset FC Tender information in "EAMFCTnn"
+\REM!!************************************************************************!!
+SUB FC.RESET.TENDERS EXTERNAL         ! reset array for EAMFCTnn file
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.BUILD
+\REM!!
+\REM!!      PURPOSE -  Build Report Lines
+\REM!!************************************************************************!!
+SUB FC.BUILD EXTERNAL                 ! builds report lines
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FC.TENDERS
+\REM!!
+\REM!!      PURPOSE -  Read "EAMFCTnn" FILE
+\REM!!************************************************************************!!
+SUB GET.FC.TENDERS(FLD$) EXTERNAL     ! read EAMFCTnn file
+  STRING FLD$
+END SUB
+
+!AIR43524
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.CASH.BUILD
+!\REM!!
+!\REM!!      PURPOSE -  Add FC Lines to Cash Report
+!\REM!!************************************************************************!!
+!SUB FC.CASH.BUILD(FLD$) EXTERNAL      ! add foreign currency lines to cash rpt
+!  STRING FLD$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.CASH.REPORT
+!\REM!!
+!\REM!!      PURPOSE -  Send FC Lines to RPCFEC01
+!\REM!!************************************************************************!!
+!SUB FC.CASH.REPORT(FLD$) EXTERNAL     ! send foreign currency lines to RPCFEC01
+!  STRING FLD$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.CASH.DISPLAY
+!\REM!!
+!\REM!!      PURPOSE -  Send FC lines to RPCFEC01
+!\REM!!************************************************************************!!
+!SUB FC.CASH.DISPLAY(FLD$) EXTERNAL    ! send foreign currency lines to RPCFEC01
+!  STRING FLD$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.CASH.INPUT
+!\REM!!
+!\REM!!      PURPOSE -  Capture Pg Up/Dn of FC Displays
+!\REM!!************************************************************************!!
+!SUB FC.CASH.INPUT(FLD$) EXTERNAL      ! capture pg up/dn on foreign cur. displays
+!  STRING FLD$
+!END SUB
+!EIR43524
+
+!AIR40697
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DRAWER.TENDERS
+!\REM!!
+!\REM!!      PURPOSE -  Read "EAMFCTnn" File
+!\REM!!************************************************************************!!
+!SUB FC.DRAWER.TENDERS(FLD5$) EXTERNAL ! read EAMFCTnn file
+!  STRING FLD5$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DRAWER.INPUT
+!\REM!!
+!\REM!!      PURPOSE -  Handle MC Screen Displays
+!\REM!!************************************************************************!!
+!SUB FC.DRAWER.INPUT(FLD5$) EXTERNAL   ! handle MCF screen displays
+!  STRING FLD5$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DRAWER.REPORT
+!\REM!!
+!\REM!!      PURPOSE -  Handle MC Extra Print Pages
+!\REM!!************************************************************************!!
+!SUB FC.DRAWER.REPORT(FLD5$) EXTERNAL  ! handle MCF extra print pages
+!  STRING FLD5$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DRAWER.DISPLAY
+!\REM!!
+!\REM!!      PURPOSE -  Send FC lines to RPCFEC01
+!\REM!!************************************************************************!!
+!SUB FC.DRAWER.DISPLAY(FLD$) EXTERNAL  ! send foreign currency lines to RPCFEC01
+!  STRING FLD$
+!END SUB
+!
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DRAWER.SCREEN
+!\REM!!
+!\REM!!      PURPOSE -  Save Detail Lines
+!\REM!!************************************************************************!!
+!SUB FC.DRAWER.SCREEN(LINE1$,I1) EXTERNAL ! save detail lines
+!  STRING LINE1$
+!  INTEGER*2 I1
+!END SUB
+!EIR40697
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.OVER.TENDERS
+\REM!!
+\REM!!      PURPOSE -  Read "EAMFCTnn" File
+\REM!!************************************************************************!!
+SUB FC.OVER.TENDERS(FLD5$) EXTERNAL    ! read EAMFCTnn file
+  STRING FLD5$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.OVER.REPORT
+\REM!!
+\REM!!      PURPOSE -  Print MCF pages of Over/Short Report
+\REM!!************************************************************************!!
+SUB FC.OVER.REPORT(FLD5$) EXTERNAL     ! print MCF pages of OVER/SHORT rpt
+  STRING FLD5$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.OVER.INPUT
+\REM!!
+\REM!!      PURPOSE -  Handle extra displays for Over/Short
+\REM!!************************************************************************!!
+SUB FC.OVER.INPUT(FLD$) EXTERNAL       ! handle extra displays for OVER/SHORT
+  STRING FLD$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.OVER.SCREEN
+\REM!!
+\REM!!      PURPOSE -  Save Detail Lines for Over/Short Report
+\REM!!************************************************************************!!
+SUB FC.OVER.SCREEN(FLD$) EXTERNAL     ! save detail lines for OVER/SHORT rpt
+  STRING FLD$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.STORE.BUILD
+\REM!!
+\REM!!      PURPOSE -  Builds Store Recap Report Lines
+\REM!!************************************************************************!!
+SUB FC.STORE.BUILD EXTERNAL           ! builds Store Recap report lines
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.STORE.REPORT
+\REM!!
+\REM!!      PURPOSE -  Prints Store Recap Report Lines
+\REM!!************************************************************************!!
+SUB FC.STORE.REPORT EXTERNAL         ! prints Store Recap report lines
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.STORE.INPUT
+\REM!!
+\REM!!      PURPOSE -  Handle extra displays for Store Recap Report
+\REM!!************************************************************************!!
+SUB FC.STORE.INPUT EXTERNAL           ! handle extra displays for Store Recap Report
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.STORE.DISPLAY
+\REM!!
+\REM!!      PURPOSE -  Handle extra displays in Store Recap Report
+\REM!!************************************************************************!!
+SUB FC.STORE.DISPLAY EXTERNAL         ! handle extra displays for Store Recap Report
+END SUB
+
+!AIR39277 subroutine to handle Tender Listing calls
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.TLIST
+\REM!!
+\REM!!      PURPOSE -  Handle calls in Tender Listing Report
+\REM!!************************************************************************!!
+SUB MC.TLIST(PARM1) EXTERNAL
+  INTEGER*2 PARM1
+END SUB
+!EIR39277
+
+!AIR43524
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.INIT.RPTS
+\REM!!
+\REM!!      PURPOSE -  Initialize variables for reports
+\REM!!************************************************************************!!
+SUB MC.INIT.RPTS EXTERNAL             ! MC.INIT.RPTS
+END SUB                               !
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.CENTER.DESC
+\REM!!
+\REM!!      PURPOSE - Center currency descriptors for display
+\REM!!************************************************************************!!
+SUB MC.CENTER.DESC EXTERNAL            ! MC.CENTER.DESC
+END SUB                                ! MC.CENTER.DESC
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.SELECTION
+\REM!!
+\REM!!      PURPOSE - To bump currency up by 1
+\REM!!************************************************************************!!
+SUB FC.SELECTION(DIRECTION) EXTERNAL   ! FC.SELECTION
+   INTEGER*2                           \
+             DIRECTION                 ! Direction of change
+END SUB                                ! FC.SELECTION
+
+!***************************************************************************
+! SUB MC.END
+!
+! Clean Up before chaining.
+!***************************************************************************
+SUB MC.END EXTERNAL                    ! MC.END
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CLOSE.FCTRACK
+\REM!!
+\REM!!      PURPOSE -  Close the foreign currency tracking file(s)
+\REM!!************************************************************************!!
+SUB CLOSE.FCTRACK EXTERNAL             ! CLOSE.FCTRACK
+END SUB                                !
+
+!***************************************************************************
+! FUNCTION MC.CURRENCY.ID$
+!
+! This routine returns an 80 byte string with the currency name centered.
+! This routine assumes that the descriptors have already been centered
+! by the above routine MC.CENTER.DESC.
+!***************************************************************************
+FUNCTION MC.CURRENCY.ID$(CURR.SLOT) EXTERNAL ! MC.CURRENCY.ID$
+  INTEGER*2 CURR.SLOT
+END FUNCTION
+
+!***************************************************************************
+! SUB MC.READ.RECS
+!
+! Read & store foreign currency information
+!
+! PARMS:
+! KEY.PREFIX$ - Accounting file record key
+! SEL.SLOT    - Selected slot option:
+!               -1  Read all currency records
+!                0  Read all of the first 2 currencies
+!                >0 Read the selected slot
+!***************************************************************************
+
+SUB MC.READ.RECS(KEY.PREFIX$, SEL.SLOT) EXTERNAL ! MC.READ.RECS
+
+  STRING                                         \
+            KEY.PREFIX$                          ! Prefix from Acct file
+
+  INTEGER*2                                      \
+            SEL.SLOT                             ! Selected Currency Option
+END SUB
+
+!***************************************************************************
+! SUB MC.DIM.RPTS
+!
+! Dimension storage for report data.
+!***************************************************************************
+SUB MC.DIM.RPTS EXTERNAL                         ! MC.DIM.RPTS
+END SUB                                          ! MC.DIM.RPTS
+
+SUB mc.sub.cash.data(CURS.LINE) external
+  integer*2 CURS.LINE
+END SUB
+SUB mc.restore.cash.data external
+END SUB
+!EIR43524
+
+\/******************************************************************/
+\/* END OF EAMMCRPJ.J86                                            */
+\/******************************************************************/

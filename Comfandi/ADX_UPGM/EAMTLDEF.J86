@@ -1,0 +1,17 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+!**********************************************************************         
+!*   TRANSACTION SUMMARY LOG CLOSE ENTRY DEFINITIONS                  *         
+!**********************************************************************         
+!* THE FOLLOWING DEFINES THE VARIABLES FOR SUMMARY LOG CLOSE RECORD.  *         
+!**********************************************************************         
+                                                                                
+   STRING                       \                                               
+        TS.TYPE$,               \ TRANSACTION TYPE              UPD 1           
+        TS.DATE$,               \ DATE AND TIME                 UPD 5           
+        TS.INDICAT1$,           \ INDICATOR FLAGS               UPD 1           
+        TS.INDICAT2$            !                               UPD 1           
+                                                                                
+!**********************************************************************         
+!* End of definitions                                                 *         
+!**********************************************************************         

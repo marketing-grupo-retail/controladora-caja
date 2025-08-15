@@ -1,0 +1,99 @@
+! CELLTS07.011 
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Junio 8 de 2001                                      **
+!   **    Proyecto   :  CASA INFORMATICA S.A. * PIN VIRTUAL                  **
+!   **    User Exit  :  CELLTS07.011                                         **
+!   **    Inclu¡r en :  EAMTSU07.J86  					     **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **    Realizada Por:  Oscar Valencia Sarmiento                           **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+!******************************************************************************
+!		PROYECTO DE PIN VIRTUAL  APERTURA DE ARCHIVOS
+!******************************************************************************
+ON ERROR GOTO ERROR.OPEN.PINES
+   IF NOT(UE.CELL.OPEN) THEN BEGIN
+		OPEN "R::CELLSTAR" KEYED RECL 55 AS 86
+		OPEN "R::CELLSTAR" KEYED RECL 55 AS 87
+		UE.CELL.OPEN = -1
+   ENDIF
+   DIM UE.CELL.DESC(3)
+   DIM UE.CELL.MSG$(10,21)
+   UE.CELL.DESC(1) = "INGRESE SERIAL"
+   UE.CELL.DESC(2) = "INGRESE AUTORIZACION"
+   UE.CELL.CAD$ = ","
+   FOR I% = 1 TO UE.CT.NOREG%			     ! Tomo n£mero de registros
+        IF I% = 1 THEN BEGIN
+		
+		ENDIF
+        IF I% = 2 THEN BEGIN
+		UE.CELL.CODCAD$ = PAR.PROY$(I%,1)
+		UE.CELL.CODALM$ = PAR.PROY$(I%,2)
+		ENDIF
+	IF I% > 2 THEN BEGIN
+ 	   UE.CELL.CAD$ = UE.CELL.CAD$+PAR.PROY$(I%,1)+","+PAR.PROY$(I%,2)+","
+           CALL VALIDE.ALMACEN        ! Validacion de pines OVS 06/jun/2001
+        ENDIF
+	
+   NEXT I%
+   OPEN "R::MSGPINES" AS 38				! Abro file msg pines
+   K% = 0						!
+   WHILE (1)						!
+	READ #38;A$					! Lectura registro hasta eof()
+	IF LEFT$(A$,1) = "<" THEN BEGIN			! Carga los mensajes 
+		I% = MATCH(">",A$,1)			! que van a utilizar 
+		J% = VAL(MID$(A$,2,I%-2))		! c/u de los operadores
+		K% = 1					! telefonicos
+	ENDIF ELSE BEGIN				!
+		UE.CELL.MSG$(J%,K%) = A$		!
+		UE.CELL.MSG$(J%,0) = STR$(K%)		!
+		K% = K% + 1				!
+	ENDIF						!
+   WEND							!
+
+ERROR.OPEN.PINES:
+      IF ERRF% = 38  AND  \
+        (ERR = "OE" OR ERR = "FU") THEN BEGIN              ! del archivo de pines
+         WRITE FORM "2C20";#30;"ERR. ARCHIVO MSG PIN",    \!
+                                "NO EXISTE CANCELADO."     !
+          CALL TSHIECET					   ! Tono de alerta
+          WAIT ; 1500                                      ! time espera
+          UE.PROYECTO(UE.CAR.CELL%) = 0			   ! Desactivo proyecto
+          UE.CELL.OPEN = -1				   !
+	  GOTO CONTINUAR				   ! Termina proceso
+      ENDIF 						   !
+      IF ERRF% = 38 AND ERR = "EF" THEN BEGIN 		   ! Si eof() de lectura
+         CLOSE 38					   ! cierra sesion
+         GOTO CONTINUAR					   ! Continua programa	
+      ENDIF						   !
+      IF ERRF% = 87 AND   	                          \! Si problemas en apertura
+         (ERR = "OE" OR ERR = "FU") THEN BEGIN             ! del archivo de pines
+          WRITE FORM "2C20";#30;"ERR. ABRIENDO PINES ",   \!
+                                "PROYECTO CANCELADO.."     !
+          CALL TSHIECET					   ! Tono de alerta
+          WAIT ; 1500                                      ! time espera
+          UE.PROYECTO(UE.CAR.CELL%) = 0			   ! Desactivo proyecto
+          UE.CELL.OPEN = -1
+	  GOTO CONTINUAR				   ! Continua programa
+      ENDIF                                                ! del programa
+      IF ERRF% = 86 AND   	                          \! Si problemas en apertura
+         (ERR = "OE" OR ERR = "FU") THEN BEGIN             ! del archivo de pines
+          WRITE FORM "2C20";#30;"ERR. ABRIENDO PINES ",   \!
+                                "PROYECTO CANCELADO.."     !
+          CALL TSHIECET					   ! Tono de alerta
+          WAIT ; 1500                                      ! time espera
+          UE.PROYECTO(UE.CAR.CELL%) = 0			   ! Desactivo proyecto
+          UE.CELL.OPEN = -1				   ! 
+	  GOTO CONTINUAR				   !
+      ENDIF                                                ! del programa
+      IF ERRF% = 87 AND ERR = "EF" THEN BEGIN              ! Lectura de pines
+         IND$ = "1"
+         RESUME
+      ENDIF
+CONTINUAR:
+!******************************************************************************
+

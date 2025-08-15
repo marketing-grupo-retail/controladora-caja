@@ -1,0 +1,765 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*                  REPORTS USER EXIT                                     
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE PROVIDES A PLACE TO PUT USER EXIT                   
+\ REM!!*  CODE SUCH THAT THE CODE WILL GET CONTROL ONCE FOR EACH                
+\ REM!!*  LINE IN ANY OR ALL OF THE REPORTS LISTED BELOW.                       
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  REPORT NAME:                                 LOAD MODULE:             
+\ REM!!*                                                                        
+\ REM!!*  CASH REPORT                                    EAMRPCRL               
+\ REM!!*  CASH DRAWER POSITION REPORT                    EAMRPC1L               
+\ REM!!*  DEPARTMENT ANALYSIS REPORT                     EAMRPD1L               
+\ REM!!*  ITEM MOVEMENT REPORT                           EAMRPIML               
+\ REM!!*  MISCELLANEOUS TRANSACTION RECAP                EAMRPM1L               
+\ REM!!*  OVER/SHORT REPORT                              EAMRPOSL               
+\ REM!!*  OPERATOR PERFORMANCE REPORT                    EAMRPPFL               
+\ REM!!*  OPERATOR SALES REPORT                          EAMRPSRL               
+\ REM!!*  SYSTEM STATUS REPORT                           EAMRPSSL               
+\ REM!!*  STORE TOTALS RECAP                             EAMRPSTL               
+\ REM!!*  TENDER LISTING REPORT                          EAMRPTLL               
+\ REM!!*  TERMINAL PRODUCTIVITY REPORT                   EAMRPTPL               
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  CODE PLACED IN THIS FILE IS INSERTED INTO THE REPORT                  
+\ REM!!*  COMMON FUNCTIONS MODULE EAMRPCFC WHICH IS LINKED INTO                 
+\ REM!!*  EACH OF THE LOAD MODULES LISTED ABOVE.  THIS CODE IS                  
+\ REM!!*  INSERTED INTO THE TOP OF THE ROUTINE RPCFEC01 WHICH                   
+\ REM!!*  IS CALLED TO PRINT, DISPLAY, OR FILE EACH LINE IN ALL                 
+\ REM!!*  OF THESE REPORTS.                                                     
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  TO USE THIS USER EXIT, INSERT CODE INTO THIS MODULE WHICH             
+\ REM!!*  TESTS AND ALTERS ONE OR MORE LINES IN ONE OR MORE OF THESE            
+\ REM!!*  REPORTS, THEN COMPILE MODULE EAMRPCFC AND RELINK THE LOAD             
+\ REM!!*  MODULE(S) FOR THE REPORT(S) TO BE IMPACTED.  NOTE THAT                
+\ REM!!*  THIS MODULE CAN BE USED TO ALTER MULTIPLE REPORTS OR                  
+\ REM!!*  MULTIPLE COPIES OF THIS MODULE CAN BE USED WITH SEPARATE              
+\ REM!!*  COMPILES AND LINKS TO SEPARATELY IMPACT THE INDIVIDUAL                
+\ REM!!*  REPORTS.  THE SECOND ALTERNATIVE SHOULD BE CONSIDERED IF              
+\ REM!!*  THE CODE FOR ONE REPORT APPEARS TO IMPACT THE PERFORMANCE             
+\ REM!!*  OF ANOTHER REPORT.                                                    
+\ REM!!*                                                                        
+\ REM!!*  NOTE THAT THERE ARE NO OPTIONS WHICH ENABLE OR DISABLE THIS           
+\ REM!!*  USER EXIT.  IF THE CODE IS PRESENT IN THE LOAD MODULE, THEN           
+\ REM!!*  IT WILL BE EXECUTED.                                                  
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING STRING VARIABLE CONTAINS THE LINE TO BE REPORTED        
+\ REM!!*  AND MAY BE TESTED AND/OR ALTERED:                                     
+\ REM!!*                                                                        
+\ REM!!*  LINE$              REPORT LINE                                        
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING INTEGER VARIABLES ARE AVAILABLE FOR TESTING:            
+\ REM!!*                                                                        
+\ REM!!*  LINE.NO            POSITION ON SCREEN/PRINTER                         
+\ REM!!*                       1-22 FOR DISPLAY, 1-66 FOR PRINTER               
+\ REM!!*  DESTINATION        DESTINATION OF REPORT                              
+\ REM!!*                       1 = DISPLAY, 2 = PRINTER, 3 = FILE               
+\ REM!!*  PERIOD             PERIOD REPORTED ON                                 
+\ REM!!*                       1 = CURRENT, 2 = PREVIOUS                        
+\ REM!!*  OP.OR.TERM         OPERATOR OR TERMINAL INDICATOR                     
+\ REM!!*                       1 = OPERATOR, 2 = TERMINAL                       
+\ REM!!*  NO.MAX.PAGE        MAXIMUM NUMBER OF PAGES IN THE REPORT              
+\ REM!!*                       (TO BE DISPLAYED AS IN "PAGE 2 OF XXX")          
+\ REM!!*  MM.PRINTLEN        PRINTER FORM LENGTH                                
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING STRING VARIABLES ARE AVAILABLE FOR TESTING:             
+\ REM!!*                                                                        
+\ REM!!*  RP.TITLE$          REPORT TITLE                                       
+\ REM!!*  AUTO.REPORT$       NAME OF AUTOMATIC REPORTS PROCEDURE                
+\ REM!!*  RP.DATETIME$       DATE AND TIME OF START OF PERIOD (PACKED)          
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE DOES NOT CONTAIN A BASIC FUNCTION, BUT SINCE        
+\ REM!!*  IT IS INCORPORATED INTO THE TOP OF A FUNCTION, LOCAL VARIABLES        
+\ REM!!*  CAN BE DEFINED AS THE FIRST ENTRIES WITHIN THIS FILE.                 
+\ REM!!*  GLOBAL VARIABLES CAN BE DEFINED IN EAMRPUVA.J86 AND EXTERNAL          
+\ REM!!*  ROUTINES CAN BE DEFINED IN EAMRPUSU.J86.                              
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  INSERT USER EXIT CODE HERE:                                           
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+!         START OF USER EXIT CODE                                               
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Copy over EAMRPU01.J86 for compile *************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!*******************************************************************
+!!** FREQUENT BUYER REPORT PROCESSING FOR THE CASH REPORT          **
+!!*******************************************************************
+
+ IF DESTINATION = 1 AND                   \ Destination = display
+    LINE.NO > 21 THEN BEGIN               ! Line is off of screen
+   LINE.NO = LINE.NO + 1                  ! bump line number
+END.IT:
+   EXIT SUB                               ! Don't display excess
+ ENDIF
+ ON ERROR GOTO FB.ERR
+IF OP.NO.EM THEN GOTO EMSS.ENDFB          ! No EM processing
+GOTO EMSS.STARTFB
+
+!!********************************************************************
+!!**  Handle errors encountered in the exit code                    **
+!!********************************************************************
+FB.ERR:
+ IF ERR NE "CU" THEN       \ Not expected error
+ CALL ADXERROR( 0,0,0,3,2, \ Log Error
+      "FB"+RIGHT$("00"+STR$(ERRF%),2)+ERR+ERRNHEX$)
+ IF ERR = "RN" THEN RESUME END.IT
+RESUME
+
+PRINT.FBUY.LINES:
+!!********************************************************************
+!!**  Format and write new print lines                              **
+!!********************************************************************
+!!  XXXXXXXXXXXXXXXXXXXX             XXXXXXXXXXX
+!! "  PREFERRED CUSTOMER SALES xxxxx/xxx,xxx.xx  xxx.x% OF ORDER"
+!!  123456789012345678901234567890123456789012345678901234567890
+!!           1         2         3         4         5         6
+!! "S  xxx.x% OF VOLUME "
+!!  12345678901234567890
+!!           7         8
+!!IF EMSS.FBUYAMT NE 0 AND                       Non-zero amount
+  IF EMSS.FBUYCNT NE 0 THEN BEGIN              ! Non-zero count
+    WORK$ = ""
+!   USER$ = LEFT$(PGM.NAME$ + STRING$(20," "),20) \ Format name = 20
+!         + " SALES "                          ! ADD descriptor = 27
+    USER$ = MSG$(1) + MSG$(2)
+    WORK$ = RIGHT$("    " + STR$(EMSS.FBUYCNT),5) ! Format count = 5
+!   USER$ = USER$ + WORK$ + "/"                ! Merge with "/"   = 33
+    J% = MATCH("%Ecnt",USER$,1)                ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,5)          ! REPLACE VARIABLE
+    WORK$ = MMCFEC06$(EMSS.FBUYAMT,-1,-1)      ! Format amount
+    IF RIGHT$(WORK$,1) = " " THEN
+       WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)     ! STRIP TRAILING BLANK
+    WORK$ = LEFT$(WORK$ + "         ",11)      ! Pad amount to 11 chars.
+!   USER$ = USER$ + WORK$ + " "                ! Merge with blank = 45
+    J% = MATCH("%Electr_amt",USER$,1)          ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,11)         ! REPLACE VARIABLE
+    WORK$ = ?PCT$(EMSS.FBUYCNT,EMSS.TOTLCNT)   ! Compute % of orders
+!   USER$ = USER$ + WORK$ + " OF ORDERS  "     ! Merge with desc = 63
+    J% = MATCH("%Ecpr",USER$,1)                ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,5)          ! REPLACE VAR, Only use 5 chars
+    WORK$ = ?PCT$(EMSS.FBUYAMT,EMSS.TOTLAMT)   ! Compute % of sales
+!   USER$ = USER$ + WORK$ + " OF VOLUME "      ! Merge with desc = 80
+    J% = MATCH("%Eapr",USER$,1)                ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,5)          ! REPLACE VAR, Only use 5 chars
+    GOSUB WRITE.LINE                           ! WRITE THE LINE
+!!
+!! "                   COUPONS xxxxx/xx,xxx.xx  $xxx.xx AVERAGE "
+!!  123456789012345678901234567890123456789012345678901234567890
+!!           1         2         3         4         5         6
+!! "SALE  (vs. $xxx.xx)  "
+!!  12345678901234567890
+!!           7         8
+!   USER$ = "                   COUPONS "      ! Descriptor = 27
+    USER$ = MSG$(3) + MSG$(4)
+    WORK$ = RIGHT$("    " + STR$(EMSS.COUPCNT),5) ! Format count = 5
+!   USER$ = USER$ + WORK$ + "/"                ! Merge with "/"   = 33
+    J% = MATCH("%Ecct",USER$,1)                ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,5)          ! REPLACE VARIABLE
+    WORK$ = MMCFEC06$(EMSS.COUPAMT,-1,-1)      ! Format amount
+    IF RIGHT$(WORK$,1) = " " THEN
+       WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)     ! STRIP TRAILING BLANK
+    WORK$ = LEFT$(WORK$ + "         ",10)      ! Pad amount to 10 chars.
+!   USER$ = USER$ + WORK$ + " "                ! Merge with blank = 44
+    J% = MATCH("%Eleccpamt",USER$,1)           ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,10)         ! REPLACE VARIABLE
+    WORK4% = EMSS.FBUYAMT/EMSS.FBUYCNT         ! Compute FB order size
+!   WORK$ = RIGHT$("    $" + STR$(WORK4%),6)   ! Format average
+!   WORK$ = LEFT$(WORK$,4) + "."               \  with 1 decimal
+!         + RIGHT$(WORK$,2) + " "              !   and blank = 8
+    WORK$ = MMCFEC06$(WORK4%,-1,-1)            ! Format amount
+    IF RIGHT$(WORK$,1) = " " THEN
+       WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)     ! STRIP TRAILING BLANK
+    WORK$ = RIGHT$("     " + WORK$,6)          ! Format average
+!   USER$ = USER$ + WORK$ + "AVERAGE SALE  "   ! Merge with desc = 66
+    J% = MATCH("%Elavg",USER$,1)               ! LOCATE START
+    CALL SUBSTR(USER$,J%-1,WORK$,0,6)          ! REPLACE VARIABLE
+    IF EMSS.NOFBCNT THEN BEGIN                 ! If not all preferred
+      WORK4% = EMSS.NOFBAMT/EMSS.NOFBCNT       ! Compute NFB order size
+!     WORK$ = RIGHT$("    (vs. $" + STR$(WORK4%),11) ! Format average
+!     WORK$ = LEFT$(WORK$,9) + "."             \  with 1 decimal
+!           + RIGHT$(WORK$,2) + ")"            !   and paren = 13
+      WORK$ = MMCFEC06$(WORK4%,-1,-1)          ! Format amount
+      IF RIGHT$(WORK$,1) = " " THEN
+         WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)   ! STRIP TRAILING BLANK
+      WORK$ = RIGHT$("     " + WORK$,6)        ! Format average
+      J% = MATCH("%Neavg",USER$,1)             ! LOCATE START
+      CALL SUBSTR(USER$,J%-1,WORK$,0,6)        ! REPLACE VARIABLE
+!     USER$ = USER$ + WORK$ + " "              ! Merge with blanks = 80
+    ENDIF ELSE BEGIN
+      WORK$ = MMCFEC06$(0,-1,-1)               ! Format amount
+      IF RIGHT$(WORK$,1) = " " THEN
+         WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)   ! STRIP TRAILING BLANK
+      WORK$ = RIGHT$("     " + WORK$,6)        ! Assure length = 6
+      J% = MATCH("%Neavg",USER$,1)             ! LOCATE START
+      CALL SUBSTR(USER$,J%-1,WORK$,0,6)        ! REPLACE VARIABLE
+    ENDIF
+    GOSUB WRITE.LINE                           ! WRITE THE LINE
+!!
+!! "        POINTS xxx,xxx.xx SALES xxx,xxx.xx BONUS xxx% xxx,xx"
+!!  123456789012345678901234567890123456789012345678901234567890
+!!           1         2         3         4         5         6
+!! "x.xx REDEEMED xxxx%
+!!  12345678901234567890
+!!           7         8
+    IF (EMSS.ITEMPTS > 0 AND                   \ Sales points
+        OP.PPAMT NE OP.AMTPP) OR               \  not just like sales
+       EMSS.BONSPTS OR EMSS.REDMPTS THEN BEGIN ! or Bonus/Redeem points
+!     USER$ = "        POINTS "                ! Descriptor = 15
+      USER$ = MSG$(5) + MSG$(6)
+      WORK$ = ?PTS$(EMSS.ITEMPTS)              ! Format item points = 10
+!     USER$ = USER$ + WORK$ + " SALES "        ! Merge with desc  = 32
+      J% = MATCH("%Totpoints",USER$,1)         ! LOCATE START
+      CALL SUBSTR(USER$,J%-1,WORK$,0,10)       ! REPLACE VARIABLE
+      WORK$ = ?PTS$(EMSS.BONSPTS)              ! Format bonus points =10
+!     USER$ = USER$ + WORK$ + " BONUS "        ! Merge with " "   = 49
+      J% = MATCH("%Bonpoints",USER$,1)         ! LOCATE START
+      CALL SUBSTR(USER$,J%-1,WORK$,0,10)       ! REPLACE VARIABLE
+      IF EMSS.TOTLPTS THEN BEGIN               ! More than redeemed
+        WORK4% = EMSS.TOTLPTS * 10             ! Round at whole %
+        WORK$ = ?PCT$(EMSS.BONSPTS,WORK4%)     ! Compute % of points
+        WORK$ = MID$(WORK$,2,2) +RIGHT$(WORK$,2) ! Format as 4 chars
+!       WHILE LEFT$(WORK$,1) = " "             ! Strip leading blanks
+!         WORK$ = RIGHT$(WORK$,LEN(WORK$)-1)
+!       WEND
+        J% = MATCH("%Bn",USER$,1)              ! LOCATE START
+        CALL SUBSTR(USER$,J%-1,WORK$,0,3)      ! REPLACE VAR, Only use 3 chars
+!       USER$ = USER$ + WORK$ + " "            ! Merge with desc  = 54
+      ENDIF
+      WORK$ = ?PTS$(EMSS.REDMPTS)              ! Format redeemed = 10
+!     USER$ = USER$ + WORK$ + " REDEEMED "     ! Merge with " "   = 74
+      J% = MATCH("%Redpoints",USER$,1)         ! LOCATE START
+      CALL SUBSTR(USER$,J%-1,WORK$,0,10)       ! REPLACE VARIABLE
+      IF EMSS.TOTLPTS THEN BEGIN               ! More than redeemed
+        WORK4% = EMSS.TOTLPTS * 10             ! Round at whole %
+        WORK$ = ?PCT$(EMSS.REDMPTS,WORK4%)     ! Compute % of points
+        WORK$ = MID$(WORK$,1,3) +RIGHT$(WORK$,2) ! Format as 5 chars
+!       WHILE LEFT$(WORK$,1) = " "             ! Strip leading blanks
+!         WORK$ = RIGHT$(WORK$,LEN(WORK$)-1)
+!       WEND
+        J% = MATCH("%Rdp",USER$,1)             ! LOCATE START
+        CALL SUBSTR(USER$,J%-1,WORK$,0,4)      ! REPLACE VARIABLE
+!       USER$ = USER$ + WORK$                  ! Merge with desc  = 79
+      ENDIF
+!     WORK2$ = STRING$(12," ")                 ! 12 BLANKS
+!     USER$ = RIGHT$(WORK2$ + USER$,79)        ! RIGHT JUSTIFY A BIT
+      GOSUB WRITE.LINE                         ! WRITE THE LINE
+    ENDIF
+  ENDIF
+RETURN
+
+WRITE.LINE:
+!!********************************************************************
+!!**  Write line to display, printer, or file                       **
+!!********************************************************************
+  IF DESTINATION = DISPLAY THEN BEGIN        ! Display needed
+    IF LINE.NO > 21 THEN RETURN              ! Don't overflow display
+    CALL MMCFEC05(POSF(LINE.NO),"CF3")       ! position cursor
+    CALL MMCFEC05(PUTF(USER$),"CF7")         ! display string
+  ENDIF ELSE BEGIN                           ! write to printer/file
+    FORMAT$ = "C" + STR$(LEN(USER$)) + ",C2" ! get format string
+    WRITE FORM FORMAT$;#1;USER$,SKIP$        ! write string
+  ENDIF
+  LINE.NO = LINE.NO + 1                      ! bump line number
+RETURN
+
+GET.FBUY.TOTALS:
+!!********************************************************************
+!!**  Get Frequent buyer totals from file for a single record       **
+!!********************************************************************
+  EMSS.FBUYAMT = 0                               ! Clear FBUY amts
+  EMSS.FBUYCNT = 0
+  EMSS.COUPCNT = 0                               ! Clear FBUY CPN amts
+  EMSS.COUPAMT = 0
+  EMSS.ITEMPTS = 0                               ! Clear FBUY points
+  EMSS.BONSPTS = 0
+  EMSS.REDMPTS = 0
+  EMSS.MFRCOUP = 0                               ! Clear CPN totals
+  EMSS.STRCOUP = 0
+  EMSS.DBLCOUP = 0
+
+  IF LEN(AC.OT.RESERVED$) = 172 THEN BEGIN     ! Record data found
+    WORK2$ = STRING$(12, CHR$(0))
+    IF MID$(AC.OT.RESERVED$,49,12) NE WORK2$ THEN BEGIN ! CPN totals
+      EMSS.MFRCOUP = GETN4(AC.OT.RESERVED$,48) ! Get AUTO MFR CPN amount
+      EMSS.STRCOUP = GETN4(AC.OT.RESERVED$,52) ! Get AUTO STR CPN amount
+      EMSS.DBLCOUP = GETN4(AC.OT.RESERVED$,56) ! Get DBL CPN amount
+      INPT.MFR.ONHAND = AC.OT.TEAMT(7)         ! Get On hand MFR Coupons
+      INPT.STR.ONHAND = AC.OT.TEAMT(8)         ! Get On hand STR Coupons
+      TEMP4% = EMSS.STRCOUP + EMSS.DBLCOUP     ! TOTAL AUTO STORE CPNS
+
+      IF (AC.OT.INDICAT0 AND 80H) NE 0 OR      \ RECONCILED
+         (AC.OT.INDICAT0 AND 6) = 2 THEN BEGIN ! COUNTED IN C.P.
+        IF TEMP4% OR EMSS.MFRCOUP THEN BEGIN   ! AUTO COUPONS PRESENT
+          IF INPT.MFR.ONHAND < EMSS.MFRCOUP OR \ NOT ENOUGH IN
+             INPT.STR.ONHAND < TEMP4% THEN BEGIN ! ON HAND
+            AC.OT.INDICAT0 = AC.OT.INDICAT0 AND NOT 2 ! NOT IN COUNTED
+            AC.OT.INDICAT0 = AC.OT.INDICAT0 OR 4 ! ASSUME PICKED UP
+          ENDIF
+        ENDIF
+      ENDIF
+
+      J% = 3                                   ! ASSUME IN NET (TO ON-HAND)
+      IF (INPT.MFR.ONHAND = EMSS.MFRCOUP AND   \ ON-HAND MATCHES AUTO COUPON
+         INPT.STR.ONHAND = TEMP4%) OR          \  OR COUNTED IN C.P.
+         (AC.OT.INDICAT0 AND 2) THEN J% = 2    !   SO IN ON-HAND
+      IF AC.OT.INDICAT0 AND 4 THEN J% = 1      ! CLOSE DONE SO IN PICKUPS
+      IF PERIOD > 1 THEN J% = 1 !! TEMP TEST   ! BYPASS BASE CODE BUG
+
+ADJUST.IT:
+      AUTO.CPN.ADJ(J%) = AUTO.CPN.ADJ(J%)      \ ADD MFR CPN TO ADJUSTMENT
+                       + EMSS.MFRCOUP
+      J% = J% + 3                              ! MOVE TO STR CPNS
+      AUTO.CPN.ADJ(J%) = AUTO.CPN.ADJ(J%)      \ ADD STR CPN TO ADJUSTMENT
+                       + EMSS.STRCOUP
+      J% = J% + 3                              ! MOVE TO DBL CPNS
+      AUTO.CPN.ADJ(J%) = AUTO.CPN.ADJ(J%)      \ ADD DBL CPN TO ADJUSTMENT
+                       + EMSS.DBLCOUP
+      IF OFFICE.REPORT AND J% < 9 THEN         \ Office first pass
+        J% = 3 : GOTO ADJUST.IT                ! ADJUST NET ALSO
+    ENDIF
+
+    IF OFFICE.REPORT = 0 THEN BEGIN            ! Not office report
+      EMSS.FBUYAMT = GETN4(AC.OT.RESERVED$,60) ! Get FBUY trans amount
+      USER$ = MID$(AC.OT.RESERVED$,65,2)       \ Get FBUY trans count
+            + CHR$(0) + CHR$(0)                !  into 4 byte field
+      EMSS.FBUYCNT = GETN4(USER$,0)            ! Get FBUY trans count
+      USER$ = MID$(AC.OT.RESERVED$,67,2)       \ Get FBUY coupon count
+            + CHR$(0) + CHR$(0)                !  into 4 byte field
+      EMSS.COUPCNT = GETN4(USER$,0)            ! Get FBUY coupon count
+      EMSS.COUPAMT = GETN4(AC.OT.RESERVED$,68) ! Get FBUY coupon amount
+      EMSS.ITEMPTS = GETN4(AC.OT.RESERVED$,36) ! Get item points
+      EMSS.BONSPTS = GETN4(AC.OT.RESERVED$,40) ! Get bonus points
+      EMSS.REDMPTS = GETN4(AC.OT.RESERVED$,44) ! Get redeemed points
+    ENDIF ELSE BEGIN                           ! Office report
+      AUTO.CPN.ADJ(1) = -AUTO.CPN.ADJ(1)       ! Invert pickup adjust.
+      AUTO.CPN.ADJ(4) = -AUTO.CPN.ADJ(4)       ! Invert pickup adjust.
+      AUTO.CPN.ADJ(7) = -AUTO.CPN.ADJ(7)       ! Invert pickup adjust.
+      IF PERIOD > 1 THEN BEGIN                 ! Previous period
+        IF OP.DEP.MFR THEN AUTO.CPN.ADJ(3) = 0 ! Auto MFR out of office
+        IF OP.DEP.STR THEN AUTO.CPN.ADJ(6) = 0 ! Auto STR out of office
+        IF OP.DEP.DBL THEN AUTO.CPN.ADJ(9) = 0 ! Auto DBL out of office
+      ENDIF                                    ! Previous period
+    ENDIF
+  ENDIF
+RETURN
+
+GET.RECAP.DATA:
+!!********************************************************************
+!!**  Sum up data from Accounting file for recap report             **
+!!********************************************************************
+  IF PERIOD = 1 THEN BEGIN
+    OPEN "EAMACCTC" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    WORK4% = SIZE("EAMACCTC")/512 - 1            ! Determine file size
+  ENDIF
+  IF PERIOD = 2 THEN BEGIN
+    OPEN "EAMACCTP" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    WORK4% = SIZE("EAMACCTP")/512 - 1            ! Determine file size
+  ENDIF
+  IF PERIOD = 3 THEN BEGIN
+    OPEN "EAMACCCL" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    WORK4% = SIZE("EAMACCCL")/512 - 1            ! Determine file size
+  ENDIF
+  IF PERIOD = 4 THEN BEGIN
+    OPEN "EAMACCPL" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    WORK4% = SIZE("EAMACCPL")/512 - 1            ! Determine file size
+  ENDIF
+  READ FORM "C512"; #55; WORK$                   ! Read header sector
+  DIM SUMM.TOTALS(9)                             ! Initalize totals
+
+  IF END #55 THEN CONTINUE.LOOP                  ! Don't stop till done
+  WHILE WORK4%                                   ! While more data
+    READ FORM "C4096"; #55; WORK$                ! Read next block
+CONTINUE.LOOP:
+    WORK4% = WORK4% - 8                          ! Dec sectors left
+    IF WORK4% < 0 THEN BEGIN                     ! Overshot end
+      WORK  = (8 + WORK4%) * 512                 ! Compute data
+      WORK2 = (0 - WORK4%) * 512                 ! Compute junk
+      WORK$ = LEFT$(WORK$,WORK)                  \ Keep data
+            + STRING$(WORK2,CHR$(0))             !  appended with zeroes
+    ENDIF
+    IF WORK4% < 1 THEN WORK4% = 0                ! No more work
+
+    FOR I% = 0 TO 3584 STEP 512                  ! For records in block
+      IF MID$(WORK$,I%+5,1) = "2" OR             \ If operator record
+         MID$(WORK$,I%+5,1) = "3" THEN BEGIN     ! or terminal record
+
+        J% = I% + 4                              ! Offset to record start
+        AC.OT.INDICAT0 = ASC(MID$(WORK$,J%+12,1)) ! Get flag data
+        AC.OT.RESERVED$ = MID$(WORK$,J%+337,172) ! Get reserved data
+        AC.OT.TEAMT(7) = GETN4(WORK$,J%+118)     ! Get On hand MFR coups
+        AC.OT.TEAMT(8) = GETN4(WORK$,J%+122)     ! Get On hand STR coups
+        GOSUB GET.FBUY.TOTALS                    ! Get new file totals
+        SUMM.TOTALS(0) = SUMM.TOTALS(0) + EMSS.FBUYAMT
+        SUMM.TOTALS(1) = SUMM.TOTALS(1) + EMSS.FBUYCNT
+        SUMM.TOTALS(2) = SUMM.TOTALS(2) + EMSS.COUPCNT  ! SUMMARIZE
+        SUMM.TOTALS(3) = SUMM.TOTALS(3) + EMSS.COUPAMT  !  NEW
+        SUMM.TOTALS(4) = SUMM.TOTALS(4) + EMSS.MFRCOUP  !   TOTALS
+        SUMM.TOTALS(5) = SUMM.TOTALS(5) + EMSS.STRCOUP
+        SUMM.TOTALS(6) = SUMM.TOTALS(6) + EMSS.DBLCOUP
+        SUMM.TOTALS(7) = SUMM.TOTALS(7) + EMSS.ITEMPTS
+        SUMM.TOTALS(8) = SUMM.TOTALS(8) + EMSS.BONSPTS
+        SUMM.TOTALS(9) = SUMM.TOTALS(9) + EMSS.REDMPTS
+
+      ENDIF
+    NEXT I%                                      ! Next record
+  WEND                                           ! next block read
+  CLOSE 55                                       ! Close file
+  EMSS.FBUYAMT = SUMM.TOTALS(0)
+  EMSS.FBUYCNT = SUMM.TOTALS(1)
+  EMSS.COUPCNT = SUMM.TOTALS(2)                  ! REPORT
+  EMSS.COUPAMT = SUMM.TOTALS(3)                  !  SUMMARIZED
+  EMSS.MFRCOUP = SUMM.TOTALS(4)                  !   TOTALS
+  EMSS.STRCOUP = SUMM.TOTALS(5)
+  EMSS.DBLCOUP = SUMM.TOTALS(6)
+  EMSS.ITEMPTS = SUMM.TOTALS(7)
+  EMSS.BONSPTS = SUMM.TOTALS(8)
+  EMSS.REDMPTS = SUMM.TOTALS(9)
+RETURN
+
+GET.FBUY.DATA:
+!!********************************************************************
+!!**  Get frequent buyer data from file and compute needed totals   **
+!!********************************************************************
+ DIM AUTO.CPN.ADJ(9)                           ! Clear CPN Adjustments
+ IF RP.TITLE$ NE SUMMARY.DESC$ THEN BEGIN      ! Oper, term, or office
+  IF OFFICE.REPORT THEN BEGIN                  ! Office report
+    AC.OT.RESERVED$ = RIGHT$(AC.ST.RESERVED$,172) ! Get office data
+    AC.OT.OPERTERM$ = "OFFICE"                 ! Dummy OPERTERM
+    DIM AC.OT.TEAMT(8)                         ! Clear on hand amts
+    AC.OT.INDICAT0 = 4                         ! All Picked up
+  ENDIF
+  GOSUB GET.FBUY.TOTALS                        ! Get new file totals
+ ENDIF ELSE BEGIN
+   GOSUB GET.RECAP.DATA                        ! Recap for summary report
+   AC.OT.OPERTERM$ = "SUMMARY"                 ! Dummy OPERTERM
+ ENDIF
+ SAV.OPERTERM$ = AC.OT.OPERTERM$                ! Save last record key
+
+ EMSS.TOTLAMT = AC.OT.GROSSPOS - AC.OT.GROSSNEG ! Get total amount
+ EMSS.TOTLCNT = AC.OT.NUMTRANS              ! Get total count
+ EMSS.NOFBAMT = EMSS.TOTLAMT - EMSS.FBUYAMT ! Get non-FB amount
+ EMSS.NOFBCNT = EMSS.TOTLCNT - EMSS.FBUYCNT ! get not-FB count
+ EMSS.TOTLPTS = EMSS.ITEMPTS + EMSS.BONSPTS ! Get total points
+RETURN
+
+ALTER.AMOUNT:
+!!********************************************************************
+!!** Get amt from USER$ at I%, add WORK4%, and put new amt in USER$ **
+!!********************************************************************
+  WORK$ = MID$(USER$,I%,13)                      ! GET AMOUNT TO ALTER
+  TEMP4% = 0                                     ! DEFAULT RESULTS
+  J% = MATCH("#",WORK$,1)                        ! LOOK FOR NUMERICS
+  IF J% THEN BEGIN
+    WORK$ = RIGHT$(WORK$,1)                      \ MOVE SIGN AND
+        + MID$(WORK$,J%,LEN(WORK$) - J%)         ! STRIP LEADING BLANKS
+YY: J% = MATCHB(",",WORK$,1)                     ! LOOK FOR COMMA
+    IF J% THEN                                   \ IF FOUND THEN DELETE
+      WORK$ = LEFT$(WORK$,J%-1) + RIGHT$(WORK$,LEN(WORK$)-J%) :\
+      GOTO YY
+ZZ: J% = MATCHB(".",WORK$,1)                     ! LOOK FOR DECIMAL
+    IF J% THEN                                   \ IF FOUND THEN DELETE
+      WORK$ = LEFT$(WORK$,J%-1) + RIGHT$(WORK$,LEN(WORK$)-J%) :\
+      GOTO ZZ
+    TEMP4% = VAL(WORK$)                          ! GET VALUE AS INTEGER
+  ENDIF
+  TEMP4% = TEMP4% + WORK4%                       ! ADD ADJUSTMENT
+  WORK$ = MMCFEC06$(TEMP4%,-1,-1)                ! FORMAT NEW AMOUNT
+  WORK$ = RIGHT$(WORK2$ + WORK$,13)              ! PAD TO 13 CHARACTERS
+  CALL SUBSTR(USER$,I%-1,WORK$,0,13)             ! INSERT DATA IN LINE
+RETURN
+
+
+!!********************************************************************
+!!**  Main line code to decide where to put new lines               **
+!!********************************************************************
+EMSS.STARTFB:
+ IF NOT EMSS.READ.DESC THEN BEGIN
+     DIM MSG$(10)
+     OPEN "EAMEDESC" RECL 49 AS 20 NOWRITE NODEL ! OPEN DESC FILE
+     READ #20,1096; MSG$(1)            ! EM SALES LINE
+     READ #20,1097; MSG$(2)            ! EM SALES LINE
+     READ #20,1098; MSG$(3)            ! EM COUPON LINE
+     READ #20,1099; MSG$(4)            ! EM COUPON LINE
+     READ #20,1100; MSG$(5)            ! EM POINTS LINE
+     READ #20,1101; MSG$(6)            ! EM POINTS LINE
+     READ #20,1102; MSG$(7)            ! "ELECTRONIC MFR COUPON  "
+     READ #20,1103; MSG$(8)            ! "ELECTRONIC STR COUPON  "
+     READ #20,1104; MSG$(9)            ! "DOUBLED COUPON   "
+     CLOSE 20                          !
+     OPEN "EAMRDESC" RECL 49 AS 20 NOWRITE NODEL ! OPEN DESC FILE
+     READ #20,1001; MSG$(10)           ! "OPERATOR               "
+     CLOSE 20                          !
+     EMSS.READ.DESC = -1
+ ENDIF
+ IF DESTINATION = 1 THEN BEGIN                ! Destination = display
+   IF (MOD(PAGE,2) = 1) AND                   \ Odd numbered page
+      (LINE.NO > 18) THEN BEGIN               ! At line 19-21
+     IF (LINE$ = "") AND                      \ Blank line
+        (EMSS.FB.PRINTED = 0) THEN BEGIN      ! Not yet printed
+       EMSS.FB.PRINTED = -1                   ! Set printed flag
+       GOSUB GET.FBUY.DATA                    ! Get needed acct data
+       GOSUB PRINT.FBUY.LINES                 ! Print new lines
+       EXIT SUB                               ! Avoid print of input
+     ENDIF
+   ENDIF ELSE BEGIN
+     EMSS.FB.PRINTED = 0                      ! Not yet printed
+     IF PAGE = 1 AND LINE.NO < 4 THEN         \ Possible new report
+       SAV.OPERTERM$ = "??"                   ! Assure re-read of data
+   ENDIF
+ ENDIF ELSE BEGIN                             ! Not display
+
+   IF LINE.NO > 13 THEN BEGIN
+    IF LINE.NO > EMSS.PRINT.NOW + 13 THEN BEGIN
+     IF (EMSS.FB.PRINTED = 0) AND             \ Not yet printed
+        (LINE$ = "") THEN BEGIN               ! Blank line found
+       EMSS.FB.PRINTED = -1                   ! Set printed flag
+       WRITE FORM "C80,C2";#1;LINE$,SKIP$     ! Print additional line
+       LINE.NO = LINE.NO + 1                  ! Bump line count
+       GOSUB GET.FBUY.DATA                    ! Get needed acct data
+       GOSUB PRINT.FBUY.LINES                 ! Print new lines
+     ENDIF
+    ENDIF
+   ENDIF ELSE BEGIN                           ! Top of page so
+     EMSS.FB.PRINTED = 0                      ! Not yet printed
+     EMSS.PRINT.NOW  = 0                      ! Assume top of page
+   ENDIF
+ ENDIF
+
+!!********************************************************************
+!!**  Add operator name next to operator number where appropriate   **
+!!********************************************************************
+ IF LINE.NO = 5 OR                           \ LINE 5
+    EMSS.FB.PRINTED THEN BEGIN               ! 2ND OPERATOR ON PAGE
+!  I% = MATCH("OPERATOR",LINE$,1)            ! LOOK FOR "OPERATOR"
+   I% = MATCH(LEFT$(MSG$(10),8),LINE$,1)     ! LOOK FOR "OPERATOR"
+   IF I% THEN BEGIN                          ! IF PRESENT THEN
+     EMSS.FB.PRINTED = 0                     ! Not yet printed
+     EMSS.PRINT.NOW = LINE.NO - 5            ! Mark start of new oper
+     I% = MATCH("#",LINE$,I%+8)              ! LOOK FOR NUMERICS
+     IF I% THEN BEGIN                        ! IF PRESENT THEN
+       J% = MATCHB(" ",LINE$,I%)             ! LOOK FOR BLANK
+       IF J% = 0 THEN J% = LEN(LINE$) + 1    ! OR FOR EOL
+       EMSS.OPER$ = MID$(LINE$,I%,J%-I%)     ! GET OPERATOR
+       EMSS.OPER$ = STR$(VAL(EMSS.OPER$))    ! DELETE BLANKS
+       EMSS.OPER$ = PACK$(RIGHT$("000000000" \ FORMAT TO 10
+                  + EMSS.OPER$,10))          !  PACKED CHARACTERS
+
+       IF END #44 THEN FILE.ERROR            ! IGNORE N.O.F. ERROR
+       EMSS.REC$ = ""                        ! ASSUME NO DATA
+       IF NOT EMSS.OPER.OPEN THEN BEGIN      ! NOT ALREADY OPEN
+         OPEN "$AMOPERA" KEYED RECL 72 AS 44 NOWRITE NODEL  ! OPEN FILE
+         EMSS.OPER.OPEN = -1
+       ENDIF
+       READ FORM "C72"; #44 KEY EMSS.OPER$; EMSS.REC$ ! READ RECORD
+FILE.ERROR:
+       EMSS.OPER$ = MID$(EMSS.REC$,33,20)    ! GET OPERATOR NAME
+       LINE$ = LEFT$(LINE$,J%-1)             ! LIMIT LINE
+       LINE$ = LINE$ + "     " + EMSS.OPER$  ! APPEND NAME TO LINE
+       IF (AC.OT.INDICAT0 AND 80H) NE 0 THEN BEGIN ! RECONCILED
+         LINE$ = LINE$ +"     " +YES.RECON$  ! APPEND DESCRIPTOR
+       ENDIF ELSE BEGIN                      ! NOT RECONCILED
+         LINE$ = LINE$ +"     " +NOT.RECON$  ! APPEND DESCRIPTOR
+       ENDIF                                 ! NOT RECONCILED
+     ENDIF
+   ENDIF
+ ENDIF
+
+!!********************************************************************
+!!**  Get descriptors for store and manufacturer coupons            **
+!!********************************************************************
+  IF LINE.NO < 3 THEN BEGIN             ! 1ST 2 LINES
+    IF STRCPN.NAME$ = "" OR             \ NO DATA YET
+       MFRCPN.NAME$ = "" THEN BEGIN     !
+      OPEN "EAMSDESC" RECL 49 AS 20 NOWRITE NODEL ! OPEN DESC FILE
+      READ #20, 7; MFRCPN.NAME$         ! GET MFR COUPON NAME
+      READ #20, 8; STRCPN.NAME$         ! GET STR COUPON NAME
+      CLOSE 20                          !
+      IF LEN(NOT.RECON$) = 0 OR         \ NO DESCRIPTORS YET
+         LEN(YES.RECON$) = 0 THEN BEGIN !
+        READ #6, 4370; YES.RECON$       ! GET "RECONCILED"
+        READ #6, 4371; NOT.RECON$       ! GET "NOT RECONCILED"
+      ENDIF                             ! NO DESCRIPTORS YET
+      IF SUMMARY.DESC$ = "" THEN        \
+        READ #6, 1109; SUMMARY.DESC$    ! SUMMARY CASH REPORT TITLE
+      IF PGM.NAME$ = "" THEN BEGIN      ! NO PROGRAM NAME
+        CLOSE 8                         ! CLOSE OPTIONS IF OPEN
+        OPEN "EAMFBOPT" AS 8 BUFFSIZE 512 NOWRITE NODEL
+        %INCLUDE USEROPRR.J86           ! READ OPTIONS
+        CLOSE 8
+      ENDIF
+    ENDIF
+  ENDIF
+
+!!********************************************************************
+!!**  Get frequent buyer data if needed after PgUp                  **
+!!********************************************************************
+ IF (LINE.NO > 8) THEN BEGIN                  ! At line 9 - 21
+  IF DESTINATION = 1 THEN BEGIN               ! Destination = display
+   IF (MOD(PAGE,2) = 0) THEN BEGIN            ! Even numbered page
+    IF SAV.OPERTERM$ NE AC.OT.OPERTERM$ THEN  \ New data needed
+      GOSUB GET.FBUY.DATA                     ! Get needed acct data
+   ENDIF
+  ENDIF
+
+!!********************************************************************
+!!**  Alter manufacturer coupon line if needed                      **
+!!********************************************************************
+  IF EMSS.MFRCOUP THEN BEGIN                ! AUTO MFR COUPONS PRESENT
+    IF MID$(LINE$,3,10) = LEFT$(MFRCPN.NAME$,10) AND \ RIGHT LINE
+       MID$(LINE$,40,40) NE " " THEN BEGIN  ! WITH DATA
+      WORK2$ = STRING$(12," ")              ! 12 BLANKS
+      USER$ = LINE$                         ! GET LINE TO ALTER
+      I% = 37                               ! PICKUP OFFSET
+      WORK4% = -AUTO.CPN.ADJ(1)             ! PICKUP ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM PICKUPS
+      I% = 51                               ! ONHAND OFFSET
+      WORK4% = -AUTO.CPN.ADJ(2)             ! ONHAND ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM ON HAND
+      I% = 66                               ! NET OFFSET
+      WORK4% = -AUTO.CPN.ADJ(3)             ! NET ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM NET
+
+      GOSUB WRITE.LINE                      ! WRITE THE LINE
+      EMSS.CPN.ALTERED = -1                 ! Coupon line altered
+      EXIT SUB                              ! Avoid print of input
+    ENDIF
+  ENDIF
+
+!!********************************************************************
+!!**  Alter store coupon line if needed                             **
+!!********************************************************************
+  IF EMSS.STRCOUP OR EMSS.DBLCOUP THEN BEGIN ! AUTO STR COUPON AVAILABLE
+    IF MID$(LINE$,3,10) = LEFT$(STRCPN.NAME$,10) AND \ RIGHT LINE
+       MID$(LINE$,40,40) NE " " THEN BEGIN  ! WITH DATA
+      WORK2$ = STRING$(12," ")              ! 12 BLANKS
+      USER$ = LINE$                         ! GET LINE TO ALTER
+      I% = 37                               ! PICKUP OFFSET
+      WORK4% = -AUTO.CPN.ADJ(4)             \ PICKUP ADJUSTMENT
+               -AUTO.CPN.ADJ(7)
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM PICKUPS
+      I% = 51                               ! ONHAND OFFSET
+      WORK4% = -AUTO.CPN.ADJ(5)             \ ONHAND ADJUSTMENT
+               -AUTO.CPN.ADJ(8)
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM ON HAND
+      I% = 66                               ! NET OFFSET
+      WORK4% = -AUTO.CPN.ADJ(6)             \ NET ADJUSTMENT
+               -AUTO.CPN.ADJ(9)
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! SUBTRACT FROM NET
+
+      GOSUB WRITE.LINE                      ! WRITE THE LINE
+      EMSS.CPN.ALTERED = -1                 ! Coupon line altered
+      EXIT SUB                              ! Avoid print of input
+    ENDIF
+  ENDIF
+
+!!********************************************************************
+!!**  Alter tender total line if needed                             **
+!!********************************************************************
+  IF EMSS.STRCOUP OR EMSS.DBLCOUP OR        \ AUTO STR COUPON PRESENT
+     EMSS.MFRCOUP THEN BEGIN                ! AUTO MFR COUPON PRESENT
+    IF LEFT$(LINE$,8) = "TOTALS :" THEN BEGIN ! RIGHT LINE
+      WORK4% = AUTO.CPN.ADJ(3)              \ TOTAL NET ADJUSTMENT
+             + AUTO.CPN.ADJ(6)              \   TO GO TO ONHAND
+             + AUTO.CPN.ADJ(9)
+      IF WORK4% THEN BEGIN                  ! ADJUSTMENTS TO NET
+        WORK2$ = STRING$(12," ")            ! 12 BLANKS
+        USER$ = LINE$                       ! GET LINE TO ALTER
+        I% = 51                             ! ONHAND OFFSET
+        GOSUB ALTER.AMOUNT                  ! ADD TO ON HAND
+        I% = 66                             ! NET OFFSET
+        WORK4% = -WORK4%                    ! NET ADJUSTMENT
+        GOSUB ALTER.AMOUNT                  ! SUBTRACT FROM NET
+        GOSUB WRITE.LINE                    ! WRITE THE LINE
+        EXIT SUB                            ! Avoid print of input
+      ENDIF
+    ENDIF
+  ENDIF
+
+!!********************************************************************
+!!**  Insert new tender lines as needed for auto or doubled coupons **
+!!********************************************************************
+  IF EMSS.CPN.ALTERED THEN BEGIN            ! Coupon line altered
+   IF LINE$ = "" THEN BEGIN                 ! BLANK LINE
+    EMSS.CPN.ALTERED = 0                    ! Coupon lines shown
+    EMSS.DEF$ = STRING$(79," ")             ! DEFAULT NEW LINE
+!   WORK$ = ".00"                           ! WITH ZERO AMOUNTS
+    WORK$ = MMCFEC06$(0,-1,-1)              ! WITH ZERO AMOUNTS
+    IF RIGHT$(WORK$,1) = " " THEN
+       WORK$ = LEFT$(WORK$,LEN(WORK$) - 1)  ! STRIP TRAILING BLANK
+    WORK$ = RIGHT$("   " + WORK$,3)         ! ENSURE LENGTH = 3
+    CALL SUBSTR(EMSS.DEF$,45,WORK$,0,3)     ! INITIALIZE PICKUPS
+    CALL SUBSTR(EMSS.DEF$,59,WORK$,0,3)     ! INITIALIZE ONHAND
+    CALL SUBSTR(EMSS.DEF$,74,WORK$,0,3)     ! INITIALIZE NET
+    WORK2$ = STRING$(12," ")                ! 12 BLANKS
+
+    IF EMSS.MFRCOUP THEN BEGIN              ! AUTO MFR COUPONS
+      USER$ = EMSS.DEF$                     ! DEFAULT NEW LINE
+!     WORK$ = "ELECTRONIC " + MFRCPN.NAME$  ! DESCRIPTOR
+      WORK$ = MSG$(7)                       ! DESCRIPTOR
+      CALL SUBSTR(USER$,2,WORK$,0,LEN(WORK$)) ! INSERT IN LINE
+      I% = 37                               ! PICKUP OFFSET
+      WORK4% = AUTO.CPN.ADJ(1)              ! PICKUP ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO PICKUPS
+      I% = 51                               ! ONHAND OFFSET
+      WORK4% = AUTO.CPN.ADJ(2)              \ ONHAND ADJUSTMENT
+             + AUTO.CPN.ADJ(3)              ! NET ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO ON HAND
+      GOSUB WRITE.LINE                      ! WRITE THE LINE
+    ENDIF
+
+    IF EMSS.STRCOUP THEN BEGIN              ! AUTO STR COUPONS
+      USER$ = EMSS.DEF$                     ! DEFAULT NEW LINE
+!     WORK$ = "ELECTRONIC " + STRCPN.NAME$  ! DESCRIPTOR
+      WORK$ = MSG$(8)                       ! DESCRIPTOR
+      CALL SUBSTR(USER$,2,WORK$,0,LEN(WORK$)) ! INSERT IN LINE
+      I% = 37                               ! PICKUP OFFSET
+      WORK4% = AUTO.CPN.ADJ(4)              ! PICKUP ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO PICKUPS
+      I% = 51                               ! ONHAND OFFSET
+      WORK4% = AUTO.CPN.ADJ(5)              \ ONHAND ADJUSTMENT
+             + AUTO.CPN.ADJ(6)              ! NET ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO ON HAND
+      GOSUB WRITE.LINE                      ! WRITE THE LINE
+    ENDIF
+
+    IF EMSS.DBLCOUP THEN BEGIN              ! DBL COUPONS
+      USER$ = EMSS.DEF$                     ! DEFAULT NEW LINE
+!     WORK$ = "DOUBLED COUPON   "           ! DESCRIPTOR
+      WORK$ = MSG$(9)                       ! DESCRIPTOR
+      CALL SUBSTR(USER$,2,WORK$,0,LEN(WORK$)) ! INSERT IN LINE
+      I% = 37                               ! PICKUP OFFSET
+      WORK4% = AUTO.CPN.ADJ(7)              ! PICKUP ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO PICKUPS
+      I% = 51                               ! ONHAND OFFSET
+      WORK4% = AUTO.CPN.ADJ(8)              \ ONHAND ADJUSTMENT
+             + AUTO.CPN.ADJ(9)              ! NET ADJUSTMENT
+      IF WORK4% THEN GOSUB ALTER.AMOUNT     ! ADD TO ON HAND
+      GOSUB WRITE.LINE                      ! WRITE THE LINE
+    ENDIF
+   ENDIF                                    ! BLANK LINE
+  ENDIF                                     ! COUPONS ALTERED
+ ENDIF                                      ! LINE > 9
+
+EMSS.ENDFB:
+!         END OF USER EXIT CODE                                                 
+\ REM!!****************************************************************         

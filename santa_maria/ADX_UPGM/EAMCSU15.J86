@@ -1,0 +1,8 @@
+! ---------------------------------------------------
+! Antes de procesar una cadena de articulo o de pago
+! ---------------------------------------------------
+!User exit called before processing item or tender entry string
+FUNCTION CSUPEC15(P1) PUBLIC
+   INTEGER*1 P1
+
+END FUNCTION

@@ -1,0 +1,25 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*********************************************************************
+!Changes:
+!
+!IR36947
+!971015 Not all Non Sales Procedures were being logged properly
+!971008 Remove 'bold' escape sequence from print line before
+!       calling journal
+!*********************************************************************
+
+FUNCTION TSUPEC21 PUBLIC
+STRING PrtLine
+INTEGER*1 Training.Exit          !971015    !IR36947
+integer*2 i                      !971008    !IR36947
+
+%INCLUDE EAMTSE21.J86          ! EMS PRPQ
+%INCLUDE JOURTS21.011          ! EJ V2   
+CALL LIBLINE(21,1)             ! Ej imprime plu
+CALL LIBLINE(21,2)             ! Imprime datos credito red y cheque 
+CALL IVATSU21.011              ! IMPRESION DE IVAS
+
+END FUNCTION
+

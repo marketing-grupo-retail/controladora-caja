@@ -1,0 +1,35 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de Subrutinas         *
+!**************************************************
+
+Sub PEFMTS02.011  External
+End Sub
+
+Sub PEFMTS04.011  External
+End Sub
+
+Sub PEFMTS07.011  External
+End Sub
+
+Sub PEFMTS14.011  External
+End Sub
+
+Sub PEFMTS20.011  External
+End Sub
+
+Sub PEFMTS23.011  External
+End Sub
+
+Sub PEFMTS53.011  External
+End Sub
+
+Sub PEFMTS56.011  External
+End Sub
+
+Sub PEFMTS66.011(X.CallParm) External
+Integer*1 X.CallParm
+End Sub

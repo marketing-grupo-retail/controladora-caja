@@ -1,0 +1,36 @@
+
+!   ***************************************************************************
+!   **    Date       :  Agosto 25 de 1998                                    **
+!   **    Responsible:  Depto de SISTEMAS                                    **
+!   **    User Exit  :  TSE2001.011                                          **
+!   **    Inclu¡r en :  EAMTSE20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  Sistemas POS                                         **
+!   **                                                                       **
+!   **    Instrucciones  para  Impresion de puntos de cada periodo del       **
+!   **    CLIENTE.                                                           **
+!   ***************************************************************************
+FONPH$ = CHR$(27)+CHR$(69) 
+!PUNTRAN% = CA.TR.POINTS
+!PUNTO% = CA.PPOINTS+PUNTRAN% 
+PPUNTO$  = "PUNTOS ACUMULADOS SEPTIEMBRE ==> "  + STR$(PUAN%)!bufer imp
+IF  TS.LINETYPE      =   6 AND                               \! Si Store Data Line
+    UE.PUNTO.IMPRESO =   1 AND                               \!
+    UE.IVA.IMPRESO%  =   0 AND                               \!
+    PUAN%          >     0 THEN BEGIN                         !
+    WRITE FORM "C38 A1";#34;FONPH$+PPUNTO$                    !
+    UE.PUNTO.IMPRESO = 0
+    CA.PPOINTS       = 0
+    PUAN%            = 0
+    CA.TR.POINTS     = 0
+    PUNTRAN% = 0 
+    X% = 0
+    PUNTO% = 0
+ENDIF 
+
+
+!    TS.BALDUE (0)  >   1 AND                               \! Si ya se pago 
+!    WRITE FORM "C38 A1";#34;"VARIABLE PUAN  "+STR$(PUAN%)+"VRA  "+STR$(CA.POINTS)+"VR  "+STR$(XF.TO.POINTS)!
+!    WRITE FORM "C38 A1";#34;"PUNTOS TRANSACC "+STR$(PUAN%)+"VR.TOTAL =  "+STR$(X%)
+!-----------------------------------------------------------------------------

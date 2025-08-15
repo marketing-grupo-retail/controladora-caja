@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC06 PUBLIC ! AFTER COMPUTING A P.M. 4 COUPON VALUE
+ 
+! insert user exit code here
+ 
+ END FUNCTION

@@ -1,0 +1,43 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Validacion de  Articulos         *
+!**************************************************
+!*
+
+   If TS.IO.KEYS(4) = 100 And TS.IO.KEYS(2) = 80 Then Begin  										! Consulta Precio
+      Exit Sub
+   EndIf
+
+   If UE.EPSS.ON <> 0 Then Exit Sub                                             ! Si es una trx de EPS no aplica promocion 
+   If IR.INDICAT2$ = PACK$("40") Then Exit Sub                                  ! Si item miscelaneo (Recaudos)
+
+   IF (IR.INDICAT0 AND 04H) NE 0   THEN                         	             \! item not for sale
+       EXIT SUB 
+       
+   If Gr.Mkp.CtlPago% <> 0 Then Begin                                           ! Si hay dscto forma de pago
+      CALL VISOR.AND.BORRAR("NO SE PERMITE MAS VENTA DE PRODUCTOS")
+      IR.INDICAT0 = IR.INDICAT0 OR 04H			                                    ! No permite venta
+      EXIT SUB 
+   EndIf
+
+   If TS.STANDALONE Then Begin                            				              ! Si en operacion TOF
+      Exit Sub 
+   EndIf
+   If IR.ITEMTYPE >= 6 Then Begin 																		          ! cupon de tienda
+    	Exit Sub  
+   EndIf 
+   If IR.ITEMTYPE < 6 Then Begin                                                ! Es un articulo y no un cupon
+      If IR.LINKEDTO$ = PACK$("0000") Then Begin  			                        ! No tiene cupon ligado
+         If TS.STANDALONE Then Begin                                            ! Si terminal OFFLINE 
+            %INCLUDE EAMIRRD5.J86                                               ! Lectura de registro EAMIMAGE
+         EndIf Else Begin                                                       ! Si esta en linea
+            %INCLUDE EAMIRRD3.J86                                               ! Lectura EAMITEMR
+         EndIf 
+         IR.LINKEDTO$ = Promodepto(ASC.IR.NDEPTO$,IR.LINKEDTO$)                 ! Valida departamento con promocion
+      EndIf 
+   EndIf 
+   Call BUSQ.ARTICULO(IR.ITEMCODE$)			                                        ! Busqueda Msg publicitario
+   Call Msg.Publicitario.Item (Gr.Msg.Itm$)                                     ! Mensaje a un producto especifico

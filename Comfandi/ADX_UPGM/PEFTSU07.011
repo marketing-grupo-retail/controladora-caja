@@ -1,0 +1,96 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+! Modificaciones:
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94				              															! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"ERROR PARAMETROS","RECARGA EN LINEA",1500,"L")	      ! Msg Alerta
+ Call Visores4690(1,"RECARGA EN LINEA","NO OPERATIVO",1500,"L")		        ! Msg Alerta
+ Call U.Imprime("ERROR CARGA RECARGA EN LINEA",2100H)	         						! Rastro en SJ
+ Asc.Pef.Line%      = 00 																									! Proyecto desactivado
+ Asc.Pef.Cadena$    = "0000"  																						! Codigo cadena
+ Asc.Pef.Appl$      = "00"          																			! Codigo de la aplicacion
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.PEF.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[PAGO DESEMPLEADO]" Then Begin											  ! Proyecto de Lealtad
+     Call U.Imprime("PAGO FONEDE OK.",2100H)			    								    ! Mensaje en SJ
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pef.Line%     = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     Asc.Pef.Cadena$    = Mid$(TS.TEMP1$,30,4)				    								! Codigo cadena
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     Asc.Pef.Appl$      = Mid$(TS.TEMP1$,30,2)                   				  ! Codigo de la aplicacion
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Asc.Pef.tpvr$      = Mid$(TS.TEMP1$,30,2)                   				  ! Tipo y variedad 
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pef.Motora%    = Val(Mid$(TS.TEMP1$,30,3))				    						! Proyecto activo
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pef.Auditoria% = Val(Mid$(TS.TEMP1$,30,2))				    						! Activa Auditoria
+
+     Dim Asc.Pef.Errores$(99)                                             ! Vector lista de errores
+     Asc.Pef.Errores$(00) = "TRANSACCION HA SIDO SATISFACTORIA       "    ! 
+     Asc.Pef.Errores$(01) = "NRO CREDENCIAL NO   ENCONTRADA          "    ! 
+     Asc.Pef.Errores$(02) = "NO HAY SUBSIDIO     DISPONIBLE          "    ! 
+     Asc.Pef.Errores$(03) = "CREDENCIAL HA SIDO  CANCELADA           "    ! 
+     Asc.Pef.Errores$(04) = "NUMERO DE CREDENCIALNO VALIDO           "    ! 
+     Asc.Pef.Errores$(05) = "CREDENCIAL PERSONA  A CARGO             "    ! 
+     Asc.Pef.Errores$(06) = "MONTO SUBSIDIO MAYORA MONTO AUTORIZADO  "    ! 
+     Asc.Pef.Errores$(07) = "SUBSIDIO NO DEFINIDOPARA ESTA CREDENCIAL"    ! 
+     Asc.Pef.Errores$(08) = "ERROR EN LA BASE DE DATOS               "    ! 
+     Asc.Pef.Errores$(09) = "TRANSACCION NO      VALIDA              "    ! 
+     Asc.Pef.Errores$(10) = "NO HAY PARAMETROS   DEFINIDOS           "    ! 
+     Asc.Pef.Errores$(11) = "NO SE ENCONTRO      CREDENCIAL A REVERSA"    ! 
+
+     TS.TEMP1I4 = 0                                                       ! Pago Inactivo Default
+     FOR I% = 1 TO TO.NUMTNDR		                                          ! Revisa pagos definidos
+     IF TO.TENDOPTS(I%,0) = VAL(Left$(Asc.Pef.tpvr$,1)) THEN BEGIN        ! Valido Tipo
+      IF (TO.TENDOPTS(I%,1) = VAL(Right$(Asc.Pef.tpvr$,1))) THEN BEGIN    ! Valida variedad
+        TS.TEMP1I4 = 1                                                    ! Pago Activo
+      ENDIF
+     ENDIF
+    NEXT I%
+
+    IF TS.TEMP1I4 = 0 THEN BEGIN																					! Si pago Desactivado
+       Call U.imprime("Modulo Pago Fonede Desactivado",6100H)             ! Mensaje al rollo de
+       Call U.Imprime("Forma de Pago "+Asc.Pef.Tpvr$+" No definida",6100H)! auditoria y al CR
+       Call U.Imprime("En las Terminal Options. ",6100H)                  !
+       Call TSHIECET                                                      ! Tono de Alerta
+       Call Visores4690(1,"PAGO   FONEDE    NO","OPERATIVO...",1500,"L")  ! Mensaje al Operador
+       Asc.Pef.Line%      = 00 				  																	! Proyecto desactivado
+       Asc.Pef.Cadena$    = "0000"  																			! Codigo cadena
+       Asc.Pef.Appl$      = "00"          																! Codigo de la aplicac
+    ENDIF 
+    GoTo UE.PEF.FINAL																									    ! Sale del ciclo de carga
+   Endif
+ Wend
+ UE.PEF.FINAL:
+   Asc.Pef.NroBon%  = 0                      															! Nro bonos capturados
+   DIM Asc.Pef.Vtabono$(60,4)                															! Init vector control PAGOS
+   DIM Asc.Pef.Vtabono2$(60,2)               															! Init vector control PAGOS
+   Close 94																																! Cierra archivo
+   TS.ER.RETURN = -1                                                      ! 
+   Asc.Pef.Contable$ = "20"+DATE$                                         ! Fecha contable Fonede
+   
+!   OPEN "R::PESCONTA" AS 94                                              ! Archivo de control
+!   IF TS.ER.RETURN = -1 THEN BEGIN			  																! Apertura OK
+!      Read #94; TS.TEMP1$																								! Lectura registro
+!      Asc.Pef.Contable$ = TS.TEMP1$                                      ! FECHA CONTABLE AAAAMMDD
+!      CALL CALCULO.FECHA.CONTABLE
+!      CLOSE 94
+!   ENDIF ELSE Asc.Pef.Contable$ = "20"+DATE$
+
+   If Asc.Pef.Line% = -1 Then                                                \! Proyecto Activo
+      CALL U.IMPRIME("MODULO PAGO FONEDE     ON 30/Nov/2012",2100H) Else     \! Msg Proyecto Cargado
+      CALL U.IMPRIME("MODULO PAGO FONEDE    OFF 30/Nov/2012",2100H)           ! Msg Proyecto Cargado
+
+Endif
+

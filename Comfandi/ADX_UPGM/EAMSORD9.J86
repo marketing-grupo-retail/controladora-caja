@@ -1,0 +1,35 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ****************************************/           
+\REM!!****************************************************************          
+\REM!!**    READ EFT USER EXIT FLAGS FROM STORE OPTIONS FILE        **          
+\REM!!****************************************************************          
+                                                                                
+       DIM SO.EFTEXIT(45)              ! dimension array                        
+                                                                                
+       READ #8,38;                     \ read entire option record              
+            LINE SO.OPTION$            ! into string variable                   
+                                                                                
+       SO.J = 1                        ! start at beginning of string           
+       SO.L = 1                        ! beginning of current field             
+                                                                                
+       FOR SO.K = 1 TO 45              ! while more fields to process           
+         GOSUB EAMSORD9.1              ! get next field                         
+         SO.EFTEXIT(SO.K) = SO.I       ! move data to array entry               
+       NEXT                                                                     
+                                                                                
+       GOTO EAMSORD9.2                 ! jump to routine exit                   
+                                                                                
+\REM!!****************************************************************          
+\REM!!**    SUBROUTINE TO EXTRACT NEXT INTEGER FIELD                **          
+\REM!!****************************************************************          
+                                                                                
+EAMSORD9.1:                                                                     
+                                                                                
+       SO.J = MATCH(",",SO.OPTION$,SO.J)        ! locate end of current field   
+       SO.I = INT%(VAL(MID$(SO.OPTION$,SO.L,SO.J-SO.L)))                        
+       SO.L = SO.J + 1                          ! start position of next field  
+       SO.J = SO.L                              ! start position for next search
+                                                                                
+       RETURN                                                                   
+                                                                                
+EAMSORD9.2:                            ! routine exit                           

@@ -1,0 +1,28 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Recuperacion de transaccion      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+IF UNPACK$(LEFT$(SL.STR.ENTRY$,1)) = "99" THEN BEGIN   	    									! Si USER/DATA
+ IF UNPACK$(MID$(SL.STR.ENTRY$,3,1)) = "15" THEN BEGIN  				      				! Proyecto Lealtad Clientes
+   Asc.Tmp.Apun% = 3																													! Apuntador busqueda
+   TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)                      ! Numero de proyecto
+   Gr.Lcl.Clte$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)                   ! Numero del cliente
+   TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)                      ! Puntos inicio de la trx
+   Gr.Lcl.Ptot% = Val(TS.TEMP1$)                  														! Asigna puntaje Total
+   TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)                      ! Puntos del periodo
+   GR.LCL.PTO3% = Val(TS.TEMP1$)                                              !
+   Gr.Lcl.Name$ = ASIC.GETUNPK4(SL.STR.ENTRY$,Asc.Tmp.Apun%)                  ! Nombre del cliente
+   USER.FBACT.READ =  -1           																						! Cliente Capturado   
+   CA.PPOINTS      = 0                              													! Asigna puntaje Periodo
+   CA.CUSTOMER$    = Ucase$(Gr.Lcl.Name$)																			! Nombre del cliente
+   AL.CUSTOMER$    = CA.CUSTOMER$                                             ! Nombre del cliente
+   GR.LCL.PROCESA% = 0 																												!
+ EndIf
+EndIf

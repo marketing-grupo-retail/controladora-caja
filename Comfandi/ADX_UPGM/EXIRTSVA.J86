@@ -1,0 +1,24 @@
+!**************************************************
+!Empresa       . Grupo Retail Ltda                *
+!Programa      . EXIRTSVA.J86                     *
+!Autor         . Oscar Valencia Sarmiento         *
+!Lenguaje      . Basic 4690 IBM                   * 
+!Observaciones . Mantenmiento Expansion del       *
+!		             Eamitemr                         *
+!**************************************************
+!* Modificaciones.
+
+
+STRING GLOBAL     ASC.IR.DATA$,         \ User data de expansion articulo
+                  ASC.IR.NDEPTO$,       \ Codigo Departamento Comercial   
+                  ASC.IR.FUTURO$        ! Uso futuro
+
+INTEGER*4 GLOBAL  ASC.IR.PRECIO2%,      \ Precio al por mayor
+                  ASC.IR.QTYORWGT%,     \ Cantidad o peso minimo 
+                  ASC.IR.CONSUMO%,      \ Valor del impuesto al consumo  
+                  ASC.IR.FECHA%,        \ Fecha de actualizacion del registro                  
+                  ASC.IR.UNDMIN%        ! UNIDAD MINIMA
+
+INTEGER*2  GLOBAL ASC.LNG.REG%,        \! Longitud del registro
+                  ASC.LNG.KEY%  				! Longitud de la llave
+

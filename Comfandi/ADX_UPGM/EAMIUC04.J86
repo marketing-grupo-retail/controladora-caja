@@ -1,0 +1,21 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC04                                                 *!
+!*                                                                           *!
+!* Description    : Before writing a record to the item file.                *!
+!*                                                                           *!
+!* Parameters     : DATA$   A string containing the data to be written       *!
+!*                                                                           *!
+!* Variables      : IRUE.BYPASS     Allows user to bypass file open by       *!
+!*                                  setting this variable to any non-zero    *!
+!*                                  value.                                   *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC04(DATA$) PUBLIC
+  STRING    DATA$
+END SUB
+

@@ -1,0 +1,8 @@
+!-------------------------------------------------------------
+! Despues de procesar un error de disco al actualizar totales
+!-------------------------------------------------------------
+!User exit called before processing totals update disk error
+FUNCTION CSUPEC13 PUBLIC
+
+
+END FUNCTION

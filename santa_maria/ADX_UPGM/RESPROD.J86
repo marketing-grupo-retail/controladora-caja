@@ -1,0 +1,22 @@
+!-------------------------------------------------------------------------------
+! arreglos para almacenar el resumen de productos ingresados en la transaccion
+!-------------------------------------------------------------------------------
+string global \
+   resProdCod$(1),  \ codigo de producto PD 6
+   resProdSku$(1),  \ codigo interno del producto PD largo variable
+   resProdNom$(1),  \ nombre del producto ASC 18
+   resProdCat$(1)   ! Categoria del producto
+
+integer*4 global \
+   resProdVen%(1),  \ valor venta (4 decimales)
+   resProdAfe%(1),  \ valor de la canasta con tarifa 12%
+   resProdDes%(1),  \ valor descuento (4 decimales)
+   resProdImp%(1),  \ valor impuesto (4 decimales)
+   resProdCan%(1)   ! cantidad de productos (si se vende por peso 3 decimales)
+
+integer*2 global \
+   resProdNum,      \ numero de productos ingresados
+   resProdTot       ! numero maximo de productos en arreglo
+
+integer*1 global \
+   resProdTip%(1)   ! tipo de producto: 0 normal, 1 se vende por peso, 2 canasta

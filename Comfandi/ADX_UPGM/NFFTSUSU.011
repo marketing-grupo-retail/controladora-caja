@@ -1,0 +1,40 @@
+!------------------------------------------------------------------------------
+!                 Subrutinas del Modulo Fiscal FIS2002.BAS
+!------------------------------------------------------------------------------
+SUB NFF.BUSTARIFA EXTERNAL                             ! Obtiene Tarifa de IVA
+END SUB                                                !
+SUB FNFF.NUM EXTERNAL                                  ! Asigna Fcat Fiscal
+END SUB                                                !
+SUB NFF.IMPFAC EXTERNAL                                ! Imprime Fcat Fiscal
+END SUB                                                !
+SUB NFF.CALIVA EXTERNAL                                ! C lculo de IVA
+END SUB                                                !
+SUB GETUNPK EXTERNAL                                   ! Desempaqueta Strings
+END SUB                                                ! 
+SUB GETPLAG EXTERNAL                                   ! Obtiene Flags 
+END SUB                                                ! 
+SUB NFF.STRING1 EXTERNAL                               ! Obtiene Campos STR 1
+END SUB                                                !
+SUB NFF.STRING99 EXTERNAL                              ! Obtiene Campos STR 99
+END SUB                                                !
+SUB NFFTSU02.011 EXTERNAL                              ! Reset de Variables
+END SUB                                                !
+SUB NFFTSU07.011 EXTERNAL                              ! Abre/Proc Arch Fisc
+END SUB                                                !
+SUB NFFTSU08.011 EXTERNAL                              ! Toma Inf EAMITEMR
+END SUB                                                !
+SUB NFFTSU14.011 EXTERNAL                              ! Control Teclado
+END SUB                                                !
+SUB NFFTSU20.011 EXTERNAL                              ! Control Impres CR/Head
+END SUB                                                !
+SUB NFFTSU21.011 EXTERNAL                              ! Control Impres SJ
+END SUB                                                !
+SUB NFFTSU23.011 EXTERNAL                              ! Control AnDisplay
+END SUB                                                !
+SUB NFFTSU32.011 EXTERNAL                              ! Control Tendr/Validat
+END SUB                                                !
+SUB NFFTSU53.011 EXTERNAL                              ! Control Recovery
+END SUB                                                !
+SUB NFFTSU27.011 EXTERNAL                              ! Control Errores
+END SUB                                                !
+!-----------------------------------------------------------------------------

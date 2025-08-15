@@ -1,0 +1,13 @@
+!************************************************** 
+!Empresa       : Comfandi                         *
+!Programa      : FDEMTSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Rutinas Fondo de Empleados       *
+!**************************************************
+
+Sub FDEMTS07.011 EXTERNAL								! Carga de Parametros
+End Sub
+
+Sub FDEMTS14.011 EXTERNAL               ! Secuencias de tecleo
+End Sub

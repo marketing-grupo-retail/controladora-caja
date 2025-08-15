@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSEMEC01 PUBLIC ! AFTER THE READ OF A CUSTOMER ACTIVITY RECORD
+ 
+! insert user exit code here
+ 
+ END FUNCTION

@@ -1,0 +1,24 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda         `      *
+!Programa      : AUTTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : VERIFICACION LLAVE SUPERVISOR    *
+!**************************************************
+
+!IF LEFT$(TS.DISP1$,2) = "B0" AND TO.MGRKEY <> 0 THEN BEGIN 									! Solicitud llave autoriza
+
+!IF LEFT$(TS.DISP1$,2) = "B0" THEN BEGIN 																	! Solicitud llave autoriza
+!   Xtmp$ = Asic.Datos$("INGRESE LLAVE DE","AUTORIZACION")
+!   If Xtmp$ = "E" or Xtmp$ = "" Then BEGIN 											    				! Proceso cancelado   
+!      TO.MGRKEY = -1																												! llave no puesta
+!!     TS.REMOVE.KEY = -1
+!   EndIf Else Begin 
+!     TO.MGRKEY = 0																													! SIMULA LLAVE PUESTA
+!!    TS.REMOVE.KEY = 0
+!   EndIf
+!ENDIF 																																			! Fin solicitud de llave
+
+IF LEFT$(TS.DISP1$,2) = "B0" THEN BEGIN 																	! Solicitud llave autoriza
+   TO.MGRKEY = 0																													! SIMULA LLAVE PUESTA
+ENDIF

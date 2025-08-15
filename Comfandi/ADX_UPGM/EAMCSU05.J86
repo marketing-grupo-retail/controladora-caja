@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ SUB CSUPEC05( PERFREC$ ) PUBLIC
+ STRING PERFREC$
+Asc.Err.Proceso$ = "CSU05" 
+! insert user exit code here
+
+  
+ END SUB

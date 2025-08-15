@@ -1,0 +1,102 @@
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+!
+!  javaguiu.j86
+!
+!  Java Gui User exit external declarations.
+!
+!
+!  Change Activity:
+!
+!
+! IR52982  Modified java GUI hooks for use with VP, SureVision and AEF.
+!          KHG IBM 30Jan2004
+!
+! END-OF-SPECIFICATIONS
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+! function javaGuiInitUserExit
+!
+! Parms: startEvent - lowest value for user exit events)
+!
+FUNCTION javaGuiInitUserExit(startEvent) EXTERNAL           !javaGuiInitUserExit
+  INTEGER*2 startEvent                                      !
+END FUNCTION                                                !
+
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+! subroutine javaGuiUserExit
+!
+! Parms: eventNum  - number of the event (application or user)
+!        eventData - data associated with the event
+!
+SUB javaGuiUserExit(eventNum, eventData$) EXTERNAL RECURSIVE ! javaGuiUserExit
+  INTEGER*2 eventNum                                        !
+  STRING    eventData$                                      !
+END SUB                                                     !
+
+!AIR52982
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+! subroutine javaAEFUserExit
+!
+! Parms: eventNum  - number of the event (application or user)
+!        eventData - data associated with the event
+!
+SUB javaAEFUserExit(eventNum, eventData$) EXTERNAL RECURSIVE ! javaGuiUserExit
+  INTEGER*2 eventNum                                        !
+  STRING    eventData$                                      !
+END SUB                                                     !
+!EIR52982
+
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+! sub javaGuiUserException
+!
+! parms: event       The event number fired
+!        data$       The data buffer passed
+!        execption$  The java exception data buffer returned from the
+!                    CBASIC InvokeMethod call (null indicates success).
+!
+! Comments:  This subroutine is provided so that the user can
+!            have an opportunity to become aware of, and possibly handle
+!            exceptions excountered from the invokeMethod call.
+!            This routine should be used with extreme caution as the
+!            call mechanism is recursive -> generating multiple errors
+!            without ever returning will result in a stack overflow.
+!            So, the advice is to NOT use this routine to call the javaEvent
+!            function!
+!
+!
+SUB javaGuiUserException(event, data$, exception$) EXTERNAL recursive
+                                                            ! User excpt handler
+  INTEGER*2                               \
+             event                        ! event number
+  STRING                                  \
+             data$,                       \ data originally passed
+             exception$                   ! exception
+
+END SUB                                   ! User Event
+
+!ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+! sub javaGuiUserJavaKey
+!
+! parms: keyStem     The key stem to interrogate
+!        validFlag   The valid flag
+!
+! Comments:  On entry, the validFlag is set to -1 if the passed
+!            key stem value matches a system defined java key.
+!            When the validFlag is set to zero, the key is not
+!            a valid system defined java key.
+!
+!            The user may use this user exit to facilitate supporting
+!            additional java keys.
+!
+!
+SUB javaGuiUserJavaKey(keyStem,           \
+                       validFlag) EXTERNAL ! User java key validation
+
+  INTEGER*2                               \
+             keyStem,                     \ passed key stem
+             validFlag                    ! validitiy flag
+
+END SUB                                   ! User java keys validation
+

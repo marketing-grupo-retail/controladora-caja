@@ -1,0 +1,44 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU56.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Durante la suspencion de trx     *
+!**************************************************
+!*
+
+ASC.MKP.OK% = 0
+ASC.MKP.OK2% = 0
+ASC.MKP.REC% = 0
+ASC.MKP.TMP1$ = ""
+ASC.MKP.DSCT% = 0
+ASC.MKP.TDSC% = 0
+ASC.MKP.NOPRESENCIA% = -1
+ASC.MKP.LISTA$  = ""
+ASC.MKP.LISTA2$ = ""
+ASC.MKP.LOGO% = 0
+ASC.MKP.PSEC% = 0
+ASC.MKP.TOTDSCT% = 0 
+ASC.MKP.DscOtorgado% = 0 
+ASC.MKP.CADENA$ = "0000"
+Gr.Mkp.CtlPago% = 0
+Gr.Mkp.Tprm% = 0 
+Gr.Promo.Compra% = 0
+Gr.Mkp.VlrCmpBol% = 0  ! Add 9 Ago 2012 - GR
+Gr.Mkp.Excento% = 0
+ASC.MKP.LSTPRO$ = "0000"
+Gr.Mkp.TirClte% = 0
+
+DIM UE.MCD.LOG$(5,2)
+FOR I% = 1 TO 5
+   UE.MCD.LOG$(I%,0) = "0"
+   UE.MCD.LOG$(I%,1) = "0"
+   UE.MCD.LOG$(I%,2) = "0"
+NEXT I%
+
+For I% = 1 to Gr.Mkp.CntRif%						       ! Valida Total de Rifas Cargadas
+    Gr.Mkp.Rifa$(I%,2) = "0"						       !
+Next I%
+ASC.MKP.LOGO% = 0
+
+CALL PRMFPAGO(56)                 ! PROMOCION FORMAS DE PAGO

@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC05 PUBLIC ! AFTER VALIDATION OF A CUSTOMER NUMBER
+ 
+! insert user exit code here
+
+ CALL LCFTSE05.011        ! LEALTAD DE CLIENTE EN LINEA
+ 
+ END FUNCTION

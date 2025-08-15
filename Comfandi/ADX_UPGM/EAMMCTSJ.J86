@@ -1,0 +1,394 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCTSJ.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL SUBROUTINE CALLS               */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Ralph Gustafson IBM NRSC                          */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/*  IR40090 - Design change to terminal to improve operator       */
+\/*            interface.                                          */
+\/*            RSH MVGA 17Mar99                                    */
+\/*                                                                */
+\/*  IR40159 - Add routine to correct recovery of the currency     */
+\/*            data for tenders.                                   */
+\/*            RSH MVGA 26Mar99                                    */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM!!***** External SMKT Multiple Currency Subroutine calls *****
+
+!AIR38497 - Multiple Currency Feature
+\REM!!****************** FC.FORMAT.LINE **************************************!
+\REM!! This function adjusts the number of decimal places, the cents
+\REM!! seperator, and the dollars seperator based on what is defined
+\REM!! in the Exchange Rate File "DECIMAL" field.
+\REM!!************************************************************************!
+
+FUNCTION FC.FORMAT.LINE ( DESC$, AMT, LGTH, FMT.LN.SLOT ) EXTERNAL
+
+  INTEGER*1 FC.FORMAT.LINE            ! Return Code
+  INTEGER*2 FMT.LN.SLOT               ! Foreign Currency Slot Number
+  STRING    DESC$                     ! Descriptor
+  INTEGER*4 AMT                       ! Amount to Format
+  INTEGER*2 LGTH                      ! Length to Format too
+
+END FUNCTION
+
+\REM!!****************** FC.FORMAT.AMOUNT ************************************!
+\REM!! This function adjusts the number of decimal places, the cents
+\REM!! seperator, and the dollars seperator based on what is defined
+\REM!! in the Exchange Rate File "DECIMAL" field.
+\REM!!************************************************************************!
+
+FUNCTION FC.FORMAT.AMOUNT ( AMT, FMT.LN.SLOT ) EXTERNAL
+
+  INTEGER*1 FC.FORMAT.AMOUNT          ! Return Code
+  INTEGER*2 FMT.LN.SLOT               ! Foreign Currency Slot Number
+  INTEGER*4 AMT                       ! Amount to Format
+
+END FUNCTION
+!EIR38497 - Multiple Currency Feature
+
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.FEATURE.STATUS
+\REM!!
+\REM!!      PURPOSE - Determine if Multiple Currency Feature is active
+\REM!!                and read files and descriptors if it is.
+\REM!!************************************************************************!!
+SUB MC.FEATURE.STATUS EXTERNAL        ! Call to get feature active flag
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.INIT.FLAGS
+\REM!!
+\REM!!      PURPOSE - Initialize MC Flags
+\REM!!************************************************************************!!
+SUB MC.INIT.FLAGS EXTERNAL            ! Call to Init Multiple Currency Flags
+END SUB
+
+!AIR40090 Routine removed as it is no longer called with the
+!         design change for operator input.
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: PROC.FC.KEY
+!\REM!!
+!\REM!!      PURPOSE - Process FC Key (Total Key) and other Motor Keys.
+!\REM!!************************************************************************!!
+!SUB PROC.FC.KEY EXTERNAL              ! Process Foreign Currency Key
+!END SUB                               ! (Total Key)
+!EIR40090
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: DISP.FORN.CURR
+\REM!!
+\REM!!      PURPOSE - Format to Display FC if FC is Selected
+\REM!!************************************************************************!!
+SUB DISP.FORN.CURR EXTERNAL           ! Format to Display Foreign Currency
+END SUB                               ! if FC Selected
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: ADD.TO.TLOG05.STRING
+\REM!!
+\REM!!      PURPOSE - Add Currency Number to Tlog 05/06 Strings.
+\REM!!************************************************************************!!
+SUB ADD.TO.TLOG05.STRING EXTERNAL     ! Add Currency Number to Tlog 05/06
+END SUB                               ! string
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: ADD.TO.TLOG09.STRING
+\REM!!
+\REM!!      PURPOSE - Add Currency Number to Tlog 09 String.
+\REM!!************************************************************************!!
+SUB ADD.TO.TLOG09.STRING EXTERNAL     ! Add Currency Number to Tlog 09
+END SUB                               ! string
+
+!AIR40090 Routine removed exception logging is performed in
+!         checkout support with the design change.
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: ADD.XLOG63.STRING
+!\REM!!
+!\REM!!      PURPOSE - Add Excpt Log Tyep '63' String
+!\REM!!************************************************************************!!
+!SUB ADD.XLOG63.STRING EXTERNAL        ! Add Exception Log Type '63'
+!END SUB                               ! string
+!EIR40090
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: VALIDATE.FC.ACCEPT
+\REM!!
+\REM!!      PURPOSE - Validate FC Currency Acceptance
+\REM!!************************************************************************!!
+SUB VALIDATE.FC.ACCEPT EXTERNAL       ! Validate FC Currency Acceptance
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CALC.FC.AMTTENDE
+\REM!!
+\REM!!      PURPOSE - Calculate FC Amount Tendered
+\REM!!************************************************************************!!
+!AIR40090 - Add flag for Manual Entry
+!SUB CALC.FC.AMTTENDE EXTERNAL         ! Calculate FC Amount Tendered
+!END SUB
+SUB CALC.FC.AMTTENDE(MANUAL.ENTRY) EXTERNAL         ! Calculate FC Amount Tendered
+  INTEGER*1 MANUAL.ENTRY
+END SUB
+!EIR40090
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: INSERT.PBC.CMCICODE
+\REM!!
+\REM!!      PURPOSE - Insert PBC CMCI Code into line
+\REM!!************************************************************************!!
+SUB INSERT.PBC.CMCICODE EXTERNAL      ! Insert PBC CMCI Code into Line
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: PRINT.FC.BALANCE
+\REM!!
+\REM!!      PURPOSE - Print FC Balance Lines
+\REM!!************************************************************************!!
+SUB PRINT.FC.BALANCE EXTERNAL         ! Print FC Balance
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: INSERT.CHG.BAL
+\REM!!
+\REM!!      PURPOSE - Insert Change/Balance information into Lines
+\REM!!************************************************************************!!
+SUB INSERT.CHG.BAL EXTERNAL           ! Insert Change/Balance Information
+END SUB                               ! into line.
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: INSERT.CMCICODE
+\REM!!
+\REM!!      PURPOSE - Insert CMCI Code into Line
+\REM!!************************************************************************!!
+SUB INSERT.CMCICODE EXTERNAL          ! Insert CMCI Code
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: INSERT.CMCICODE.VODE
+\REM!!
+\REM!!      PURPOSE - Insert CMCI Code into Void Line
+\REM!!************************************************************************!!
+!AIR40090 - Add flag indicating display or print
+!SUB INSERT.CMCICODE.VOID EXTERNAL     ! Insert CMCI Code into Void Line
+!END SUB
+SUB INSERT.CMCICODE.VOID(FOR.DISPLAY) EXTERNAL ! Insert CMCI Code into Void Line
+  INTEGER*1 FOR.DISPLAY                        ! Indicates from display function
+END SUB
+!EIR40090
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: ADD.FC.ID
+\REM!!
+\REM!!      PURPOSE - Add FC ID to Line
+\REM!!************************************************************************!!
+SUB ADD.FC.ID EXTERNAL                ! Add FC ID
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FC.AMTTENDE
+\REM!!
+\REM!!      PURPOSE - Get FC Amount Tendered
+\REM!!************************************************************************!!
+SUB GET.FC.AMTTENDE EXTERNAL          ! Get FC Amount Tendered
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FC.AMOUNT
+\REM!!
+\REM!!      PURPOSE - Get FC Amount
+\REM!!************************************************************************!!
+SUB GET.FC.AMOUNT(AMOUNTI4) EXTERNAL  ! Get FC Amount
+INTEGER*4 AMOUNTI4
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FC.CHANGE
+\REM!!
+\REM!!      PURPOSE - Get FC Change Amount
+\REM!!************************************************************************!!
+SUB GET.FC.CHANGE EXTERNAL            ! Get FC Change Amount
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.CURRENCY.ID
+\REM!!
+\REM!!      PURPOSE - Get the Foreign Currency ID
+\REM!!************************************************************************!!
+SUB GET.CURRENCY.ID EXTERNAL          ! Get Currency ID
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CHG.EURO.SYMBOL.ON.DSPLY
+\REM!!
+\REM!!      PURPOSE - Change the Euro Symbol based on installed Displays
+\REM!!************************************************************************!!
+SUB CHG.EURO.SYMBOL.ON.DSPLY EXTERNAL ! Change EURO Symbol on Display Line
+END SUB
+
+!AIR40090
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.TOGGLE
+\REM!! PARMS:   None
+\REM!! PURPOSE: This routine is called whenever we may need to 'toggle'
+\REM!!          the selected foreign currency to the next foreign currency
+\REM!!          based upon operator input.
+\REM!! CALLERS: Mainline, Tender Exhchange, Cashier Loans/Pickups/Tender Count
+\REM!!          MAIN, TSTEEC01, TSCPEC01
+\REM!!************************************************************************!!
+SUB MC.TOGGLE        EXTERNAL                   ! MC.TOGGLE
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.RESET.SLOT
+\REM!! PARMS:   None
+\REM!! PURPOSE: This routine is called from the print routine and is called
+\REM!!          to reset certain MCF variables based upon successful entries.
+\REM!! CALLERS: TSPREC01
+\REM!!************************************************************************!!
+SUB MC.RESET.SLOT EXTERNAL                      ! MC.RESET.SLOT
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.ZERO.TENDERED
+\REM!! PARMS:   None
+\REM!! PURPOSE: To reset the foreign currency tender buckets used by the
+\REM!!          cashier loan/pickup/tender count function.
+\REM!! CALLERS: TSCPEC01
+\REM!!************************************************************************!!
+SUB MC.ZERO.TS.TENDERED EXTERNAL                ! MC.ZERO.TENDERED
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.ACCUM.CL.CP.TC
+\REM!! PARMS:   None
+\REM!! PURPOSE: To accumulate by currency the amounts of foreign tenders
+\REM!!          picked up.
+\REM!! CALLERS: TSCPEC01
+\REM!!************************************************************************!!
+SUB MC.ACCUM.CL.CP.TC EXTERNAL                  ! MC.ACCUM.CL.CP.TC
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.TLOG.CL.CP.TC
+\REM!! PARMS:   None
+\REM!! PURPOSE: To trigger TLOG'ing a type '24' string following completion
+\REM!!          of a Cashier Loan/Pickup/TC by foreign currencies.
+\REM!! CALLERS: TSCPEC01
+\REM!!************************************************************************!!
+SUB MC.TLOG.CL.CP.TC EXTERNAL                   ! MC.TLOG.CL.CP.TC
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.TLOG.CL.CP.TC$
+\REM!! PARMS:   None
+\REM!! RET.VAL: Type '24' string for logging to the tlog following
+\REM!!          Cashier Loan/Pickup/Tender count by currency.
+\REM!! PURPOSE: To return prep'ed type '24' string
+\REM!! CALLERS: TSTPEC01
+\REM!!************************************************************************!!
+FUNCTION MC.TLOG.CL.CP.TC$ EXTERNAL             ! MC.TLOG.CL.CP.TC$
+END FUNCTION
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.INIT.NON.SALES
+\REM!! PARMS:   None
+\REM!! PURPOSE: To Initially set SEL.FC.SLOT so that the display is properly
+\REM!!          modified for the first Non-Sales prompt displayed.
+\REM!! CALLERS: TSCSEC09
+\REM!!************************************************************************!!
+SUB MC.INIT.NON.SALES EXTERNAL                  ! MC.INIT.NON.SALES
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.TEX
+\REM!! PARMS:   HOOK
+\REM!! PURPOSE: Tender Exchange Processing for Foreign Currencies
+\REM!! CALLERS: TSTEEC01
+\REM!!************************************************************************!!
+SUB MC.TEX(HOOK) EXTERNAL                       ! MC.TEX
+   INTEGER*1 HOOK
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.VF.CURR
+\REM!! PARMS:   None
+\REM!! PURPOSE: To display Foreign Currency Amounts during the Price Verify
+\REM!!          function.
+\REM!! CALLERS: TSPCEC01 - Price Verify
+\REM!!************************************************************************!!
+SUB MC.VF.CURR EXTERNAL                         ! MC.VF.CURR
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.AUTO.TEND
+\REM!! PARMS:   None
+\REM!! PURPOSE: To log the appropriate data for MCF when a LOAN is issued
+\REM!!          during auto till exchange.
+\REM!! CALLERS: TSNSEC04
+\REM!!************************************************************************!!
+SUB MC.AUTO.TEND EXTERNAL                       ! MC.AUTO.TEND
+END SUB
+
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.TSTPEC09
+\REM!! PARMS:   None
+\REM!! PURPOSE: To perform void validation of foreign currency tenders.
+\REM!! CALLERS: TSTPEC09
+\REM!!************************************************************************!!
+SUB MC.TSTPEC09 EXTERNAL                        ! MC.TSTPEC09
+END SUB
+
+!EIR40090
+
+!AIR40159
+\REM!!************************************************************************!!
+\REM!! SUB:     MC.RECOVER.TEND
+\REM!! PARMS:   None
+\REM!! PURPOSE: To set up variables for MCF for recovery of 5/6 strings.
+\REM!! CALLERS: TSTTEC01
+\REM!!************************************************************************!!
+FUNCTION MC.RECOVER.TEND EXTERNAL               ! MC.RECOVER.TEND
+END FUNCTION
+!EIR40159
+
+!A_MCFUPD
+\REM!!************************************************************************!!
+\REM!! Function: MC.CASH.BACK
+\REM!! Purpose: Provides a method for the Operator to select the
+\REM!!          currency to issue cash back to the customer.
+\REM!! Parms: None
+\/****************************************************************************!!
+SUB MC.CASH.BACK EXTERNAL
+END SUB
+
+
+\REM!!************************************************************************!!
+\REM!! Function: MC.DISABLE.CASHBACK
+\REM!! Purpose: Provides a method for the Operator to disable a currency
+\REM!!          from allowing cashback to be issued.
+\REM!! Parms: None
+\/****************************************************************************!!
+SUB MC.DISABLE.CASHBACK EXTERNAL
+END SUB
+!E_MCFUPD
+\/******************************************************************/
+\/* END OF EAMMCTSJ.J86                                            */
+\/******************************************************************/

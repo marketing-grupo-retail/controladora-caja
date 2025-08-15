@@ -1,0 +1,6 @@
+\/* TIME STAMP BLOCK ************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+SUB EAMXXCPY
+STRING EAMXXCPY$
+EAMXXCPY$ = "(C) COPR. IBM CORP. 1990"
+END SUB

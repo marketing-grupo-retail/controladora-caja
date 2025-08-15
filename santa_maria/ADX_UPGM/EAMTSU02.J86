@@ -1,0 +1,64 @@
+!USER EXIT CALLED AFTER A CUSTOMER CHECKOUT TRANSACTION COMPLETES
+! Despues de completar una transaccion de venta
+FUNCTION TSUPEC02 PUBLIC
+INTEGER*1 TSUPEC02
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC02
+
+   !Inventario
+   call MSMTINVE02
+
+   !Devolucion de IVA
+   call NUOTDIVA02
+   
+   !Credito Institucional
+   call MSMTINST02
+   
+   !Tarjeta de REGALO
+   call MSMTGIFT02
+   
+   !Tarjets Bancarias
+   call MSMTTARB02
+   
+   !Recargas Electronicas
+   call MSMTREC02
+
+   !Promociones
+   call NUOTPROM02
+
+   !Notas de Credito
+   call MSMTNCRE02
+
+   !Facturacion MSM
+   call MSMTFACT02
+
+   !Clientes y Fidelidad
+   call MSMTCLIE02
+
+   !Retenciones
+   call MSMTRETE02
+
+   !Cheques
+   call MSMTCHEQ02
+
+   !Remates
+   Call GRREMATES(02)
+   
+   !Deliverys
+   CALL GRDOMICILIOS(02)
+
+   !Cupones tienda
+	 CALL GRCUPONES(02)
+
+   !Pago Deuna
+   CALL PAGO.DEUNA(02)
+   
+   !Pago Rappi
+   CALL PAGO.RAPPI(02)
+   
+   !Claves Autorizacion
+   CALL GRCLVAUT(02)
+
+
+END FUNCTION

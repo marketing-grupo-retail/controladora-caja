@@ -1,0 +1,52 @@
+!************************************************** 
+!Empresa       : Grupo Retail S.A                 *
+!Programa      : RECTSUVA.011                     *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Noviembre de 2007                *
+!Observaciones : Modulo Recaudo Serv. Publicos    *
+!**************************************************
+
+Integer   Global UE.RECASRV.Slend%
+integer*4 Global Asc.Tmp.Apun%
+INTEGER*1 GLOBAL UE.RECASRV.FLAG%, UE.RECASRV.ANUL%, UE.RECASRV.TRX%, Asic.Detalle%, \
+                 UE.RECASRV.Recup%, UE.RECASRV.ITM%
+INTEGER*2 GLOBAL UE.RECASRV.CONT%,UE.RECASRV.QTY%
+
+STRING GLOBAL UE.RECASRV.MASK$(1),UE.RECASRV.CODE$,UE.RECASRV.DOC$(1), \
+              UE.RECASRV.VLR$(1),UE.RECASRV.FECHA$(1),\
+              UE.RECASRV.NIT$(1),UE.RECASRV.TIPO$(1), UE.RECASRV.CLAVE$(1), UE.RECASRV.CCOSTO$(1), \
+              UE.RECASRV.TRX$(1)
+
+STRING GLOBAL UE.RECASRV.DC$,\ 
+              UE.RECASRV.VL$,\ 
+              UE.RECASRV.FC$,\ 
+              UE.RECASRV.NT$,\ 
+              UE.RECASRV.PLU$,\ 
+              UE.RECASRV.RTA$,\ 
+              UE.RECASRV.LISTA$,\
+              UE.RECASRV.CLV$,\
+              UE.RECASRV.TP$ 
+
+STRING GLOBAL UE.RECASRV.RESALTE$,\
+              UE.RECASRV.INVER$,\
+              UE.RECASRV.CENTRA$,\
+              UE.RECASRV.DERECHA$,\
+              UE.RECASRV.IZQUIERDA$,\
+              UE.RECASRV.DOBLEALTO$,\
+              UE.RECASRV.DOBLEANCHO$
+
+STRING GLOBAL UE.RECASRV.SIMPLE$, \
+              UE.RECASRV.SIMPLEPRO$
+
+STRING GLOBAL UE.RECASRV.RESERV$,     \! PLU de registro
+              UE.RECASRV.RESERVPRO$,  \! Numero de proyecto
+              UE.RECASRV.RESERVMOT$    ! Tecla Motora
+
+STRING GLOBAL UE.RECASRV.APLICACION$, \! 
+              UE.RECASRV.FUNCION$
+
+Integer*1 Global Gr.REC.TipID%              
+String    Global Gr.Rec.RtaMsg$, Gr.Rec.NitRsv$, Gr.Rec.NameRsv$, Gr.Rec.CtroCosto$, UE.RECASRV.RESERVPAG$
+String    Global UE.RECASRV.ACUAVI$, UE.RECASRV.ACUAVIPRO$, UE.RECASRV.ACUAVINIT$, UE.RECASRV.DCRECUP$
+Integer*1 Global Gr.REC.Acuaviva%              
+

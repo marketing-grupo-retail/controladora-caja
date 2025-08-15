@@ -1,0 +1,58 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Inicializacion de variables      *
+!**************************************************
+!*
+
+
+If (ASC.MKP.LOGO% = 2) Then Begin                                             ! Hay impresion de logos
+   Call IMP.LOGOS					              																			! Impresion de logos
+   CALL IMPRESION.RIFA							      																		! Impresion vouchers para rifas
+   ASC.MKP.LOGO% = 0                                                          ! cierra acceso
+EndIf                                                                         !
+
+
+ASC.MKP.OK% = 0
+ASC.MKP.OK2% = 0
+ASC.MKP.REC% = 0
+ASC.MKP.LEC% = 0
+ASC.MKP.TMP1$ = ""
+ASC.MKP.CADENA$ = "0000"
+ASC.MKP.I% = 0
+ASC.MKP.DSCT% = 0
+ASC.MKP.TDSC% = 0
+ASC.MKP.LOGO% = 0
+ASC.MKP.PSEC% = 0
+ASC.MKP.COMPRA% = 0 
+ASC.MKP.TOTDSCT% = 0
+ASC.MKP.DscOtorgado% = 0 
+Gr.Mkp.CtlPago% = 0
+Gr.Mkp.Tprm% = 0 
+Gr.Mkp.Promo$ = "0000"
+ASC.MKP.LSTPRO$ = "0000"
+Asc.MKP.DSCT%  = 0 		
+ASC.MKP.DSCTO% = 0 	
+Gr.Mkp.DstSec% = 0 
+Gr.Promo.Compra% = 0
+Gr.Mkp.VlrCmpBol% = 0
+Gr.Mkp.Excento% = 0
+Gr.Mkp.TirClte% = 0
+
+DIM UE.MCD.LOG$(7,2)
+FOR I% = 1 TO 5
+   UE.MCD.LOG$(I%,0) = "0"
+   UE.MCD.LOG$(I%,1) = "9"
+   UE.MCD.LOG$(I%,2) = "0"
+NEXT I%
+
+!--- ADD 23 Mzo 2012
+For I% = 1 to Gr.Mkp.CntRif%		            	            ! Valida Total de Rifas Cargadas
+    Gr.Mkp.Rifa$(I%,2) = "0"															! Inicializa vector de rifa
+Next I%																										!
+
+!DIM VTAB%(500,2)																					! Control venta ayb
+!GrPab% = 0																								! Items vendidos ayb
+!Gr.Mkp.DstAB% = 0                                         ! Total Dscto AyB

@@ -1,0 +1,292 @@
+!************************************************** 
+!Empresa       : GRUPO RETAIL LTDA                *
+!Programa      : GRFISCOL.BAS                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de Numeracion Fiscal  *
+!**************************************************
+
+!--- Definicion de Variables de trabajo
+
+
+STRING    Global U.SERIAL$, U.PREF$, U.AUT$, U.FEC$, U.TMP$, Gr.User$
+INTEGER*4 Global U.INI%, U.FIN%, U.ACT%
+Integer*1 Global TS.ER.RETURN
+String    Global Old.Reg$, New.Reg$
+
+%INCLUDE FISPVARI.BAS				  	   ! Variables programa
+%INCLUDE ADX_UPGM:DMEXTR.J86          				   ! Inclucion Libreria Display Manager
+%INCLUDE FISPRUTI.BAS				  	   ! Rutinas Comunes
+
+FUNCTION QUIT2     					   ! Funcion salida programa
+    CLOSE AREA1%
+    CALL SETF("0000000")				   !
+    CALL CLRSCR						   !
+    RET.ERR%= CLSDIS					   !
+    CALL DM.ERR(RET.ERR%,CLSDIS$)			   !
+    STOP
+END FUNCTION
+!--- Fin de la funcion de salida
+
+FUNCTION INICIO01
+   CALL.ORDER% = 30                                           ! Llamado Primera Pantalla D.M
+   RET.ERR% = DISPD(CALL.ORDER%)                              ! Llamado de la pantalla en DM
+   CALL DM.ERR(RET.ERR%,DISPD$)
+END FUNCTION
+!--- Fin de la funcion de inicio
+
+Sub FISCAL.AUDITORIA(X.ENVIA$, X.LLEGA$,X.SALE$,X.RTA$)
+String X.ENVIA$, X.LLEGA$, X.FILE$, X.LEC$, X.FINR$, X.REG$, X.SALE$, X.RTA$, X.BUFF$
+Integer*4 X.Len%
+			TS.ER.RETURN = -1
+			X.FILE$ = "ADX_UDT1:NF" + Left$(DATE$,6) + ".TXT"
+			Open X.FILE$ AS 56 Append
+			If TS.ER.RETURN <> -1 Then Begin    ! Si no existe
+			   TS.ER.RETURN = -1
+				 CREATE X.FILE$ AS 56
+         If TS.ER.RETURN <> -1 Then Begin 
+            CALL MSG.ERR(05,"Error: Falla Creación Auditoria")
+            WAIT;2000
+            Exit Sub 
+         EndIf 
+			EndIf 
+			X.Finr$ = Chr$(13) + Chr$(10)
+			X.BUFF$ = "["+X.SALE$+"]"+"MSG:"+X.ENVIA$
+			X.Len% = Len(X.BUFF$)						  				  								            ! Toma longitud del registro
+			X.Lec$ = "C"+Str$(X.len%)+" C2"								  						            ! Arma estructura de grabacion
+			Write form X.Lec$; #56 ; x.buff$, X.Finr$            					          ! Graba registro
+			X.BUFF$ = "["+X.RTA$+"]"+"RTA:"+X.LLEGA$                                !
+			X.Len% = Len(X.BUFF$)						  				  								            ! Toma longitud del registro
+			X.Lec$ = "C"+Str$(X.len%)+" C2"								  						            ! Arma estructura de grabacion
+			Write form X.Lec$; #56 ; x.buff$, X.Finr$            					          ! Graba registro      
+			Close 56
+End Sub 
+
+
+SUB CAPTURA.DATOS
+
+      CALL MSG.ERR(10,"Numero Serial del Equipo")
+      U.SERIAL$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      If (ENDF = F4.KEY)   Then Begin 
+      	CALL MSG.ERR(10,"Borrando Numeracion Terminal")
+      	DM.OPCION$ = Pack$(RIGHT$("0000"+DM.OPCION$,4))
+      	DelRec AREA1% ; DM.OPCION$
+      	Call MSG.ERR(10,"Terminal Eliminada "+UnPack$(DM.OPCION$))
+      	WAIT ; 2500
+      	Exit Sub                                              ! Si presiona tecla F3
+      EndIf 
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.SERIAL$ = " " 
+         CALL MSG.ERR(10,"Numero Serial del Equipo")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.SERIAL$ = GET.DATOS                               ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      WEND
+
+      CALL MSG.ERR(10,"Prefijo de Facturacion")
+      U.PREF$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.PREF$ = " " 
+         CALL MSG.ERR(10,"Prefijo de Facturacion")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.PREF$ = GET.DATOS                               ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      WEND
+      NUM.INICIAL:
+      CALL MSG.ERR(10,"Rango Inicial de Facturacion")
+      U.TMP$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.TMP$ = " " OR VAL(U.TMP$) <= 0
+         CALL MSG.ERR(10,"Rango Inicial de Facturacion")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.TMP$ = GET.DATOS                                   ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      WEND
+      U.INI% = VAL(U.TMP$)
+
+      CALL MSG.ERR(10,"Rango Final de Facturacion")
+      U.TMP$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.TMP$ = " " OR VAL(U.TMP$) <= 0
+         CALL MSG.ERR(10,"Rango Final de Facturacion")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.TMP$ = GET.DATOS                                   ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      WEND
+      U.FIN% = VAL(U.TMP$)
+      IF U.FIN% < U.INI% THEN BEGIN 
+         CALL POSF(4)
+         GOTO NUM.INICIAL
+      ENDIF
+
+      CALL MSG.ERR(10,"Numero Autorizacion Asignado por la DIAN")
+      U.AUT$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.AUT$ = " " 
+         CALL MSG.ERR(10,"Numero Autorizacion Asignado por la DIAN")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.AUT$ = GET.DATOS                               ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      WEND
+
+      CALL MSG.ERR(10,"Fecha de Autorizacion de la Resolucion")
+      U.FEC$ = GET.DATOS
+      IF (ENDF = F3.SALIR) THEN EXIT SUB                      ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN EXIT SUB                      ! Si presiona tecla ESC
+      WHILE U.FEC$ = " " 
+         CALL MSG.ERR(10,"Fecha de Autorizacion de la Resolucion")
+         RET.ERR% = NXTF(-2)
+         CALL DM.ERR(RET.ERR%,NXTF$)
+         U.FEC$ = GET.DATOS                               ! Asigna valor capturado
+         IF (ENDF = F3.SALIR) THEN EXIT SUB                   ! Si presiona tecla F3
+         IF (ENDF = ESC.KEY)  THEN EXIT SUB                   ! Si presiona tecla ESC
+      Wend
+      DM.OPCION$ = Pack$(RIGHT$("0000"+DM.OPCION$,4))
+      U.SERIAL$  = Left$(U.SERIAL$+"               ",15)
+      U.PREF$    = Left$(U.PREF$+"    ",4)
+      U.AUT$     = Pack$(Left$(U.AUT$+"            ",12))
+      U.FEC$     = Pack$(U.FEC$)
+      Write Form "C2 C15 C4 2I4 C6 C3 I4"	;#AREA1% ;         \! Grabacion de registros
+        DM.OPCION$, \ Numero de terminal
+        U.SERIAL$,  \ Numero serial
+        U.PREF$,    \ Prefijo de facturacion
+        U.INI%,     \ Rango inicial
+        U.FIN%,     \ Rango Final
+        U.AUT$,     \ Numero Autorizacion
+        U.FEC$,     \ Fecha de autorizacion
+        U.ACT%      ! Numero actual de registro
+
+
+        New.Reg$ = U.SERIAL$+","+U.PREF$+","+Str$(U.INI%)+","+ \
+                   Str$(U.FIN%)+","+Unpack$(U.AUT$)+","+Unpack$(U.FEC$)+","+\
+                   Str$(U.ACT%)
+      
+       Call FISCAL.AUDITORIA("MODIFICA DATOS FISCAL","USUARIO "+GR.USER$,DATE$ + ":"+TIME$, DATE$ + ":"+TIME$)
+       Call FISCAL.AUDITORIA("TERMINAL MODIFICADA "+UNPACK$(DM.OPCION$),"USUARIO "+GR.USER$,DATE$ + ":"+TIME$, DATE$ + ":"+TIME$)
+       Call FISCAL.AUDITORIA("OLD:"+Old.Reg$,"NEW:"+New.Reg$,DATE$ + ":"+TIME$, DATE$ + ":"+TIME$)
+       
+END SUB
+
+SUB VALIDA.DATOS
+STRING U.KEY$, LEC$
+
+  U.KEY$ = RIGHT$("0000"+DM.OPCION$,4)
+  U.KEY$ = PACK$(U.KEY$)
+  BAN.PRG$ = "0"
+  LEC$="C2 C15 C4 2I4 C6 C3 I4"	                           !
+  READ FORM LEC$;#AREA1% KEY U.KEY$;                      \! Lee Reg Cabecera 
+  U.KEY$,U.SERIAL$, U.PREF$, U.INI%, U.FIN%, U.AUT$, U.FEC$, U.ACT%
+  IF BAN.PRG$ = "0" THEN BEGIN
+     Call MSG.ERR(03,U.SERIAL$)
+     Call MSG.ERR(04,U.PREF$)
+     Call MSG.ERR(05,Str$(U.INI%))
+     Call MSG.ERR(06,Str$(U.FIN%))
+     Call MSG.ERR(07,Unpack$(U.AUT$))
+     Call MSG.ERR(08,Unpack$(U.FEC$))
+     Call MSG.ERR(09,Str$(U.ACT%))
+     Old.Reg$ = U.SERIAL$+","+U.PREF$+","+Str$(U.INI%)+","+ \
+                Str$(U.FIN%)+","+Unpack$(U.AUT$)+","+Unpack$(U.FEC$)+","+\
+                Str$(U.ACT%)
+  ENDIF Else Begin 
+  	U.ACT% = 0
+  	Old.Reg$ = "DEFINICION REGISTRO NUEVO"
+  EndIf
+  Call FISCAL.AUDITORIA("CONSULTA DATOS FISCAL","USUARIO "+GR.USER$,DATE$ + ":"+TIME$, DATE$ + ":"+TIME$)
+END SUB
+
+!----
+!----
+!---- Bloque Principal 
+!----
+!----
+
+ON ERROR GOTO E0101
+Gr.User$ = Command$                      ! Nombre usuario accesa aplicacion
+CALL INICIADM 				                   ! Inicializacion Variables Display Manager
+AREA1% = 1
+ARCH1$ = "TF:NUMFIS" 
+OPEN ARCH1$ KEYED RECL 42 AS AREA1%                        ! Abre archivo de control
+TERM$ = " "					           ! Inicializo Libreria
+RET.ERR%=INITDM(TERM$)					   !
+CALL DM.ERR(RET.ERR%,INITDM$)				   !
+RET.ERR% = OPNDIS("ADX_UPGM:FISCAL.PNT")	           ! Apertura de la forma de pantalla
+CALL DM.ERR(RET.ERR%,OPNDIS$)
+FIN$="0"
+WHILE (FIN$ = "0") 					   ! Mientras que no F3/Esc
+      DM.OPCION$   = "  "				   !
+      CALL INICIO01					   !
+      MSG$="Digite Numero de la terminal"		   !
+      CALL MSG.ERR(10,MSG$)				   ! Mensaje 
+      RET.ERR% = NXTF(-20) 			           ! Primer campo
+      CALL DM.ERR(RET.ERR%,NXTF$)			   !
+      ATTR$ = SETF(PRM.ON$)                                !
+      INP$ = UPDF                                          ! Captura dato en pantalla
+      DM.OPCION$ = INP$                                    ! Asigna valor capturado
+      IF (ENDF = F1.AYUDA) THEN BEGIN \
+         CALL HELP("Numeracion Fiscal","NUMFIS.TXT") !
+         CALL INICIO01
+      ENDIF
+      IF (ENDF = F3.SALIR) THEN CALL QUIT2                 ! Si presiona tecla F3
+      IF (ENDF = ESC.KEY)  THEN CALL QUIT2                 ! Si presiona tecla ESC
+      WHILE DM.OPCION$ = " " OR VAL(DM.OPCION$) = 0
+        RET.ERR% = NXTF(-20)
+        CALL DM.ERR(RET.ERR%,NXTF$)
+        ATTR$ = SETF(PRM.ON$)                                
+        INP$ = UPDF                                        ! Captura dato en pantalla
+        DM.OPCION$ = INP$                                  ! Asigna valor capturado
+        IF (ENDF = F1.AYUDA) THEN BEGIN \
+           CALL HELP("Numeracion Fiscal","NUMFIS.TXT") !
+           CALL INICIO01
+        ENDIF
+        IF (ENDF = F3.SALIR) THEN CALL QUIT2               ! Si presiona tecla F3
+        IF (ENDF = ESC.KEY)  THEN CALL QUIT2               ! Si presiona tecla ESC
+      WEND
+      CALL VALIDA.DATOS				           ! 
+      CALL CAPTURA.DATOS                                   ! CAPTURA DATOS NUMFISCAL
+WEND
+
+!----
+!---- Fin del bloque principal
+!----
+
+E0101:
+         IF ERRF% = AREA1% AND                            \! Validacion si existe 
+            (ERR = "OE" OR ERR = "FU") THEN BEGIN          ! el archivo de control
+            CREATE POSFILE ARCH1$ KEYED 2,,,5000 RECL 42  \! si no existe lo crea.
+                        AS AREA1% COMPOUND PERUPDATE		   ! 
+            RESUME                                         ! retorna ejecucion
+         ENDIF                                             ! del programa
+         IF ERRF% = AREA1% AND ERR = "EF" THEN BEGIN      \! Si encuentra fin de 
+            BAN.PRG$ = "1"				   ! archivo             
+            RESUME
+         ENDIF
+         If ERRF% = 56 AND                                    \! Validacion si existe 
+            (ERR = "OE" OR ERR = "FU") THEN BEGIN              ! el archivo de control
+            TS.ER.RETURN = 0
+            Resume 
+         ENDIF                          
+         IF ERRF% = 19 AND ERR = "EF" OR ERR="OE" THEN BEGIN  \! Valida la lectura
+            BAN.PRG$ = "1"				       ! del archivo de 
+            RESUME					       ! help del aplicativo
+         ENDIF						       !
+         CALL TRADUCE.ERROR
+         MSG$ = "Error: "+ERR+" Sesi¢n: "+STR$(ERRF%)+"-"+ERRFX$
+         LOCATE 24,1:PRINT MSG$                          ! Presenta Error pantalla
+!--- Fin despliegue de errores
+
+!--- Fin del programa NUMFIS.BAS

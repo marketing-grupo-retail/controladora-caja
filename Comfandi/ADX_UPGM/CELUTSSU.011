@@ -1,0 +1,45 @@
+!   ***************************************************************************
+!   **    Date       :  Junio de 1998                                        **
+!   **    Project    :  IBM - CARULLA                                        **
+!   **    User Exit  :  CARUTSSU.011                                         **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :                                                       **
+!   **                                                                       **
+!   **               User defined variables for Checkout Support             **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+SUB CELUTS01.011 EXTERNAL               ! Rutina Inicio de Transac Var Dialog
+END SUB                                 !
+                                        !
+SUB CELUTS02.011 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !
+                                        !
+SUB CELUTS07.011 EXTERNAL               ! Rutina de Lectura Variables Dialogo
+END SUB                                 !
+                                        !
+SUB CELUTS08.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+                                        !
+SUB CELUTS14.011 EXTERNAL               ! Rutina de Manejo Teclado Dialogo
+END SUB                                 !
+                                        !
+SUB CELUTS20.011 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !
+                                        !
+SUB CELUTS27.011 EXTERNAL               ! Rutina de Reset Transac fin Dialogo
+END SUB                                 !
+
+SUB CELUTS30.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+
+SUB CELUTS53.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+
+SUB CELUTS56.011 EXTERNAL               ! Rutina de Recuperacion Dialogo
+END SUB                                 !
+!------------------------------------------------------------------------------
+

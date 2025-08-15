@@ -1,0 +1,37 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSUSU.J86************************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+ 
+!!***** CODE FOR COUPON LOGGING    ********************* EAMCSUSU ***
+!!*******************************************************************
+!!** ACCESS ROUTINES NEEDED FOR FILE ERROR PROCESSING              **
+!!*******************************************************************
+ 
+ FUNCTION  CSMLEC03  EXTERNAL
+ STRING CSMLEC03
+ END FUNCTION
+ 
+ SUB CSMLEW01 EXTERNAL                       ! Common error routine
+ END SUB
+ 
+!!*******************************************************************
+!!** CODE MOVED TO EAMCSFBX.BAS TO FREE SPACE IN EAMCSUPC.BAS      **
+!!*******************************************************************
+SUB CSU03.CPN EXTERNAL           ! CODE FOR EXIT 03
+END SUB
+ 
+SUB CSU04.CPN EXTERNAL           ! CODE FOR EXIT 04
+END SUB
+ 
+SUB CSU12.CPN EXTERNAL           ! CODE FOR EXIT 12
+END SUB
+ 
+SUB CSU16.CPN EXTERNAL           ! CODE FOR EXIT 16
+END SUB
+ 

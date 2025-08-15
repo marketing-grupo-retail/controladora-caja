@@ -1,0 +1,14 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+
+If Asc.Pay.OptTrx$ = "12" Then Begin          ! Cobro subsidio no por compra
+   SL.IT.XPRICE     = 0
+   SL.IE.SALEPRIC   = 0
+EndIf 

@@ -1,0 +1,288 @@
+!-------------------------------------------------------------------------------
+!Modulo de impresion de factura MSM
+!Fecha: 13 de marzo de 2023
+!Autor: Alejandro Farre
+!-------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! Retorna linea con datos de factura
+! se debe llamar despues de la impresión de la factura
+!------------------------------------------------------------------------------
+function lineaDatosFactura$ external
+   string lineaDatosFactura$
+end function
+
+!------------------------------------------------------------------------
+!Disponibiliza la linea con fecha hora tienda caja transaccion operador
+!------------------------------------------------------------------------
+sub getLinetrailer( m$ ) external
+    string m$
+end sub
+
+!-----------------------------------------------------------------------------
+! Aplica el descuento a cada linea de venta con el descuento indice r
+! r = - 1 -> utiliza la variable resPromociones
+!-----------------------------------------------------------------------------
+sub aplicaDescuentos( r ) external
+   integer*2 r
+end sub
+
+!-------------------------------------------------------------------------
+! Base imponible total por tarifa, incluido el descuento (2 decimales)
+! 0 Base imponible total no afecta a impuestos
+! 1 Base imponible total afecta a impuestos
+! 2 Valor total del impuesto
+!-------------------------------------------------------------------------
+function baseTarifa( i ) external
+   integer*4 baseTarifa
+   integer *1 i
+end function
+
+!------------------------------------------------------------------------------
+! Calcula tarifas con el monto de descuento
+!------------------------------------------------------------------------------
+sub tarifasConDescuento( t0, t1, t2 ) external
+   integer*4 t0, t1, t2
+end sub
+
+!------------------------------------------------------------------------------
+! Calcula tarifas con el monto de descuento al total
+! y al pago
+!------------------------------------------------------------------------------
+sub tarifasAjustadas( t0, t1, t2 ) external
+   integer*4 t0, t1, t2
+end sub
+
+!------------------------------------------------------------------------------
+!Imprime detalle de productos en un QR
+!------------------------------------------------------------------------------
+sub QRproductos external
+end sub
+
+!------------------------------------------------------------------------------
+! Imprime resumen para anulacion o suspension
+! comprobante = 1 trx anulada
+! comprobante = 2 trx suspendida
+!------------------------------------------------------------------------------
+sub imprimeResumen( comprobante ) external
+   integer*1 comprobante
+end sub
+
+!------------------------------------------------------------------------
+! Al inicio de una transaccion de venta
+! Despues de vender el primer articulo en una transaccion
+!------------------------------------------------------------------------
+sub MSMTFACT01 external
+end sub
+
+!------------------------------------------------------------------------
+! Al finalizar una transaccion de venta
+!------------------------------------------------------------------------
+sub MSMTFACT02 external
+end sub
+
+!------------------------------------------------------------------------
+! Carga parametros del modulo
+!------------------------------------------------------------------------
+sub MSMTFACT07 external
+end sub
+
+!------------------------------------------------------------------------
+! Control productos vendidos por peso y canastas
+!------------------------------------------------------------------------
+sub MSMTFACT08 external
+end sub
+
+!------------------------------------------------------------------------
+! Captura teclas
+!------------------------------------------------------------------------
+sub MSMTFACT14 external
+end sub
+
+!------------------------------------------------------------------------
+! Antes de grabar en archivo de transacciones
+!------------------------------------------------------------------------
+!sub MSMTFACT18 external
+!end sub
+
+!------------------------------------------------------------------------
+! Captura las lineas de impresion
+!------------------------------------------------------------------------
+function MSMTFACT20 external
+   integer*1 MSMTFACT20
+end function
+
+!------------------------------------------------------------------------
+! Captura las lineas del visor
+!------------------------------------------------------------------------
+sub MSMTFACT23 external
+end sub
+
+!------------------------------------------------------------------------
+! Retorna indicador de balanza conectada
+!------------------------------------------------------------------------
+function MSMTFACT27 external
+   integer*1 MSMTFACT27
+end function
+
+!------------------------------------------------------------------------------
+! En el calculo del saldo a pagar
+!------------------------------------------------------------------------------
+sub MSMTFACT30 external
+end sub
+
+!------------------------------------------------------------------------------
+! En la salida del modo autonomo
+!------------------------------------------------------------------------------
+sub MSMTFACT35 external
+end sub
+
+!------------------------------------------------------------------------
+! En la intervencion del jefe de departamento
+!------------------------------------------------------------------------
+!sub MSMTFACT36 external
+!end sub
+
+!------------------------------------------------------------------------
+! En el control de errores
+!------------------------------------------------------------------------
+!sub MSMTFACT37 external
+!end sub
+
+!------------------------------------------------------------------------
+! En la comprobación de los limites de entrada, edición y
+! cancelación de artículos
+! se utiliza para controlar los productos que se venden por peso
+! y anulaciones
+!------------------------------------------------------------------------
+!sub MSMTFACT39 external
+!end sub
+
+!------------------------------------------------------------------------
+! En la recuperacion de transaccion
+!------------------------------------------------------------------------
+sub MSMTFACT53 external
+end sub
+
+!------------------------------------------------------------------------
+! Despues de escribir en el TSL
+!------------------------------------------------------------------------
+!sub MSMTFACT59 external
+!end sub
+
+!------------------------------------------------------------------------
+! Despues de la intervencion del jefe de departamento
+!------------------------------------------------------------------------
+sub MSMTFACT66(callparm) external
+   integer*1 callparm
+end sub
+
+!------------------------------------------------------------------------
+! Antes de actualizar la matriz de transacciones
+!------------------------------------------------------------------------
+sub MSMTFACT68(ENTRY$, ELEMENT) external
+   STRING ENTRY$
+   INTEGER*2 ELEMENT
+end sub
+
+!-------------------------------------------------------------------------
+!Setea el valor de la variable local tipoDocumento
+!-------------------------------------------------------------------------
+sub MSMTFACTsetTipoDocumento(tipo) external
+   integer *1 tipo
+end sub
+
+!-------------------------------------------------------------------------
+! Retorna arreglo con codigos de impuestos
+!-------------------------------------------------------------------------
+function MSMTFACTimpuestos$(i) external
+    string MSMTFACTimpuestos$
+    integer *1 i
+end function
+
+!-------------------------------------------------------------------------
+! Retorna RUC del establecimiento
+!-------------------------------------------------------------------------
+function MSMTFACTrucEstablecimiento$ external
+   string MSMTFACTrucEstablecimiento$
+end function
+
+!-------------------------------------------------------------------------
+! Retorna No. Serie de Terminal
+!-------------------------------------------------------------------------
+function MSMTFACTserieTerminal$ external
+   string MSMTFACTserieTerminal$
+end function
+
+!-------------------------------------------------------------------------
+! Retorna secuencia del No de Factura de la transaccion
+!-------------------------------------------------------------------------
+function MSMTFACTnumeroFactura external
+   integer *4 MSMTFACTnumeroFactura
+end function
+
+!-------------------------------------------------------------------------
+! Retorna tipo de ambiente SRI
+!-------------------------------------------------------------------------
+function MSMTFACTtipoAmbienteSRI$ external
+   string MSMTFACTtipoAmbienteSRI$
+end function
+
+!-------------------------------------------------------------------------
+! Retorna tipo de emision SRI
+!-------------------------------------------------------------------------
+function MSMTFACTtipoEmisionSRI$ external
+   string MSMTFACTtipoEmisionSRI$
+end function
+
+!-------------------------------------------------------------------------
+! Retorna secuencia SRI
+!-------------------------------------------------------------------------
+function MSMTFACTsecuenciaSRI$ external
+   string MSMTFACTsecuenciaSRI$
+end function
+
+!-------------------------------------------------------------------------
+!codigo de producto segun indice (PD 6)
+!-------------------------------------------------------------------------
+function MSMTFACTresProdCod$( i ) external
+   string MSMTFACTresProdCod$
+   integer *2 i
+end function
+
+!-------------------------------------------------------------------------
+! numero de productos ingresados
+!-------------------------------------------------------------------------
+function MSMTFACTresProdNum external
+   integer*2 MSMTFACTresProdNum
+end function
+
+!-------------------------------------------------------------------------
+! Genera linea de detalle para descuento
+! i indice del producto
+!-------------------------------------------------------------------------
+function MSMTFACTlineaDescuento$( i ) external
+   string MSMTFACTlineaDescuento$
+   integer*2 i
+end function
+
+!-------------------------------------------------------------------------
+! Logo de encabezado de factura
+!-------------------------------------------------------------------------
+function MSMTFACTlogo$ external
+   string MSMTFACTlogo$
+end function
+
+!-------------------------------------------------------------------------
+! Retorna porcentaje impuesto IVA
+!-------------------------------------------------------------------------
+function MSMTFACTimpuestoIVA% external
+   integer*1 MSMTFACTimpuestoIVA%
+end function
+
+!-------------------------------------------------------------------------
+! Retorna el total de venta sin desglose de impuesto ni descuentos
+!-------------------------------------------------------------------------
+function MSMTFACTtotal external
+   integer*4 MSMTFACTtotal
+end function

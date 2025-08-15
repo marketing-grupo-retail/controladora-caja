@@ -1,0 +1,58 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCSLJ.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL SUBROUTINE CALLS               */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Ralph Gustafson IBM NRSC                          */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM!!***** External SMKT Multiple Currency Subroutine calls *****
+
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.FEATURE.STATUS
+\REM!!
+\REM!!      PURPOSE - Determine if Multiple Currency Feature is active
+\REM!!                and read files and descriptors if it is.
+\REM!!************************************************************************!!
+SUB MC.FEATURE.STATUS EXTERNAL        ! Call to get feature active flag
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CNVRT.PRICE
+\REM!!
+\REM!!      PURPOSE - Convert price to Foreign Currency
+\REM!!************************************************************************!!
+SUB CNVRT.PRICE(IR.PRICE, FLDDESC$) EXTERNAL
+  INTEGER *4 IR.PRICE
+  STRING FLDDESC$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: INSERT.CMC.ID
+\REM!!
+\REM!!      PURPOSE - Insert Country Monetary Currency ID/ Symbol into Line.
+\REM!!************************************************************************!!
+SUB INSERT.CMC.ID(SL.TEMP$, FLDDESC$) EXTERNAL
+  STRING SL.TEMP$, FLDDESC$
+END SUB
+
+\/******************************************************************/
+\/* END OF EAMMCSLJ.J86                                            */
+\/******************************************************************/

@@ -1,0 +1,95 @@
+! PROGRAMA PARA IMPRIMIR TIQUES, PARTIENDO DEL ROLLO DE AUDITORIA
+! TULIO ANGEL GIRALDO
+!---------------------------------------------------------------------------
+
+STRING MES$,DIA$,NTER$,NTER1$,NTRAN$,FECHA$,FECHA1$,FECHA2$,TIQUE$,NUMCB$
+STRING NTRAN1$,FIELDS$,NTRAN2$,NTRAN3$,NTRAN4$,FECHA3$,NTRAN5$,NTRAN6$,NTRAN7$
+STRING NTRAN8$,CODARTI$,B$
+INTEGER*1 A%,B%,C%,D%
+INTEGER*2 NTRAN%,NTRAN1%,NTRAN10%
+!----------------------------------------------------------------------------
+
+FINR$=CHR$(13)+CHR$(10)		!CREA UN FIN DE REGISTRO
+CLEARS				!LIMPIA PANTALLA
+
+A%=1 
+
+!--------------------	MENU CAPTURA DATOS TIQUETE	----------------
+
+WHILE  A%<>0
+CLEARS 
+PRINT "		"
+PRINT "	                   SOPORTE POS				 "
+print "                   PROGRAMA PARA GENERAR TIQUETES  		 "
+PRINT "                       Tec. Tulio A. Giraldo          		 "
+PRINT "                                                      		 "
+PRINT "                                                      		 " 
+INPUT "	DIGITE MES - 2 DIGITOS (MM ej: 02,09,11):       ";MES$ 
+INPUT "	DIGITE DIA - 2 DIGITOS (DD ej: 07,16,27):	";DIA$
+INPUT "	DIGITE CODIGO ARTICULO:	";CODARTI$ 
+
+!------ VALIDA INFORMACION INGRESADA --------------- 
+
+IF VAL(MES$)>13 THEN BEGIN
+	CLEARS
+	PRINT "		LOS MESES VAN DESDE 01 A 12"  
+	WAIT;3000 
+ENDIF  
+IF VAL(DIA$)<1 OR VAL(DIA$)>31 THEN BEGIN
+	CLEARS
+	PRINT "		LOS DIAS VAN DESDE 01 A 31" 
+	WAIT;3000 
+ENDIF
+
+MES%=VAL(MES$)					!CONVIERTE STRING EN VALOR
+DIA%=VAL(DIA$)
+IF MES%>0 AND MES%<13 AND DIA%>0 AND DIA%<32 THEN BEGIN 
+	FECHA$="C:/ADX_UDT1/EAMT"+MES$+DIA$+".DAT"
+	A%=0 
+ENDIF 
+WEND     
+
+TLOG = 25
+
+ON ERROR GOTO ERRORTRAP
+
+IF END #TLOG THEN SALIDA
+
+OPEN FECHA$ AS TLOG NOWRITE NODEL
+
+CREATE "C:/DATOS/FILE.TXT" AS 10 
+OPEN "C:/DATOS/FILE.TXT" AS 11 APPEND
+
+NXTRCD:
+  Q=1
+  READ #TLOG; LINE INAREA$
+  LAR% = LAR% + LEN(INAREA$)
+  REL% = REL% + 1
+ CONSOLE
+  LOCATE 15,10
+  PRINT "Registros Le¡dos: ";STR$(REL%);"     Offset TLOG: ";STR$(LAR%)
+!  IF REL% < REI% THEN GOTO NXTRCD
+  INAREA$ = INAREA$ + ","
+  WHILE (Q < LEN(INAREA$))
+    P = MATCH (",",INAREA$,Q)                ! FIND STRING DELIMETER
+    IF (P-Q) < 3 THEN BEGIN                  ! TEST FOR MISSING STRING
+	WRITE #11;INAREA$
+      Q=P+1                                  ! SET UP FOR NEXT STRING
+!      GOTO AGAIN
+    ENDIF
+  WEND
+  GOTO NXTRCD
+
+
+ERRORTRAP:
+	RESUME
+	STOP
+
+
+SALIDA: 
+	CLOSE TLOG
+	CLOSE 11
+
+
+END
+

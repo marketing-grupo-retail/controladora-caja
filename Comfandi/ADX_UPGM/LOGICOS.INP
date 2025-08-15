@@ -1,0 +1,4 @@
+LOGICOS.286 = LOGICOS,
+           EAMCSASC,
+           ADXACRCL.L86 [s],
+           ADXADMBL.L86 [s,li,lo,m,stack[max[200]]]

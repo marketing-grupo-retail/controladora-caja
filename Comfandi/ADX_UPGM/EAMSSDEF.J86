@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+!**********************************************************************
+!*   SALES SUPPORT CONTROL FILE - CLOSE RECORD FIELD DEFINITIONS      *
+!**********************************************************************
+!* The following defines the variables for the store close record .   *
+!**********************************************************************
+!*START OF CHANGES ****************************************************
+!                                                                     *
+!  IR32134 - Made ss.closepnt global to assure copying of xactions    *
+!            from the old transaction log to the new.                 *
+!**END-OF-SPECIFICATIONS***********************************************
+
+   STRING  GLOBAL               \ IR26236
+        SS.LOGNAME$,            \ NAME OF TRANSACTION SUMMARY   ASC 8
+        SS.OLDLOG$,             \ NAME OF PREVIOUS TLOG         ASC 8
+        SS.DATETIME$,           \ DATE AND TIME OF LAST CLOSE   UPD 5
+        SS.RESERVED$            !                IRCSGF         ASC 9
+
+   INTEGER*4                    \
+              GLOBAL            \ IR32134 made global
+        SS.CLOSEPNT             ! POINTER TO PREV. CLOSE RECORD INT 4
+
+!**********************************************************************
+!* End of definitions                                                 *
+!**********************************************************************

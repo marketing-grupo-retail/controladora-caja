@@ -1,0 +1,88 @@
+!-------------------------------------------------------------------------------
+!         **  PROYECTO IBM -               **
+!
+!     USER EXIT          =  UT0801A.VRF
+!     Punto de Entrada   =  EAMTSU08.J86
+!     Fecha de Revisi¢n  =  Feb. de 1999
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!------------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 08  para controlar la
+! venta de Articulos  con Indicativos especiales de Verificacion
+! interceptando y procesando los PLU's de Drogueria y Cosmeticos
+! como si fueran Verificables.
+! 
+! Como guia documentativa, se INCLUYE la siguiente informacion
+! para tener en cuenta en la defincion de "Opciones de Usuario"
+! en el Capitulo "Personalizacion" de TERMINAL OPTIONS = 19:
+!
+!                                   Descrip/Reporte
+!                                      3058-3064
+!
+!       60 User Option 1  Y  --->  Liq Iva/ImpConsumo 
+!       61 User Option 2  N  --->  Dig Ctrl/CH Subsid 
+!       62 User Option 3  N  --->  Despl/Mens Vdisply  
+!       63 User Option 4  N  --->  Verif 100% Precios 
+!       64 User Option 5  N  --->  Emitir Factura Adicional
+!       65 User Option 6  N  --->  Elaborar Minifactura en CR
+!       66 User Option 7  N  --->  Franqueo en Entrenamiento
+!
+! El Display del Operador le Indica con B105 el comienzo de la                                                         
+! Verificacion                                                           
+!------------------------------------------------------------------
+
+IF IR.ITEMTYPE >= 6 THEN EXIT SUB 
+
+IF VERIAM% = 1 THEN BEGIN                              ! Si Verific Oblig
+   VERIAM% = 0                                         ! Restaura Flag
+   IR.INDICAT1A = IR.INDICAT1A OR 04H                  ! ¢ Flag Ind/Ver/Prec
+ENDIF                                                  !
+
+
+!TO.PRCOVRIDLIM = 0                                     ! Price Overr Limit
+IF (VAL(UNPACK$(IR.DEPARTME$)) = 090 OR               \! Si son Medicamentos
+    VAL(UNPACK$(IR.DEPARTME$)) = 403)AND              \! Si son Medicamentos
+    VERIFICA% = 1        OR                           \! Y Plu Digitado
+    IR.INDICAT1A AND 04H   THEN BEGIN
+       !TO.PRCOVRIDLIM = L14PRCOVR                      ! Price Overr Limit
+       KGCM% = VAL(TS.IO.DATA$(6))                     !
+       IF TS.IO.KEYS(6) = 0 AND                       \! No hay Motor en 6
+          TS.IO.DATA$(6) = "" THEN BEGIN               !
+             KGCM% = 1                                 ! Sin Cant Coloca UNO 
+      ENDIF                                            !
+      IF NOT USER.VERIFY.ITEM        AND              \! Si no se ha Verf
+         ((IR.INDICAT0 AND 10H) = 0) AND              \! y NO Req Precio
+         REPEAT.COUNT           < 1  AND              \! sin Repeticion
+         TS.IO.DATA$(5)         = "" THEN BEGIN        ! Sin Precio Digitado
+            TS.PURGE.ERR      = -1                     ! Ignora Error Anter
+                                                       !
+            TS.PC.PM      = IR.PRICING.METHOD          ! Inicializacion 
+            TS.PC.PRICE1  = IR.PRICE1                  !  Especial de
+            TS.PC.PRICE2  = IR.PRICE2                  !   Variables de
+            TS.PC.QTY$    = UNPACK$(IR.SALEQUAN$)      !    Reg de Plus
+            TS.PC.OPRICE1 = IR.PRICE1                  !     para ver las
+            TS.PC.OPRICE2 = IR.PRICE2                  !      lineas de 
+            TS.PC.OQTY$   = TS.PC.QTY$                 !       verificacion
+            IF VAL(TS.PC.QTY$) > 1 AND                \!        de Precios
+               TS.PC.PM < 2 THEN TS.PC.SPLIT = -1     \!
+            ELSE TS.PC.SPLIT = 0                       !
+                                                       !
+            TS.LINETYPE    = 11                        ! Despliega
+            TS.LINEDATA    = 0                         ! Item Verificado
+            TS.STACKERR(0) = 9                         ! Estado de Entrada Precio
+            I$             = TS.SAVDISP1$              ! Salva despliegue
+            J$             = TS.SAVDISP2$              ! para borrar
+            CALL TSCSEC03                              ! Stack de Errores
+            TS.SAVDISP1$   = I$                        ! Restaura despliegue
+            TS.SAVDISP2$   = J$                        ! Salvado para Borrar
+                                                       !
+            USER.VERIFY.ITEM = -1                      ! Flag de Verif de Item
+            USER.SAVE.ITEM$  = TS.IO.DATA$(2)          ! Salva Plu Digitado
+            FAST.EXIT        = -1                      ! y no mas Proceso
+      ENDIF                                            ! Fin de Cond
+ENDIF                                                  ! Fin de Verific de Plu
+!-------------------------------------------------------------------------
+
+
+                                                 !  ** Con ENTER lo REGISTRA **

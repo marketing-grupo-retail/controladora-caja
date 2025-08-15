@@ -1,0 +1,11 @@
+!************************************************** 
+!Empresa       : Grupo Retail S.A                 *
+!Programa      : RECSRSU.011                      *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Noviembre de 2007                *
+!Observaciones : Modulo Recaudo Serv. Publicos    *
+!**************************************************
+
+FUNCTION RECASRV(UE.RECASRV.PARAMETRO%,XDATA%) EXTERNAL
+INTEGER*1 UE.RECASRV.PARAMETRO%, XDATA%
+END FUNCTION

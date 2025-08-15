@@ -1,0 +1,33 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : AJUSTS30.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Ajuste al cambio                 *
+!**************************************************
+
+IF TS.BALDUE(0) <= 0 THEN BEGIN
+   TS.TEMP4I4 = 0
+   FOR J% = 1 TO 6
+	    TS.TEMP4I4 = TS.TEMP4I4 + TS.TENDERED(J%)
+   NEXT J%
+   IF (TS.TOTALS(0,0,0) <> TS.TEMP4I4) THEN BEGIN
+    IF UE.AJUS.REDO% <= 0 THEN GOTO SALIDA.AJUSTE.CAMBIO
+    IF MOD(TS.TOTALS(0,0,0),UE.AJUS.REDO%) > 0 THEN	BEGIN
+	     TS.TEMP4I4 = TS.TEMP4I4 - TS.TOTALS(0,0,0)
+       UE.AJUS.MONTO% = MOD(TS.TEMP4I4,UE.AJUS.REDO%)
+	     IF UE.AJUS.MONTO% <> 0 THEN BEGIN
+		      UE.AJUS.MONTO% = UE.AJUS.REDO% - UE.AJUS.MONTO%
+		      SL.STR$(SL.END+1) = PACK$("03")+":"+PACK$(UE.MNTO.DPT$)+":"+	\
+				                      PACK$("00")+ ":"+PACK$(STR$(UE.AJUS.MONTO%))+":"
+		      TS.BALDUE(0) = TS.BALDUE(0) - UE.AJUS.MONTO%
+		      SL.HD.GROSSNEG = SL.HD.GROSSNEG + UE.AJUS.MONTO%
+		      TS.GROSSNEG = TS.GROSSNEG + UE.AJUS.MONTO%
+		      SL.END = SL.END + 1
+		   ENDIF
+	   ENDIF
+   ENDIF
+ENDIF
+
+SALIDA.AJUSTE.CAMBIO:

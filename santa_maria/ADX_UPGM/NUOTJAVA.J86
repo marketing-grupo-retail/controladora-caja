@@ -1,0 +1,52 @@
+!-------------------------------------------------------------------------------
+!Encabezado de interfaz para java
+!Fecha: 17 de abril de 2021
+!Autor: Alejandro Farré P.
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+! invoca un metodo de una clase java
+! clase$  nombre de la clase
+! metodo$ nombre del metodo
+! param$  parametro a enviar
+! retorna una cadena con el resultado
+! si primer caracter es E hubo un error en la invocacion
+!-------------------------------------------------------------------------------
+function invocaMetodo$( clase$, metodo$, param$ ) external
+   string    invocaMetodo$, clase$, metodo$, param$
+end function
+
+!------------------------------------------------------------------------------
+! lista archivos
+!------------------------------------------------------------------------------
+function listaArchivos( path$ ) external
+   integer*1 listaArchivos
+   string path$
+end function
+
+!------------------------------------------------------------------------------
+! ejecuta las instrucciones del archivo c:/TEMP/COMANDOS.TXT
+!------------------------------------------------------------------------------
+function instrucciones external
+   integer*1 instrucciones
+end function
+
+!-------------------------------------------------------------------------------
+! utiliza la clase soConsulta para enviar un mensaje por socket
+! consulta$  mensaje a enviar
+! direccion$ direccion IP del servidor
+! puerto$    puerto de servicio
+! espera$    tiempo de espera
+! retorna    codigo de respuesta y la respuesta
+! 00 respuesta recibida
+! 01 Nada que enviar
+! 02 Error en conexion
+! 03 Error en envio
+! 04 El servidor no responde
+! 05 Error en logitud de la respuesta
+! 06 InterruptedException
+! 07 Exception
+!-------------------------------------------------------------------------------
+function soConsulta$( consulta$, direccion$, puerta$, espera$ ) external
+   string soConsulta$, consulta$, direccion$, puerta$, espera$
+end function

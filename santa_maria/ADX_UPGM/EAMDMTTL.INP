@@ -1,0 +1,6 @@
+     EAMDMTTL     = EAMDMTTC,
+           EAMCSASC,
+           EAMGAFTK.L86 [S],
+           EAMGASCK.L86 [S],
+           EAMIRCMK.L86 [S],
+           ADXACRCL.L86 [S,LI,LO,M,STACK[MAX[200]]]

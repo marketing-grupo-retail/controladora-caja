@@ -1,0 +1,57 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variables          *
+!**************************************************
+
+String    Global  Asc.Pef.Monto$,       \! Monto de la compra
+                  Asc.Pef.Saldo$,       \! Saldo de la tarjeta
+                  Asc.Pef.Cadena$,      \! Codigo cadena
+                  Asc.Pef.Appl$,      	\! Codigo de la aplicacion
+                  Asc.Pef.tpvr$,        \! Tipo y variedad a controlar
+                  Asc.Pef.NotaNul$,     \! 
+                  Asc.Pef.NotaVen$,     \! 
+                  Asc.Pef.EstadoNota$,  \!
+                  Asc.Pef.VlrBono$,     \!
+                  Asc.Pef.NumNota$,     \! 
+                  Asc.Pef.VlrDev$,      \!
+                  Asc.Pef.VtaBono$(2),  \! 
+                  Asc.Pef.VtaBono2$(2), \! 
+                  Asc.Pef.Contable$,    \! Fecha movimiento contable
+                  Asc.Pef.VlrCompra$,   \! Valor movimiento               
+                  Asc.Pef.CadenaReverso$,\! String de reverso
+                  Asc.Pef.Tmp$           ! 
+
+Integer*1 Global  Asc.Pef.Line%,        \! Modulo activo
+                  Asc.Pef.Impr%,        \! Control impresion franqueos
+                  Asc.Pef.Sesion%,      \! Sesion temporal de trabajo
+                  Asc.Pef.ManLin%,      \! Si la autorizacion en local o en linea
+                  Asc.Pef.NtCap%,       \! Nota Capturada
+                  Asc.Pef.Cambio%,      \! Control intercambio medios de pago
+                  Asc.Pef.InCambio%,    \! Control intercambio medios de pago
+                  Asc.Pef.InDevol%,     \! Indicador control devoluciones aplicacion en pago
+                  Asc.Pef.Recup%,       \! Control de recuperacion 
+                  Asc.Pef.Auditoria%,   \! Auditoria del sistema
+                  Asc.Pef.Tipo%,        \! Tipo de pago capturado
+                  Asc.Pef.Vari%,        \! Tipo de Variedad capturado
+                  Asc.Pef.Bug%,         \! Control Bug aplicacion ADD OVS 10 Feb 2006
+                  Asc.Pef.Fran%          ! Numero de franqueo a utilizar
+                  
+Integer*4 Global  Asc.Pef.Slend%,       \! Total string de la transaccion
+                  Asc.Pef.NroBon%,      \! Numero de tarjetas capturadas
+                  Asc.Pef.Motora%,      \! Numero de tecla motora
+                  Asc.Pef.DataPos%,     \! Posicion de datos en vector
+                  Asc.Pef.Consulta%      ! Tecla sesion de consulta
+                  
+
+String    Global Asc.Pef.Rrn$,          \! RRN de la operacion
+		             Asc.Pef.Autor$,        \! numero de autorizacion
+		             Asc.Pef.Fneg$,         \! fecha de posteo
+		             Asc.Pef.Rthos$,   		  \! Rta del Host
+		             Asc.Pef.Comer$,        \! Codigo del comercio
+		             Asc.Pef.Stats$,        \! Status de la nota
+		             Asc.Pef.Idpos$    		   ! ID del POS
+
+Integer*1 Global Asc.Pef.54%, Asc.Pef.AutPay%, Asc.Pef.Operacion%

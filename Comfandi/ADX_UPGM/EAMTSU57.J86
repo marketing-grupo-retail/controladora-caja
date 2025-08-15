@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK ***************************************/
+
+FUNCTION TSUPEC57 PUBLIC
+! TSUPEC57 - After a "read" from the sequential file at retrieval time
+%INCLUDE EAMTSE57.J86        ! EMS PRPQ
+END FUNCTION
+

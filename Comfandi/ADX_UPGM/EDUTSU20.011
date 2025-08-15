@@ -1,0 +1,25 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudos Colegios        *
+!**************************************************
+
+
+IF (TS.LINETYPE = 29) AND (TS.LINEDATA = 1) THEN BEGIN
+  IF (Asc.Edu.Impr% = -1) THEN BEGIN
+     Asc.Edu.Slend% = SL.END								! Total de strings
+  EndIf
+EndIf
+
+IF (TS.LINETYPE =  1 AND VAL(UNPACK$(IR.ITEMCODE$)) = VAL(Asc.Edu.Item$) AND Asc.Edu.Impr% <> 0) THEN BEGIN
+   CALL FORMAT.AMOUNT(VAL(Asc.Edu.VlrPago$))
+   TS.TEMP2$ = "Recibo:"  + Asc.Edu.NoRec$    \!
+     +"Valor: " + TS.TEMP1$
+   TS.TEMP2$ = LEFT$(TS.TEMP2$+STRING$(38," "),38)  
+   CALL U.IMPRIME(TS.TEMP2$,6100H)
+   TS.GUIDANCE = 1020																															 ! Mensaje de totalizar   
+ENDIF
+

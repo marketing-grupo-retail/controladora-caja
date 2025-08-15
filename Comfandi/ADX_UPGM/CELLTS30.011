@@ -1,0 +1,134 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A                                 **
+!   **    User Exit  :  CELLTS30.011                                         **
+!   **    Inclu¡r en :  EAMTSU30.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD RETAIL                      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+IF (TS.TOTALS(0,0,0) >= 0) AND (TS.BALDUE(0) <= 0) AND (UE.CELL.SALE% = -1) THEN \
+BEGIN
+UE.CELL.SALE% = 1
+SL.END = SL.END + 1			! Incrementa pointer
+!UE.CELL.AUX = SL.END				! y guarda para Grabar
+
+IF UE.CELL.SALE% = 1 THEN	\
+BEGIN
+!	ON ERROR GOTO NO.CELL
+	UE.CELL.KEY$ = PACK$(UE.CELL.ITEM$)+PACK$("0000")
+	UE.CELL.KEY2$ = PACK$(UE.CELL.ITEM$)+PACK$("0000")
+	UE.CELL.ERROR% = 0
+        TS.ER.RETURN = 0
+	UE.CELL.PIN$  = "0"
+	UE.CELL.MARK$ = "0"
+	IF TS.TRAINING THEN \
+	   READ FORM "C8 C2 C2 2C3 C37";#93 KEY UE.CELL.KEY$;	\
+		UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+                UE.CELL.ALM$, F$ \
+	ELSE \
+	   READ FORM "C8 C2 C2 2C3 C37";#93 AUTOLOCK KEY UE.CELL.KEY$;	\
+		UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+                UE.CELL.ALM$, F$
+
+	IF NOT(TS.ER.RETURN) THEN BEGIN
+		UE.CELL.KEY2$ = PACK$(UE.CELL.ITEM$)+UE.CELL.CONT$
+		READ FORM "C8 C20 C3 C1 C15 C8";#94 KEY UE.CELL.KEY2$;	\
+			UE.CELL.KEY2$,UE.CELL.PIN$,UE.CELL.FECHA$,UE.CELL.MARK$,UE.CELL.SERIE$,F$
+		IF NOT(TS.ER.RETURN) THEN BEGIN
+!???????????????????????????????????????????????????????????????????????????????			
+			IF UE.CELL.MARK$ <> "7" THEN BEGIN
+				IF UNPACK$(UE.CELL.CONT$) = "9999" THEN UE.CELL.CONT$ = PACK$("0001")	\
+				ELSE	\
+					UE.CELL.CONT$ = PACK$(RIGHT$("0000"+STR$(VAL(UNPACK$(UE.CELL.CONT$))+1),4))
+				IF NOT(TS.TRAINING) THEN BEGIN
+       				   F$=STRING$(37,"0") ! Asegura long registro ovs 22/Jun/01
+				   WRITE FORM "C8 C2 C2 2C3 C37";#93 AUTOUNLOCK;	\
+					UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+                                        UE.CELL.ALM$, F$
+       				   F$=STRING$(08,"0") ! Asegura long registro OVS 22/Jun/01
+				   WRITE FORM "C8 C20 C3 C1 C15 C8";#94;	\
+					UE.CELL.KEY2$,UE.CELL.PIN$,UE.CELL.FECHA$,"7",UE.CELL.SERIE$,F$
+				ENDIF
+				LOCATE #30;1,1,OFF                            ! Ubica Cursor
+				WRITE FORM "2C20";#30;"GENERANDO TIQUETE DE", \
+	 					      "PIN VIRTUAL ...     "
+				CALL TSHIECET
+				WAIT;2000
+                                IF TS.TRAINING THEN BEGIN
+                                   UE.CELL.PIN$ = "9999999999"
+  				   UE.CELL.SERIE$ = "999999999999999"
+       				ENDIF ELSE \
+				   UE.CELL.PINDES$ = CELLSTAR.CLAVE(UE.CELL.PIN$,2)
+!---------------------------------------------------------------------------
+				UE.CELL.SALE% = 2
+				UE.CELL.IMPRIMA% = 7
+!				CALL IMPRIMA.CELLSTAR
+!---------------------------------------------------------------------------
+			ENDIF ELSE BEGIN
+				IF NOT(TS.TRAINING) THEN BEGIN
+  				   F$ = STRING$(37,"0") ! Ajusta long registro OVS 22/Jun/01
+				   WRITE FORM "C8 C2 C2 2C3 C37";#93 AUTOUNLOCK; \
+				         UE.CELL.KEY$,UE.CELL.FIN$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+            				 UE.CELL.ALM$, F$
+  				   F$ = STRING$(08,"0") ! Ajusta long registro OVS 22/jun/01
+				   WRITE FORM "C8 C20 C3 C1 C15 C8";#94 ;	\
+					 UE.CELL.KEY2$,UE.CELL.PIN$,UE.CELL.FECHA$,"7",UE.CELL.SERIE$,F$
+				ENDIF
+				UE.CELL.IMPRIMA% = 9
+				LOCATE #30;1,1,OFF                            ! Ubica Cursor
+				WRITE FORM "2C20";#30;"NO HAY TARJETAS",\
+						      " DISPONIBLES..."
+				CALL TSHIECET
+				UE.CELL.SALE% = 2
+				WAIT;2000
+				LOCATE #30;1,1,OFF                            ! Ubica Cursor
+				WRITE FORM "2C20";#30;"QUEDO Y:"+UNPACK$(UE.CELL.CONT$),\
+						      "FINAL  :"+UNPACK$(UE.CELL.FIN$)
+				CALL TSHIECET
+				WAIT;4000
+			ENDIF
+!???????????????????????????????????????????????????????????????????????????????			
+		ENDIF ELSE BEGIN
+		        F$ = STRING$(37,"0") ! Ajusta long registro OVS 22/Jun/01
+			IF NOT(TS.TRAINING) THEN \
+			   WRITE FORM "C8 C2 C2 2C3 C37";#93 AUTOUNLOCK; \
+			   UE.CELL.KEY$,UE.CELL.FIN$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+                           UE.CELL.ALM$, F$
+			UE.CELL.IMPRIMA% = 9
+			LOCATE #30;1,1,OFF                            ! Ubica Cursor
+			WRITE FORM "2C20";#30;"NO HAY TARJETAS",\
+					      " DISPONIBLES..."
+			CALL TSHIECET
+			UE.CELL.SALE% = 2
+			WAIT;2000
+		ENDIF
+	ENDIF
+!F$ = CELLSTAR.DATO(UE.CELL.PIN$,1)	
+SL.STR$(SL.END) = PACK$("11")+		\  ! En string reservado
+				":"+PACK$(STR$(70112000))+	\
+				":"+";"+PACK$(UE.CELL.PIN$)+	\
+				";"+PACK$("00")+\
+				";"+PACK$(UE.CELL.SERIE$)+	\
+				";"+UE.CELL.CODOP$+	\
+				";"+UE.CELL.OPLOGIS$+";"+	\
+				":"+":"+":"+":"
+
+ENDIF
+ENDIF
+
+GOTO SIGA.CELL
+
+!NO.CELL:
+!TVISOR$ = ERR:VISOR% = ERRF%
+!UE.CELL.ERROR% = -1
+!RESUME
+
+SIGA.CELL:
+
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------

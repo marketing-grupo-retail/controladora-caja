@@ -1,0 +1,34 @@
+!   ***************************************************************************
+!   **    Date       :  Octubre 27 de 1997                                   **
+!   **    Responsible:  Depto de SISTEMAS                                    **
+!   **    User Exit  :  USR2005.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  Sistemas POS                                         **
+!   **                                                                       **
+!   **    Instrucciones  para  franqueo de documentos con el nombre del      **
+!   **    CLIENTE y el nombre de la Empresa para Ventas a Credito.           **
+!   ***************************************************************************
+
+
+
+IF PROCE%        =  1  AND                                \! Si Requiere Factura
+   TS.BALDUE (0) <> 1  AND                                \! Si ya se Pago
+   TS.BAL.TAKEN        AND                                \! y ya se tomo Saldo
+   TS.INTRX         THEN BEGIN                             ! y es Transaccion
+      PROCE% = 0         
+      CALL ENCABEZA                                        ! Rutina de Encab
+      CALL IMPRIMIR                                        ! 
+ENDIF   						   !
+
+IF MERCAMOS%        =  1  AND                             \! Si Requiere Factura
+   TS.BALDUE (0) <  1  AND                                \! Si ya se Pago
+   TS.INTRX         THEN BEGIN                             ! y es Transaccion
+      MERCAMOS% = 0
+       CALL ENCABEZA                                       ! Rutina de Encab
+       CALL IMPRIMIR                                       ! 
+ENDIF     
+
+
+

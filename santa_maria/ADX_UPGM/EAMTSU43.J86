@@ -1,0 +1,19 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC43 PUBLIC
+! TSUPEC43 - PRICE COMPUTATION
+INTEGER*1 TSUPEC43                        ! define variable !IR89474
+
+   ! Inventario
+   call MSMTINVE43
+   
+   ! Remates
+   CALL GRREMATES(43)                     !MODULO REMATES
+
+   !Deliverys
+   CALL GRDOMICILIOS(43)
+
+   
+END FUNCTION
+

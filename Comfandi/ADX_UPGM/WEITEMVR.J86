@@ -1,0 +1,32 @@
+\/*********************************************************************/
+\/*                                                                   */
+\/*      MODULE NAME: WEITEMVR.J86                                    */
+\/*                                                                   */
+\/*      DESCRIPTIVE NAME: WIC EBT SMARTCARD VARIABLE DECLARATIONS    */
+\/*                        DECLARATIONS FOR GLOBAL WIC'ABLE ITEMS     */
+\/*                                                                   */
+\/*      COPYRIGHT:                                                   */
+\/*      5799-QZH THIS MODULE IS "RESTRICTED MATERIALS OF IBM"        */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED        */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT      */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                           */
+\/*                                                                   */
+\/*      STATUS: RELEASE 1 LEVEL 0                                    */
+\/*                                                                   */
+\/*                                                                   */
+\/*      PERSON RESPONSIBLE = Tom Gaskill                             */
+\/*                                                                   */
+\/*      WE = WIC EBT                                                 */
+\/*                                                                   */
+\/*      CHANGE ACTIVITY: LEVEL 0                                     */
+\/*                                                                   */
+\/* END-OF-SPECIFICATIONS *********************************************/
+
+INTEGER*2 GLOBAL                       \
+          WE.ITEM.MAX.COUNT,           \ count of WIC'able items
+          WE.ITEM.TLOG.INDEX(1)        ! index into TLog of WIC'able items
+
+INTEGER*4 GLOBAL                       \
+          WE.ITEM.QUANTITY(1)          ! quantity of WIC'able items at index
+
+!****************************** END WEITEMVR.J86 ******************************

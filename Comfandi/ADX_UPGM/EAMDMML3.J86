@@ -1,0 +1,39 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** EAMDMML3.J86 ***********************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  *************************************************************
+   IF TGT.NO = 4 THEN BEGIN                     ! ITEM RECORD
+    IF LEFT$(DM.DMSDATA$,6) = LEFT$(REST$,6) AND \ REPLACE OF
+       LEN(DM.DMSDATA$) = LEN(REST$) THEN BEGIN  ! EXISTING ITEM
+     IF (DM.DMCMT AND 01H) = 0 THEN BEGIN        ! NOT IN-STORE
+       DM.DMSDATA$ = MID$(DM.DMSDATA$,01,12)  \ DON'T CHANGE
+                   + MID$(REST$      ,13,03)  \  FAMILY
+                   + MID$(DM.DMSDATA$,16,07)  \
+                   + MID$(REST$      ,23,02)  \  OR LINK CODE
+                   + MID$(DM.DMSDATA$,25,18)  \
+                   + MID$(REST$      ,43,04)  !  OR EXITS FIELDS
+     ENDIF ELSE BEGIN                       ! IN-STORE FORMAT
+      IF ASC(MID$(DM.DMSDATA$,10,1)) < 60H THEN BEGIN ! NOT COUP
+       DM.DMSDATA$ = MID$(DM.DMSDATA$,01,15)  \ DON'T CHANGE
+                   + MID$(REST$      ,16,07)  \  PRICE DATA
+                   + MID$(DM.DMSDATA$,23,02)  \
+                   + MID$(REST$      ,25,18)  \  OR DESCRIPTOR
+                   + MID$(DM.DMSDATA$,43,04)  !
+      ENDIF                                 ! NOT A COUPON
+     ENDIF                                  ! IN-STORE FORMAT
+    ENDIF                                   ! REPLACE EXISTING
+   ENDIF                                    ! ITEM RECORD
+!  *************************************************************
+! This code updates the source item record data with the family code,
+! link field, and exit fields from the target item record before the
+! source is written to the target file on an item record replacement.
+! This change prevents host price maintenance from altering the item
+! record fields that might be set in the store for electronic marketing.
+! In-store created batches can alter the electronic marketing fields,
+! but cannot alter the price data or item descriptor.

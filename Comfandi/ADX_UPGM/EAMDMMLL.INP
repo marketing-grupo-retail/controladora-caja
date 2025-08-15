@@ -1,0 +1,13 @@
+     EAMDMMLL     = EAMDMMLC,
+                    EAMDMSRC[S],
+                    EAMDMTLC[S],
+                    EAMGASDC[S],
+                    EAMMMCFC[S],
+                    EAMCSASC[S],
+                    EXTENDIR[S],
+                    EAMIRCMK.L86 [S],
+                    EAMPSDMK.L86 [S],
+                    EAMGAFMK.L86 [S],
+                    EAMGASCK.L86 [S],
+                    ADXACRCL.L86 [S],
+                    ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

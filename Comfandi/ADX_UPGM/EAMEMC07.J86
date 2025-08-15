@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSEMEC07 PUBLIC ! BEFORE THE WRITE OF AN AUDIT LOG RECORD
+ 
+! insert user exit code here
+ 
+ END FUNCTION

@@ -1,0 +1,24 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU56.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+Asc.Pef.Impr%    = 0											! Init de variable control de franqueo
+Asc.Pef.InCambio% = 0                     ! Control intercambio medios de cambio
+Asc.Pef.NotaNul$ = ""                     ! Init de variable control de anulaciones
+Asc.Pef.NtCap%   = 0                      ! Control de notas capturadas
+Asc.Pef.Cambio%  = 0                      ! Intercambio medios de pago
+Asc.Pef.InDevol% = 0                      ! Control de autorizaciones por devolucion y pago
+Asc.Pef.NumNota$ = ""                     ! Temporal
+Asc.Pef.VlrDev$  = ""                     ! 
+Asc.Pef.NroBon%  = 0                      ! Nro bonos capturados
+DIM Asc.Pef.Vtabono$(60,4)                ! Init vector control bonos
+DIM Asc.Pef.Vtabono2$(60,2)               ! Init vector control bonos
+Asc.Pef.Recup% = 0                        ! Control recuperaciones
+Asc.Pef.Cambio% = 0                       ! Intercambios
+Asc.Pef.VlrCompra$ = "0"
+Asc.Pef.Operacion% = 0                    ! Tipo de operacion 
+Asc.Pef.DataPos% = 0 

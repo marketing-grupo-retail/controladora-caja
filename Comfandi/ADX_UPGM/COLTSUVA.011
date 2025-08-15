@@ -1,0 +1,38 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Definicion de variables          *
+!**************************************************
+
+String    Global  Asc.Col.Monto$,       \! Monto del bono de devolucion
+                  Asc.Col.Saldo$,       \! Saldo del bono en la consulta
+                  Asc.Col.Cadena$,      \! Codigo cadena
+                  Asc.Col.Appl$,      	\! Codigo de la aplicac
+                  Asc.Col.tpvr$,        \! Tipo y variedad a controlar
+                  Asc.Col.NotaNul$,     \! Notas Anuladas
+                  Asc.Col.EstadoNota$,  \!
+                  Asc.Col.VlrBono$,     \! Valor del Bono
+                  Asc.Col.PluPack$,     \! Plu Empaquetado
+                  Asc.Col.Tecla$,       \! Tecla de control
+                  Asc.Col.Tmp$           ! Temporal de trabajo
+
+Integer*1 Global  Asc.Col.Line%,        \! Modulo activo
+                  Asc.Col.Sesion%,      \! Sesion temporal
+                  Asc.Col.Impr%,        \! Control impresion franqueos
+                  Asc.Col.IndPrice%,    \! Indicador de precio
+                  Asc.Tmp.Apun%,        \! Apuntador recuperacion String
+                  Asc.Col.Devol%,       \! Indicador de una devolucion
+                  Asc.Col.Fran%          ! Numero de franqueo a utilizar
+                  
+Integer*4 Global  Asc.Col.Slend%         ! Total string de la transaccion
+                  
+
+String    Global  Asc.Col.Lista$,       \! Lista de bonos a pagar
+                  Asc.Col.Item$,        \! Item Miscelaneo
+                  Ue.Cencos$,           \! Centro de costo
+                  Ue.Recive$             !       
+		             
+		           

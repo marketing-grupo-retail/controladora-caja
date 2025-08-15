@@ -1,0 +1,51 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PLUTSU21.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Impresion en el SJ               *
+!**************************************************
+
+exit sub 
+
+!If Ts.Linetype = 7 and Ts.Linedata = 1 Then Begin
+!   A$ = Right$(Ts.PrtBuf$,12)
+!   Ts.PrtBuf$ = "==>> SUBTOTAL/TOTAL USD  :$" + A$
+!Endif
+
+!IF (TS.LINETYPE = 1) THEN BEGIN                       !Si linea de articulo
+! IF RIGHT$(TS.PRTBUF$,1) = "I" OR RIGHT$(TS.PRTBUF$,1) = "T" THEN \
+!    Ts.PrtBuf$ = " "
+! 
+!ENDIF
+
+!-- Ajuste dato presentacion Tiquete Items Pesables GR- OVS 15Nov2012
+
+!If (TS.LINETYPE = 5) And (TS.LINEDATA = 3) Then Begin    										! Linea Impresion pesable
+! If Gr.Prm.Tdpi% <> 0 Then Begin																						! Si hay dscto presencia Item
+!    TS.TEMP4I4 = Val(UNPACK$(IR.SALEPRIC$))
+! 	  Call FORMAT.WEIGHT(SL.IE.QTYORWGT)
+! 	  TS.TEMP2$ = TS.TEMP1$ + " Kg x "
+! 	  Call Format.Amount(TS.TEMP4I4)
+! 	  TS.TEMP2$ = TS.TEMP2$ + TS.TEMP1$ + " /Kg"
+! 	  If Match("PE MAN",TS.PRTBUF$,1) > 0 Then \
+!	  	 TS.TEMP2$ = TS.TEMP2$ + " PE MAN"
+! 	  TS.PRTBUF$ = Left$(TS.TEMP2$ + String$(37," "),37)
+! EndIf																																			!	 
+!EndIf																																			! 
+
+If (TS.LINEDATA >= 0 AND TS.LINETYPE = 1 And TS.PROCEDURE < 0) Then Begin		! Impresion Item
+ 	   TS.TEMP3$  = UnPack$(Ue.Iva.Item$)																			! Codigo del Item
+ 	   TS.TEMP3$  = Str$(Val(TS.TEMP3$))																			! Elimina Ceros izqierda
+ 	   TS.TEMP2$  = Right$("       "+TS.TEMP3$,07)	     											! Ajusta dato Impresion
+     If (TS.IO.KEYS(1) = 70 OR TS.IO.KEYS(8) = 67 ) Then                   \! Si una anulacion
+        Call Format.Amount(SL.IT.XPRICE * -1) Else												 \!
+       	Call Format.Amount(SL.IT.XPRICE)      															!
+ 	   TS.TEMP1$  = Right$("            "+TS.TEMP1$,10)												! Ajusta dato Impresion valor producto
+ 	   TS.TEMP3$  = TS.TEMP2$ + " " + IR.ITEMNAME$ + " " + TS.TEMP1$ +       \! Arma String de impresion Item, Name,
+ 	                Gr.Ind.Iva$ 																							! price, tax flag
+ 	   TS.TEMP3$  = Left$(TS.TEMP3$+String$(38," "),38)												! Ajusta Tiquete
+ 	   TS.PRTBUF$ = TS.TEMP3$    																							! Entrega a la aplicacion
+EndIf
+

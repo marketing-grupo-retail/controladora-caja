@@ -1,0 +1,243 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCCSJ.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL FUNCTION PROTOTYPE CALLES      */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Michael Coffman                                   */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/*  IR39277 - Support for MCF tender listing file.                */
+\/*            MBC IBM 04Feb99                                     */
+\/*                                                                */
+\/*  IR40090 - Design change to handle modifications to the TLOG   */
+\/*            format and Foreign Currency Tracking File.          */
+\/*            RSH MGVA 17Mar99                                    */
+\/*                                                                */
+\/*  IR40156 - Design change to correct problems with checkpointing*/
+\/*            during close of FC track file and restart/          */
+\/*            checkpointing of the MC tender listing file.        */
+\/*            RSH MGVA 26Mar99                                    */
+\/*                                                                */
+\/*  IR40310 - Add routine to update foreign currency tracking     */
+\/*            file for coupons so that the handling of coupons    */
+\/*            with MCF installed is consistent with other tenders.*/
+\/*            RSH MGVA 16Apr99                                    */
+\/*                                                                */
+\/*  IR40902 - Implement design change for MCF Accounting.         */
+\/*            - Use Arrow keys for selecting Currency             */
+\/*            - Present screens/get input similar to TBV          */
+\/*            - Process accounting updates similar to TBV         */
+\/*              (Checkout support updates short EAMFCTR* files)   */
+\/*            RSH MGVA 01Jul99                                    */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM!!***** External SMKT Multiple Currency Subroutine calls *****
+
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.FEATURE.STATUS
+\REM!!
+\REM!!      PURPOSE - Determine SA Multiple Currency Feature Status.
+\REM!!************************************************************************!!
+SUB MC.FEATURE.STATUS EXTERNAL         ! Call to get feature active flag
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: OPEN.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Open Foreign Currency Tracking File.
+\REM!!************************************************************************!!
+SUB OPEN.FCTRACK EXTERNAL              ! Call to open foreign currency tracking
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CLOSE.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Close Foreign Currency Tracking File.
+\REM!!************************************************************************!!
+SUB CLOSE.FCTRACK(CL.TYPE) EXTERNAL    ! Call to roll foreign cur track files
+  INTEGER*2 CL.TYPE
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: READ.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Read Foreign Currency Tracking File.
+\REM!!************************************************************************!!
+SUB READ.FCTRACK(FC.KEY$) EXTERNAL     ! Call to read foreign cur track file
+  STRING FC.KEY$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: WRITE.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Write Foreign Currency Tracking File
+\REM!!************************************************************************!!
+SUB WRITE.FCTRACK(FC.KEY$) EXTERNAL    ! Call to write foreign cur track file
+  STRING FC.KEY$
+END SUB
+
+!AIR40090 - Remove routine as it is no longer needed
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: READ.FC.EXLOG
+!\REM!!
+!\REM!!      PURPOSE - Read "EAMEXCPT" SA Multiple Currency Type 63 Records.
+!\REM!!************************************************************************!!
+!SUB READ.FC.EXLOG EXTERNAL             ! Call to read EAMEXCPT rec type 63
+!END SUB
+!EIR40090
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: UPDATE.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Update Foreign Currency Tracking File
+\REM!!************************************************************************!!
+SUB UPDATE.FCTRACK EXTERNAL            ! Call to update EAMFCTRC records
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: UPDATE.FCTLIST
+\REM!!
+\REM!!      PURPOSE - Update Foreign Currency records in "EAMTLIST"
+\REM!!************************************************************************!!
+SUB UPDATE.FCTLIST EXTERNAL            ! Call to put foreign cur. in EAMTLIST
+END SUB
+
+!AIR39277 open MCF tender listing
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: OPEN.MCTLIST
+\REM!!
+\REM!!      PURPOSE - open MCF tender listing file
+\REM!!************************************************************************!!
+SUB OPEN.MCTLIST EXTERNAL                        ! open MCF tender listing file
+END SUB
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: WRITE1.MCTLIST
+\REM!!
+\REM!!      PURPOSE - write MCF tender listing file start/end record
+\REM!!************************************************************************!!
+SUB WRITE1.MCTLIST EXTERNAL                        ! write MCF tender listing file
+END SUB
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: WRITE2.MCTLIST
+\REM!!
+\REM!!      PURPOSE - write MCF tender listing file tender record
+\REM!!************************************************************************!!
+SUB WRITE2.MCTLIST EXTERNAL                        ! write MCF tender listing file
+END SUB
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: WRITE3.MCTLIST
+\REM!!
+\REM!!      PURPOSE - write MCF tender listing file delimiter record
+\REM!!************************************************************************!!
+SUB WRITE3.MCTLIST EXTERNAL                        ! write MCF tender listing file
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB CLOSE.MCTLIST perform close of MCF tender listing file
+\ REM!!****************************************************************
+
+SUB CLOSE.MCTLIST(PARM1) EXTERNAL
+  INTEGER*1 PARM1
+END SUB
+!EIR39277
+
+!AIR40090
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.TIMER.PROC - Tclose MCF data files on timer processing
+\ REM!!****************************************************************
+SUB MC.TIMER.PROC EXTERNAL                ! MC.TIMER.PROC
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.VALIDATE24 - Validate string type 24's
+\ REM!!****************************************************************
+SUB MC.VALIDATE24(WORK1I1) EXTERNAL       ! MC.VALIDATE24
+  INTEGER*1 WORK1I1
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.CSFUTILL - Process Multiple Currency Till change strings
+\ REM!!****************************************************************
+SUB MC.CSFUTILL EXTERNAL                  ! MC.CSFUTILL
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.CLEAR.TC - Clear Tender Count info in FCTRACK file
+\ REM!!****************************************************************
+SUB MC.CLEAR.TC EXTERNAL                  ! MC.CLEAR.TC
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! FUNCTION FC.SLOT - Select Slot number based upon input data
+\ REM!!****************************************************************
+FUNCTION FC.SLOT(DATA$) EXTERNAL          ! FC.SLOT
+  STRING    DATA$                         ! Passed CMC number
+END FUNCTION                              ! End Function FC.SLOT
+
+!EIR40090
+
+!AIR40156
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.TL.RESTART - Set up for restart of Multiple Currency TL
+\ REM!!****************************************************************
+SUB MC.TL.RESTART EXTERNAL                ! MC.TL.RESTART
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.TLIST.TEND - Log Tender listing data from tender string
+\ REM!!****************************************************************
+SUB MC.TLIST.TEND EXTERNAL                ! MC.TLIST.TEND
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.TLIST.TOF  - Log Tender listing TOF recovered
+\ REM!!****************************************************************
+SUB MC.TLIST.TOF EXTERNAL                 ! MC.TLIST.TOF
+END SUB
+
+!EIR40156
+
+!AIR40310
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB MC.CSSAC.CPN - Update Currency record for cpns
+\ REM!!****************************************************************
+SUB MC.CSSAC.CPN(TEND,VAR) EXTERNAL       ! MC.CSSAC.CPN
+  INTEGER*2                               \
+            TEND,                         \ Tender Type
+            VAR                           ! Variety
+END SUB
+!EIR40310
+
+!AIR40902
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB OPEN.PP.FCTRACK - Open the Previous Period FC Track file
+\ REM!!****************************************************************
+SUB OPEN.PP.FCTRACK EXTERNAL              ! OPEN.PP.FCTRACK
+END SUB
+
+\ REM!!*******************  SUBPROGRAM  *******************************
+\ REM!! SUB CLOSE.PP.FCTRACK - Close the Previous Period FC Track file
+\ REM!!****************************************************************
+SUB CLOSE.PP.FCTRACK EXTERNAL              ! CLOSE.PP.FCTRACK
+END SUB
+!EIR40902
+
+\/******************************************************************/
+\/* END OF EAMMCCSJ.J86                                            */
+\/******************************************************************/

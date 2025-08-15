@@ -1,0 +1,27 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+
+If (UE.EPS.PRECIO% <> 0) And UE.EPSS.ON Then Begin
+   If Val(UNPACK$(IR.SALEQUAN$)) <> 0 Then Begin
+      UE.EPS.PRECIO% = (UE.EPS.PRECIO% / Val(UNPACK$(IR.SALEQUAN$)))
+   EndIf
+   SL.IT.XPRICE   = UE.EPS.PRECIO% * SL.IE.QTYORWGT
+   SL.IE.SALEPRIC = UE.EPS.PRECIO%
+   If Val(UE.EPS.CAPITACION$) = 1 Then Begin    ! Si proceso de capitacion
+      SL.IT.INDICAT3A  = 4
+      If (Asc.Cnv.ApplCobro% = -1) Then Begin    ! Aplicacion cuota moderadora en reverso  
+         SL.IT.XPRICE     = Val(Asc.Cnv.CuotaMod$)
+         SL.IE.SALEPRIC   = Val(Asc.Cnv.CuotaMod$)
+      EndIf Else Begin 
+         SL.IT.XPRICE     = 0
+         SL.IE.SALEPRIC   = 0
+      EndIf 
+   EndIf 
+EndIf

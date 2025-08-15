@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DMPTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Dialogo Medios de Pago           *
+!**************************************************
+! Modificaciones:
+
+
+SUB DMPMTS07.011 EXTERNAL
+END SUB
+
+SUB DMPMTS14.011 EXTERNAL
+END SUB

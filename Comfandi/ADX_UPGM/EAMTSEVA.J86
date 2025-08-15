@@ -1,0 +1,602 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSUVA.J86 ***********************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!!*********************************************************************
+!!
+!! IR98772 -  With weight items, it is a requirement of the UK Dept
+!!            of trade and Industry that the item, price per weight
+!!            and the total when a weight item is sold.  for example,
+!!            tomatoes, $1.25 per pound and total price.
+!!            However, with EM installed, it shows the item name,
+!!            the weight of the item and the total price.
+!!            MWD MGVA Sept 21, 1992
+!!
+!! IR23680 - Prevent an SU error when the number of unique promo
+!!           codes in a transaction reaches the limit and another
+!!           unique promo item is entered.
+!!           BAH MGVA 9/01/93
+!!
+!! IR23870 - Make the amount used to decide if a transaction has
+!!           a negative balance GLOBAL so that users can set it
+!!           to -1 to avoid having 0 behave as a negative balance due.
+!!           DRV MGVA 9/27/93
+!!
+!! IR25418 - The incorrect override reason code can be logged to
+!!           the exception log if overrides are stacked and the last
+!!           one is reduced to an operators override due to setting
+!!           of E/M option 26.
+!!           BAH MGVA 3/14/94
+!!
+!! IR25943 - CORRECT IR25703, MODULE EAMTSEVA.J86 required a
+!!           symbol "TS.PC.DET" be added as a global variable.
+!!           Module EAMTSE14.J86 not changed from IR25703.
+!!           MWD MGVA 04/20/94
+!!
+!! IR26182 - With E/M option 13.3 set to overprint exception
+!!           entries, and terminal options set to print cancels on
+!!           the document insert station, 2 separate document
+!!           prints are required for voids of Miscellaneous Sales.
+!!           BAH MGVA 05/19/94
+!!
+!! IR26510 - With IR24959, a managers override of a B064 coupon error
+!!           is not allowed even though managers override controls
+!!           in terminal options allows the override.
+!!           BAH MGVA 06/22/94
+!!
+!! IR26734 - The Deposit amount is not charged on a item matches a
+!!           targeted coupon if the customer number is entered at the
+!!           start of the transaction.
+!!           MWD MGVA 07/01/94
+!!
+!! IR27245 - Voiding multiplied coupons will void the entire
+!!           multiplied value, even when the multiplied coupon
+!!           has been reduced by EM to prevent it from exceeding
+!!           the price of the item.
+!!           JEO MGVA 9/16/94
+!!
+!! IR27702 - Add EM support for extended item record files.
+!!           JEO MGVA 18Nov94
+!!
+!! IR28028 - Allow GST tax toggle keys to operate correctly.
+!!           JEO MGVA 18Nov94
+!!
+!! IR29242 - Add variable to determine Version of code being used.
+!!           CMJ MGVA  1May95
+!!
+!! IR31262 - Add base variable ts.retv.in.progress to em code.
+!!           CRM MGVA  19DEC95
+!!
+!! IR31387 - Add base variable endtrans and create EMSS.ENDTRANS
+!!           CRM MGVA  08Jan96
+!!
+!! IR33392 - Add new variable for buffering coups for Big memory model
+!!           CRM MGVA  08Jan96
+!!
+!! IR33957 - Add new variable for 4610 printer support
+!!           MWD IBM   10Jan97
+!!
+!! IR34534 - Add new variable for 4610 printer support
+!!           CMJ MGVA  24Mar97
+!!
+!! IR35984 - Add new variable for 4610 printer support
+!!           RSH MGVA  22Jul97
+!!
+!! IR36710 - Add new array element for array EMSS.PROMO.AMTS.  This file is
+!!           modified only to document the usage of the element.
+!!           RSH MGVA 30Oct97
+!!
+!! IR38928 - Voiding a percent off coupon (98xxx) which has
+!!           no validation may result in the coupon deducting
+!!           a second time.
+!!           RSH MGVA 15Oct98
+!!
+!! IR40031 - Added global integer*4 to allow EM to access this
+!!           variable. This change assures that a scale weight or scale error from a
+!!           prior sale does not carry over to an automatic coupon awarded
+!!           at total time or card entry.
+!!           JAM MGVA 10Mar99
+!!
+!! IR40950 - Added new variable to hold the coupon number that has been
+!!           displaced by a targeted coupon.  This coupon number is used
+!!           during a void of the item entered with a quantity.
+!!           RSH MGVA 13Jul99
+!!
+!! IR41214 - Added a variable to allow EM to access TS11.NOSALE variable.
+!!           This change is for correcting the problem where store date
+!!           line was not printed in correct place on the SJ when doing
+!!           NOSALE ENTER within a transaction.
+!!           LLU MGVA 02Sep99
+!!
+!! IR41419 - Added variables to allow user to define the minimum valid
+!!           weight and maximum valid price per pound allowed when
+!!           calculating weighted coupons on random weight items.
+!!           JEO MGV  10Oct99
+!!
+!! IR41494 - When retrieving an order where the customer number
+!!           has been entered prior to suspending and a item links
+!!           to a coupon having a coupon value of 985.00
+!!           providing a 50% discount on the entire order, the
+!!           coupon is replayed upon retrieval.
+!!           JAM MGVA 18Oct99
+!!
+!! IR41671 - Add new variables to hold the coupon amount and bonus
+!!           points that have been replayed. These variable are used
+!!           in user exit 37  to assure all valid coupons get replayed
+!!           after an error message occur.
+!!           LLU MGVA 12Nov99
+!!
+!! IR41901 - Add two new variables to hold the old promo code so it can
+!!           be retrieved and written to 11 string in Tlog, after user
+!!           exit 8, so we can do tracking of promo code correctly.
+!!           CVM MGVA 29DEC99
+!!
+!! IR42386 - PEIR41987 When voiding multiple items that are part of
+!!           a cross promotional sale involving PM 4 coupons, the
+!!           value of the coupon must be entered manually. This is
+!!           the reason for IR41987. However, after IR41987 when
+!!           multiple PM4 coupons are voided, the operator must
+!!           enter the price for each. Also when the last coupon
+!!           is voided, the operator gets a "CHECK KEY SEQUENCE"
+!!           error. This change saves the value the operator enters
+!!           and reuses it as long as the coupon number is the same.
+!!           JAM MGVA 16Feb00
+!!
+!! IR43285 - Add variable EMSS.DEP.DONE to indicate if a deposit process
+!!           in user exit 8 has been done for this item entry.
+!!           LLU MGVA 28Jun00
+!!
+!! IR43331   Add code to support that when EM option 20.3 SHOW
+!!           ONLY PAPER COUPONS IN CASH DRAWER REPORTS is on, the
+!!           multiplied coupons will not show on the cash drawer
+!!           position reports.
+!!           LLU MGVA 25Jul00
+!!
+!! IR43289   Add customer card scanned event support for ValuePack 2001
+!!           Java GUI.
+!!           RSH IBM 02Jan01
+!!
+!! IR44871   Add code to support voiding points redemption coupon
+!!           linked to a PM 4 coupon using the Quantity key.
+!!           JAM MGVA 08Feb01
+!!
+!! IR45275   AEIR43289 Include of JAVAGUIV.J86 causes EAMTSUPC
+!!           compile error.  Code changed to comment out the
+!!           Include and declare variables in EAMTSFBY.
+!!           MED MGVA 20Mar01
+!!
+!!  IR46321 - Add function for new 'Could have saved' algorithm.
+!!            CMJ MGVA 08/01/01
+!!
+!! IR46794   Added new flag byte showing when there is an alias
+!!           item in a retrieved transaction.
+!!           JAM MGVA 02Oct01
+!!
+!! IR47325   Added new flag byte and array to handle unusual coupons
+!!           (Bonus points) that have trans.lmt set to 1
+!!           JAM MGVA 11Jan02
+!!
+!! IR47997   Added access to LAST.ITEMCODE$ to allow reset to prevent
+!!           repeat on item UPC2. Prevents failure on item with / and
+!!           without.
+!!           JAM MGVA 25Mar02
+!!
+!! IR48081   Added new variable EMSS.ITEM.PROMO.SAVE to prevent reducing
+!!           qty value incorrectly. Changes in EAMTSX08.J86
+!!           JAM MGVA 10APR02
+!!
+!! IR48975   PE IR47325 Backed out the fix from IR47325. Bonus
+!!           coupons were being awarded even though the linked
+!!           item had been voided.
+!!           KHG IBM  15Aug2002
+!!
+!! IR48941   Added minutes field to restricted sales period option and
+!!           provided a flag to allow reversal of the meaning of the
+!!           restricted time period.
+!!           KHG IBM 19Aug02
+!!
+!! IR50206   Added an EM installed flag.
+!!           KHG IBM 01Jan03
+!!
+!! IR52458  B608 needs to be given once and only once per xaction.
+!!          CRM IBM 15Oct2003
+!!
+!! IR52567  When using option 19.5 (Treat all non-preferred customer
+!!          as Raincheck Customers) 1st item sets up card and starts
+!!          a coupon replay. If the first item needs to delay a
+!!          coupon it is not able to. This also addresses other
+!!          shortcomings by separating the card entry from the
+!!          first item.
+!!          CRM IBM 12Nov2003
+!!
+!! IR52688  PEIR46223.  With IR46223, a B614 CUSTOMER ID ALREADY
+!!          ENTERED guidance occurs if any targeted coupons exist.
+!!          Restore the pre-IR46223 threshold of six or more
+!!          targeted coupons to get the B614.  Also add a new
+!!          global EMSS.TG.CPN.B614 which specifies the threshold
+!!          and defaults to six.
+!!          GGK IBM 24Nov03
+!!
+!! IR52887  PE IR47683.  EMSS.PC.COUP was left on at the end of a
+!!          retrieval, which causes the next entry to be ignored if
+!!          the QTY key is used.
+!!          GGK IBM 02Feb2004
+!!
+!! IR53115  Add new variable for targeted processing at retrieve.
+!!          CRM/RM IBM 12Feb2004
+!!
+!! IR53312  Design change.  Buy X get Y free is not handled
+!!          correctly with non-preferred deals.
+!!          RM/GGK IBM 09Mar2004
+!!
+!! IR53766  If a customer card was accepted and then the terminal
+!!          goes into special signoff, the next transaction could
+!!          have a second header printed.  It also could show the
+!!          original customer number on the receipt even though the
+!!          transaction might be from a different customer, or might
+!!          not even be a Preferred Customer transaction.
+!!          GGK IBM 14May2004
+!!
+!! IR54252  When using option 19.5 (Treat all non-preferred customer
+!!          as Raincheck Customers) fix completion IR52567 Keyed
+!!          number system 20 items are not accepted if they are the
+!!          first entry in a transaction.
+!!          CRM IBM 30Jul2004
+!!
+!! IO03554  PE IR55025.  This new behavior must be conditioned
+!!          with a user-specified flag USER.20000.NORMAL.ITEM.
+!!          GGK IBM 01Feb2006
+!!
+!! IO03900  If using an expanded EAMITEMR, a KF error can cause
+!!          IRRF.RECL to be incorrectly set back to 46.
+!!          GGK IBM 13Mar2006
+!!
+!! IO05724  If an item linked to an unlimited points redemption
+!!          coupon is sold, voided and resold, the discount
+!!          coupon is replayed at total time, which can lead to
+!!          an extra discount.
+!!          GGK IBM 04Dec2006
+!!
+!! IO06425  EMSS.RD.PRN% is declared local, but should be GLOBAL.
+!!          It is referenced in EAMTSFBY and EAMTSFBZ.
+!!          GGK IBM 06Apr2007
+!!
+!!**END-OF-SPECIFICATIONS**********************************************
+!
+%INCLUDE EAMTSCVA.J86      ! COUPON ENHANCEMENT CODE
+
+!!*******************************************************************
+!!** DEFINE ELECTRONIC MARKETING VARIABLES                         **
+!!*******************************************************************
+
+%INCLUDE USERCADF.J86               ! CUSTOMER ACTIVITY FILE DEFINITION
+%INCLUDE USERXFDF.J86               ! PENDING TRANSFER FILE DEFINITION
+%INCLUDE USEROPDF.J86               ! FREQUENT BUYER OPTIONS DEFINITION
+
+INTEGER*2 GLOBAL EMSS.TG.LNK(2),    \ IR53115
+                 EMSS.TG.LKS        ! IR53115
+
+!AIR52567
+STRING    GLOBAL EMSS.IO.PREV.DATA$(1)  ! place to stash input
+INTEGER*2 GLOBAL EMSS.IO.PREV.KEYS(1)   ! place to stash input
+INTEGER*1 GLOBAL USE.EMSS.PREV.KEYS     ! flag to tell us to use saved input
+INTEGER*1 GLOBAL EMSS.IO.DEVICE         ! saved device
+INTEGER*2 GLOBAL EMSS.IO.MOTORKEY       ! save LAST MOTOR KEY USED
+!EIR52567
+STRING    GLOBAL EMSS.IO.HEADER$        ! place to stash hdr$ IR54252
+
+STRING GLOBAL EMSS.PCMSX$(1)        ! FREQUENT BUYER MESSAGE DEFINITION
+!!! STRING EMSS.PCMSG$(1)           ! IN MEMORY VIRTUAL ARRAY
+
+STRING EMSS.IRSAVE.BUF$(1)  !IR33392! IN MEMORY COUPON RECORD ARRAY
+
+STRING GLOBAL EMSS.SAVETEMP$,       \ SAVE AREA FOR EXIT 31
+              EMSS.SV.DISC$,        \ LAST AUTO DISCOUNT LOG ENTRY
+              EMSS.IR.EXTRA$,       \ EXTRA DATA IN I.R. NAME FIELD
+              EMSS.IRSAVE$,         \ ITEM RECORD SAVED FROM MEMORY
+              EMSS.POINTS$,         \ POINTS FOR POINT ONLY ITEMS
+              EMSS.OPER$,           \ OPERATOR NAME
+              EMSS.PMSG$,           \ PERSONALIZED TRAILER DISPLAY
+              EMSS.BO.NAME$,        \ BONUS ITEM NAME
+              EMSS.TG.DESC$(1),     \ TARGETED COUPON DESCRIPTORS
+              EMSS.RD.PRN$,         \ REDEMPTION PRINT MESSAGE
+              EMSS.RD.OVRD$,        \ REDEMPTION OVERRIDE
+              EMSS.MSR.MSG$,        \ PROMPT MESSAGE FOR CUSTOMER
+              EMSS.EXP.MSG$,        \ PROMPT MESSAGE EXPIRATION DATE
+              EMSS.MSR.DATA$,       \ DATA FROM LAST MSR READ
+              EMSS.ZERO$,           \ STRING OF 18 ZEROES
+              EMSS.NOLINK$,         \ PACK$("0000")
+              EMSS.SJSAVE$(1),      \ ARRAY FOR SAVING JOURNAL LINES
+              EMSS.PRN.SAVE$(1),    \ SAVE AREA FOR PRINT ROUTINES
+              EMSS.CD.OWNER$,       \ OWNER OF RESERVED CASH DRAWER
+              EMSS.ERROR$(1)        ! ERROR MESSAGES FOR EXIT 27
+
+INTEGER*4 GLOBAL EMSS.PR.BALDUE     ! IR34534
+INTEGER*2 GLOBAL EP.ETO.PRINT.POST.TRANS !IR34534
+INTEGER*2 GLOBAL EMSS.ITEM.PROMO.SAVE ! IR48081
+INTEGER*2 GLOBAL EM.IRRF.RECL       ! EAMITEMR record length IO03900
+
+INTEGER*4 GLOBAL EMSS.TR.POINTS,    \ TRANSACTION POINTS
+                 EMSS.BO.POINTS,    \ TRANSACTION BONUS POINTS
+                 EMSS.RD.POINTS,    \ TRANSACTION REDEEMED POINTS
+                 EMSS.PD.POINTS,    \ PENDING REDEEMED POINTS
+                 EMSS.IT.POINTS,    \ POINTS FOR A POINTS ONLY ITEM
+                 EMSS.TR.NOPTS,     \ INELIGIBLE SALES
+                 EMSS.TR.PCCPNAMT,  \ TRANSACTION PC COUPON AMOUNT
+                 EMSS.TR.ACOUPMFR,  \ TRANSACTION MFR AUTO COUPONS AMT
+                 EMSS.TR.ACOUPSTR,  \ TRANSACTION STR AUTO COUPONS AMT
+                 EMSS.TR.COUPDBLD,  \ TRANSACTION MULTIPLIED CPNS AMT IR43331
+                 EMSS.DI.LAST,      \ TOTAL AFTER LAST AUTO DISCOUNT
+                 EMSS.SV.WGTLIMIT,  \ SAVE WEIGHT OVERRIDE LIMIT
+                 EMSS.SV.KEYWGTLIM, \ SAVE KEYED WEIGHT LIMIT
+                 EMSS.CROSSP.LVAL,  \ SAVE CROSS PROMO MATCHING VAL
+                 EMSS.CROSSP.TVAL,  \ SAVE CROSS PROMO MATCHING VAL
+                 EMSS.LINK.VAL,     \ LAST VALUE SAVED FOR LINKED COUP
+                 EMSS.LINK.WGT,     \ LAST WEIGHT SAVED FOR LINKED COUP
+                 EMSS.PERCENT.TOT,  \ TOTAL HIT BY PERCENT DISCOUNT
+                 EMSS.PERCENT.AMT(1), \ TOTALS HIT BY PERCENT DISCOUNT
+                 EMSS.DELAY.AMTS(1),  \ TRANSACTION DELAYED COUPON AMT
+                 EMSS.REPLAY.AMTS(1), \ TRANSACTION PC COUPON AMT
+ \  ENTRY   = Total value of items that link to coupons
+                 EMSS.WGT.DATA(2),  \ SAVE AREA FOR WEIGHTS
+ \  ENTRY 0 = Total item weight       1 = Total coupon weight
+ \        2 = Largest single weight   3 = 2nd Largest item weight
+ \        4 = 3rd largest weight
+                 EMSS.PROMO.AMTS(2),  \ TRANSACTION PROMO AMOUNT DATA
+ \  ENTRY 0 = Value of promo group    1 = Largest item value
+ \        2 = Value of promo coupons                           !IR36710
+                 EMSS.TG.CPN(2)     ! TARGETED COUPON LIST
+                                    ! Entry 0 = count + flags + UPC
+                                    !   x"0001" = Data gathered for item
+                                    !   x"0002" = MFR validation
+                                    !   x"0004" = Qty not allowed
+                                    !   x"0008" = Ignore invalid entry
+                                    !   x"0010" = Used in this trans.
+                                    !   x"0020" = Min pur or cross promo
+                                    !   x"0040" = Fake TC, no print/log
+                                    ! Entry 1 = MFR/Family for validation
+
+
+INTEGER*1 GLOBAL                    \
+          EMSS.PANEL.TRANS,         \ FLAG PANEL TRANSACTION
+          EMSS.RC.VALID,            \ VALID READ OF RAINCHECK RECORD
+          EMSS.PC.KIOSK,            \ IN CUSTOMER KIOSK MODE
+          EMSS.BYPASS.VALD,         \ FLAG BYPASS OF COUPON VALIDATION
+          EMSS.VOID.DBLERR,         \ VOID FAILS PROMO AND MFR VALIDATION
+          EMSS.TR.DEPT.VAL,         \ COUPONS BY DEPT IN TRANSACTION
+          EMSS.NP.NEEDED,           \ ITEMS SINCE DELAYED AT TOTAL
+          EMSS.TG.NEEDED,           \ ITEMS SINCE TARGETED APPLIED
+          EMSS.TG.MATCH,            \ VALIDATION TYPES FOR TARGETED CPNS
+          EMSS.TG.LINK.REJ,         \ TARGETED LINK REJECTED SINCE REPLAY
+          EMSS.TG.REJ.RPLY,         \ REJECT REPLAY OF TARGETED COUPONS
+          EMSS.TG.NOTDONE,          \ TOO MANY PC + TARG FOR FIRST PASS
+          EMSS.TG.PARTVOID,         \ PARTIAL VOID OF SINGLE ENTRY
+          EMSS.TG.CPN.B614,         \ B614 IF TARGETED COUPONS EXCEED THIS IR52688
+          EMSS.VOID.REPLAY,         \ REPLAY IS ON VOIDED ITEM
+          EMSS.PO.ITEMS,            \ POINT ONLY ITEMS IN TRANSACTION
+          EMSS.KEYED.IRCPN,         \ FLAG KEYED COUPON ITEM RECORD
+          EMSS.REDEEM,              \ FLAG REDEMPTION OF POINTS
+          EMSS.ALIAS,               \ FLAG ALIAS ITEM RECORDS
+          EMSS.DEP.SEEN,            \ BACK END DEPOSITS SEEN IN TRANS
+          EMSS.LATE.DEP,            \ DEPOSIT ENTRY DELAYED
+          EMSS.HEADER.PRINTED,      \ FLAG HEADER PRINTED FOR TRANS.
+          EMSS.TENDR.CASHING,       \ FLAG TENDER CASHING
+          EMSS.2ND.CD.INUSE,        \ FLAG 2 DRAWERS AT REGISTER
+          EMSS.RESERVE.CD,          \ ATTEMPTING TO RESERVE A DRAWER
+          EMSS.CM.OPEN,             \ FLAG COUPON MESSAGES FILE OPEN
+          EMSS.PROMO.FOUND,         \ TRUE WHEN MATCHING PROMO FOUND     IR23680
+          EMSS.OVPRT.NEG,           \ FLAGS HIGHLIGHTING NEGATIVE ENTRY  IR26182
+          EMSS.TO.COUPVALUE,        \ SAVE TERMINAL OPTION               IR26510
+          EMSS.CUSTNUM.IN.RETRV,    \ CUST NUMBER IS IN RETRIEVED TRANS  IR41494
+          EMSS.EM.INSTALLED,        \ EM INSTALLED FLAG                  IR50206
+          EMSS.B608.GIVEN,          \ STATE OF B608                      IR52458
+          EMSS.VOID.POINTS,         \ POINTS COUPON WAS VOIDED           IO05724
+          EMSS.CM.INACTIVE          ! FLAG COUPON MESSAGES FILE INACTIVE
+
+INTEGER   GLOBAL                    \
+          EMSS.TR.PCCPNCNT,         \ TRANSACTION PC COUPON COUNT
+          EMSS.TR.ACMFRCNT,         \ TRANSACTION MFR AUTO COUPONS CNT
+          EMSS.TR.ACSTRCNT,         \ TRANSACTION STR AUTO COUPONS CNT
+          EMSS.TR.ACOUPCNT,         \ TRANSACTION AUTO COUPONS FOR VOID
+          EMSS.TR.ACOUPUPC(1),      \ TRANSACTION AUTO COUPONS FOR VOID
+          EMSS.RC.DISCG,            \ DISCOUNT GROUP IN RAINCHECK RECORD
+          EMSS.RC.PMULT,            \ POINT MULTIPLIER IN RAINCHECK RECORD
+          EMSS.RC.STATUS,           \ STATUS IN RAINCHECK RECORD
+          EMSS.RC.MSGNUM,           \ MESSAGE IN RAINCHECK RECORD
+          EMSS.RC.OPTIONS,          \ OPTIONS IN RAINCHECK RECORD
+          EMSS.TG.RC.CNT,           \ COUNT OF COUPONS TARGETED TO ALL
+          EMSS.TG.RC(1),            \ LIST OF COUPONS TARGETED TO ALL
+          EMSS.TG.CPN.CNT,          \ COUNT OF TARGETED COUPONS
+          EMSS.IR.TARE,             \ TARE FROM ITEM RECORD
+          EMSS.PERCENT.SAVE,        \ TRANS PERCENT TOTALS SAVE COUNT
+          EMSS.PERCENT.LMT,         \ MAX TRANS PERCENT TOTALS SAVE COUNT
+          EMSS.PERCENT.ITM(1),      \ ITEMS HIT BY PERCENT DISCOUNT
+          EMSS.DELAY.SAVE,          \ TRANS. DELAYED COUPON SAVE COUNT
+          EMSS.DELAY.LMT,           \ MAX TRANS DELAYED COUPON SAVE COUNT
+          EMSS.LAST.REPLAY,         \ ENTRY FOR LAST REPLAY
+          EMSS.REPLAY.SAVE,         \ TRANSACTION PC COUPON SAVE COUNT
+          EMSS.REPLAY.LMT,          \ MAX TRANS PC COUPON SAVE COUNT
+          EMSS.DELAY.DATA(2),       \ TRANSACTION DELAYED COUPON DATA
+          EMSS.REPLAY.DATA(2),      \ TRANSACTION PC COUPON DATA
+ \          FOR EMSS.DELAY.DATA AND EMSS.REPLAY.DATA
+ \  ENTRY 0 = Saved link code         1 = Quantity of items
+ \        2 = Weight pointer
+          EMSS.REPLAY.CNT,          \ COUNT OF LIKE COUPONS REPLAYED
+          EMSS.PROMO.COUP,          \ COUPON VALIDATED BY PROMO CODE
+          EMSS.PROMO.FSAVE,         \ SAVE POINTER FOR FAKE PROMO COUPS
+          EMSS.PROMO.FDATA(2),      \ SAVE ARRAY FOR FAKE PROMO COUPS
+          EMSS.PROMO.SAVE,          \ TRANSACTION PROMO SAVE COUNT
+          EMSS.PROMO.LMT,           \ MAX TRANS PROMO SAVE COUNT
+          EMSS.WGT.SAVE,            \ TRANSACTION WEIGHT SAVE COUNT
+          EMSS.WGT.LMT,             \ MAX TRANS WEIGHT SAVE COUNT
+          EMSS.WGT.PTR,             \ WEIGHT POINTER FOR ENTRY
+          EMSS.PROMO.DATA(2),       \ TRANSACTION PROMO COUNT DATA
+ \  ENTRY 0 = Promotion code          1 = Item count
+ \        2 = MFR coupon count        3 = Store coupon count
+ \        4 = Fake coupon count       5 = Pointer to saved weights
+          EMSS.IRSAVE.UPC(1),       \ LIST OF SAVED PC UPCS
+          EMSS.IRSAVE.NEXT,         \ NEXT SLOT IN WHICH TO SAVE PC UPCS
+          EMSS.SV.SL.NEXT,          \ SAVE SL.NEXT TO RESTORE
+          EMSS.SV.DESC,             \ SAVE B064 ERROR TYPE FOR DESC
+          EMSS.SV.QTY,              \ SAVE ENTERED QUANTITY     IR26734
+          EMSS.BD.MSG,              \ BOUNDRY MESSAGE
+          EMSS.IR.EXLTH,            \ LTH OF EXTRA DATA IN I.R. NAME
+          EMSS.SJPOINT,             \ POINTER TO SAVED JOURNAL LINES
+          EMSS.CD.RESERVED,         \ NUMBER OF RESERVED CASH DRAWER
+          EMSS.PRN.SAVE(1),         \ SAVE AREA FOR PRINT ROUTINES
+          EMSS.COUP.REPLAY,         \ REPLAY COUPONS FLAG
+          EMSS.TSU14.FLAG,          \ FLAG UNIQUE EXIT 14 CONDITIONS
+          EMSS.PC.COUP,             \ FIRST PC COUPON UPC
+          EMSS.NP.COUP,             \ FIRST NON-PC COUPON UPC   ! IR53312
+          EMSS.NP.SAVE,             \ SAVE NON-PC COUPON UPC    ! IR53312
+          EMSS.DISPLACED.PC,        \ Displaced Coupon          ! IR40950
+          EMSS.LT.LINK,             \ LAST LINKED TO COUPON
+          EMSS.LINK.DEP,            \ ITEM LINKS TO DEPOSIT
+          EMSS.DEP.DONE,            \ DEPOSIT DONE FOR ITEM ENTRY IR43285
+          EMSS.CPNVAL.TYPE          ! VALIDATION TYPE FOR COUPON
+
+!AIR23870
+INTEGER*4 GLOBAL EMSS.NEGBAL        ! TS.BALDUE(0) <= EMSS.NEGBAL means
+                                    ! transaction has negative bal
+!EIR23870
+!AIR30718
+!AIR27245
+!INTEGER*4 GLOBAL EMSS.CPN.ITEM.VAL  ! Value of item coupon is taken
+!EIR27245
+!EIR30718
+STRING GLOBAL I.FM$                 ! IR27702 - Item Record Read Format
+STRING GLOBAL LAST.ITEMCODE$        ! IR47997 ALLOW ACCESS
+
+!********************************************************************
+!*    DEFINE BASE VARIABLES NEEDED FOR ELECTRONIC MARKETING         *
+!********************************************************************
+  INTEGER*2 GLOBAL SAVE.CODE        ! Access base variable
+  INTEGER*2 GLOBAL REPEAT.COUNT     ! Access base variable
+  INTEGER GLOBAL CHAIN.COUNT        ! Access base variable
+  INTEGER GLOBAL IR.FAMILYNU2       ! Access base variable
+  INTEGER GLOBAL SL.NEXT            ! Access base variable
+  INTEGER GLOBAL UK.SCALES.OPTION   ! Access base variable    IR98772
+  INTEGER*1 GLOBAL RPIVEC.CALLED    ! Access base variable
+  INTEGER*1 GLOBAL TS.RETV.IN.PROGRESS ! Access base variable IR31262
+  INTEGER*1 GLOBAL TS.RECOVERY         ! Access base variable IR52887
+  INTEGER*1 GLOBAL ENDTRANS         ! Access base variable    IR31387
+  INTEGER*1 GLOBAL EMSS.ENDTRANS    ! holds endtrans          IR31387
+  INTEGER*2 GLOBAL TS.SV.MO.REASON  ! Access base variable    IR25418
+  INTEGER*2 GLOBAL TS.PC.DET        ! Access base variable    IR25943
+! INTEGER GLOBAL IR.FAMILYNU1       ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL FAST.EXIT          ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL SL.END             ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL IR.ITEMTYPE        ! Access base variable  ***TSCVA***
+! INTEGER*4 GLOBAL IR.PRICE1        ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL TS11.OVRFLAG       ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL TS.SV.LINETYPE     ! Access base variable  ***TSCVA***
+! STRING GLOBAL ITEMCODE.UNPACKED$  ! Access base variable  ***TSCVA***
+! INTEGER GLOBAL LEVEL.OF.VALIDATION ! Access base variable ***TSCVA***
+!
+  INTEGER*2 GLOBAL IRRF.RECL        ! Access base variable    IR27702
+
+  INTEGER*2 GLOBAL GS.ENABLE        ! Access GST  variable    IR28028
+
+  INTEGER*2 GLOBAL VERSION          ! Add version variable    IR29242
+
+  INTEGER*2 GLOBAL PRT4610.ENABLE   ! Add 4610 Print variable IR33957
+  INTEGER*2 GLOBAL CR.BUFFER.POINTER% ! Points to current pos in buffer IR53766
+  INTEGER*1 GLOBAL HEADER.PRINTED.4610 ! 4610 printed header IR53766
+
+  STRING GLOBAL EP.WIDE.PRTBUF$     ! Add 4610 Print variable IR33957
+
+  INTEGER*2 GLOBAL BUFFER.RECEIPT,  \ IR35984
+                   TS11.NOSALE      ! Access NOSALE variable  IR41214
+
+!AIR41419 ALLOW COUPONS ON RANDOM WEIGHT SALES SMALLER THAN 1/10 LB
+  INTEGER*2 GLOBAL EMSS.MIN.WGT,          \ MIN CALC WEIGHT FOR R/W
+                   EMSS.MAX.PRICE.PER.LB  ! MAX PRICE/LB FOR WGT CALC
+!EIR41419
+
+!AIR38928
+  INTEGER*1 GLOBAL EMSS.PCNT.VD.OFF ! Flag Void key turned off for PCNT Off VD
+!EIR38928
+  INTEGER*4 GLOBAL SCALE.WEIGHT,    \ IR40031 allow EM to reference
+                   SV.COUP.AMT,     \ Add save of coupon amt   IR41671
+                   SV.BO.POINTS     ! Add save of bonus points IR41671
+
+!AIR41901
+  INTEGER*2 GLOBAL EMSS.PROMO.CODE, \ Promo code for tracking
+                   SV.IR.USEREXIT1  ! Save new promo code
+!EIR41901
+!AIR42386
+  STRING GLOBAL EMSS.KEYED.COUPON.PRICE$ ! Value of keyed price for PM4 coupon
+  STRING GLOBAL EMSS.CPN.REQ.PRICE$      ! Coupon number for which price is requested
+!EIR42386
+
+!AIR45275 Removing for it is not required
+!AIR43289 Add customer card scanned event for ValuePack 2001 Java GUI
+!%include javaguiv.j86
+!EIR43289
+!EIR45275
+
+!AIR44871
+!AIO06425
+\INTEGER*2 EMSS.RD.PRN%             ! Saved coupon number with emss.rd.prn$
+ INTEGER*2 GLOBAL EMSS.RD.PRN%      ! Saved coupon number with emss.rd.prn$
+!EIO06425
+!EIR44871
+!AIR46321 Add new could have saved algorithm
+!!*******************************************************************
+!!** DEFINE VARIABLES FOR THE SLOW PATH COULD HAVE SAVED ALGORITHM **
+!!*******************************************************************
+STRING    GLOBAL                 \
+          SPCS.CS.DATA$(1)       ! SAVE DATA TO RESTORE LATER
+INTEGER   GLOBAL                 \
+          SPCS.CS.DAT2(1)        ! SAVE DATA TO RESTORE LATER
+INTEGER*4 GLOBAL                 \
+          SPCS.CS.DAT4(1)        ! SAVE DATA TO RESTORE LATER
+
+INTEGER*1 GLOBAL                 \
+          SPCS.CS.ACTIVE,        \ FLAG FUNCTION IS ACTIVE
+          SPCS.COULDSAV          ! IN REPLAY FOR SAVE AMOUNT ONLY
+
+INTEGER   GLOBAL                 \                            RM-01/98
+          SPCS.C1.SAVE,          \ SAVE REPLAY COUNT          RM-01/98
+          SPCS.C2.SAVE,          \ SAVE PROMO COUNT           RM-01/98
+          SPCS.C3.SAVE,          \ SAVE WEIGHT COUNT          RM-01/98
+          SPCS.C4.SAVE,          \ SAVE PERCENT COUNT         RM-01/98
+          SPCS.C1.DATA(2),       \ SAVE REPLAY DATA           RM-01/98
+          SPCS.C2.DATA(2),       \ SAVE PROMO DATA            RM-01/98
+          SPCS.C4.DATA(1)        ! SAVE PERCENT DATA          RM-01/98
+INTEGER*4 GLOBAL                 \                            RM-01/98
+          SPCS.C1.AMTS(1),       \ SAVE REPLAY AMOUNTS        RM-01/98
+          SPCS.C2.AMTS(2),       \ SAVE PROMO AMOUNTS         RM-01/98
+          SPCS.C3.DATA(2),       \ SAVE WEIGHT DATA           RM-01/98
+          SPCS.C4.AMTS(1)        ! SAVE PERCENT AMOUNTS       RM-01/98
+                                                            ! RM-01/98
+!EIR46321
+!AIR46794
+  INTEGER*1 GLOBAL EMSS.ALIAS.IN.RETV ! Flag retrieve item was an alias   Off VD
+!EIR46794
+!AIR48975
+!AIR47325
+!INTEGER*2 GLOBAL EMSS.UNUSUAL.COUP(2)   ! Save area for unusual coup's
+!INTEGER*1 GLOBAL EMSS.UNUSUAL.DIMMED    ! Flag used with array
+!EIR47325
+!EIR48975
+!AIR48941
+
+!AIO03554 If a 20mmmmm00000 item is to be treated as a normal item instead of
+!         a weight/price embedded item, set this flag to -1.
+INTEGER*1 GLOBAL                  \
+          USER.20000.NORMAL.ITEM  ! 0=prior to IR55025 behavior, -1=regular item
+!EIO03554
+
+!********************************************************************************
+! VARIABLES FOR USE IN SUPPORTING RESTRICTED SALES PERIOD WITH HOURS AND MINUTES
+!********************************************************************************
+ STRING GLOBAL           \
+    CURR.TYM$,           \! current time
+    START.TYM$,          \! start of time period
+    END.TYM$              ! end of time period
+!EIR48941

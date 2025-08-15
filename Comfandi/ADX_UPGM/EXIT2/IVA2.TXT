@@ -1,0 +1,374 @@
+USRSU01.011:        Xline$ = Xline$ + " " + Xprecio$+X.IVA$
+USR2004.VVV:!   **    Code for printing IVA on the customer receipt station.             **
+USR2004.VVV:UE.IVA.IMPRESO% = 1     THEN BEGIN                  ! Para una sola impresion
+USR2004.VVV: !  IMPRE%  = 0 						                        ! de IVA
+USR2004.VVV:		           UE.IVA.IMPRESO% = 0
+USR2004.VVV:                  AUX$ = "** DETALLE DEL IVA **"    ! 
+USR2004.VVV:                         "Base/Imp.    IVA"         ! 
+USR2004.VVV:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR2004.VVV:                  UE.IVA.IMPRESO% = 0
+USR2004.VVV:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR2004.VVV:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR2004.VVV:            IF UE.II%=1 THEN NFF.IT1$=USR.IVA$      !
+USR2004.VVV:            IF UE.II%=2 THEN NFF.IT2$=USR.IVA$      !
+USR2004.VVV:            IF UE.II%=3 THEN NFF.IT3$=USR.IVA$      !
+USR2004.VVV:            IF UE.II%=4 THEN NFF.IT6$=USR.IVA$      !
+USR2004.VVV:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.VVV:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.VVV:                           USR.IVA$ ,10)            !
+USR2004.VVV:               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+USR2004.VVV:           AUX$ = "*SIN IVA"                        !
+USR2004.VVV:           SIN.IVA.TOTALS       = TS.TOTALS(0,0,0) \! Compra Exenta = Pago Total -
+USR2004.VVV:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR2004.VVV:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.VVV:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.VVV:                           USR.IVA$ ,10)            !
+USR2004.VVV:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR2004.VVV:               NFF.EXE$ = STR$(SIN.IVA.TOTALS)      ! 
+USR2004.VVV:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR2004.VVV:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR2004.VVV:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR2004.VVV:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.VVV:                           USR.IVA$ ,10)            !
+USR2004.VVV:               IVAS$    = TS.TEMP1$                 !
+USR2004.VVV:               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+USR2004.VVV:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 21    OR       \! ¢ Abarrotes con IVA
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 15    OR       \! ¢ Abarrotes sin IVA  
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 18    OR       \! ¢ Papeler¡a sin IVA  
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 47    OR       \! ¢ GRANOS SIN IVA  
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 26)   AND      \! ¢ Licores sin IVA 
+USR0801.BAK:    (VAL(UNPACK$(IR.DEPARTME$)) = 23    OR       \! ¢ Med con IVA
+USR0801.BAK: IF (VAL(UNPACK$(IR.DEPARTME$)) = 64    OR       \! CARNES IVA 7%
+USR0801.BAK:     VAL(UNPACK$(IR.DEPARTME$)) = 58    OR       \! DELIKATESSEN IVA 16%
+USR0801.BAK:  IF    VAL(UNPACK$(IR.DEPARTME$)) = 33 THEN     \! DELIKATESSEN IVA 16%
+USR2010.011:  CALL U.IMPRIMIR(FONPH$+"!!!  BONO POR EL VALOR DEL IVA     !!!",4100H)
+USRSU02.011:!   **    User defined variables for printing IVA on Customer Receipt        **
+USR3002.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR3002.011:FOR UE.II% = 1 TO 4                                     ! following calculates IVA 
+USR3001.011:     TS.TAX.SAVE =TS.TAXES(0,0)                ! Salva IVA impreso
+USR2301.011:!     mensaje de IVA en la pantalla del Operador.            
+USR2301.011:IF TS.LINETYPE = 3 THEN BEGIN                 ! Si es linea de IVA
+USR2010.BAK:  CALL U.IMPRIMIR(FONPH$+"!!!  BONO POR EL VALOR DEL IVA     !!!",4100H)
+USR2004.SCL:!   **    Code for printing IVA on the customer receipt station.             **
+USR2004.SCL:                         "** DETALLE DEL IVA **"    ! 
+USR2004.SCL:                         "Base/Imp.    IVA"         ! 
+USR2004.SCL:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR2004.SCL:               AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR2004.SCL:            IF II% = 2 THEN AUX$ = " B = 20%"       ! Need changed if more IVAs
+USR2004.SCL:            IF II% = 3 THEN AUX$ = " C = 35%"       ! Need changed if more IVAs
+USR2004.SCL:            IF II% = 4 THEN AUX$ = " D = 10%"       ! Need changed if more IVAs
+USR2004.SCL:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.SCL:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.SCL:                           USR.IVA$ ,10)            !
+USR2004.SCL:                        USR.PAGO$,USR.BASE$,USR.IVA$!
+USR2004.SCL:            AUX$ = "*SIN IVA"                       !
+USR2004.SCL:                               - TS.TOTALS(1,0,0)  \! IVA 1 de la Compra -
+USR2004.SCL:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.SCL:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.SCL:                           USR.IVA$ ,10)            !
+USR2004.SCL:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR2004.SCL:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR2004.SCL:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.SCL:                           USR.IVA$ ,10)            !
+USR2004.SCL:               IVAS$    = TS.TEMP1$                 !
+USR2004.SCL:                     USR.PAGO$,USR.BASE$,USR.IVA$   !
+USR2004.BAK:!   **    Code for printing IVA on the customer receipt station.             **
+USR2004.BAK:UE.IVA.IMPRESO% = 1     THEN BEGIN                  ! Para una sola impresion
+USR2004.BAK: !  IMPRE%  = 0 						    ! de IVA
+USR2004.BAK:		           UE.IVA.IMPRESO% = 0
+USR2004.BAK:                         "** DETALLE DEL IVA **"    ! 
+USR2004.BAK:                         "Base/Imp.    IVA"         ! 
+USR2004.BAK:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR2004.BAK:                  UE.IVA.IMPRESO% = 0
+USR2004.BAK:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR2004.BAK:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR2004.BAK:            IF UE.II%=1 THEN NFF.IT1$=USR.IVA$      !
+USR2004.BAK:            IF UE.II%=2 THEN NFF.IT2$=USR.IVA$      !
+USR2004.BAK:            IF UE.II%=3 THEN NFF.IT3$=USR.IVA$      !
+USR2004.BAK:            IF UE.II%=4 THEN NFF.IT6$=USR.IVA$      !
+USR2004.BAK:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.BAK:                           USR.IVA$ ,10)            !
+USR2004.BAK:               TS.SAVPRT$  = AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR2004.BAK:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR2004.BAK:           AUX$ = "*SIN IVA"                        !
+USR2004.BAK:           SIN.IVA.TOTALS       = TS.TOTALS(0,0,0) \! Compra Exenta = Pago Total -
+USR2004.BAK:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR2004.BAK:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.BAK:                           USR.IVA$ ,10)            !
+USR2004.BAK:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR2004.BAK:               NFF.EXE$ = STR$(SIN.IVA.TOTALS)      ! 
+USR2004.BAK:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR2004.BAK:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR2004.BAK:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR2004.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.BAK:                           USR.IVA$ ,10)            !
+USR2004.BAK:               IVAS$    = TS.TEMP1$                 !
+USR2004.BAK:               TS.SAVPRT$  = AUX$+USR.PAGO$+USR.BASE$+USR.IVA$ 
+USR2004.BAK:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR2004.BAK:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR2004.BAK:!               WRITE FORM "C38 A1";#34;            \! Imprime para SIN IVA
+USR2004.BAK:!               WRITE FORM "C38 A1";#36;            \! Imprime para SIN IVA
+USR2004.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR2004.011:UE.IVA.IMPRESO% = 1     THEN BEGIN                  ! Para una sola impresion
+USR2004.011: !  IMPRE%  = 0 						                        ! de IVA
+USR2004.011:		           UE.IVA.IMPRESO% = 0
+USR2004.011:                  AUX$ = "** DETALLE DEL IVA **"    ! 
+USR2004.011:                         "Base/Imp.    IVA"         ! 
+USR2004.011:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR2004.011:                  UE.IVA.IMPRESO% = 0
+USR2004.011:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR2004.011:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR2004.011:            IF UE.II%=1 THEN NFF.IT1$=USR.IVA$      !
+USR2004.011:            IF UE.II%=2 THEN NFF.IT2$=USR.IVA$      !
+USR2004.011:            IF UE.II%=3 THEN NFF.IT3$=USR.IVA$      !
+USR2004.011:            IF UE.II%=4 THEN NFF.IT6$=USR.IVA$      !
+USR2004.011:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.011:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.011:                           USR.IVA$ ,10)            !
+USR2004.011:               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+USR2004.011:           AUX$ = "*SIN IVA"                        !
+USR2004.011:           SIN.IVA.TOTALS       = TS.TOTALS(0,0,0) \! Compra Exenta = Pago Total -
+USR2004.011:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR2004.011:               USR.IVA$ = TS.TEMP1$                 !
+USR2004.011:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.011:                           USR.IVA$ ,10)            !
+USR2004.011:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR2004.011:               NFF.EXE$ = STR$(SIN.IVA.TOTALS)      ! 
+USR2004.011:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR2004.011:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR2004.011:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR2004.011:               USR.IVA$  = RIGHT$("          " +   \!
+USR2004.011:                           USR.IVA$ ,10)            !
+USR2004.011:               IVAS$    = TS.TEMP1$                 !
+USR2004.011:               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+USR2004.011:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 21    OR       \! ¢ Abarrotes con IVA
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 15    OR       \! ¢ Abarrotes sin IVA  
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 18    OR       \! ¢ Papeler¡a sin IVA  
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 47    OR       \! ¢ GRANOS SIN IVA  
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 26)   AND      \! ¢ Licores sin IVA 
+USR0801.OLD:    (VAL(UNPACK$(IR.DEPARTME$)) = 23    OR       \! ¢ Med con IVA
+USR0801.OLD: IF (VAL(UNPACK$(IR.DEPARTME$)) = 64    OR       \! CARNES IVA 7%
+USR0801.OLD:     VAL(UNPACK$(IR.DEPARTME$)) = 58    OR       \! DELIKATESSEN IVA 16%
+USR0801.OLD:  IF    VAL(UNPACK$(IR.DEPARTME$)) = 74  THEN     \! DELIKATESSEN IVA 16%
+USR2001.ULT:!   **    Code for printing IVA on the customer receipt station.             **
+USR2001.ULT:!           "         AGENTE RETENEDOR DE IVA"       !
+USR2001.RED:!   **    Code for printing IVA on the customer receipt station.             **
+USR2001.RED:!           "         AGENTE RETENEDOR DE IVA"       !
+USR2001.013:!   **    Code for printing IVA on the customer receipt station.             **
+USR2001.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR1801.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR14EDU.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR1409.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR1408.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR1301.OLD:                         "** DETALLE DEL IVA **" +FINLIN$   ! 
+USR1301.OLD:                         "Base/Imp.    IVA"+FINLIN$   ! 
+USR1301.OLD:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.OLD:               AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.OLD:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.OLD:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.OLD:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.OLD:                           USR.IVA$ ,10)            !
+USR1301.OLD:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.OLD:           AUX$ = "*SIN IVA"                        !
+USR1301.OLD:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.OLD:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.OLD:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.OLD:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.OLD:                           USR.IVA$ ,10)            !
+USR1301.OLD:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.OLD:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.OLD:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.OLD:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.OLD:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.OLD:                           USR.IVA$ ,10)            !
+USR1301.OLD:               IVAS$    = TS.TEMP1$                 !
+USR1301.OLD:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.OLD:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR1301.BAK:!-- Se adiciona la rutina de impresion de IVAS, Grupo Retail - OVS  14 Abr 2010
+USR1301.BAK:Call U.IMPRIME("---    RESUMEN TARIFAS DE IVA    ----",6100H)
+USR1301.BAK:    Call U.IMPRIME(" Tipo   Compra    Base/Imp.     IVA  ",6100H)
+USR1301.BAK:       TS.TEMP1$ = RIGHT$("00"+Str$(UE.TABLAIVA(K%)),2)
+USR1301.BAK:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.BAK:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.BAK:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.BAK:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.BAK:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.BAK:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.BAK:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.BAK:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.BAK:                         "** DETALLE DEL IVA **"
+USR1301.BAK:                         "Base/Imp.    IVA"
+USR1301.BAK:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.BAK:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.BAK:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.BAK:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.BAK:                           USR.IVA$ ,10)            !
+USR1301.BAK:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.BAK:           AUX$ = "*SIN IVA"                        !
+USR1301.BAK:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.BAK:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.BAK:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.BAK:                           USR.IVA$ ,10)            !
+USR1301.BAK:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.BAK:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.BAK:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.BAK:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.BAK:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.BAK:                           USR.IVA$ ,10)            !
+USR1301.BAK:               IVAS$    = TS.TEMP1$                 !
+USR1301.BAK:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.BAK:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR1301.013:!-- Se adiciona la rutina de impresion de IVAS, Grupo Retail - OVS  14 Abr 2010
+USR1301.013:Call U.IMPRIME("---    RESUMEN TARIFAS DE IVA    ----",6100H)
+USR1301.013:    Call U.IMPRIME(" Tipo   Compra    Base/Imp.     IVA  ",6100H)
+USR1301.013:       TS.TEMP1$ = RIGHT$("00"+Str$(UE.TABLAIVA(K%)),2)
+USR1301.013:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.013:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.013:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.013:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.013:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.013:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.013:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.013:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.013:                         "** DETALLE DEL IVA **"
+USR1301.013:                         "Base/Imp.    IVA"
+USR1301.013:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.013:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.013:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.013:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.013:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.013:                           USR.IVA$ ,10)            !
+USR1301.013:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.013:           AUX$ = "*SIN IVA"                        !
+USR1301.013:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.013:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.013:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.013:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.013:                           USR.IVA$ ,10)            !
+USR1301.013:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.013:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.013:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.013:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.013:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.013:                           USR.IVA$ ,10)            !
+USR1301.013:               IVAS$    = TS.TEMP1$                 !
+USR1301.013:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.013:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 21    OR       \! ¢ Abarrotes con IVA
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 15    OR       \! ¢ Abarrotes sin IVA  
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 18    OR       \! ¢ Papeler¡a sin IVA  
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 47    OR       \! ¢ GRANOS SIN IVA  
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 26)   AND      \! ¢ Licores sin IVA 
+USR0801.011:    (VAL(UNPACK$(IR.DEPARTME$)) = 23    OR       \! ¢ Med con IVA
+USR0801.011: IF (VAL(UNPACK$(IR.DEPARTME$)) = 64    OR       \! CARNES IVA 7%
+USR0801.011:     VAL(UNPACK$(IR.DEPARTME$)) = 58    OR       \! DELIKATESSEN IVA 16%
+USR0801.011:  IF    VAL(UNPACK$(IR.DEPARTME$)) = 74  THEN     \! DELIKATESSEN IVA 16%
+USR0702.011:!   **    Code for printing IVA on the customer receipt station.             **
+USR0701.013:     MEX.VAT.TAB(UE.II%) = VAL(MID$(RALMA$,UE.II%*3 - 2,2)) ! Set IVAS
+USR04UV.011:!     USER EXIT          =  IIVATSVA.011 
+USR04UV.011:INTEGER*1 UE.IVA.IMPRESO%			! Bandera para imprimir una
+USR02UV.011:	  NIVA%,   MUEST%,             \! Guarda Iva de Articulos 
+USR02UV.011:          WORKI4,      SIN.IVA.TOTALS, \! 
+USR02UV.011:          LIN.CRE$,  USR.IVA$,         \! Linea para Franqueo Creditos
+USR02UV.011:          PEAJ$,     IVAS$,            \!
+USR0103.011:!     USER EXIT          =  IIVATS01.011 
+USR0103.011:UE.IVA.IMPRESO% = 1				! Prender Bandera para imprimir
+USR1301.121:                         "** DETALLE DEL IVA **"
+USR1301.121:                         "Base/Imp.    IVA"
+USR1301.121:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.121:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.121:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.121:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.121:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.121:                           USR.IVA$ ,10)            !
+USR1301.121:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.121:           AUX$ = "*SIN IVA"                        !
+USR1301.121:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.121:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.121:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.121:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.121:                           USR.IVA$ ,10)            !
+USR1301.121:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.121:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.121:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.121:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.121:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.121:                           USR.IVA$ ,10)            !
+USR1301.121:               IVAS$    = TS.TEMP1$                 !
+USR1301.121:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.121:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 21    OR       \! ¢ Abarrotes con IVA
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 15    OR       \! ¢ Abarrotes sin IVA  
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 18    OR       \! ¢ Papeler¡a sin IVA  
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 47    OR       \! ¢ GRANOS SIN IVA  
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 26)   AND      \! ¢ Licores sin IVA 
+USR0801.316:    (VAL(UNPACK$(IR.DEPARTME$)) = 23    OR       \! ¢ Med con IVA
+USR0801.316: IF (VAL(UNPACK$(IR.DEPARTME$)) = 64    OR       \! CARNES IVA 7%
+USR0801.316:     VAL(UNPACK$(IR.DEPARTME$)) = 58    OR       \! DELIKATESSEN IVA 16%
+USR0801.316:  IF    VAL(UNPACK$(IR.DEPARTME$)) = 74  THEN     \! DELIKATESSEN IVA 16%
+USR1301.415:                         "** DETALLE DEL IVA **"
+USR1301.415:                         "Base/Imp.    IVA"
+USR1301.415:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.415:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.415:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.415:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.415:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.415:                           USR.IVA$ ,10)            !
+USR1301.415:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.415:           AUX$ = "*SIN IVA"                        !
+USR1301.415:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.415:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.415:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.415:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.415:                           USR.IVA$ ,10)            !
+USR1301.415:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.415:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.415:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.415:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.415:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.415:                           USR.IVA$ ,10)            !
+USR1301.415:               IVAS$    = TS.TEMP1$                 !
+USR1301.415:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.415:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+USR1301.COP:!-- Se adiciona la rutina de impresion de IVAS, Grupo Retail - OVS  14 Abr 2010
+USR1301.COP:Call U.IMPRIME("---    RESUMEN TARIFAS DE IVA    ----",6100H)
+USR1301.COP:    Call U.IMPRIME(" Tipo   Compra    Base/Imp.     IVA  ",6100H)
+USR1301.COP:       TS.TEMP1$ = RIGHT$("00"+Str$(UE.TABLAIVA(K%)),2)
+USR1301.COP:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.COP:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.COP:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.COP:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.COP:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0))
+USR1301.COP:       TS.TEMP1$ = Str$(ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0))
+USR1301.COP:       Gr.Total.Base%  = Gr.Total.Base%  + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.),0,0)
+USR1301.COP:       Gr.Total.Impto% = Gr.Total.Impto% + ROUND(FLOAT(UE.TOTALS(K%))/(1.+FLOAT(UE.TABLAIVA(K%))/100.)*FLOAT(UE.TABLAIVA(K%))/100.,0,0)
+USR1301.COP:                         "** DETALLE DEL IVA **"
+USR1301.COP:                         "Base/Imp.    IVA"
+USR1301.COP:               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+USR1301.COP:                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+USR1301.COP:            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+USR1301.COP:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.COP:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.COP:                           USR.IVA$ ,10)            !
+USR1301.COP:                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.COP:           AUX$ = "*SIN IVA"                        !
+USR1301.COP:           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+USR1301.COP:                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+USR1301.COP:               USR.IVA$ = TS.TEMP1$                 !
+USR1301.COP:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.COP:                           USR.IVA$ ,10)            !
+USR1301.COP:            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+USR1301.COP:            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+USR1301.COP:                             - SIN.IVA.TOTALS      \! Total Exento       -
+USR1301.COP:               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+USR1301.COP:               USR.IVA$  = RIGHT$("          " +   \!
+USR1301.COP:                           USR.IVA$ ,10)            !
+USR1301.COP:               IVAS$    = TS.TEMP1$                 !
+USR1301.COP:               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+USR1301.COP:               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA

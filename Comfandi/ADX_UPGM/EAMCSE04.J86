@@ -1,0 +1,19 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU04.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+CALL CSU04.FB
+ 
+%INCLUDE EAMCSC04.J86      ! COUPON ENHANCEMENT CODE
+ 
+EMSS.PANEL.TRANS = 0       ! RESET PANEL TRANSACTION
+CA.CUSTNUM$ = ""           ! RESET ACCOUNT NUMBER
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE

@@ -1,0 +1,110 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\REM!!****************************************************************
+\REM!!**  WRITE GLOBAL CONSTANTS RECORD TO STORE OPTIONS FILE    **
+\REM!!****************************************************************
+!AIR99548
+\\WRITE #8 AUTOUNLOCK, 27; \
+WRITE #8, 27; \
+\EIR99548
+GC.ZF.TEND(1),GC.ZF.TEND(2),GC.ZF.TEND(3),GC.ZF.TEND(4), \
+GC.ZF.TEND(5),GC.ZF.TEND(6),GC.ZF.TEND(7),GC.ZF.TEND(8), \
+GC.ZF.CASH(1),GC.ZF.CASH(2),GC.ZF.CASH(3),GC.ZF.CASH(4), \
+GC.ZF.CASH(5),GC.ZF.CASH(6),GC.ZF.CASH(7),GC.ZF.CASH(8), \
+GC.ZF.CASH(09),GC.ZF.CASH(10),GC.ZF.CASH(11),GC.ZF.CASH(12), \
+GC.ZF.CASH(13),GC.ZF.CASH(14),GC.ZF.CASH(15),GC.ZF.CASH(16), \
+GC.ZF.CASH(17),GC.ZF.CASH(18),GC.ZF.CASH(19),GC.ZF.CASH(20), \
+GC.ZF.CASH(21),GC.ZF.CASH(22),GC.ZF.CASH(23),GC.ZF.CASH(24), \
+GC.ZF.CASH(25),GC.ZF.CASH(26),GC.ZF.CASH(27),GC.ZF.CASH(28), \
+GC.ZF.CASH(29),GC.ZF.CASH(30),  \
+GC.ZF.PERF(1),GC.ZF.PERF(2),GC.ZF.PERF(3),GC.ZF.PERF(4), \
+GC.ZF.PERF(5),GC.ZF.PERF(6),GC.ZF.PERF(7),GC.ZF.PERF(8), \
+GC.ZF.PERF(09),GC.ZF.PERF(10),GC.ZF.PERF(11),GC.ZF.PERF(12), \
+GC.ZF.PERF(13),GC.ZF.PERF(14),GC.ZF.PERF(15),GC.ZF.PERF(16), \
+GC.ZF.PERF(17),GC.ZF.PERF(18),GC.ZF.PERF(19),GC.ZF.PERF(20), \
+GC.ZF.PERF(21),GC.ZF.PERF(22),GC.ZF.PERF(23),GC.ZF.PERF(24), \
+GC.ZF.PERF(25),GC.ZF.PERF(26),  \
+GC.MAXTERMS,  \
+GC.MAXOPERS,  \
+GC.PRINTER,  \
+GC.AUTO.BAL,  \
+GC.FRANK.TOUT,  \
+GC.PC.SIZE,  \
+GC.SL.SIZE,  \
+GC.SL.WARN,  \
+GC.RD.TIMEOUT,  \
+GC.BACKLOG,  \
+GC.IM.FLUSH,  \
+GC.DEFAULT.OP$,    \
+GC.ETONE.HZ$,    \
+GC.ETONE.LEN$,    \
+GC.TP.MAXDAYS,    \
+GC.APPLYTEST,    \
+GC.DELTEST,    \
+GC.LINKTYPE, \
+GC.DLC.RETRY, \
+GC.DLC.TMOUT, \
+GC.DISP.TMOUT, \
+GC.REPL.MSGNUM, \
+GC.VF.CODETBL$(1),  \
+GC.VF.CODETBL$(2),  \
+GC.VF.CODETBL$(3),  \
+GC.VF.CODETBL$(4),  \
+GC.VF.CODETBL$(5),  \
+GC.VF.CODETBL$(6),  \
+GC.VF.CODETBL$(7),  \
+GC.VF.CODETBL$(8),  \
+GC.VF.CODETBL$(9),  \
+GC.VF.CODETBL$(10), \
+GC.VF.CODEACT(1,1), \
+GC.VF.CODEACT(1,2), \
+GC.VF.CODEACT(2,1), \
+GC.VF.CODEACT(2,2), \
+GC.VF.CODEACT(3,1), \
+GC.VF.CODEACT(3,2), \
+GC.VF.CODEACT(4,1), \
+GC.VF.CODEACT(4,2), \
+GC.VF.CODEACT(5,1), \
+GC.VF.CODEACT(5,2), \
+GC.VF.CODEACT(6,1), \
+GC.VF.CODEACT(6,2), \
+GC.VF.CODEACT(7,1), \
+GC.VF.CODEACT(7,2), \
+GC.VF.CODEACT(8,1), \
+GC.VF.CODEACT(8,2), \
+GC.VF.CODEACT(9,1), \
+GC.VF.CODEACT(9,2), \
+GC.VF.CODEACT(10,1), \
+GC.VF.CODEACT(10,2), \
+GC.UPC2.TYPE,GC.NET.ST.COUPON,GC.MAX.XLOG16, \
+GC.MCPN.TDR,GC.CPN.FSTX,                     \
+GC.GOFASTER,GC.C.DISK.FREE,GC.D.DISK.FREE,   \
+GC.TXABLE.FS.ADJ,                            \ IR77985
+GC.EFT.CTL.ID,                               \eftschgs
+GC.PRICE.CHK,                                \ IR78845
+GC.PRE.FRANKING.LF,                          \ IR79515
+GC.COUPON.VAL,                               \ IR88033
+GC.PRINT.TOTAL.SOLD,                         \ IR89353
+GC.DONOT.RESET.TRANS.NUM,                    \ IR28521
+GC.TAX.LIMIT,                                \ IR29311
+GC.BLANK.EFT.ACNUM,                          \ IR37251
+gc.reserv18,                                 \
+gc.reserv19,                                 \
+gc.reserv20,                                 \
+gc.reserv21,                                 \
+gc.reserv22,                                 \
+gc.reserv23,                                 \
+gc.reserv24,                                 \
+gc.reserv25,                                 \
+gc.reserv26,                                 \
+gc.reserv27,                                 \
+gc.reserv28,                                 \
+gc.reserv29,                                 \
+gc.reserv30,                                 \
+gc.reserv31,                                 \
+gc.reserv32,                                 \
+gc.reserv33,                                 \
+gc.reserv34,                                 \
+gc.reserv35,                                 \
+gc.reserv36,                                 \
+gc.reserv37                                  !

@@ -1,0 +1,49 @@
+!------------------------------------------------------------------------------
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  CFTSUVA.011
+!     Punto de Entrada   =  EAMTSUVA.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1999
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!------------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!            Estas lineas se insertan en la USER EXIT EAMTSUVA.J86   
+!            para definir las variables de manejo de OFERTAS
+!                                                         
+!------------------------------------------------------------------------------
+
+INTEGER*1   GLOBAL                                        \!
+            IND1OF%, IMPREDA%,        RECOLECTA%,    SIGUE.OF%      !
+
+INTEGER*2   GLOBAL           DOSP%,         LIG2%,        \!
+            FT%,             LIG1%,         SIGNOF%,      \!
+            FIS.IVA%(1),     FIS.FIV%,      FIS.TARIFA,   \!
+            ANCHO%,          FIS.LIN%,      UIND1%,       \!
+            FIS.DEP%,        FIS.ITEM,      FIS.SIGNO      !
+
+INTEGER*4   GLOBAL                                        \!
+            VTA.TO%,         VTOT.OFE%,                   \!
+            FIS.IVADEF%,     MOTO%,         MOTOP%,       \!
+            SUBTL%,          NUM.OFE%,      VAL.OFE%,     \!
+            FIS.TOTV(1),     FIS.VRU%,      FIS.IMP.TOT(1) !
+
+INTEGER*2   GLOBAL           ELEMENT,       LIGIN%         !
+INTEGER     GLOBAL                                        \!
+                      OF.END,        ELEMENTO%      !
+
+STRING      GLOBAL           PLU.OF$,        DOS$,        \!
+            ULTIMO$,         ULT.PLU$,       NOM.OFE$,    \!
+            INDIS$,          TS.DESC$(1),    FIS.EQ$(1),  \!
+            FIS.A$,          FIS.GRU$,       FIS.KIT$,    \!
+            OF.STR$(1),      ENTRA$,         PREFOF$,     \!
+            PREFALI$,        OFERT$,         KEYOF$,      \!
+            LIGA$,           VALOF$,         LIGO$,       \!
+            PLUOF$,          FIS.D$,         FIS.DL$,     \!
+            RELE1$,          RELE2$,         RELE3$,      \!
+            DESOFE$,         ULTLIGA$,       LEOM$,       \!
+            UNO$,            OFER.PLU$,      CCC$,        \!
+            INDIC1$,         INDIC2$,        INDIC3$,     \!
+            x.clave$,        x.datos$   
+
+!------------------------------------------------------------------------------

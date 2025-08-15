@@ -1,0 +1,23 @@
+!-------------------------------------------------------------------------------
+!Funcion para convertir un INTEGER*4 a hexadecimal
+!-------------------------------------------------------------------------------
+! La funcion convierte un entero de 4 bytes en una cadena hexadecimal
+! El resultado de la funcion es una cadena de 8 caracteres
+function hex$( numero )
+   string    hex$
+   integer*4 numero
+
+   string s$
+   integer*2 i, k
+
+   s$ = ""
+   for i = 0 to 7
+      k = shift(numero, i*4) and 000FH
+      if k < 10 then \
+         k = k + 48  \
+      else           \
+         k = k + 55
+      s$ = chr$(k) + s$
+   next i
+   hex$ = s$
+fend

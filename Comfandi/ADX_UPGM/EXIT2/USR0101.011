@@ -1,0 +1,37 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0101.011 
+!     Punto de Entrada   =  EAMTSU01.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!---------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!  DESCUENTOS: Calcular descuento por articulo y acumularlo. Se
+!              ejecuta antes de iniciar una nueva transaccion.       
+!---------------------------------------------------------------
+!PUNTO%  = 0
+USER.SMDSCT = 0			! Suma de descuentos <== 0
+TS.DISC.SAVE(0,0) = 0           !
+TS.DISC.SAVE(0,1) = 0           !
+USER.SI.DESC = 0		! No se ha presentado descuento
+!OFERTA%      = 0
+!  WRITE #34;CHR$(1BH)+CHR$(61H)+CHR$(1)   ! Centrado
+!  WRITE #34;CHR$(1DH)+CHR$(2FH)+CHR$(0)+CHR$(2) !Imprime Logo 
+!TVRTGRA% = 0
+!  tipos de letras 
+
+IF PRT4610.ENABLE NE 0 THEN BEGIN 
+   FINLIN$ = CHR$(13) + CHR$(10)
+   LFEED$ = CHR$(1BH)+CHR$(33H)+CHR$(204)
+   LFEED$  = CHR$(0AH)
+   FONPH$  = CHR$(1BH)+CHR$(47H)+CHR$(1)
+   FONPHN$ = CHR$(1BH)+CHR$(47H)+CHR$(00)
+ENDIF ELSE BEGIN 
+   FINLIN$ = ""
+   LFEED$  = ""
+   LFEED$  = ""
+   FONPH$  = CHR$(27) + CHR$(69)
+   FONPHN$ = CHR$(27) + CHR$(69)
+ENDIF 
+!--------------------------------------------------------------

@@ -1,0 +1,229 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMP4EGJ                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: GENERIC FUNCTION PROTOTYPES             */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*                                                                */
+\/*      IR33229 - Created June 18, 1996 - Matra ADW.              */
+\/*              7/8/96 - Added PRT4610.ADXSERVE - mat_adw.        */
+\/*              7/11/96 - Added more PRT4610 routines - mat_adw.  */
+\/*              7/15/96 - Added PRT4610.HONOR.MODE  - mat_adw.    */
+\/*              7/18/96 - Added more 4610 DI routines - mat_adw.  */
+\/*              8/23/96 - Added PRT4610.DI.TIMEOUT - mat_adw.     */
+\/*                                                                */
+\/*      IR33750 - Added PRT4610.RESTORE.FONT.AND.SPACING$.        */
+\/*                12/2/96 - MATRA (adw).                          */
+\/*                                                                */
+\/*              - Pass linefeeds to BUFFER.RECEIPT.LINE so they   */
+\/*                will be the same buffered and non buffered.     */
+\/*              - Added PRT4610.DI.HOME                           */
+\/*              - Allow start of printing timeout to be passed to */
+\/*                PRT4610.DI.TIMEOUT                              */
+\/*                19Dec1996  IBM MWD                              */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+SUB EP.READ.ETO (FILE.NAME$, FILE.NUM, TERM.NUM$) EXTERNAL
+   STRING    FILE.NAME$, TERM.NUM$
+   INTEGER   FILE.NUM
+END SUB
+
+SUB DISABLE.BUFFERING  EXTERNAL
+END SUB
+
+SUB ENABLE.BUFFERING  EXTERNAL
+END SUB
+
+SUB DIM.CR.PRINT.BUFFER  EXTERNAL
+END SUB
+
+FUNCTION CR.BUFFER.FULL EXTERNAL
+INTEGER*2 CR.BUFFER.FULL
+END FUNCTION
+
+FUNCTION CR.BUFFER.WARN  EXTERNAL
+INTEGER*2 CR.BUFFER.WARN
+END FUNCTION
+
+SUB CR.BUFFER.GUILLOTINE EXTERNAL
+END SUB
+
+SUB WRITE.TO.CR(PRINT.LINE$,FORMAT$) EXTERNAL
+STRING PRINT.LINE$,FORMAT$
+END SUB
+
+!AIR33750 - number of linefeeds is now passed as a parameter
+!SUB BUFFER.RECEIPT.LINE(PRT.LINE$)  EXTERNAL
+SUB BUFFER.RECEIPT.LINE(PRT.LINE$,LINEFEED%)  EXTERNAL
+STRING PRT.LINE$
+INTEGER*2 LINEFEED%
+END SUB
+!EIR33750
+
+SUB GET.SESS.NUMS(SJ.NUM%,DI.NUM%) EXTERNAL
+INTEGER*2 SJ.NUM%,DI.NUM%
+END SUB
+
+SUB EP.LOAD.FEATURE.DESC (FILE.NAME$, FILE.NUM, NUM.DESC) EXTERNAL
+   STRING    FILE.NAME$
+   INTEGER   FILE.NUM, NUM.DESC
+END SUB
+
+SUB PRT4610.ADXSERVE EXTERNAL
+END SUB
+
+FUNCTION PRT4610.DI.GETLONG(DI) EXTERNAL
+   INTEGER*4 PRT4610.DI.GETLONG
+   INTEGER*2 DI
+END FUNCTION
+
+SUB PRT4610.DI.EJECT(DI) EXTERNAL
+   INTEGER*2 DI
+END SUB
+
+SUB PRT4610.DI.FLIP(DI) EXTERNAL
+   INTEGER*2 DI
+END SUB
+
+SUB PRT4610.HONOR.MODE (CR, HONOR) EXTERNAL
+   INTEGER*2 CR
+   INTEGER*1 HONOR
+END SUB
+
+SUB PRT4610.DI.LPI (DI, LPI) EXTERNAL
+   INTEGER*2 DI
+   INTEGER*1 LPI
+END SUB
+
+SUB PRT4610.DI.LANDSCAPE (DI, LANDSCAPE) EXTERNAL
+   INTEGER*2 DI
+   INTEGER*1 LANDSCAPE
+END SUB
+
+SUB PRT4610.DI.FEED (DI, LF) EXTERNAL
+   INTEGER*2 DI
+   INTEGER*1 LF
+END SUB
+
+
+SUB PRT4610.SET.CR.FONTWIDTH (CR, FONTWIDTH) EXTERNAL
+   INTEGER*2 CR, FONTWIDTH
+END SUB
+
+SUB PRT4610.SET.CR.CHARSPACE (CR, CHARSPACE) EXTERNAL
+   INTEGER*2 CR, CHARSPACE
+END SUB
+
+SUB PRT4610.SET.CR.CHARPERLINE (CR, CHARPERLINE) EXTERNAL
+   INTEGER*2 CR, CHARPERLINE
+END SUB
+
+SUB EP.WIDE.RIGHT$(Passed.string$)               EXTERNAL
+  STRING    Passed.string$                       !
+END SUB
+
+SUB EP.WIDE.LEFT$(Passed.string$)                EXTERNAL
+  STRING    Passed.string$                       !
+END SUB
+
+SUB EP.WIDE.CENTER$(Passed.String$) EXTERNAL
+  STRING    Passed.String$                       !
+END SUB
+
+SUB EP.WIDE.SUBSTR (Insertion.position,   \
+                         String.to.insert$,      \
+                         Starting.position,      \
+                         Ending.position )         EXTERNAL
+  INTEGER*2 Insertion.position                   !
+  STRING    String.to.insert$                    !
+  INTEGER*2 Starting.position                    !
+  INTEGER*2 Ending.position                      !
+END SUB
+
+SUB EP.WIDE.REV.SUBSTR (Offset.Distance,         \
+                         String.to.insert$,      \
+                         Starting.position,      \
+                         Ending.position )         EXTERNAL
+  INTEGER*2 Offset.Distance                      !
+  STRING    String.to.insert$                    !
+  INTEGER*2 Starting.position                    !
+  INTEGER*2 Ending.position                      !
+END SUB
+
+SUB EP.WIDE.SUBSTR.DESC(Insertion.position,Desc.to.insert) EXTERNAL
+  INTEGER*2 Insertion.position                   !
+  INTEGER*2 Desc.to.insert                       !
+END SUB
+
+SUB EP.WIDE.SUBSTR.LEN(Offset.Distance,Passed.string$) EXTERNAL
+  INTEGER*2 Offset.Distance                      !
+  STRING    Passed.string$                       !
+END SUB
+
+SUB EP.WIDE.P14               EXTERNAL
+END SUB
+
+SUB EP.WIDE.FORMAT.LINE (Passed.String$, Amount.to.Format)     EXTERNAL
+   STRING    Passed.String$
+   INTEGER*4 Amount.to.Format
+END SUB
+
+!AIR33750 - Starting of DI printing timeout is now passed as a parameter
+!SUB PRT4610.DI.TIMEOUT (DI, TIMEOUT) EXTERNAL
+SUB PRT4610.DI.TIMEOUT (DI, TIMEOUT1, TIMEOUT2) EXTERNAL
+   INTEGER*2 DI, TIMEOUT1, TIMEOUT2
+END SUB
+!EIR33750
+
+SUB PRT4610.SAVE.FONT.AND.SPACING      EXTERNAL
+END SUB
+
+SUB PRT4610.RESTORE.FONT.AND.SPACING(SESS.NUM)  EXTERNAL
+INTEGER*2 SESS.NUM
+END SUB
+
+SUB PRT4610.FONT.INIT(SESS.NUM,STACK.SIZE)  EXTERNAL
+INTEGER*2 SESS.NUM,STACK.SIZE
+END SUB
+
+SUB PRT4610.SET.FONT.ATTRIB(SESS.NUM,VALUE) EXTERNAL
+INTEGER*1 VALUE
+INTEGER*2 SESS.NUM
+END SUB
+
+SUB PRT4610.SET.INTER.CHAR.SPACE(SESS.NUM,VALUE)  EXTERNAL
+INTEGER*1 VALUE
+INTEGER*2 SESS.NUM
+END SUB
+
+FUNCTION PRT4610.FONT.AND.FORMAT$(ASTR$,VALUE) EXTERNAL
+INTEGER*1 VALUE
+STRING ASTR$,PRT4610.FONT.AND.FORMAT$
+END FUNCTION
+
+
+SUB PRT4610.SET.DI.CHARPERLINE(SESS.NUM, VALUE)  EXTERNAL
+INTEGER*2 SESS.NUM,VALUE
+END SUB
+
+!AIR33750 - Added following prototype
+FUNCTION PRT4610.RESTORE.FONT.AND.SPACING$ EXTERNAL
+  STRING PRT4610.RESTORE.FONT.AND.SPACING$
+END FUNCTION
+!EIR33750 - End modification
+
+!AIR33750 - added this new routine
+SUB PRT4610.DI.HOME(SESS.NUM, VALUE) EXTERNAL
+INTEGER*2 SESS.NUM, VALUE
+END SUB
+!EIR33750

@@ -1,0 +1,31 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/*                                                                */
+\/*   IO05390 - Design change.  This is the second part of a       */
+\/*             two-step fix begun with IR51337.  That fix was     */
+\/*             implemented to prevent customer-supplied user exit */
+\/*             code from running during asynchronous errors.      */
+\/*             With this current fix, capability for              */
+\/*             customer-supplied user exit code for asynchronous  */
+\/*             errors is restored, but with a differently-named,  */
+\/*             new user exit routine, TSUPEA27.  Accompanying     */
+\/*             this new user exit stub is a set of instructions   */
+\/*             that must be carefully followed in order to        */
+\/*             prevent the problems that necessitated IR51337.    */
+\/*             GGK IBM 13Oct2006                                  */
+
+FUNCTION TSUPEA27 PUBLIC
+! TSUPEA27 - ASYNC IO ERROR PROCESSING
+
+\ REM!!
+\ REM!!          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\ REM!!          !!  WARNING - BECAUSE THIS ROUTINE RUNS ASYNCHRONOUSLY,  !!
+\ REM!!          !!  ALTERING OF ANY GLOBAL VARIABLE HERE CAN CAUSE THE   !!
+\ REM!!          !!  CURRENTLY-RUNNING FUNCTION TO BEHAVE ERRATICALLY OR  !!
+\ REM!!          !!  ABEND.  REFER TO THE NOTES SECTION OF THE ON ASYNC   !!
+\ REM!!          !!  ERROR CALL STATEMENT IN THE BASIC LANGUAGE REFERENCE !!
+\ REM!!          !!  MANUAL FOR ADDITIONAL INFORMATION.                   !!
+\ REM!!          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+END FUNCTION
+

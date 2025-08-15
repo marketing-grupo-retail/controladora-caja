@@ -1,0 +1,26 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1405.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 14  para       
+! restaurar las variables que almacenan Lineas de         
+! Items para posible Credito de Medicamentos             
+!-----------------------------------------------------------
+
+IF TS.IO.STATE     = 10      THEN BEGIN        ! Si esta en MAIN 
+   IF TS.IO.DATA$(2) <> ""   AND             \ ! y se digita Plu
+      TS.IO.KEYS(2)   = 80   OR              \ ! con ENTER o
+      TS.IO.KEYS(5)   > 199  AND             \ ! Digita Dpto
+      TS.IO.KEYS(5)   < 240  THEN BEGIN        ! segun rango
+          BUF$     = ""                        ! Restaura las
+          TYPE5%   = 0                         ! variables
+          LIN.CRE$ = ""                        ! para una nueva
+          VAL.UNI$ = ""                        ! transaccion
+          SUPER$   = "       "                 ! de venta
+      ENDIF
+ENDIF

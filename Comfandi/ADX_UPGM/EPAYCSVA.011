@@ -1,0 +1,13 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYCSVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Variables para CS Pago Electro.  *
+!**************************************************
+
+
+String    Global Asc.Err.Proceso$, Asc.Err.Ter$, Asc.Err.Trx$, XL.TRMJ$(2), XL.ALMACEN$, XL.LEC$
+String    Global XL.Trama$, XL.TARJETAS$(2), XL.Valor$, XL.Tarjeta$, XL.TRM$, XL.TMP$, XL.JAVA$(2)
+Integer*4 Global Asc.Tmp.Apun%, Asc.Tmp.I%, Asc.Tmp.L%, XL.I%, Asc.Ind.Tmp%, Asc.Tmp.V%, XL.LEN%
+Integer*1 Global Asc.Cs.Error%, Asc.Ind.Pago%

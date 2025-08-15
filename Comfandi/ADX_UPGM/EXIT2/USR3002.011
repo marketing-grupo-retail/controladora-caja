@@ -1,0 +1,35 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1966                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR3002.011                                          **
+!   **    Inclu¡r en :  EAMTSU30.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   ***************************************************************************
+
+                                                     ! Local definition of 100%
+DIM MEX.VAT.TOTAL(4)                                 ! Declara Arreglo Iva
+CIENP = 100.0                                        ! Variable initialization
+FOR UE.II% = 1 TO 4                                     ! following calculates IVA 
+  IF UE.II% = 1 THEN IC% = IPOT16%                      ! Impo Consumo Plan A
+  IF UE.II% = 2 THEN IC% = IPOT20%                      ! Impo Consumo Plan B
+  IF UE.II% = 3 THEN IC% = IPOT35%                      ! Impo Consumo Plan C
+  IF UE.II% = 4 THEN IC% = IPOTDD%                      ! Impo Consumo Plan D
+  IF TS.TOTALS(UE.II%,0,0) <> 0 THEN BEGIN              ! Si hubo Vtas con Iva
+     MEX.VAT.TOTAL(UE.II%)  =                          \! Calcula Base del Iva
+         ROUND(((TS.TOTALS(UE.II%,0,0) - IC%) * CIENP) \! sin tener en Cta el
+                 / (CIENP + MEX.VAT.TAB(UE.II%)),0,0)   ! ImpoConsumo
+     MEX.VAT.TOTAL(0) = MEX.VAT.TOTAL(0)       +    \! Acumula el Iva
+                        MEX.VAT.TOTAL(UE.II%)           ! liquidado
+  ENDIF                                              !
+NEXT UE.II%                                             ! end calculation cicle
+TS.TAXES(0,0) = 0                                    ! Reset Appl var.if set
+TS.TAXES(1,0) = 0                                    !
+TS.TAXES(2,0) = 0                                    !
+TS.TAXES(3,0) = 0                                    !
+TS.TAXES(4,0) = 0                                    !
+                                                     ! write #36;"VTS30 ",err,errf%
+!----------------------------------------------------------------------------

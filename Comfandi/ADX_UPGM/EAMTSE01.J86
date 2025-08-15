@@ -1,0 +1,142 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU01.J86 ************************************!!
+! TITLE: Electronic Marketing Suppport
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/* CHANGE ACTIVITY                                                   !
+\/* IR28917 - Don't lose department key sale following sale of item   !
+\/*           that brings in rain check targeted coupon.              !
+\/*           JEO MGVA 3/10/95                                        !
+\/*                                                                   !
+\/* IR29159 - Fix completion for IR28917 to correct problem of not    !
+\/*           bringing in rain check targeted coupon when no customer !
+\/*           number has been entered.                                !
+\/*           JEO MGVA 4/25/95                                        !
+\/*                                                                   !
+\/* IR33957   The delay header feature is not needed with the IBM     !
+\/*           4610 printer installed.  It was causing the 1st         !
+\/*           header line to print twice.                             !
+\/*           MWD IBM  04Jan97                                        !
+\/*                                                                   !
+\/* IR37064   When using option 19.5 (Treat all non-preferred customer!
+\/*           as Raincheck Customers) with coupons targeted to the    !
+\/*           Raincheck ID, a price required item will not be properly!
+\/*           processed when it is the first item in the order.       !
+\/*           RSH MGVA 01/12/98                                       !
+\/*                                                                   !
+\/* IR47325   Added DIM statement to redimention an array used with   !
+\/*           voiding a bonus points coupon with the trans limit set  !
+\/*           to 1.                                                   !
+\/*           JAM MGVA 01/11/02                                       !
+\/*                                                                   !
+\/* IR48975   PE IR47325 Backed out the fix from IR47325. Bonus       !
+\/*           coupons were being awarded even though the linked       !
+\/*           item had been voided.                                   !
+\/*           KHG IBM  15Aug2002                                      !
+\/*                                                                   !
+\/* IR52567   When using option 19.5 (Treat all non-preferred customer!
+\/*           as Raincheck Customers) 1st item sets up card and starts!
+\/*           a coupon replay. If the first item needs to delay a     !
+\/*           coupon it is not able to. This also addresses other     !
+\/*           shortcomings by separating the card entry from the      !
+\/*           first item.                                             !
+\/*           CRM IBM 12Nov2003                                       !
+\/*                                                                   !
+\/* IR54252   When using option 19.5 (Treat all non-preferred customer!
+\/*           as Raincheck Customers) fix completion IR52567 Keyed    !
+\/*           number system 20 items are not accepted if they are the !
+\/*           first entry in a transaction.                           !
+\/*           CRM IBM 30Jul2004                                       !
+\/*                                                                   !
+\/****END-OF-SPECIFICATIONS*******************************************!
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!********************************************************************
+!*    IMPROVE EOT PRINTING PERFORMANCE BY DELAYING HEADER PRINTING  *
+!********************************************************************
+!AIR33957 - changed code to fix headers when 4610 printed is installed
+!IF NOT EMSS.HEADER.PRINTED THEN BEGIN ! Header not yet printed
+ IF (EMSS.HEADER.PRINTED = 0) AND      \ Header not yet printed
+    (PRT4610.ENABLE = 0) THEN BEGIN    ! IBM 4610 printer not installed
+!EIR33957
+   TS.SAVPRT$ = " "                    ! Force head home
+   TS.SAVPRT.OPT = 4100H               ! WRITE TO RECEIPT
+   TS.LINETYPE = 29                    ! PRINT TS.SAVEPRT$ AS IS
+   CALL TSPREC01                       ! CALL PRINT ROUTINE
+   TS.LINETYPE = 18                    ! PRINT HEADER
+   TS.LINEDATA = 1                     ! PRINT HEADER ONLY
+   CALL TSPREC01                       ! Call Print routine
+ ENDIF
+ EMSS.PMSG$ = ""                       ! CLEAR PERSONALIZED DISPLAY
+
+!********************************************************************
+!*    MAKE ALL CUSTOMERS RAINCHECK CUSTOMERS IF OPTION SELECTED     *
+!********************************************************************
+ IF NOT(TS.IO.KEYS(4) = 89 OR TS.IO.KEYS(4) = 100)  THEN BEGIN ! not nosale keys IR52567
+   IF OP.ALL.RC.CUST THEN BEGIN          ! ALL ARE RAINCHECK
+     IF NOT EMSS.PANEL.TRANS AND         \ NOT ALREADY PREFERRED
+        NOT EMSS.PC.KIOSK THEN BEGIN     ! NOT KIOSK MODE
+         DIM EMSS.IO.PREV.KEYS(10)       ! prep array IR52567
+         DIM EMSS.IO.PREV.DATA$(10)      ! prep array IR52567
+         EMSS.IO.MOTORKEY =  TS.IO.MOTORKEY ! save motorkey IR52567
+       FOR I% = 0 TO 10
+         TS.IO.PREV.KEYS(I%) = TS.IO.KEYS(I%)     ! SAVE KEYED DATA 
+         TS.IO.PREV.DATA$(I%) = TS.IO.DATA$(I%)   ! SAVE KEYED DATA 
+         EMSS.IO.PREV.KEYS(I%) = TS.IO.KEYS(I%)   ! SAVE KEYED DATA IR52567  
+         EMSS.IO.PREV.DATA$(I%) = TS.IO.DATA$(I%) ! SAVE KEYED DATA IR52567  
+         EMSS.IO.DEVICE = TS.IO.DEVICE            ! SAVE DEVICE 
+         EMSS.IO.HEADER$ = TS.IO.HDR$             ! SAVE ORIGINAL HEADER IR54252
+       NEXT I%
+       DIM TS.IO.KEYS(10)                       ! CLEAR KEYED DATA
+       DIM TS.IO.DATA$(10)                      ! CLEAR KEYED DATA
+       TS.IO.KEYS(10) = 63                      ! Data entry key
+       TS.IO.KEYS(4) = 100                      ! No-sale key
+       TS.IO.DATA$(2) = UNPACK$(OP.RC.ID$)      ! Customer number
+       CALL TSU14.FB                            ! Process cust. entry
+       TS.TEMP1I1 = 11                          ! Data entry
+       CALL TSTPEC01                            ! Process data entry
+       
+       IF EMSS.COUP.REPLAY = 0 THEN BEGIN       ! no replay needed IR52567
+         FOR I% = 0 TO 10
+           TS.IO.KEYS(I%) = TS.IO.PREV.KEYS(I%)   ! RESTORE KEYED DATA
+           TS.IO.DATA$(I%) = TS.IO.PREV.DATA$(I%) ! RESTORE KEYED DATA
+         NEXT I%
+  !AIR52567       
+       ENDIF ELSE BEGIN                         ! replay needed
+         USE.EMSS.PREV.KEYS = -1                ! mark saved keys in use
+         TS.IO.DEVICE = 1                       ! say input was from keyboard
+         TS.IO.MOTORKEY = 999                   ! mark to ignore key seq error
+         DIM TS.IO.KEYS(10)                       ! CLEAR KEYED DATA
+         DIM TS.IO.DATA$(10)                      ! CLEAR KEYED DATA
+       ENDIF
+  !EIR52567     
+  !AIR29159 - require targeted coupon replay if raincheck targeted cpns
+  !    EMSS.COUP.REPLAY = 0              ! DON'T REPLAY    !IR28917
+       IF (EMSS.TG.RC.CNT) THEN BEGIN    ! If targeted coupons
+         EMSS.TG.NEEDED = -1             ! Require TG Cpn Replay
+       ENDIF
+  !EIR29159
+  !AIR37064
+       IF OP.PC.INMEM = 0 THEN BEGIN     ! No PC coupons in memory
+         OP.PC.INMEM = 1                 ! Set buffer size to 1
+         CALL CLEAR.PC.UPC               ! Allocate memory buffer
+       ENDIF                             ! No PC coupons in memory
+  !EIR37064
+     ENDIF                               ! NOT PREFERRED OR KIOSK
+   ENDIF                                 ! ALL ARE RAINCHECK
+ ENDIF                                 ! Nosale not hit IR52567
+!AIR48975
+!AIR47325
+! EMSS.UNUSUAL.DIMMED = 0
+! DIM EMSS.UNUSUAL.COUP(0,0)
+! DIM EMSS.UNUSUAL.COUP(1,6)
+! EMSS.UNUSUAL.DIMMED = -1
+!EIR47325
+!EIR48975
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

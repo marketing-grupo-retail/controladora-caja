@@ -1,0 +1,23 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : CHKCSU13.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Control Rutina de Errores        *
+!                Aplicacion CheckOut Support      *
+!**************************************************
+
+IF ERR = "OI" THEN BEGIN   																																	! Hasta el tamaño del string
+X.Msg$ = ERR+"-"+Asc.Err.Caja$+"-"+Asc.Err.Trx$
+X.P% = ADXERROR( 0,          			    \ 0 for controller
+                     ASC("B"),        \ msg displayed
+                     235,             \ msg number
+                     3,               \ severity level
+                     2,               \ 2 = checkout support
+                     X.Msg$)	        ! Mensaje rutina error
+CALL ADXSERVE(0,26,1,"ERROR BACKGROUND")
+WAIT ; 1200                     
+ENDIF 
+
+

@@ -1,0 +1,6 @@
+!USER EXIT CALLED AFTER THE READ OF A TENDER VERIFICATION RECORD
+! Despues de leer un registro de verificacion de pagos
+FUNCTION TSUPEC13 PUBLIC
+
+
+END FUNCTION

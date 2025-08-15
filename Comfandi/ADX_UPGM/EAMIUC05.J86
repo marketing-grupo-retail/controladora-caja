@@ -1,0 +1,29 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC05                                                 *!
+!*                                                                           *!
+!* Description    : Before deleting a record from the item file.             *!
+!*                                                                           *!
+!* Parameters     : ITEMKEY$    The key of the record to be deleted.         *!
+!*                                                                           *!
+!* Variables      : IRUE.BYPASS     Allows user to bypass file open by       *!
+!*                                  setting this variable to any non-zero    *!
+!*                                  value.                                   *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!* IR34715 - Incorrect variable declaration for passed parameter.            *!
+!*           LTG MGVA 14Apr97                                                *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC05(ITEMKEY$) PUBLIC
+
+!AIR34715
+! STRING    KEY$
+  STRING    ITEMKEY$
+!EIR34715
+
+END SUB
+

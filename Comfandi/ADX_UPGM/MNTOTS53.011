@@ -1,0 +1,16 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2000                                        **
+!   **    Proyecto   :  GLOBAL DATATEL COLOMBIA *                            **
+!   **    User Exit  :  GLOBTS01.011                                         **
+!   **    Inclu¡r en :  EAMTSU01.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **                                                                       **
+!   **    Restaura valor de variables al Inicio de Transaccion               **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+%INCLUDE MNTOTS01.011  ! Inicializacion de variables

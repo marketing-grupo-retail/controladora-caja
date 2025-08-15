@@ -1,0 +1,49 @@
+!*********************************************************************
+!Changes:
+!
+!IR36947
+!971015 Not all Non Sales Procedures were being logged properly
+!971008 Remove 'bold' escape sequence from print line before
+!       calling journal
+!*********************************************************************
+!AIR36947
+!971015 START                                   !
+  IF TS.LINETYPE = 25 THEN \  ! START OF EXIT TRAINING ?
+  IF NOT Training.Exit THEN BEGIN ! YES...
+    CALL QXL.TSUPEC01
+    Training.Exit = -1
+  ENDIF
+!971015 END                                   !
+!EIR36947
+
+PrtLine = TS.PRTBUF$                            ! Pass the current line
+
+!AIR36947
+!************************************************************
+!971008 START
+!************************************************************
+
+i = MATCH(CHR$(27)+CHR$(69),PrtLine,1)
+if i <> 0 then \
+  PrtLine = LEFT$(PrtLine,i-1) + RIGHT$(PrtLine,LEN(PrtLine)-i-1)
+
+!************************************************************
+!971008 END
+!************************************************************
+!EIR36947
+
+PrtLine = TS.PRTBUF$                            ! Pass the current line
+PrtLine = QXL.TSUPEC21(PrtLine)                 ! to ESCAPE.  If ESCAPE
+if PrtLine = "" then begin                      ! returns a null, then
+  TS.SJDATA$ = string$(len(TS.SJDATA$)," ")     ! don't print this line
+  TS.PRTBUF$ = string$(len(TS.PRTBUF$)," ")     ! on the paper journal
+endif                                           !
+
+!AIR36947
+!971015 START                                   !
+  IF TS.LINETYPE = 23 THEN BEGIN !END OF SIGNOFF TRANS
+    CALL QXL.TSUPEC02
+    Training.Exit = 0
+  ENDIF
+!971015 END                                   !
+!EIR36947

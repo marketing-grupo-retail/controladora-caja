@@ -1,0 +1,134 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+TVISOR$ = TS.IO.DATA$(2)
+If (TS.IO.KEYS(1) = 82) AND (UE.EPSS.ON) Then Begin
+  Call Visores4690(1,"NO SE PUEDE","SUSPENDER !!",1500,"C")   	
+  DIM TS.IO.KEYS(10)
+  DIM TS.IO.DATA$(10)
+  TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) Then Begin
+ If NOT(UE.EPSS.ON) Then Begin                             ! No es trx EPS
+  If TS.IO.MOTORKEY = VAL("9"+UE.EPS.TIPO$) AND \          ! Presionan tecla pago
+	 VAL(TS.IO.DATA$(3)) = VAL(UE.EPS.VARI$) Then Begin    ! 
+	 Call Visores4690(1,"FORMA PAGO EXCLUSIVA","DE CONVENIOS !!",1500,"C")   	
+   DIM TS.IO.KEYS(10)
+   DIM TS.IO.DATA$(10)
+   TS.IO.MOTORKEY = 0
+	EXIT Sub
+  EndIf 	
+ EndIf
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) Then Begin ! Si forma de pago 
+ If UE.EPSS.ON <> 0 AND UE.EPS.COPAGOAPLICADO% = 0 Then Begin
+    Call Visores4690(1,"PRESIONE TECLA","CONVENIO ANTES !!",1500,"C")   	
+    DIM TS.IO.KEYS(10)
+    DIM TS.IO.DATA$(10)
+    TS.IO.MOTORKEY = 0
+    EXIT Sub
+ EndIf
+EndIf
+
+If UE.EPSS.ON Then \
+	If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \
+		UE.EPS.DEVO% = -1
+If UE.EPSS.ON Then \
+	If (TS.IO.KEYS(1) = 70) AND (TS.IO.MOTORKEY = Ue.Eps.Motora%) Then	\
+		If NOT(TS.INTRX) Then Begin
+			UEDLG.OK% = 0
+			While (UEDLG.OK% = 0)
+			UE.ERROR% = 0
+			Call CAPTURE.DATOEPS("ANULA INFORMACION"," DE EPS 1=SI, 9=NO",-1)
+			If (Mid$(IOPDATA$,13,1) <> "I") AND (UE.ERROR% = 0) Then Begin
+			   If Mid$(IOPDATA$,13,1) = "P" Then Begin         	! si presiono ENTER
+				 UE.EPSS.LEIDO% = VAL(Right$(KQ$,LEN(KQ$)-1))
+				 UE.EPSS.LEIDO$ = Right$(KQ$,LEN(KQ$)-1)
+				 If UE.EPSS.LEIDO% = 1 Then Begin
+					Call INICIALICE.EPS
+					UEDLG.OK% = 1
+					Call Visores4690(1,"DATOS DE CONVENIOS","INICIALIZADOS...",1500,"C")   	
+					EndIf
+				 If UE.EPSS.LEIDO% = 9 Then Begin
+				    Call Visores4690(1,"** ANULACION **","** CANCELADA **",1500,"C")   	
+					UEDLG.OK% = 1
+				 EndIf
+			   EndIf
+			EndIf
+			Wend
+	EndIf ELSE Begin
+	   Call Visores4690(1,"YA HAY ARTICULOS","VENDIDOS",1500,"C")   	
+	   Call Visores4690(1,"DEBE ANULAR","LA TRANSACCION",1500,"C")   		   
+	EndIf
+
+If (TS.IO.MOTORKEY = 62) AND (UE.EPS.NRMLoCATAL$ <> "2") AND UE.EPSS.ON Then Begin
+    Call Visores4690(1,"NO APLICA DSCTO EN","ESTA TRANSACCION !!",1500,"C")   	
+	  DIM TS.IO.KEYS(10):DIM TS.IO.DATA$(10):TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.MOTORKEY = 62) AND (UE.EPS.NRMLoCATAL$ = "2") AND (UE.EPSS.ON) Then Begin
+	TS.IO.DATA$(5) = UE.EPSS.DSCTOTRX$
+	TO.DISC.RATE(VAL(UE.EPSS.DSCTOTRX$)-1) = VAL(UE.EPS.DSCTOTRX$)*10
+	Call Visores4690(1,"APLICANDO DESCUENTO","....",1500,"C")   	
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.IO.KEYS(1) <> 70) AND (TS.INTRX) AND (TS.TENDVAMT(UE.EPS.POSPAGO%) > 0) Then Begin
+  DIM TS.IO.KEYS(10)
+  DIM TS.IO.DATA$(10)
+  TS.IO.MOTORKEY = 0
+  UEPG.BORRA% = 0
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.INTRX) AND (UE.EPSS.ON) AND (TS.BAL.TAKEN) Then Begin
+  UE.EPSS.COOP% = -1
+  UE.EPS.COPAGOAPLICADO% = COOPAGO          ! Aplicacion del coopago
+  If UE.EPS.COPAGOAPLICADO% = -1 Then      \!
+     UE.EPS.GRABAString% = 0
+  UE.EPS.COPAGOAPLICADO% = -1               ! Control cierre de la trx 
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) AND (UE.EPS.NRMLoCATAL$ = "2") AND (UE.EPSS.ON) Then	\
+If (UE.EPS.NRMLoCATAL$ = "2") AND (NOT(TS.DISCFLAG)) Then Begin
+    Call Visores4690(1,"DEBE APLICAR EL","DESCUENTO ANTES!",1500,"C")   	
+	  DIM TS.IO.KEYS(10)
+	  DIM TS.IO.DATA$(10)
+	  TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.INTRX = 0) AND (UE.EPSS.ON <> -1) Then Begin
+FOR I% = 1 TO 5                       ! Entra limpiando vector datos
+	UE.EPSS.DAT(I%) = ""
+NEXT I%
+Call LEA.EPS
+If UEPG.BORRA% >= 3 Then \
+	Begin
+	  DIM TS.IO.KEYS(10)
+	  DIM TS.IO.DATA$(10)
+	  DIM UE.EPSS.DAT(6)
+	  TS.IO.MOTORKEY = 0
+	  UEPG.BORRA% = 0
+	  UE.EPSS.ON = 0
+	  TS.IO.KEYS(0) = 73
+	  TS.IO.MOTORKEY = 73
+	  Call INICIALICE.EPS
+	EndIf ELSE Begin
+	  DIM UE.EPS.PARR(500)
+	  TS.IO.MOTORKEY = 0
+	  UE.EPS.FOTO% = -1
+	  UE.EPSS.HEAD = -1
+    If PRT4610.ENABLE = 0 Then UE.EPS.LINE% = 1 ELSE UE.EPS.LINE% = 1
+	  DIM TS.IO.KEYS(10)
+	  DIM TS.IO.DATA$(10)
+	  UE.EPS.GRABAString% = -1
+	EndIf
+EndIf
+If (TS.IO.KEYS(6) = 75) Then	\
+	UE.EPS.CANT$ = TS.IO.DATA$(6)

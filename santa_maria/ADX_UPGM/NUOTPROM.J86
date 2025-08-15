@@ -1,0 +1,114 @@
+
+!------------------------------------------------------------------------------
+! Al inicio de una transaccion de ventas
+!------------------------------------------------------------------------------
+sub NUOTPROM01 external
+end sub
+
+!------------------------------------------------------------------------------
+! Al finalizar una transaccion de venta
+!------------------------------------------------------------------------------
+sub NUOTPROM02 external                                                          
+end sub
+
+!------------------------------------------------------------------------------
+! Despues de apertura de todos los archivos
+!------------------------------------------------------------------------------
+sub NUOTPROM07 external
+end sub
+
+!------------------------------------------------------------------------------
+! Despues de la lectura del Teclado/Scan/Lect Optico
+!------------------------------------------------------------------------------
+sub NUOTPROM14 external
+end sub
+
+!------------------------------------------------------------------------------
+! Antes de escribir una linea al visor
+!------------------------------------------------------------------------------
+sub NUOTPROM23 external
+end sub
+
+!------------------------------------------------------------------------------
+! En el calculo del saldo a pagar
+!------------------------------------------------------------------------------
+sub NUOTPROM30 external
+end sub
+
+!------------------------------------------------------------------------------
+! En la comprobacion de limite de pagos
+!------------------------------------------------------------------------------
+sub NUOTPROM40 external
+end sub
+
+!------------------------------------------------------------------------------
+! Imprime resumen de descuentos en factura
+!------------------------------------------------------------------------------
+sub NUOTPROMresumen(m$) external
+   string m$
+end sub
+
+!------------------------------------------------------------------------------
+!Datos para descuento empleado
+!------------------------------------------------------------------------------
+sub NUOTPROMempleado( c$ ) external
+   string c$
+end sub
+
+!------------------------------------------------------------------------------
+! Calcula un descuento al medio de pago
+! retorna el monto de descuento
+!------------------------------------------------------------------------------
+function descuentoPago( monto , tarjeta , codPago ) external
+   integer*4 descuentoPago
+   string monto,   \ Monto del medio de pago
+          tarjeta, \ Tarjeta
+          codPago  ! Codigo de medio de pago
+end function
+
+!------------------------------------------------------------------------------
+! consulta el descuento asociado a un pago
+! retorna el monto del descuento que fue aplicado
+!------------------------------------------------------------------------------
+function consultaPago( monto , tarjeta , codPago ) external
+   integer*4 consultaPago
+   string monto,   \ Monto del medio de pago
+          tarjeta, \ Tarjeta
+          codPago  ! Codigo de medio de pago
+end function
+
+!-------------------------------------------------------------------------
+! cancela el descuento al pago
+!-------------------------------------------------------------------------
+sub cancelaPago external
+end sub
+
+!------------------------------------------------------------------------------
+! retorna el monto de descuento
+!------------------------------------------------------------------------------
+function NUOTPROMdescuento external
+   integer*4 NUOTPROMdescuento
+end function
+
+!------------------------------------------------------------------------------
+! retorna la cadena de descuento
+!------------------------------------------------------------------------------
+function NUOTPROMresPromociones external
+   string NUOTPROMresPromociones
+end function
+
+!------------------------------------------------------------------------------
+! Para no aplicar descuentos en recargas
+!------------------------------------------------------------------------------
+sub noAplicaDescuento external
+end sub
+
+!------------------------------------------------------------------------------
+! Activa/Desactiva temporalmente el calculo de descuentos
+! f = 0  Para no calcular descuentos si no ha cambiado nada en la transaccion
+! f = -1 Para calcular los descuentos 
+!------------------------------------------------------------------------------
+sub calcularDescuentos( f ) external
+   integer*1 f
+end sub
+

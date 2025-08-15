@@ -1,0 +1,152 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMEXCHV.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: Define Feature Variables.               */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Ralph D. Gustafson                                */
+\/*                                                                */
+\/*                                                                */
+\/*      IR37838 - Initial Release                                 */
+\/*                RDG IBM 10Aug98                                 */
+\/*                                                                */
+\/*  IR43567 Add code to change the format of the Foreign Exchange */
+\/*          Rate file to 512 byte record length Direct file.      */
+\/*          CMJ MGVA 16Aug2000                                    */
+\/*                                                                */
+\/**END-OF-SPECIFICATIONS*******************************************/
+
+
+STRING    GLOBAL               \
+          REC.TYPE$,           \ RECORD TYPE (ALL RECORDS)              PD 1
+          CASHBK$,             \ IR43567
+          NUM.CURR$            ! NUMB OF FC'S ACCEPTED (10 REC ONLY)    PD 1
+
+INTEGER*2 GLOBAL               \
+          NUM.FCSA,            \ NUMBER OF FOREIGN CURRENCIES ACCEPTED
+          RECORD.TYPE,         \ Record Type Field                       PD 1
+          RF.SESS%             ! Session Number
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE TYPE X'20' RECORD.    !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL               \
+          CMCICODE$,           \ COUNTRY MONETARY CURRENCE ID (COMMON) ASCII 3
+          FCNAME$,             \ FOREIGN CURRENCY NAME               ASCII V?
+          CURR.NUM$,           \ FOREIGN CURRENCY NUMBER                PD 2
+          FC.SYMBOL$,          \ FOREIGN CURRENCY SYMBOL                PD 2
+          PROC.METH$,          \ PROCESSING METHOD                      PD 1
+          EXCHRATE$,           \ EXCHANGE RATE                       ASCII 11
+          DECFLAG$,            \ DECIMAL CURRENCY FLAG               ASCII 1
+          LOANABLE$,           \ LOANABLE CURRENCY FLAG              ASCII 1
+          CURR.KEY.CODE$,      \ CURRENCY KEYING CODE                   PD 1
+          AUTHLEVEL$,          \ MIN AUTHORIZATION LEVEL                PD 1
+          CHKINDFLD$,          \ FIELD CONTAINING CHECK INDICATOR       PD 1
+                               \ X'01' = TRANSIT NUMBER FIELD
+                               \ X'02' = ACCOUNT NUMBER FIELD
+                               \ X'03' = CHECK NUMBER FIELD
+          CHKINDOFF$,          \ OFFSET INTO FIELD                      PD 1
+          CHECKIND$,           \ INDICATOR FOR CURRENCY                 PD 1
+          USERDATA$,           \ USER DATA FIELD                     ASCII V?
+          FCER.ARR$(2)         ! FOREIGN CURRENCY EXCHG RATE ARRAY
+
+INTEGER*1 GLOBAL               \
+          CURR.KEYCODE,        \ CURRENCY KEYING CODE
+          DATA.CAPTURED,       \ Data Captured flag
+          DEC.FLAG,            \ DECIMAL CURRENCY FLAG
+          ERROR.TYPE,          \ Error Type
+          FIELD.ERROR,         \ Field Error Flag
+          J,L,                 \ Work Variables
+          LOANABLE,            \ LOANABLE TENDER FLAG
+          MIN.AUTH.LEV,        \ MIN AUTHORIZATION LEVEL FLAG
+          PROCESSING.METHOD    ! Currency Processing Method
+
+REAL      GLOBAL               \
+          EXCHG.RATE           ! FOREIGN CURRENCY EXCHANGE RATE
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE TYPE X'30' RECORD.    !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL               \
+          TTAR.ARR$(2)         ! Tender Acceptance ARRAY
+
+
+\ REM!!***************************************************************!!
+\ REM!! RECORDS ARE READ USING THE INCLUDE:                           !!
+\ REM!!                                                               !!
+\ REM!!  EAMEXCHR.J86  READ EXCHANGE RATE FILE RECORD                 !!
+\ REM!!***************************************************************!!
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE FOREIGN CURRENCY FEAT.!!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL               \
+          CURR.KEYCODE$,       \ Current Keycode
+          ERROR.TYPE$,         \ Error Type
+          EXCHGRATE$,          \ Exchange Rate
+          FC.ACCEPT$,          \ FC Accept Field
+          FC.DESC.ARR$(2),     \ FC Descriptors Array
+          FC.MODULE.ID$,       \ FC Module ID for Logging
+          FC.NOT.FND.MSG$,     \ FC Not found message
+          FC.PM$,              \ FC Processing Method
+          FC.TEMP1$,           \ Work Variable
+          FC.TEMP2$,           \ Work Variable
+          FC.TTYPE$,           \ FC Tender Type
+          FC.TVAR$,            \ FC Tender Variety
+          MC.ISO.ARR$(2),      \ MC ISO Array
+          NUM.ISO$,            \ Number of ISO Entries
+          OEXCHGRATE$,         \ Old Exchange Rate
+          PROC.METHOD$,        \ Processing Method
+          PM.1.DESC$,          \ PM 1 Descriptor
+          PM.26.DESC$,         \ PM 2,6 Descriptor
+          PM.345.DESC$,        \ PM 3,4, and 5 Descriptor
+          TVADEF$              ! Tender Type,Varerity Accept Definition
+
+INTEGER*1 GLOBAL               \
+          DESC.READ,           \ Descriptor Read flag
+          EAMEXCHG.PROCESSED,  \ Exchange Rate File Processed flag
+          EAMEXISO.PROCESSED,  \ ISO File Processed flag
+          FC.KEY,              \ FC Key Number
+          FC.TEMP1I1,          \ Work Variable
+          FC.TEMP1I2,          \ Work Variable
+          RD.FIRST.LINE,       \ Rd first Line flag
+          RD.ISO.FILE,         \ Rd ISO file flag
+          RD.EXCHG.FILE        ! Rd Exchange Rate File flag
+
+
+INTEGER*2 GLOBAL               \
+          EOL,                 \ End of Line Position
+          MC.ENABLED,          \ MULTIPLE CURRENCY ENABLED FLAG
+          FC.TEMP2I2,          \ Work Variable
+          FC.TV.INDEX,         \ FC Type-Variety Index
+          FLD.END,             \ Field End Pointer
+          FLD.LEN,             \ Field Length
+          FLD.NUM,             \ Field Number
+          FLD.START,           \ Field Start Pointer
+          NEXT.FC.INDEX,       \ Next FC Index pointer
+          NUM.DESCS,           \ Number of Descriptors
+          NUM.ISO%,            \ Number of ISO Entries
+          RECORD.LEN,          \ Record Length
+          SLOT                 ! Slot Number
+
+INTEGER*4 GLOBAL               \
+          EAMCDESC.PRESENT,    \ Feature Descriptor File Present Flag
+          EAMEXISO.PRESENT,    \ ISO File Present Flag
+          EAMEXCHG.PRESENT,    \ Exchange Rate File Present Flag
+          FC.AMTTENDE          ! FC Amount Tendered Variable
+
+!
+!*************************************************************************
+!                END OF INCLUDE : EAMEXCHV.J86
+!*************************************************************************

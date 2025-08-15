@@ -1,0 +1,62 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA SA                                  **
+!   **    User Exit  :  CELLTS27.011                                         **
+!   **    Inclu¡r en :  EAMTSU27.J86  -  User Exit control de errores        **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD DE RETAIL            	      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+IF ERRF% = UE.PIN.SES1% AND ERR = "TO" THEN 			\! Si TOF
+   UE.CELL.PINDES$ = "????????????"
+IF ERRF% = UE.PIN.SES2% AND ERR = "TO" THEN 			\! Si TOF
+   UE.CELL.PINDES$ = "????????????"
+
+IF ERRF% = UE.PIN.SES2% AND ERR = "EF" THEN 	\! Si EOF()
+   UE.CELL.ERROR% = -1
+
+IF ERRF% = UE.PIN.SES1% AND ERR = "EF" THEN 	\! Si EOF()
+   UE.CELL.ERROR% = -1
+
+IF (ERRF% = UE.PIN.SES2%  AND ERR = "OE") THEN BEGIN              	 ! del archivo de pines
+   WRITE FORM "2C20";#30;"ERR:APERTURA PINES",   	\!
+                          "ERROR OE"     	 !
+    CALL TSHIECET					 ! Tono de alerta
+    WAIT ; 1500                                          ! time espera    
+ENDIF
+
+IF (ERRF% = UE.PIN.SES2%  AND ERR = "FU") THEN BEGIN              	 ! del archivo de pines
+   WRITE FORM "2C20";#30;"ERR:APERTURA PINES",   	\!
+                          "ERROR FU"     	 !
+    CALL TSHIECET					 ! Tono de alerta
+    WAIT ; 1500                                          ! time espera    
+ENDIF
+
+
+!IF (ERRF% = 56 ) AND     		                            \! Si problemas en apertura
+!   (ERR = "OE" OR ERR = "FU") THEN BEGIN              	 ! del archivo de control
+!    WRITE FORM "2C20";#30;"ERR:APERTURA CONTROL",      	\!
+!                          "PROYECTO CANCELADO.."       	 !
+!    CALL TSHIECET					                               ! Tono de alerta
+!    WAIT ; 1500                                          ! time espera
+!    UE.PROYECTO(UE.PIN.CELL%) = 0			                   ! Desactivo proyecto
+!ENDIF
+
+!IF (ERRF% = UE.PIN.SES2% OR ERRF% = UE.PIN.SES1%) AND                       \! Si problemas en apertura
+!   (ERR = "OE" OR ERR = "FU") THEN BEGIN              	 ! del archivo de pines
+!    WRITE FORM "2C20";#30;"ERR. ABRIENDO PINES ",   	\!
+!                          "PROYECTO CANCELADO.."     	 !
+!    CALL TSHIECET					 ! Tono de alerta
+!    WAIT ; 1500                                          ! time espera
+!    UE.PROYECTO(UE.PIN.CELL%) = 0			 ! Desactivo proyecto
+!    UE.CELL.STAT% = 0				         ! No vta articulos
+!ENDIF
+
+IF (ERRF% = 90)  THEN BEGIN                ! Si problemas en apertura
+    UE.PIN.CODERR$ = ERR
+ENDIF
+

@@ -1,0 +1,57 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+Gr.Lcl.Points$ = "" 																													! Inicializacion de variables
+Gr.Lcl.Name$   = "" 																													! por cambio de transaccion
+Gr.Lcl.Ctrl%   = -1 																													! 
+Gr.Lcl.Clte$   = ""                                                    				! 
+USER.FBACT.READ =  0                                                    			! Inicializacion Variable
+EMSS.VOID.POINTS = -1
+Asc.Proy.Leal%  = 00     																											! Proyecto desactivado
+TS.ER.RETURN = -1			                                												! Ctrl Errores
+Open "R::$SCNTRL" AS 94	UNLOCKED NOWRITE NODEL               									! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN	                                						! Error en la apertura
+ Call TSHIECET					                        															! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Modulo Lealtad",1500,"L")							! Msg Alerta
+ Call Visores4690(1,"Mod. Lealtad ONLINE","No Operativo",1500,"L")						! Msg Alerta
+ Asc.Proy.Leal%     = 00 																											! Proyecto desactivado
+ Gr.Lcl.Ctrl%      = 00																												! Control de lectura
+ Gr.Lcl.Cadena$    = "0000"  																									! Codigo cadena
+ Gr.Lcl.Appl$      = "00"          																						! Codigo de la aplicacion
+EndIf Else Begin																															! Apertura OK
+ IF END #94 THEN UE.LCF.FINAL		       			        													! Si es EOF
+ While (1)																																		! Carga parametros modulo lealtad
+  Read #94; Gr.Lcl.Tmp1$																											!
+  IF Gr.Lcl.Tmp1$ = "[PROGRAMA LEAL]" Then Begin															! Proyecto integracion LEAL
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Asc.Proy.Leal%     = Val(Mid$(Gr.Lcl.Tmp1$,30,2))													! Proyecto activo
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Gr.Lcl.Cadena$    = Mid$(Gr.Lcl.Tmp1$,30,4)																! Codigo cadena
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Gr.Lcl.Appl$      = Mid$(Gr.Lcl.Tmp1$,30,2)              									! Codigo de la aplicacion
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Gr.Lcl.Visita$ = Mid$(Gr.Lcl.Tmp1$,30,13)      														! Cliente visitante
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Gr.Lcl.Motor% = val(Mid$(Gr.Lcl.Tmp1$,30,3)) 														  ! Tecla motora redencion
+    Read #94; Gr.Lcl.Tmp1$																										! Lectura registro
+    Gr.Lcl.TVP$   = Mid$(Gr.Lcl.Tmp1$,30,2) 														      ! Tipo variedad pago redenciones
+    Gr.Lcl.Ctrl%      = -1																										! Control de lectura
+    GoTo UE.LCF.FINAL																													!
+  Endif																																				!
+ Wend																																					!
+ UE.LCF.FINAL:																																!
+  Close 94																																		!
+EndIf																																					  ! 
+
+ If Asc.Proy.Leal% = -1 Then                                                   \!
+     Call U.IMPRIME("MODULO LEALTAD CLTE.   ON 26/Abr/2024",2100H) Else        \! Msg Proyecto Cargado
+     Call U.IMPRIME("MODULO LEALTAD CLTE.  OFF 26/abr/2024",2100H)              ! Msg Proyecto Cargado    	

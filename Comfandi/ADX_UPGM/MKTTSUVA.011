@@ -1,0 +1,85 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variables          *
+!**************************************************
+!*
+
+Integer*1 Global UE.CAR.CLP%,	          \! Numero de proyecto
+                 ASC.MKP.OK%,           \! Status aplicacion
+                 ASC.MKP.LEC%,          \! Ctrl lectura
+                 ASC.MKP.OK2%,          \! Status aplicacion
+                 ASC.MKP.LOGO%,         \! Status Imp logos 
+                 ASC.MKP.IMP%,          \! Impresion  
+                 ASC.MKP.PSEC%,         \! Status Imp logos x seccion
+                 ASC.MKP.REC%,          \! Status aplicacion
+                 ASC.MKP.SE1%,          \! Sesion apertura 1
+                 ASC.MKP.NRPRO%,        \! Numero de promociones
+                 ASC.MKP.SE2%,          \! Sesion apertura 2
+                 UE.MSG.OPEN%,          \! Sesion apertura 2
+                 ASC.MKP.OPEN%,         \! Ctrl apertura archivo
+                 ASC.MKP.ANTRX%,        \! Anula trx
+                 ASC.MKP.TGCP%,         \! Numero maximo target cupons
+                 Ue.mktp.Line%,         \! Proyecto Activo
+                 Gr.Mkp.DstSec%,        \! Ctrl dscto x sec
+                 ASC.MKP.I%,            \!
+                 UE.IN.MSG%,            \!
+                 ASC.MKP.STAT%           ! Codigo status del cliente
+
+Integer*2 Global ASC.MKP.SEC%,          \! Numero de secciones en promocion
+                 ASC.MKP.CAT%            ! Numero de Categorias en promocion
+
+Integer*4 Global ASC.MKP.CPM%,          \! Control Compra minima 
+                 ASC.MKP.DSCT%,         \! Valor descuento otorgado
+                 ASC.MKP.TDSC%,         \! Valor descuento otorgado				 
+                 ASC.MKP.TQTY%,         \! Qty facturada           				 
+                 ASC.MKP.ANTPRICE%,     \! Precio anterior          			
+                 ASC.MKP.VLRC%           ! Valor descuento otorgado
+
+String    Global ASC.MKP.TGC$(1),       \! Opciones de target coupons
+                 ASC.MKP.TMP1$,         \! Temporal
+                 ASC.MKP.CUPON$,        \! Cupon promocion
+                 ASC.MKP.CADENA$,       \! Lista de store levels
+                 UE.MCD.LOG$(2),        \! Lista de store levels
+         				 UE.MCD.SEC$(2),        \! Lista de secciones promocionales
+				         UE.MCD.CAT$(2),        \! Lista de Categorias promocionales
+                 ASC.MKP.TMP2$           ! Temporal
+
+!--- Definicion Variables Impresion Logos Publicitarios
+
+String Global  UE.MCD.COD$,    \ Codigo del mensaje
+               UE.MCD.LOGO$,   \ Numero de logo
+               UE.MCD.CPN$,    \ Ctrl promociones a clientes
+               UE.MCD.PRM$,    \ Parametrizacion de mensajes
+               UE.MCD.MSG$(1), \ Mensajes operador y cliente
+               UE.MCD.MST$(1), \ Mensajes tiquete
+  	           ASC.MKP.MCM$     ! Mensaje de compra minima
+
+Integer*1 Global ASC.MKP.TS7%, \! Control de UE 7
+                 ASC.MKP.NOPRESENCIA%
+                  
+
+String Global  ASC.MKP.IMG$(1), \ Vector de logos publicitarios
+               ASC.MKP.CCM$,    \ Control compra minima clientes
+               ASC.MKP.LISTA$,  \ Lista de promociones           
+               ASC.MKP.LISTA2$, \ lista de promociones          
+               ASC.MKP.LSTPRO$, \ Lista de promociones a un cliente
+               ASC.MKP.DESCRIPTOR$, \ Descriptor de beneficio
+               UE.MCD.ART$(2)   ! Matriz control de no presencia
+
+Integer*4 Global ASC.MKP.ART%,  \!
+                 ASC.MKP.DSCTO%, \!
+                 ASC.MKP.TOTDSCT%, \!
+                 ASC.MKP.DscOtorgado%, \!
+                 Asc.Tmp.Apun%,  \! Apuntador de string
+                 ASC.MKP.COMPRA%
+
+String    Global Gr.Mkp.Rifa$(2), Gr.Mkp.Liga$, Gr.Mkp.PagoRel$,Gr.Mkp.Cprm$, Gr.Msg.Itm$, \
+                 Gr.Mkp.DctoPago$, Gr.Mkp.Promo$
+Integer*4 Global Gr.Mkp.CntRif%, Gr.Mkp.Vlr%, Gr.Mkp.Bol%, Gr.Mkp.DctoPago%, Gr.Mkp.VlrCmpBol%
+Integer*1 Global Gr.Mkp.CtlPago% , Gr.Mkp.Tprm%, Gr.Mkp.SesTmp%
+String    Global Gr.Mkp.ItmSec$, Gr.Mkp.SecPrc$, Gr.Mkp.SecQty$, Gr.Mkp.Pr$, Gr.Mkp.Sgn$, Gr.Mkp.VtaDp$(1)
+Integer*4 Global Gr.Mkp.Ntdpt%
+Integer*1 Global Gr.Mkp.TirClte%		! Impresion datos tirilla Cliente

@@ -1,0 +1,351 @@
+!------------------------------------------------------------------------------
+!                   Definicion de Variables de IVAS y Descuentos 
+!------------------------------------------------------------------------------
+ INTEGER*1 GLOBAL  FIS.1RF                             ! N. Ses Display
+ INTEGER*1 GLOBAL  FIS.DIS%                            ! N. Ses Display
+ INTEGER*1 GLOBAL  FIS.IMP%                            ! N. Ses Ipmres CR
+ INTEGER*1 GLOBAL  FIS.HTO%                            ! N. Ses Hard Totals
+ INTEGER*1 GLOBAL  FIS.RAM%                            ! N. Ses Fiscal RAM
+ INTEGER*1 GLOBAL  FIS.ROM%                            ! N. Ses Fiscal ROM
+ INTEGER*1 GLOBAL  FIS.RIF%                            ! N. Ses RIF
+ INTEGER*1 GLOBAL  FIS.DEV%                            ! N. Ses Devol Fis
+ INTEGER*1 GLOBAL  FIS.CAB%                            ! N. Ses Matriz-Cab
+ INTEGER*1 GLOBAL  FIS.CTR%                            ! N. Ses Arch Ctr Alm
+ INTEGER*1 GLOBAL  FIS.STA%                            ! N. Ses Arch Term Stat
+ INTEGER*1 GLOBAL  FIS.DUR%                            ! Pausa
+
+ INTEGER*2 GLOBAL  FIS.UET,   FIS.RUNT%                ! U/Exit Data EAMTERMS
+ INTEGER*2 GLOBAL  FIS.H07%                            ! Direccion RIF en HardT
+ INTEGER*2 GLOBAL  FIS.H08%                            ! Direccion RIF en HardT
+ INTEGER*2 GLOBAL  FIS.H09%                            ! Direccion 'Z' en HardT
+ INTEGER*2 GLOBAL  FIS.H10%                            ! Direccion 'Z' en HardT
+ INTEGER*2 GLOBAL  FIS.H11%                            ! Direccion 'Z' en HardT
+ INTEGER*2 GLOBAL  FIS.H12%                            ! Direccion 'Z' en HardT
+ INTEGER*2 GLOBAL  FIS.H13%                            ! Direccion 'X' en HardT
+ INTEGER*2 GLOBAL  FIS.H14%                            ! Direccion 'X' en HardT
+ INTEGER*2 GLOBAL  FIS.H15%                            ! Direccion 'X' en HardT
+ INTEGER*2 GLOBAL  FIS.H16%                            ! Direccion 'X' en HardT
+
+ STRING    GLOBAL  FIS.A1$,   FIS.N1$                  ! Define Reg Inicializac
+ STRING    GLOBAL  FIS.A2$,   FIS.N2$                  ! Archivo Control Almacen
+ STRING    GLOBAL  FIS.A3$,   FIS.N3$                  ! Archivo FISCAL.RAM
+ STRING    GLOBAL  FIS.A4$,   FIS.N4$                  ! Archivo FISCAL.ROM
+ STRING    GLOBAL  FIS.A5$,   FIS.N5$                  ! Archivo FISCAL.RIF
+ STRING    GLOBAL  FIS.A6$,   FIS.0$                   ! Archivo FISCAL.DEV
+ STRING    GLOBAL  FIS.A7$,   FIS.AVI$,  FIS.KIT$      ! Archivo Matriz Logo
+ STRING    GLOBAL  FIS.A8$,   FIS.TST$                 ! Archivo Term Stat
+ STRING    GLOBAL  PARM2$,    LEIV$,     FIS.HOYES$    !
+ INTEGER*4 GLOBAL  RET,       FIS.LIG%                 !
+ INTEGER*2 GLOBAL  FUNC,      PARM1                    !
+ INTEGER*1 GLOBAL  FIS.ITEM,  FIS.NIT,   FIS.FOR%      ! Flag para procesar item
+ INTEGER*2 GLOBAL  FIS.CNT%,  FIS.TIC%,  FIS.GRU%      ! Flag para procesar item
+ STRING    GLOBAL  FIS.IV1$,  FIS.IV2$,  FIS.IV3$,    \!
+                   FIS.IV4$,  FIS.IV5$,  FIS.IV6$      !
+ STRING    GLOBAL  FIS.PLU$,  FIS.FHO$,  FIS.ANO$      ! Flag para procesar item
+ STRING    GLOBAL  FIS.ARG$,  FIS.AL,    FIS.DI        ! Variabl elongar Msgs 
+ STRING    GLOBAL  FIS.RFZ$,  FIS.RIZ$,  FIS.IDE$      ! Flag para procesar item
+ STRING    GLOBAL  FIS.NUT$,  FIS.MPA$,  FIS.TRLOG$    ! Flag para procesar item
+ STRING    GLOBAL  FIS.DEPA$, FIS.OFF$,  FIS.MEN$      ! Flag para procesar item
+ STRING    GLOBAL  FIS.PRF$,  FISPR1$,   FISPR2$       ! Flag para procesar item
+ STRING    GLOBAL  FIS.F07$,  FIS.F08$,  FIS.F09$      !
+ STRING    GLOBAL  FIS.F10$,  FIS.F11$,  FIS.F12$      !
+ STRING    GLOBAL  FIS.F13$,  FIS.F14$,  FIS.F15$      !
+ STRING    GLOBAL  FIS.F16$,  FIS.LDS$,  FIS.NUAL$     !
+ STRING    GLOBAL  FIS.LE$,   FIS.AL$,   FIS.RAL$      ! Flag para procesar item
+ STRING    GLOBAL  IOPDATA$,  KK$,   TX$,             \! Lectura Teclado y Status
+           BQ$,    CQ$, DQ$, EQ$, FQ$, GQ$, HQ$, IQ$, \!
+           JQ$,    KQ$                                 ! teclado con 10 Datos
+ STRING    GLOBAL  M$,   FIS.AUX$, FIS.RAN$            ! Flag para procesar item
+ STRING    GLOBAL  AUX$, FIS.A$,   FIS.RET$, FIS.HOR$  ! Flag para procesar item
+ STRING    GLOBAL  KEY$, FIS.TIR$, FIS.TER$, FIS.FE$   ! Flag para procesar item
+ REAL      GLOBAL  CIENP  
+ INTEGER*1 GLOBAL  FIS.COUP, FIS.BOR%                  ! Flag para procesar Cupon
+ INTEGER*1 GLOBAL  FIS.AA%, FIS.MM%, FIS.DD%           !
+ INTEGER*1 GLOBAL  FT%,    FIS.ERR%,    FIS.ENT%       ! Flag para procesar Cupon
+ INTEGER*4 GLOBAL  FIS.SIGNO                           ! Flag para procesar Cupon
+ INTEGER*4 GLOBAL  FIS.VENTADS(1)                      ! Ventas descontab por IVA
+ INTEGER*4 GLOBAL  FIS.DESC(1)                         ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  FIS.IVADESC(1)                      ! IVA Descuento por Tarifa
+ INTEGER*4 GLOBAL  FIS.DES                             ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  FIS.TOT                             ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  FIS.IMP                             ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  FIS.IIV                             ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  FIS.BAS                             ! Descuentos por cada IVA
+ INTEGER*4 GLOBAL  UE.BASEDSC(1),  UE.IVADSC(1)        ! Descuentos por cada IVA
+ INTEGER*2 GLOBAL  FIS.FLAG                            ! Descuentos por cada IVA
+ INTEGER*2 GLOBAL  FIS.INDICAT1                        ! Descuentos por cada IVA
+
+ INTEGER*1 GLOBAL  FIS.STYPE                           ! Tipo de String
+ INTEGER*4 GLOBAL  FIS.DESCTO                          ! Vr Descuento 
+ INTEGER*4 GLOBAL  FIS.TTLDESCTO                       ! Total Descuento SA
+ INTEGER*4 GLOBAL  FIS.MAYORDSC                        ! Item con el Mayor DESCTO
+ INTEGER*4 GLOBAL  FIS.DESCREG(1)                      ! Arreglo Desctos/IVA de SA
+ INTEGER*4 GLOBAL  FIS.IVADSCREG(1)                    ! Arreglo de IVAS de SA
+ INTEGER*4 GLOBAL  FIS.IVAMAYORDSC                     ! Tarifa Item Mayor Descto
+ INTEGER*4 GLOBAL  FIS.DIF                             ! Dif entre Dsc/SA vs Calc
+ STRING    GLOBAL  FIS.TRTYPE$                         ! Tipo de Transac (TR, DV)
+
+ INTEGER*4 GLOBAL   FIS.IVA%(1)                        ! Tarifas de IVA
+ INTEGER*4 GLOBAL   FIS.NTRA                           ! Consecutivo Trans
+ INTEGER*4 GLOBAL   FIS.VA%                            ! Valor para Compaginar
+ STRING    GLOBAL   FIS.VR$                            ! Valor Editado Ln=11
+ STRING    GLOBAL   FIS.EQ$(1)                         ! Descriptores de IVA
+!------------------------------------------------------------------------------
+!                 Definicion de Variables Modulo Fiscal
+!------------------------------------------------------------------------------
+ INTEGER*1 GLOBAL   FIS.LA(1),    CA%,     FIS.LOG99%  ! Definicion ARRAYS
+ INTEGER*4 GLOBAL   FIS.TARIFA                         ! Tarifas de IVA
+ INTEGER*1 GLOBAL   FIS.FIV%,     FIS.I%,  FIS.18      ! Tarifas de IVA, Rango
+ INTEGER*1 GLOBAL   FIS.LU(1),    FIS.CA,  FIS.POR%    ! Logo DIAN y
+ INTEGER*1 GLOBAL   FIS.FLATI,    FIS.ITIPO            ! Flag y Tipo Item
+ INTEGER*2 GLOBAL   FIS.TPV%(1)                        ! Arreglo Terminales
+ INTEGER*2 GLOBAL   FIS.DIR%,     FIS.D%,  FIS.CAN%    ! Variabl Func SUBSTR
+ INTEGER*2 GLOBAL   FIS.VOREF%                         ! 
+ INTEGER*2 GLOBAL   FIS.TIS,      FIS.DEL, FIS.PO      ! Tipo y Delim String
+ INTEGER*4 GLOBAL   FIS.II,       FIS.IN,  FIS.JJ      ! Posic Inic Matriz LOGO
+ INTEGER*2 GLOBAL   FIS.ICOI,     FIS.ICOF             ! Rango de PLU's Ipocon
+ INTEGER*2 GLOBAL   FIS.MA%
+ STRING    GLOBAL   FIS.ICORNG$,  FIS.N$               ! Desplaza Rango Ipocon
+ STRING    GLOBAL   FIS.MAT$,     FIS.GRU$             !
+ INTEGER*2 GLOBAL   FIS.DEP%                           !
+
+ INTEGER*2 GLOBAL   FIS.M%,       FIS.END%             ! Variable para SL.STR$
+ STRING    GLOBAL   FISFEQ$,      FISFZE$,  FISUSR$    ! Autorizac,Usuario
+ INTEGER*4 GLOBAL   FISCON%,      FISNEQ%,  FISNZE%    !
+ INTEGER*4 GLOBAL   FIS.RE,       FIS.REC%,           \!
+                    FIS.IVADEF%,  FIS.VRU%,           \!
+                    TCO%,         HX%,      II%,      \!
+                    TCD%,         SX%,      JJ%,      \!
+                    FISCOT%,      SUM%,               \!
+                    FIS.IMP.TOT(1),                   \!
+                    FIS.TOTV(1)                        ! Fecha X y Z Contad.
+
+ REAL   GLOBAL      R1,           R2                   !
+ STRING GLOBAL      FIE$,         FIS.RY$,    ERRFX$   !
+ STRING GLOBAL      FIS.X$,       FIS.D$               !
+ STRING GLOBAL      FIS.ADN$(1),  FIS.DES$(1)          !
+ STRING GLOBAL      FIS.EQUI$,    FIS.IM$              ! Equivalencias, IVAS
+ STRING GLOBAL      DATO1$,       DATO2$,      FLEC$, \!
+                    FIM$,         LE$(1)               !
+ STRING GLOBAL      PF1$, PF2$,   FIS.ERCO$            !   Pago Food-St/Oper
+ INTEGER*1 GLOBAL   FIS.SOLODV%                        ! Flag para devoluciones
+
+
+!------------------------------------------------------------------------------
+!                        Variables de Registro No 1  
+!------------------------------------------------------------------------------
+ 
+ INTEGER*4 GLOBAL  EFE%                                !   Vr Efectivo/Gaveta
+ INTEGER*4 GLOBAL  CHE%                                !   Vr Cheques/Gaveta
+ INTEGER*4 GLOBAL  FOO%                                !   Vr Food St/Gaveta
+ INTEGER*4 GLOBAL  MI1%                                !   Vr Misc 1/Gaveta
+ INTEGER*4 GLOBAL  MI2%                                !   Vr Misc 2/Gaveta
+ INTEGER*4 GLOBAL  MI3%                                !   Vr Misc 3/Gaveta
+ INTEGER*4 GLOBAL  CUF%                                !   Cupones Fab/Gaveta
+ INTEGER*4 GLOBAL  CUA%                                !   Cupones Almac/Gaveta
+ INTEGER*4 GLOBAL  BRP%                                !   Bruto + Terminal
+ INTEGER*4 GLOBAL  BRN%                                !   Bruto - Terminal
+ INTEGER*4 GLOBAL  MIS%                                !   Vr Tr/Miscel
+ INTEGER*4 GLOBAL  BAS%                                !   Vr Bases/Terminal
+ INTEGER*4 GLOBAL  REC%                                !   Vr Recogidas/Terminal
+ INTEGER*2 GLOBAL  NBT%                                !   No. de Bases/Terminal
+ INTEGER*2 GLOBAL  NRT%                                !   No. Recog/Terminal
+ INTEGER*2 GLOBAL  CTR%                                !   Cant Transac Vta
+ INTEGER*2 GLOBAL  UF1%                                !   User Data Field
+
+!------------------------------------------------------------------------------
+!                        Variables de Registro No 2
+!------------------------------------------------------------------------------
+ 
+ INTEGER*2 GLOBAL  TER%                                !   No. Term/trans Run
+ INTEGER*2 GLOBAL  NTR%                                !   No. Transac
+ INTEGER*1 GLOBAL  TTR%                                !   Tipo Transac
+ INTEGER*2 GLOBAL  NST%                                !   #Strings/#Tran Standl
+ STRING GLOBAL     PSW$                                !   Clave (4Bytes)
+ INTEGER*4 GLOBAL  BPS%                                !   Bruto + Standl
+ INTEGER*4 GLOBAL  BNS%                                !   Bruto - Standl
+ INTEGER*4 GLOBAL  TRD%                                !   Tiempo en Red
+ INTEGER*4 GLOBAL  TVT%                                !   Tiempo en Vta
+ INTEGER*4 GLOBAL  TAS%                                !   Tiempo Asegurado
+ INTEGER*4 GLOBAL  TIN%                                !   Tiempo Inactivo
+ INTEGER*4 GLOBAL  IN1%                                !   Indicativo 1
+ INTEGER*2 GLOBAL  ETR%                                !   Estatus Terminal
+ STRING GLOBAL     NOP$                                !   No. de Oper(5Bytes)
+ STRING GLOBAL     TRA$                                !   No. Trans Act(2Bytes)
+ STRING GLOBAL     UTR$                                !   Ultima Tran/WR(2Bytes)
+ STRING GLOBAL     TRP$                                !   Tipo/Tran/Progr(1Byte)
+ INTEGER*4 GLOBAL  PEO%                                !   Pago Efectivo/Oper
+
+!------------------------------------------------------------------------------
+!                        Variables de Registro No 3
+!------------------------------------------------------------------------------
+ 
+ INTEGER*4 GLOBAL  PCH%                                !   Pago       s/Oper
+ INTEGER*4 GLOBAL  PFO%                                !   Pago Food-St/Oper
+ INTEGER*4 GLOBAL  PM1%                                !   Pago Mis1/oper
+ INTEGER*4 GLOBAL  PM2%                                !   Pago Mis2/Oper
+ INTEGER*4 GLOBAL  PM3%                                !   Pago Mis3/Oper
+ INTEGER*4 GLOBAL  CFO%                                !   Cupones Fabr/Oper
+ INTEGER*4 GLOBAL  CAO%                                !   Cupones Almac/Oper
+ INTEGER*4 GLOBAL  VBO%                                !   Vr Bases/Oper
+ INTEGER*4 GLOBAL  VRO%                                !   Vr Recogidas/Oper
+ INTEGER*2 GLOBAL  NBO%                                !   No. Bases/Oper
+ INTEGER*2 GLOBAL  NRO%                                !   No. Recogidas/Oper
+ STRING GLOBAL     HTU$                                !   Hard Totals Usuario
+ STRING GLOBAL     FHC$                                !   Fech/Hora YYMMDDhhmm
+ STRING GLOBAL     RES$                                !   Reservado(5Bytes)
+!-----------------------------------------------------------------------------
+!           Variables de Registro No 7-8 RIF Fiscal Hard Totals
+!------------------------------------------------------------------------------
+ STRING GLOBAL    FISNITRT$                            ! No Terminal ¢ 999999
+ STRING GLOBAL    FISNOMRT$                            ! Nombre, Razon Social
+ STRING GLOBAL    FISCALRT$                            ! Calidad Fiscal
+ STRING GLOBAL    FISPRORT$                            ! Proveedor
+ STRING GLOBAL    FISSOLRT$                            ! Solic Atomat Dian
+ STRING GLOBAL    FISFNVRT$                            ! Solic Atomat Dian
+ STRING GLOBAL    FISFAURT$                            ! Fecha Ult Autrz Num
+ STRING GLOBAL    FISDIRRT$                            ! Direccion Fiscal
+ STRING GLOBAL    FISLICRT$                            ! Licencia SAF
+ STRING GLOBAL    FISNIVRT$                            ! No. Inicial Vigente
+ STRING GLOBAL    FISNFVRT$                            ! No. Fial Vigente
+ STRING GLOBAL    FISFRIRT$                            ! Fecah Inicial Rif
+!-----------------------------------------------------------------------------
+!           Variables de Registro No 9-12  de Hard Totals
+!                                  y
+!           Variables de Registro No 13-16 de Hard Totals
+!------------------------------------------------------------------------------
+ STRING GLOBAL    FISKEYRT$                            ! No Terminal ¢ 999999
+ STRING GLOBAL    FISFECRT$                            ! Fec Fiscal DDMMAAAAHHmm
+ INTEGER*4 GLOBAL FISNTIRT                             ! No Inicial Rango
+ INTEGER*4 GLOBAL FISNTFRT                             ! No Final   Rango
+ INTEGER*4 GLOBAL FISCONRT                             ! No Comprobantes Z
+ INTEGER*4 GLOBAL FISEXERT                             ! Ventas Exentas TPV
+ INTEGER*4 GLOBAL FISEXCRT                             ! Ventas Ecluidas TPV
+ INTEGER*4 GLOBAL FISGRTRT                             ! Tot Vtas Grav sin IVA
+ INTEGER*4 GLOBAL FISIV1RT                             ! Vr IVA Tarifa 1 TPV
+ INTEGER*4 GLOBAL FISIV2RT                             ! Vr IVA Tarifa 2 TPV
+ INTEGER*4 GLOBAL FISIV3RT                             ! Vr IVA Tarifa 3 TPV
+ INTEGER*4 GLOBAL FISIV4RT                             ! Vr IVA Tarifa 4 TPV
+ INTEGER*4 GLOBAL FISIV5RT                             ! Vr IVA Tarifa 5 TPV
+ INTEGER*4 GLOBAL FISIV6RT                             ! Vr IVA Tarifa 6 TPV
+ INTEGER*4 GLOBAL FISVTORT                             ! Gran Total Vta Diaria
+ INTEGER*4 GLOBAL FISDESRT                             ! Descuentos en TPV
+ INTEGER*4 GLOBAL FISEFERT                             ! Pagos Efectivo TPV
+ INTEGER*4 GLOBAL FISOPGRT                             ! Otros Medios de Pago
+ INTEGER*4 GLOBAL FISEXEDV                             ! Devoluciones Exentas
+ INTEGER*4 GLOBAL FISEXCDV                             ! Devoluciones Excluid
+ INTEGER*4 GLOBAL FISGRTDV                             ! Gran Tot Devol sin IVA
+ INTEGER*4 GLOBAL FISIV1DV                             ! Devoluc IVA Tarifa 1
+ INTEGER*4 GLOBAL FISIV2DV                             ! Devoluc IVA Tarifa 2
+ INTEGER*4 GLOBAL FISIV3DV                             ! Devoluc IVA Tarifa 3
+ INTEGER*4 GLOBAL FISIV4DV                             ! Devoluc IVA Tarifa 4
+ INTEGER*4 GLOBAL FISIV5DV                             ! Devoluc IVA Tarifa 5
+ INTEGER*4 GLOBAL FISIV6DV                             ! Devoluc IVA Tarifa 6
+ INTEGER*4 GLOBAL FISVTODV                             ! Gran Total de Devoluc
+ INTEGER*4 GLOBAL FISDESDV                             ! Devoluc de Descuentos
+ INTEGER*4 GLOBAL FISEFEDV                             ! Devoluc en Efectivo 
+ INTEGER*4 GLOBAL FISOPGDV                             ! Devoluc Otros Pagos 
+ INTEGER*4 GLOBAL FISTRART                             ! No. de Transaccion
+ INTEGER*4 GLOBAL FISTRADV                             ! No. de Transaccion
+!------------------------------------------------------------------------------
+!           Variables del Registro de Jornada Fiscal (Term/Acum)
+!------------------------------------------------------------------------------
+ STRING GLOBAL    FISKEY$, FIS.KEY$                    ! No Terminal ¢ 999999
+ STRING GLOBAL    FISFEC$                              ! Fec Fiscal DDMMAAAAHHmm
+ STRING GLOBAL    FISNTI$                              ! No Inicial Rango
+ STRING GLOBAL    FISNTF$                              ! No Final Rango
+ STRING GLOBAL    FISACT$, ACT$, LEC$                         ! Flag para procesar item
+ STRING GLOBAL    FISNIV$, NIV$, \                           !
+                  FISNFV$, NFV$, \                           !
+                  FISFNV$, FNV$, \                          !
+                  FISUNV$, UNV$, \                           !
+                  FISNIN$, NIN$, \                           !
+                  FISNFN$, NFN$, \                           !
+                  FISFNN$, FNN$, \                           !
+                  FISAUV$, AUV$, \                                  !
+                  FISAUN$, AUN$                                  !
+ INTEGER*4 GLOBAL FISEXE                               ! Ventas Exentas TPV
+ INTEGER*4 GLOBAL FISEXC                               ! Ventas Ecluidas TPV
+ INTEGER*4 GLOBAL FISGRT                               ! Tot Vtas Grav sin IVA
+ INTEGER*4 GLOBAL FISIV1                               ! Vr IVA Tarifa 1 TPV
+ INTEGER*4 GLOBAL FISIV2                               ! Vr IVA Tarifa 2 TPV
+ INTEGER*4 GLOBAL FISIV3                               ! Vr IVA Tarifa 3 TPV
+ INTEGER*4 GLOBAL FISIV4                               ! Vr IVA Tarifa 4 TPV
+ INTEGER*4 GLOBAL FISIV5                               ! Vr IVA Tarifa 5 TPV
+ INTEGER*4 GLOBAL FISIV6                               ! Vr IVA Tarifa 6 TPV
+ INTEGER*4 GLOBAL FISVTO                               ! Gran Total Vta Diaria
+ INTEGER*4 GLOBAL FISDES                               ! Descuentos en TPV
+ INTEGER*4 GLOBAL FISEFE                               ! Pagos Efectivo TPV
+ INTEGER*4 GLOBAL FISCHE                               ! Pagos Cheque TPV
+ INTEGER*4 GLOBAL FISFOO                               ! Pagos Food Stamps TPV
+ INTEGER*4 GLOBAL FISMS1                               ! Pagos Misc 1 TPV
+ INTEGER*4 GLOBAL FISMS2                               ! Pagos Misc 2 TPV
+ INTEGER*4 GLOBAL FISMS3                               ! Pagos Misc 3 TPV
+ INTEGER*4 GLOBAL FISCFB                               ! Pagos Cupones Fab
+ INTEGER*4 GLOBAL FISCUA                               ! Pagos Cup Almacen
+ INTEGER*4 GLOBAL FISVMS                               ! Tot Misc en la Vta
+ INTEGER*4 GLOBAL FISPMS                               ! Tot Misc en el Pago
+!-----------------------------------------------------------------------------
+!           Variables de Trabajo Regs: No 9-12  de Hard Totals
+!                                  y
+!           Variables de Trabajo Regs: No 13-16 de Hard Totals
+!------------------------------------------------------------------------------
+ STRING GLOBAL    FISKEY769$                           ! No Terminal ¢ 999999
+ STRING GLOBAL    FISFEC770$                           ! Fec Fiscal DDMMAAAAHHmm
+ INTEGER*4 GLOBAL FISNTI777                            ! No Inicial Rango
+ INTEGER*4 GLOBAL FISNTF783                            ! No Final Rango
+ INTEGER*4 GLOBAL FISCON784                            ! No Final Rango
+ INTEGER*4 GLOBAL FISEXE789                            ! Ventas Exentas TPV
+ INTEGER*4 GLOBAL FISEXC799                            ! Ventas Ecluidas TPV
+ INTEGER*4 GLOBAL FISGRT809                            ! Tot Vtas Grav sin IVA
+ INTEGER*4 GLOBAL FISIV1819                            ! Vr IVA Tarifa 1 TPV
+ INTEGER*4 GLOBAL FISIV2833                            ! Vr IVA Tarifa 2 TPV
+ INTEGER*4 GLOBAL FISIV3843                            ! Vr IVA Tarifa 3 TPV
+ INTEGER*4 GLOBAL FISIV4853                            ! Vr IVA Tarifa 4 TPV
+ INTEGER*4 GLOBAL FISIV5863                            ! Vr IVA Tarifa 5 TPV
+ INTEGER*4 GLOBAL FISIV6873                            ! Vr IVA Tarifa 6 TPV
+ INTEGER*4 GLOBAL FISVTO883                            ! Gran Total Vta Diaria
+ INTEGER*4 GLOBAL FISDES897                            ! Descuentos en TPV
+ INTEGER*4 GLOBAL FISEFE907                            ! Pagos Efectivo TPV
+ INTEGER*4 GLOBAL FISOPG917                            ! Otros Medios de Pago
+ INTEGER*4 GLOBAL FISEXE927                            ! Devoluciones Exentas
+ INTEGER*4 GLOBAL FISEXC937                            ! Devoluciones Excluid
+ INTEGER*4 GLOBAL FISGRT947                            ! Gran Tot Devol sin IVA
+ INTEGER*4 GLOBAL FISIV1961                            ! Devoluc IVA Tarifa 1
+ INTEGER*4 GLOBAL FISIV2965                            ! Devoluc IVA Tarifa 2
+ INTEGER*4 GLOBAL FISIV3969                            ! Devoluc IVA Tarifa 3
+ INTEGER*4 GLOBAL FISIV4973                            ! Devoluc IVA Tarifa 4
+ INTEGER*4 GLOBAL FISIV5977                            ! Devoluc IVA Tarifa 5
+ INTEGER*4 GLOBAL FISIV6981                            ! Devoluc IVA Tarifa 6
+ INTEGER*4 GLOBAL FISVTO985                            ! Gran Total de Devoluc
+ INTEGER*4 GLOBAL FISDES995                            ! Devoluc de Descuentos
+ INTEGER*4 GLOBAL FISEFE999                            ! Devoluc en Efectivo 
+ INTEGER*4 GLOBAL FISOPG1009                           ! Devoluc Otros Pagos 
+ INTEGER*4 GLOBAL FISTRA1019                           ! No de Transaccion Actual
+!------------------------------------------------------------------------------
+!                    Variables Fiscales del Archivo FISINREC
+!------------------------------------------------------------------------------
+ STRING    GLOBAL FISNIT$,                            \!
+                  FISCAL$,                            \! 
+                  FISADM$,                            \!
+                  FISNOM$,                            \!
+                  FISDIR$,                            \! Llave,Nit,CF,Nom,Dir
+                  FISPRO$,                            \!
+                  FISSOL$,                            \!
+                  FISLIC$,                            \!
+                  FISFRI$,                            \!
+                  FISFUM$,                            \! Prov,Solic,Licen,RIF
+                  FISNCA$,                            \!    
+                  FISIV1$,                            \!
+                  FISIV2$,                            \!
+                  FISIV3$,                            \!
+                  FISIV4$,                            \!
+                  FISIV5$,                            \!
+                  FISIV6$                              !
+ INTEGER*4 GLOBAL FISTCO%,                            \!
+                  FISTCD%                              !
+ STRING    GLOBAL FISFUC$,                            \!
+                  FISRES$,                            \!
+                  FISNAU$,                            \!
+                  FISPWD$                              ! Ult/Camb,Rsrv,Cod/Pw
+!------------------------------------------------------------------------------

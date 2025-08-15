@@ -1,0 +1,41 @@
+\/*
+\/* Scrolling receipt functions
+\/*
+
+SUB scDisplaySubTtls(total1, total2, total3, total4) EXTERNAL
+  INTEGER*4 total1, total2, total3, total4
+END SUB
+
+SUB scInitialization(sessionNumber, receiptSize) EXTERNAL
+  INTEGER*2 sessionNumber
+  INTEGER*2 receiptSize
+END SUB
+
+SUB scDisplayStatus(offline, cdlimit, training, \
+                    operatorName$, dateStr$, timeStr$) EXTERNAL
+  INTEGER*1 offline,cdlimit,training
+  STRING    operatorName$, dateStr$, timeStr$
+END SUB
+
+SUB scAddMessage(receiptText$) EXTERNAL
+  STRING  receiptText$
+END SUB
+
+SUB scStartTransaction(receiptSize) EXTERNAL
+  INTEGER*2 receiptSize
+END SUB
+
+SUB scDisplayAdvert(indx, itemName$) EXTERNAL
+  INTEGER*2 indx
+  STRING    itemName$
+END SUB
+
+SUB scSetCustomer2x20(message1$, message2$) EXTERNAL
+  STRING message1$, message2$
+END SUB
+
+SUB scScrollBy(delta) EXTERNAL
+  INTEGER*2 delta
+END SUB
+
+

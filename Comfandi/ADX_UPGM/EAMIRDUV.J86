@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+
+!*****************************************************************************!
+!* Sample User Exit Code                                                     *!
+!*****************************************************************************!
+STRING GLOBAL    ITEM.PG3$(1)
+STRING GLOBAL    IR.USER.PRIC$
+STRING GLOBAL    IR.USER.QUAN$
+STRING GLOBAL    IR.USER.PM$

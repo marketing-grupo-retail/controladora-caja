@@ -1,0 +1,183 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYCS01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Funcion   para CS Pago Electro.  *
+!**************************************************
+
+ON ERROR GOTO EPAY.ERR3
+
+  For Asc.Tmp.L% = 1 To SL.HD.NUMSTRIN + 1                                       ! Recorro la trx
+   If CS.TYPE(Asc.Tmp.L%) = 00 Then BEGIN 												               ! STRING Cabecera trx
+      Asc.Ind.Pago% = 0
+      DIM XL.TARJETAS$(50,3)
+      Asc.Tmp.I% = 0
+   ENDIF 
+   If CS.TYPE(Asc.Tmp.L%) = 99 Then Begin 												               ! STRING DE USUARIO
+     CALL CSVFEC02(Asc.Tmp.L%)																		               ! Tomo el string 
+     XL.TRAMA$    = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(1)+1,CS.FLD.LEN(1)))       ! Extraigo 1er campo
+     
+     If XL.TRAMA$ = "01082005" Then Begin                  		                   ! PAGO ELECTRONICO
+      Asc.Ind.Pago% = -1   
+      XL.TRAMA$   = (MID$(CS.INPUT$,CS.FLD.POS(2)+1,CS.FLD.LEN(2)))              ! Extraigo Trama      
+      XL.TARJETA$ = Right$(XL.TRAMA$,18) 
+      XL.VALOR$   = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(3)+1,CS.FLD.LEN(3)))       ! Valor del PES
+      Asc.Ind.Tmp% = 0
+      FOR XL.I% = 1 TO Asc.Tmp.I%
+       IF XL.TARJETA$ = XL.TARJETAS$(XL.I%,1) THEN \
+          Asc.Ind.Tmp% = XL.I%
+      NEXT XL.I% 
+      IF Asc.Ind.Tmp% NE 0 THEN BEGIN 
+         Asc.Tmp.I%  = Asc.Tmp.I% + 1
+         XL.TARJETAS$(Asc.Tmp.I%,0) = XL.TRAMA$
+         XL.TARJETAS$(Asc.Tmp.I%,1) = XL.TARJETA$
+         XL.TARJETAS$(Asc.Tmp.I%,2) = "1"
+      ENDIF ELSE BEGIN 
+         XL.TARJETAS$(Asc.Tmp.I%,2) = STR$(VAL(XL.TARJETAS$(Asc.Tmp.I%,2)) + 1)
+      ENDIF 
+    EndIf
+    
+     If XL.TRAMA$ = "02082005" Then Begin                  		                   ! REVERSO PAGO ELECTRONICO
+      Asc.Ind.Pago% = -1        
+      XL.TRAMA$   = (MID$(CS.INPUT$,CS.FLD.POS(2)+1,CS.FLD.LEN(2)))              ! Extraigo Trama      
+      XL.TARJETA$ = Right$(XL.TRAMA$,18) 
+      XL.VALOR$   = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(3)+1,CS.FLD.LEN(3)))       ! Valor del PES
+      Asc.Ind.Tmp% = 0
+      FOR XL.I% = 1 TO Asc.Tmp.I%
+       IF XL.TARJETA$ = XL.TARJETAS$(XL.I%,1) THEN \
+          Asc.Ind.Tmp% = XL.I%
+      NEXT XL.I% 
+      IF Asc.Ind.Tmp% NE 0 THEN BEGIN 
+         Asc.Tmp.I%  = Asc.Tmp.I% + 1
+         XL.TARJETAS$(Asc.Tmp.I%,0) = XL.TRAMA$
+         XL.TARJETAS$(Asc.Tmp.I%,1) = XL.TARJETA$
+         XL.TARJETAS$(Asc.Tmp.I%,2) = "-1"
+      ENDIF ELSE BEGIN 
+         XL.TARJETAS$(Asc.Tmp.I%,2) = STR$(VAL(XL.TARJETAS$(Asc.Tmp.I%,2)) - 1)
+      ENDIF       
+    EndIf
+   Endif       
+ Next Asc.Tmp.L%
+ 
+ ASC.CS.ERROR% = -1                           ! Ctrl de errores
+ Open "C:\ADXALMA.DAT" AS 91 NODEL 
+ IF ASC.CS.ERROR% = -1 THEN BEGIN             ! Apertura OK
+    Read #91; XL.TMP$
+    XL.ALMACEN$ = LEFT$(XL.TMP$,4)
+    CLOSE 91
+ ENDIF ELSE XL.ALMACEN$ = "9999"
+
+ 
+ Asc.Tmp.V% = 0															  ! Variable de control
+ XL.TMP$ = "C:\ADX_UDT1\RASTRO\MV"+RIGHT$("000"+ASC.ERR.TER$,3)+RIGHT$("000"+ASC.ERR.TRX$,3)+".DAT"
+ ASC.CS.ERROR% = -1                           ! Ctrl de errores
+ Open XL.TMP$ AS 91                           ! abre rastreo de java
+ IF ASC.CS.ERROR% = -1 THEN BEGIN             ! Si java reporta PES 
+    DIM XL.JAVA$(50,2)
+    IF END #91 THEN CARGA.FINAL							  ! Hasta fin de archivo
+    While(1)                                  ! Recorre el plano
+      Read #91; XL.TMP$                       ! lectura registro
+      XL.TRAMA$ = RIGHT$(XL.TMP$,2)           ! Toma tipo de trama
+      IF XL.TRAMA$ = "1001" THEN BEGIN        ! Si trama de compra
+         XL.TARJETA$ = Right$(XL.TMP$,18)     ! Extrae nro credencial
+         Asc.Ind.Tmp% = 0
+         For XL.I% = 1 To Asc.Tmp.V%          ! Arma vector para comparacion
+           IF XL.TARJETA$ = XL.JAVA$(XL.I%,1) THEN \
+              Asc.Ind.Tmp% = XL.I%
+         Next XL.I%
+         IF Asc.Ind.Tmp% NE 0 THEN BEGIN      ! Si no encontrado
+            Asc.Tmp.V%  = Asc.Tmp.V% + 1
+            XL.JAVA$(Asc.Tmp.V%,0) = XL.TMP$
+            XL.JAVA$(Asc.Tmp.V%,1) = XL.TARJETA$
+            XL.JAVA$(Asc.Tmp.V%,2) = "1"
+         ENDIF ELSE BEGIN 									! Si lo encontro
+            XL.JAVA$(Asc.Tmp.V%,2) = STR$(VAL(XL.JAVA$(Asc.Tmp.V%,2)) + 1)
+         ENDIF 
+      ENDIF 																!
+      
+      IF XL.TRAMA$ = "1002" THEN BEGIN      ! Si trama de Cambio por dinero
+         XL.TARJETA$ = Right$(XL.TMP$,18)   ! Extrae nro credencial
+         Asc.Ind.Tmp% = 0
+         For XL.I% = 1 To Asc.Tmp.I%        ! Arma vector
+           IF XL.TARJETA$ = XL.JAVA$(XL.I%,1) THEN \
+              Asc.Ind.Tmp% = XL.I%
+         Next XL.I%
+         IF Asc.Ind.Tmp% NE 0 THEN BEGIN    ! Si no encontrado
+            Asc.Tmp.V%  = Asc.Tmp.V% + 1
+            XL.JAVA$(Asc.Tmp.V%,0) = XL.TMP$
+            XL.JAVA$(Asc.Tmp.V%,1) = XL.TARJETA$
+            XL.JAVA$(Asc.Tmp.V%,2) = "1"
+         ENDIF ELSE BEGIN                   ! Si encontrado
+            XL.JAVA$(Asc.Tmp.V%,2) = STR$(VAL(XL.JAVA$(Asc.Tmp.V%,2)) + 1)
+         ENDIF 
+      ENDIF 																!
+
+      IF XL.TRAMA$ = "1003" THEN BEGIN      ! Si trama de reverso de trx
+         XL.TARJETA$ = Right$(XL.TMP$,18)   ! Extrae nro credencial
+         Asc.Ind.Tmp% = 0
+         For XL.I% = 1 To Asc.Tmp.V%
+           IF XL.TARJETA$ = XL.JAVA$(XL.I%,1) THEN \
+              Asc.Ind.Tmp% = XL.I%
+         Next XL.I%
+         IF Asc.Ind.Tmp% NE 0 THEN BEGIN 
+            Asc.Tmp.V%  = Asc.Tmp.V% + 1
+            XL.JAVA$(Asc.Tmp.V%,0) = XL.TMP$
+            XL.JAVA$(Asc.Tmp.V%,1) = XL.TARJETA$
+            XL.JAVA$(Asc.Tmp.V%,2) = "-1"
+         ENDIF ELSE BEGIN 
+            XL.JAVA$(Asc.Tmp.V%,2) = STR$(VAL(XL.JAVA$(Asc.Tmp.V%,2)) - 1)
+         ENDIF 
+      ENDIF 																																			!
+
+    Wend 																																					!
+    CARGA.FINAL:																																	!
+      CLOSE 91      																															!
+      IF Asc.Ind.Pago% = -1 THEN BEGIN      																			! Si operaciones registradas en el POS 
+         If Asc.Tmp.V% NE Asc.Tmp.I% Then Begin                                   ! Si qty operaciones no iguales
+            ASC.CS.ERROR% = -1                           													! Ctrl de errores
+            Open "C:\JAVA\BIN\SEC.DAT" AS 91 Append
+            IF ASC.CS.ERROR% = -1 THEN BEGIN                                      ! Correcta Apertura
+              For XL.I% = 1 TO Asc.Tmp.V%      																  	! Recorre operaciones en java
+               XL.TMP$ = XL.JAVA$(Asc.Tmp.V%,0)                                   ! Trama de msg
+               XL.TMP$ = Armar.Trama.Msg("10", "04", XL.TMP$,"00","0001","123456",mid$(XL.TMP$,1,4), \ !Arma mensaje
+               mid$(XL.TMP$,5,6),mid$(XL.TMP$,11,10), mid$(XL.TMP$,21,6), mid$(XL.TMP$,27,12))
+   		         XL.Len% = Len(XL.TMP$)						  					  								    ! Toma longitud del registro
+ 				       XL.Lec$ = "C"+Str$(XL.len%)+" C2"								  							  ! Arma estructura de grabacion
+ 				       Write form XL.Lec$; #91 ; XL.TMP$, Chr$(13) + Chr$(10)             ! Graba en el Store and Forward
+              Next XL.I%																														!
+            ENDIF 																																		!
+         EndIf																																		!
+      ENDIF ELSE BEGIN                      																			! Si operaciones en java y no en POs
+         ASC.CS.ERROR% = -1                           														! Ctrl de errores
+         Open "C:\JAVA\BIN\SEC.DAT" AS 91 Append
+         IF ASC.CS.ERROR% = -1 THEN BEGIN                                         ! Correcta Apertura
+            For XL.I% = 1 TO Asc.Tmp.V%      																			! Recorre operaciones en java
+               XL.TMP$ = XL.JAVA$(XL.I%,0)                                        ! Trama de msg
+               XL.TMP$ = Armar.Trama.Msg("10", "04", XL.TMP$,"00","0001","123456",mid$(XL.TMP$,1,4), \ !Arma mensaje
+               mid$(XL.TMP$,5,6),mid$(XL.TMP$,11,10), mid$(XL.TMP$,21,6), mid$(XL.TMP$,27,12))
+   		         XL.Len% = Len(XL.TMP$)						  					  								    ! Toma longitud del registro
+ 				       XL.Lec$ = "C"+Str$(XL.len%)+" C2"								  							  ! Arma estructura de grabacion
+ 				       Write form XL.Lec$; #91 ; XL.TMP$, Chr$(13) + Chr$(10)             ! Graba en el Store and Forward
+            Next XL.I%																														!
+         ENDIF 																																		!
+         
+      ENDIF																																				!
+ ENDIF ELSE BEGIN 																																! Si no pes Java pero si POS
+      IF Asc.Ind.Pago% = -1 THEN BEGIN      																			! Si operaciones registradas en el POS 
+            !--- Colocar el correo electronico
+      ENDIF 
+ ENDIF 
+ 
+ EXIT FUNCTION 
+ 
+ EPAY.ERR3:
+     Asc.Cs.Error% = 0 
+     CALL CSMLEW01             ! Process other errors
+     IF CS.RESUME THEN \
+       BEGIN
+         RESUME                  ! resume after error
+       ENDIF ELSE BEGIN
+         RESUME RETRY            ! retry failing instn.
+     ENDIF
+     

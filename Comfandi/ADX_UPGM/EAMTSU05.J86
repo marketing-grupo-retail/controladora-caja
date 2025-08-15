@@ -1,0 +1,49 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC05 PUBLIC
+! TSUPEC05 - AFTER NS
+CALL QXL.TSUPEC05            ! EJ V2
+
+!CALL EPAYMS02.011            ! PAGO ELECTRONICO
+!CALL COMFTS02.011            ! MODULO COMFANDI
+!CALL PEFMTS02.011            ! PAGO ELECTRONICO - FONEDE
+!CALL LCFTSU02.011            ! Modulo Lealtad Clientes Online
+
+CALL BONODEVPAGO(02)               ! Bono nota devolucion 
+CALL RECASRV(02,0)	  	           ! PAGO SERVICIOS PUBLICOS
+CALL RTITSU02.011                  ! Consulta ivas
+CALL EPSEANTS02                    ! ENTREGA MEDICA.
+CALL LIBLINE(2,1)                  ! Para Reset de Memoria Transacciones de CR
+CALL LIBLINE(2,2)                  ! Para Imprimir NIT Empresa en Summary Journal
+CALL FISMTS02.011                  ! NUMERACION FISCAL
+CALL COMFTS02.011                  ! COMFANDI - CISA
+CALL COLMTS02.011                  ! RECAUDO COLEGIOS
+CALL EDUMTS02.011                  ! RECAUDO SIEMPRE EDUCANDO
+!CALL EPAYMS02.011                  ! PAGO ELECTRONICO
+!CALL EPAYMS05.011                  ! PAGO ELECTRONICO
+
+CALL DOMIMS02.011                  ! MODULO DOMICILIOS
+CALL PTOMTS02.011                  ! PUNTOS ADICIONALES
+CALL PEFMTS02.011                  ! PAGO ELECTRONICO - FONEDE
+CALL EPSMTS02.011                  ! Modulo Convenios
+
+CALL CONTROL.CLIENTE(2)  	         ! CONTROL CLIENTES
+CALL REMISION(02)                  ! REMISION MERCANCIA
+CALL IVATSU02.011                  ! IMPRESION DE IVAS
+CALL PROPINA(02)                   ! Modulo propinas
+CALL LCFTSU02.011                  ! Modulo Lealtad Clientes Online
+CALL GRMOVRMS(02)                  ! Remisiones de mercancia
+!CALL PRMFPAGO(02)                  ! PROMOCION FORMAS DE PAGO
+
+CALL ESCALONADO(02)                ! DESCUENTOS ESCALONADOS
+CALL IVATSU02.011                  ! MODULO DE IVAS
+CALL SUBSIDIO.MPAC(02)             ! MPAC
+CALL SUBSIDIO.SAPCORE(05)          ! SAP-CORE
+CALL SUBSIDIO.FOSFEC(02)           ! FOSFEC SAPCORE
+CALL BONOS.KUPI(02)                ! BONO ELECTRONICO KUPI
+
+%INCLUDE UEECR105.U86              ! MODULO TEF REDEBAN
+
+END FUNCTION
+

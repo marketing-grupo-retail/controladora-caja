@@ -1,0 +1,111 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU27.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!!
+!!  IR29242 - Added code to handle error logging for 4680-4690
+!!            Supermarket Application, as well as, 4680
+!!            Supermarket.
+!!            CMJ MGVA 1May95
+!!
+!!  IR38101 - Added code to avoid terminal hang if AC, AE, DE, IH, or SU
+!!            error is encountered prior to EM initialization in user
+!!            exit 7.
+!!            RSH MGVA 17Jun98
+!!
+!!  IR41792 - Added code to avoid printing if the current error being processed
+!!            is an async printer error.
+!!            JAM MGVA 06Dec99
+!!
+!*END-OF-SPECIFICATIONS**************************************************
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!AIR41792 If the current error is from the async on error and the device
+!         is the printer, don't attempt to print anything.
+IF NOT((ERR27.ROUTINE% = 1) AND (DVICE = 144)) THEN BEGIN
+!EIR41792
+!!*******************************************************************
+!!** PRINT ADDITIONAL DIAGNOSTIC DATA FOR SELECTED FAILURES        **
+!!*******************************************************************
+
+IF TS.TS11WERR$ = "AC" OR \
+   TS.TS11WERR$ = "AE" OR \
+   TS.TS11WERR$ = "DE" OR \
+   TS.TS11WERR$ = "IH" OR \
+   TS.TS11WERR$ = "SS" OR \
+   TS.TS11WERR$ = "SU" THEN BEGIN
+  G$ = "" : B$ = "XX"
+!AIR29242 Check for 4680 or 4680-4690 Supermarket Application
+  IF (VERSION = 200) THEN BEGIN
+    I% = 25
+  ENDIF ELSE BEGIN
+    I% = 10
+  ENDIF
+! FOR N% = 0 TO 10
+  FOR N% = 0 TO I%
+!EIR29242
+    CALL PUTN2(B$,0,TS.TRACE(N%))
+    IF TS.TRACE(N%) = 0 THEN B$ = "XX"
+    G$ = G$ + B$ + " "
+  NEXT N%
+
+!AIR38101
+!!*******************************************************************
+!!** READ IN ERROR DESCRIPTORS IF NOT READ YET                     **
+!!*******************************************************************
+  IF (EMSS.ZERO$ = "") THEN BEGIN           ! Not yet through exit 7
+    DIM EMSS.ERROR$(3)                      !
+    CALL READ.DESC(958)                     ! "LAST LINE IN EXIT CODE ="
+    EMSS.ERROR$(1) = TS.TEMP1$
+    CALL READ.DESC(956)                     ! " ERROR = "
+    EMSS.ERROR$(2) = TS.TEMP1$
+    CALL READ.DESC(957)                     ! " TRACE INFO = "
+    EMSS.ERROR$(3) = TS.TEMP1$
+  ENDIF
+!EIR38101
+
+  IF ERRL NE 0 THEN BEGIN
+    H$ =   EMSS.ERROR$(1) + STR$(ERRL)      ! "LAST LINE IN EXIT CODE ="
+  ENDIF
+  CALL SAVE.FB.PRN                          ! SAVE PRINT VARIABLES
+
+  TS.SAVPRT$ = EMSS.ERROR$(2) + TS.TS11WERR$ ! " ERROR = "
+  TS.SAVPRT.OPT = 2100H                     ! WRITE TO JOURNAL
+  TS.LINETYPE = 29                          ! PRINT TS.SAVEPRT$ AS IS
+  CALL TSPREC01                             ! CALL PRINT ROUTINE
+! TS.SAVPRT$ = TS.TS11WERR$ + " error , TRACE INFO = "
+  TS.SAVPRT$ = EMSS.ERROR$(3)               ! " TRACE INFO = "
+  TS.SAVPRT.OPT = 2100H                     ! WRITE TO JOURNAL
+  TS.LINETYPE = 29                          ! PRINT TS.SAVEPRT$ AS IS
+  CALL TSPREC01                             ! CALL PRINT ROUTINE
+!AIR29242 If length is greater than print line break up
+  WHILE (LEN(G$) > 38)
+    TS.SAVPRT$    = LEFT$(G$,36)            ! Get first 36 characters
+    TS.SAVPRT.OPT = 2100H
+    TS.LINETYPE   = 29
+    CALL TSPREC01
+    G$ = RIGHT$(G$, (LEN(G$) - 36))         ! Remove chars. printed
+  WEND
+!EIR29242
+  TS.SAVPRT$ = G$
+  TS.SAVPRT.OPT = 2100H                     ! WRITE TO JOURNAL
+  TS.LINETYPE = 29                          ! PRINT TS.SAVEPRT$ AS IS
+  CALL TSPREC01                             ! CALL PRINT ROUTINE
+  IF ERRL NE 0 THEN BEGIN
+    TS.SAVPRT$ = H$
+    TS.SAVPRT.OPT = 2400H                   ! WRITE TO JOURNAL
+    TS.LINETYPE = 29                        ! PRINT TS.SAVEPRT$ AS IS
+    CALL TSPREC01                           ! CALL PRINT ROUTINE
+  ENDIF
+
+  CALL RESTORE.FB.PRN                       ! RESTORE PRINT VARIABLES
+  TS.TRANS.LOG.WRITE = 0                    ! NOT WRITE AT EOT
+ENDIF
+
+ENDIF                      ! IR41792
+ENDIF                      ! EM PROCESSING IS ACTIVE

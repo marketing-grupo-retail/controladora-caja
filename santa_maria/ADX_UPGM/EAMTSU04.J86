@@ -1,0 +1,14 @@
+!USER EXIT CALLED BEFORE PERFORMING ANY NON-SALES TRANSACTION
+! Antes de iniciar una transaccion de no venta
+FUNCTION TSUPEC04 PUBLIC
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC04
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT04
+
+   !Claves Autorizacion
+   CALL GRCLVAUT(02)
+
+END FUNCTION

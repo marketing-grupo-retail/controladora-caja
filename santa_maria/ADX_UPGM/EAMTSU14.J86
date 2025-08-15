@@ -1,0 +1,110 @@
+!USER EXIT CALLED AFTER THE READ OF THE KEYBOARD/SCANNER/WAND
+! Despues de leer el teclado / Escanner
+FUNCTION TSUPEC14 PUBLIC
+
+
+!FOR I% = 1 TO 10
+!    write # 34 ; "DATA "+STR$(I%)+" :"+TS.IO.DATA$(I%) + chr$(10)
+!    write # 34 ; "KEYS "+STR$(I%)+" :"+STR$(TS.IO.KEYS(I%)) + chr$(10)
+!NEXT I%
+
+   !graba las variables del IO en el archivo TRACE de la caja
+   !call grabaVariablesIO( "UE14 " )
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC14
+
+   ! PROCEDIMIENTO DEFINIDO POR EL USUARIO (XX CONEX)
+   !if TS.IO.KEYS(5)=61 and TS.IO.DATA$(5)="XX" and TS.IO.STATE=10 and \
+   !   mid$(TS.IODATA$, 12, 1) = "1" AND SO.USEROPTS(10) then begin
+   !   ! get status cash drawer
+   !   call tshiec02
+   !   if not TS.DEV.FLAG then begin
+   !
+   !   procedimiento a ejecutar
+   !
+   !   call ignoraTeclas
+   !endif
+
+   !pruebas
+   !if (TS.IO.KEYS(5) = 61) and (TS.IO.DATA$(5) = "26") and (TS.IO.STATE = 10) then begin
+   !   call calculaBasesImpuesto
+   !   call ignoraTeclas
+   !endif
+
+   !Directorio de discos X: Y: o C:
+   if (TS.IO.KEYS(5) = 61) and (TS.IO.DATA$(5) = "28") and (TS.IO.STATE = 10) then begin
+      call directorioRAM( "X:" )
+      call directorioRAM( "C:" )
+      call directorioRAM( "F:" )
+      call directorioRAM( "C:\ADX_IDT1\" )
+      call muestraBorrar("DIR X: C:\ADX_IDT1", "EN ARCHIVO TRACE")
+      call ignoraTeclas
+   endif
+
+   ! Comandos programados
+   if TS.IO.KEYS(5)=61 and TS.IO.DATA$(5)="27" and TS.IO.STATE=10 then begin
+      call traceNUO( "27 CONEX" )
+      if instrucciones then call traceNUO( "Error en instrucciones" )
+      call ignoraTeclas
+   endif
+
+   ! Simulacion de Venta
+   CALL SIMULAR.VENTA.POS(14)
+
+   ! Inventario
+   if MSMTINVE14 then exit function
+
+   !Remates
+   Call GRREMATES(14)
+
+   !Deliverys
+   CALL GRDOMICILIOS(14)
+
+   ! Devolucion de IVA
+   call NUOTDIVA14
+
+   ! Recargas Electronicas
+   call MSMTREC14
+
+   ! Retenciones
+   call MSMTRETE14
+
+   ! Nota de Credito
+   call MSMTNCRE14
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT14
+
+   ! Facturas MSM
+   call MSMTFACT14
+
+   ! Clientes y Fidelidad
+   call MSMTCLIE14
+
+   ! Retenciones
+   !call MSMTRETE14
+
+   ! Cliente no bancario
+   call NUOTCNB14
+
+   ! PROMOCIONES NUO
+   call NUOTPROM14
+
+   ! Credito Institucional
+   call MSMTINST14
+
+   ! Tarjetas Bancarias
+   call MSMTTARB14
+
+   ! Cheques
+   call MSMTCHEQ14
+
+   !Pago Deuna
+   CALL PAGO.DEUNA(14)
+
+   !Pago Rappi
+   CALL PAGO.RAPPI(14)
+
+
+END FUNCTION

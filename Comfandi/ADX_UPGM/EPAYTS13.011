@@ -1,0 +1,20 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS13.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+IF (TS.IO.MOTORKEY - 90) =  VAL(LEFT$(Asc.Pay.tpvr$,1)) AND  \!
+    VAL(TS.IO.DATA$(3))  =  VAL(RIGHT$(Asc.Pay.tpvr$,1)) THEN BEGIN	 ! Variedad definida
+    If Asc.Pay.ManLin% = -1 Then Begin	 ! Autorizacion en linea
+     TS.VF.MAXTRANS  = VAL(Asc.Pay.Saldo$)
+     TS.VF.LIMTRANS  = VAL(Asc.Pay.Saldo$)
+     TS.VF.AMTTRANS  = 0
+     TS.VF.NUMTRANS  = 0 
+    Endif Else Begin               ! Autorizacion Local
+     Asc.Pay.Saldo$ = Str$(TS.VF.MAXTRANS)
+    Endif
+ENDIF     

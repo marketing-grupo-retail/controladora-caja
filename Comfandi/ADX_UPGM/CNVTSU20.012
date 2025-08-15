@@ -1,0 +1,66 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU20.012                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+If Match("**  **",TS.PRTBUF$,1) > 0 Then Begin 
+   TS.PRTBUF$ = ""
+   If PRT4610.ENABLE = 0 Then \
+      TS.FORMCR$ = "C38 A0" Else \
+      TS.FORMCR$ = "C52 A0" 
+   Exit Sub 
+EndIf 
+
+If (TS.LINETYPE = 29) AND (TS.PROCEDURE = -1) AND (TS.LINEDATA = 0) Then Begin                  ! Si linea de articulo
+ If ( UE.EPS.CAPITACION$ = "1" AND MATCH("MR",TS.PRTBUF$,1) > 0 ) Then Begin                    !
+    TS.PRTBUF$ = ""
+    If PRT4610.ENABLE = 0 Then \
+       TS.FORMCR$ = "C38 A0" Else \
+       TS.FORMCR$ = "C52 A0" 
+ EndIf                   
+EndIf 
+
+If (TS.LINETYPE <= 1) AND (TS.PROCEDURE < 1) Then Begin                       !Si linea de articulo
+ If UE.EPS.CAPITACION$ = "1" Then Begin                                      !
+    TS.PRTBUF$ = ""
+    If PRT4610.ENABLE = 0 Then \
+       TS.FORMCR$ = "C38 A0" Else \
+       TS.FORMCR$ = "C52 A0" 
+ EndIf
+EndIf
+
+If (TS.LINETYPE <= 1) Then Begin 
+ If (UE.EPS.CAPITACION$ = "1" AND MATCH("x",TS.PRTBUF$,1) > 0 ) Then Begin
+    TS.PRTBUF$ = ""
+    If PRT4610.ENABLE = 0 Then \
+       TS.FORMCR$ = "C38 A0" Else \
+       TS.FORMCR$ = "C52 A0" 
+ 
+ EndIf 
+EndIf 
+
+If UE.EPS.CAPITACION$ = "1" Then  Begin
+ If Ts.Linetype = 7 and Ts.Linedata = 1 Then Begin
+   A$ = Right$(Ts.PrtBuf$,12)
+   !Ts.PrtBuf$ = string$(38,"*")
+   Ts.PrtBuf$ = ""
+    If PRT4610.ENABLE = 0 Then \
+       TS.FORMCR$ = "C38 A0" Else \
+       TS.FORMCR$ = "C52 A0" 
+   
+ EndIf
+EndIf  
+ 
+ If UE.EPS.CAPITACION$ = "1" Then  Begin                                     ! Elimina string de impresion
+  If Ts.Linetype = 2 and Ts.Linedata = 60 Then Begin                         ! de la forma de pago
+     !TS.PrtBuf$ = ""                                                         !
+  EndIf 
+  If Ts.Linetype = 4 and Ts.Linedata = 1 Then Begin                          ! Elimina string de cambio
+     !TS.PrtBuf$ = ""                                                         !
+  EndIf 
+EndIf 
+
+

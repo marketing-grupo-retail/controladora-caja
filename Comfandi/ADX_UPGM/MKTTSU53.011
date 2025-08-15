@@ -1,0 +1,59 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Proceso de recuperacion          *
+!**************************************************
+!*
+
+If USER.FBACT.READ Then Begin         ! Si CLF capturado
+ If ASC.MKP.REC% = 0 Then Begin
+    ASC.MKP.LISTA$  = ""
+    ASC.MKP.LISTA2$ = ""
+    ASC.MKP.OK2% = -1
+    ASC.MKP.REC% = -1
+    ASC.MKP.TOTDSCT% = 0 
+ EndIf
+EndIf
+
+If Unpack$(LEFT$(SL.STR.ENTRY$,1)) = "99" Then Begin   	                    ! Si DATA/ENTRY
+    Asc.Tmp.Apun% = 3							                                          ! Apuntador String
+    TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	                ! Codigo del Proyecto
+    If TS.TEMP1$ = "68" Then Begin                                          ! Descto PromoOnline
+    	 TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Codigo de la promocion
+    	 ASC.MKP.NRPRO% = Val(TS.TEMP1$)                                      ! Numero de la promocion  
+    	 TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Item Promocionado
+    	 TS.TEMP4$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Cantidad promocionada
+    	 TS.TEMP5$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Precio de venta
+    	 TS.TEMP2$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Descto Otorgado
+    	 TS.TEMP3$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Signo Operacion 00.Venta 01.Anul
+    	 TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Forma de Pago
+    	 TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Valor Dscto total/forma pago
+    	 TS.TEMP1$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%) 	              ! Tipo de promocion
+       If TS.TEMP1$ = "01" Then BEGIN                                       ! Promo - Presencia Item
+       	 If TS.TEMP3$ = "00" Then                                          \! Es venta
+       	    ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + Val(TS.TEMP2$) Else      \!
+       	    ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% - Val(TS.TEMP2$)            !
+       	    ASC.MKP.DSCT%    = Val(TS.TEMP2$) / Val(TS.TEMP4$)              ! Valor unitario dscto
+       	    ASC.MKP.TQTY%    = Val(TS.TEMP4$)                               ! Cantidad dscto
+       ENDIF
+       If TS.TEMP1$ = "02" Then BEGIN                                       ! Promo - Dscto x seccion
+       	 If TS.TEMP3$ = "00" Then                                          \! Es venta
+       	    ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + Val(TS.TEMP2$) Else      \!
+       	    ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% - Val(TS.TEMP2$)            !
+       	    ASC.MKP.DSCT%    = 0                                            ! Valor unitario dscto
+       	    ASC.MKP.TQTY%    = Val(TS.TEMP4$)                               ! Cantidad dscto
+       	    Asc.MKP.DscOtorgado% = Val(TS.TEMP5$) - Val(TS.TEMP2$)          ! Dscto Aplicado
+       	    If TS.TEMP3$ = "01" Then                                       \! Es Anulacion
+       	    	 Asc.MKP.DscOtorgado% = 0 - Asc.MKP.DscOtorgado%              ! Valor Dscto
+      	    ASC.MKP.DSCTO% = (1 - (Val(TS.TEMP2$) / Val(TS.TEMP5$)) ) * 1000! Ptg Aplicado
+       ENDIF
+       If TS.TEMP1$ = "03" Then BEGIN                                       ! Promo - Forma Pago
+       ENDIF
+       If TS.TEMP1$ = "01" Then BEGIN                                       ! Promo - Total Trx
+       ENDIF
+
+    EndIf 
+EndIf 
+

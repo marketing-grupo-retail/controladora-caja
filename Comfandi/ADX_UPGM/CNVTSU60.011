@@ -1,0 +1,13 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : Cnvtsu60.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 Ibm                   * 
+!Observaciones : Modulo De Eps / Convenios        *
+!**************************************************
+
+If TS.LINETYPE = 1 Then                                        \! Es un articulo
+ If (UE.EPSS.ON And UE.EPS.CAPITACION$ = "0") Then Begin				! Es un convenio y no capitacion
+   Call Genera.Codigo.CUM	
+ EndIf 
+

@@ -1,0 +1,15 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit after writing to the display.         */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+FUNCTION TSUPEC63 PUBLIC
+
+   ! Insert User Exit Code here
+
+END FUNCTION
+

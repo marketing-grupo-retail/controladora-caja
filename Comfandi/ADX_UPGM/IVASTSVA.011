@@ -1,0 +1,69 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : IVASTSVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Carga Parametros Modulo IVAS     *
+!**************************************************
+INTEGER*1 GLOBAL \
+     UE.TARIFA%, \
+     UE.SGN%,    \
+     UE.TRX.ANUL%, \
+     UE.ANCHETAS%
+
+INTEGER*2 GLOBAL \
+     UE.LINEA, UE.PORCENTAJE, UE.NIT, UE.DEPTO  	
+
+INTEGER*4 GLOBAL \
+    UE.TABLAIVA(1), \
+    UE.TOTALS(1),   \
+    UE.INDI1%,      \
+    Asc.Total.Base%, \
+    Asc.Total.Impto%
+
+
+STRING GLOBAL        \
+    FORMATO$,        \
+    UE.BIN$,         \
+    Asc.Ind.Iva$,    \
+    Asc.Oper.Name$,  \
+    Asc.Fis.Linea1$, \
+    Asc.Fis.Linea2$, \
+    Asc.Fis.Linea3$, \
+    Asc.Fis.Linea4$, \
+    Asc.Fis.Linea5$, \
+    Asc.Fis.Linea6$, \                
+    Asc.Fis.Linea7$, \                
+    Asc.Fis.Linea8$, \                
+    Asc.Fis.Linea9$, \                        
+    Asc.Fis.LineaA$, \                        
+    Asc.Fis.LineaB$, \                        
+    Asc.Fis.LineaC$, \
+    Asc.Fis.LineaD$, \
+    Asc.Fis.LineaE$, \
+    Asc.Fis.LineaF$, \
+    Asc.Fis.LineaG$, \
+    Asc.Fis.LineaH$, \
+    Asc.Fis.LineaI$, \
+    Ue.Iva.Item$,    \
+    Ue.Iva.Name$,    \
+    PRTLINE
+
+Integer*1 Global     \
+    ASC.DSC.TARIFA%, \
+    Asc.Est.Tarifa%, \ Tarifa empresas estatales
+    Asc.Vtas.IndAnul%, \
+    ASC.DSC.INDICAT1
+
+String Global        \
+    ASC.DSC.DEPARTME$    
+
+String    Global     \
+    Asc.Fis.Estatal$    ! Control empresas estatales    
+
+Integer*1 Global     \
+    Asc.Vtas.ImpxMayor%
+
+Integer*4 Global     \
+    Asc.Vtas.TotxMayor%

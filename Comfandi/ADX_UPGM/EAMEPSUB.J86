@@ -1,0 +1,236 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMEPSUB.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME:  COMPLEX PASSWORD ENHANCEMENT EXTERNAL  */
+\/*                         ROUTINE DEFINITIONS                    */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      STATUS: RELEASE 2 LEVEL 0                                 */
+\/*                                                                */
+\/*      PERSON RESPONSIBLE = NOLL, ROBERT                         */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE ACTIVITY: LEVEL 0                                  */
+\/*                                                                */
+\/*   IO06528 This file was created for Complex Password support.  */
+\/*           RJN IBM 20Feb07                                      */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE DATE:                                              */
+\/*                                                                */
+\/*   IO06846 Log exception only when the OS password has been     */
+\/*           created or updated. (defect 2258)                    */
+\/*           RJN IBM 18Jun07                                      */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.ACTIVE                                       *
+!*                                                                 *
+!* FUNCTION:  DETERMINE IF ENHANCED PASSWORD FUNCTION IS           *
+!*            ACTIVE IN OS                                         *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.ACTIVE EXTERNAL
+  INTEGER*1 EP.ACTIVE
+END FUNCTION
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.INITIALIZE                                   *
+!*                                                                 *
+!* FUNCTION:  SETUP ENHANCED PASSWORD VARIABLES                    *
+!*                                                                 *
+!*******************************************************************
+SUB EP.INITIALIZE EXTERNAL
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.GET.ERROR.NUM(ERR.NUM)                       *
+!*                                                                 *
+!* FUNCTION:  RETURN ERROR MESSAGE NUMBER BASED ON ERR.NUM         *
+!*            COMPARED TO LIST OF ERRORS                           *
+!*                                                                 *
+!* PARM:      ERR.NUM - ERROR RETURNED FROM OS FUNCTION            *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.GET.ERROR.NUM(ERR.NUM) EXTERNAL
+  INTEGER*2 EP.GET.ERROR.NUM
+  INTEGER*4 ERR.NUM
+END FUNCTION
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.GET.CURRENT.USER$                            *
+!*                                                                 *
+!* FUNCTION:  GET OS CURRENT USER SIGNED ON AND RETURN TO CALLER   *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.GET.CURRENT.USER$ EXTERNAL
+  STRING EP.GET.CURRENT.USER$
+END FUNCTION
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.VALIDATE.PASSWORD(OPERID$, PASSWORD$)        *
+!*                                                                 *
+!* FUNCTION:  VALIDATE PASSWORD IS CORRECT OR RETURN EP.ERR.NUM    *
+!*            WITH ERROR MESSAGE NUMBER                            *
+!*                                                                 *
+!* PARMS:     OPERID$   - ID OF OPERATOR TO VALIDATE               *
+!*            PASSWORD$ - PASSWORD TO VALIDATE                     *
+!*******************************************************************
+SUB EP.VALIDATE.PASSWORD(OPERID$, PASSWORD$) EXTERNAL
+  STRING OPERID$, PASSWORD$
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.COMMIT.CHANGES(LOG.EXCEPT)                   *
+!*                                                                 *
+!* FUNCTION:  COMMIT CHANGES MADE DURING SESSION.                  *
+!*            RETURN EP.ERR.NUM MESSAGE IF ERROR                   *
+!*                                                                 *
+!* PARMS:    LOG.EXCEPT - FLAG TO LOG AN EXCEPTION IO06846         *
+!*                                                                 *
+!*******************************************************************
+!AIO06846 Add a calling parameter to indicate if an exception is to be logged
+!SUB EP.COMMIT.CHANGES EXTERNAL
+SUB EP.COMMIT.CHANGES(LOG.EXCEPT) EXTERNAL      !
+  INTEGER*1 LOG.EXCEPT                          !
+!EIO06846
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.CANCEL.CHANGES                               *
+!*                                                                 *
+!* FUNCTION:  CANCEL ALL CHANGES MADE DURING SESSION               *
+!*            RETURN EP.ERR.NUM MESSAGE IF ERROR                   *
+!*                                                                 *
+!*******************************************************************
+SUB EP.CANCEL.CHANGES EXTERNAL
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.SET.PASSWORD(OPERID$,SNUM,FLAGS$,NEWPW$)     *
+!*                                                                 *
+!* FUNCTION:  SET PASSWORD TO NEWPW$ FOR OPERATOR OPERID$          *
+!*                                                                 *
+!* PARMS:    OPERID$ - ID OF OPERATOR TO SET PASSWORD FOR          *
+!*           SNUM    - SESSION NUMBER OF OS SESSION                *
+!*           FLAGS$  - "0" - DO NOT SET PASSWORD EXPIRED           *
+!*                     "1" - SET PASSWORD EXPIRED                  *
+!*           NEWPW$  - NEW PASSWORD                                *
+!*                                                                 *
+!*******************************************************************
+SUB EP.SET.PASSWORD(OPERID$, SNUM, FLAGS$, NEWPW$) EXTERNAL
+  STRING OPERID$, NEWPD$, FLAGS$
+  INTEGER*4 SNUM
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.START.SESSION                                *
+!*                                                                 *
+!* FUNCTION:  START OS SESSION NUMBER FOR ENHANCED PASSWORDS       *
+!*            SAVE SESSION NUMBER FOR REFERENCE                    *
+!*            RETURN EP.ERR.NUM MESSAGE IF ERROR                   *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.START.SESSION EXTERNAL
+  INTEGER*1 EP.START.SESSION
+END FUNCTION
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.DELETE.OPER(OPERID$)                         *
+!*                                                                 *
+!* FUNCTION:  DELETE OPERATOR OPERID$ FROM OS ENHANCED PW FILE     *
+!*            IF DELETE COMPLETED SUCCESSFULLY COMMIT CHANGES      *
+!*            IF DELETE FAILED CANCEL CHANGES                      *
+!*            RETURN EP.ERR.NUM MESSAGE IF ERROR                   *
+!*                                                                 *
+!* PARMS:    OPERID$ - ID OF OPERATOR TO DELETE                    *
+!*                                                                 *
+!*******************************************************************
+SUB EP.DELETE.OPER(OPERID$) EXTERNAL
+  STRING OPERID$
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.GET.PASSWORD(PROMPT1$, PROMPT2$)             *
+!*                                                                 *
+!* FUNCTION:  PROMPT FOR PASSWORD FOR EM FUNCTIONS                 *
+!*            EXPIRED PASSWORD IS CONSIDERED VALID                 *
+!*            RETURN EP.ERR.NUM MESSAGE IF ERROR                   *
+!*                                                                 *
+!* PARMS:     PROMPT1$ - PROMPT MESSAGE FOR PASSWORD               *
+!*            PROMPT2$ - PROMPT MESSAGE FOR RE-ENTRY OF FAILED PW  *
+!*                                                                 *
+!*******************************************************************
+SUB EP.GET.PASSWORD(PROMPT1$, PROMPT2$) EXTERNAL
+  STRING PROMPT1$, PROMPT2$
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.SCREEN.ACTIVE                                *
+!*                                                                 *
+!* FUNCTION:  RE-DISPLAY OS PASSWORD SCREEN AFTER HELP DISPLAYED   *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.SCREEN.ACTIVE EXTERNAL
+   INTEGER*1 EP.SCREEN.ACTIVE
+END FUNCTION
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.PROCESS.SCREEN                               *
+!*                                                                 *
+!* FUNCTION:  GET NEW PASSWORD, VERIFY NEW PASSWORD AND EXPIRE     *
+!*            INDICATOR FOR OS ENHANCED PASSWORDS                  *
+!*                                                                 *
+!*******************************************************************
+SUB EP.PROCESS.SCREEN EXTERNAL
+END SUB
+
+
+!*******************************************************************
+!*                                                                 *
+!* FUNCTION NAME:  EP.OPER.CONTROLLER.FUNC.CHECK                   *
+!*                                                                 *
+!* FUNCTION:  CHECK IF OPERATOR HAS AUTHORIZATION FOR ANY          *
+!*            CONTROLLER FUNCTIONS, IF SO FORCE ENTRY OF OS        *
+!*            ENHANCED PASSWORD TO CREATE OPERATOR                 *
+!*            VERIFY SESSION HAS NOT TIMED OUT                     *
+!*                                                                 *
+!*******************************************************************
+FUNCTION EP.OPER.CONTROLLER.FUNC.CHECK EXTERNAL
+  INTEGER*1 EP.OPER.CONTROLLER.FUNC.CHECK
+END FUNCTION

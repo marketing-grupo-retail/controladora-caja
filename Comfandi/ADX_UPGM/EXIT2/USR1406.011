@@ -1,0 +1,45 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1406.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 14  para controlar los
+! datos  digitados  por  el  cajero  en  el  momento  de venta de 
+! articulos, interceptando  y  procesando la respuesta al flag de   
+! Verificacion de Precios en Articulos de Drogueria      
+!                                                         
+! Si se digita BORRAR, el articulo se Ignora como Invalido. Si se
+! digita solo ENTER, el precio del archivo EAMITEMR se asume como
+! valido. Si se digita una cifra con ENTER, se asume este como un
+! CAMBIO  DE PRECIO TEMPORAL. El Resto de la Transaccion asume el
+! valor digitado por el Cajero.
+!
+!------------------------------------------------------------------
+
+  IF  USER.VERIFY.ITEM            THEN BEGIN         ! Item para Verificar
+     IF TS.IO.MOTORKEY     = 73   THEN BEGIN         ! Si se digita BORRAR
+        IF ((TS.TEMP1I2    = 1)   AND               \! sin Otras teclas
+           (TS.IO.DATA$(1) = "")) OR                \! y sin Datos    
+           (TS.TEMP1I2     = 0)   THEN BEGIN         ! 
+              USER.VERIFY.ITEM = 0                   ! Restaura Flag de Verif
+        ENDIF                                        ! 
+     ENDIF ELSE BEGIN                                ! Si no hay BORRAR
+       IF TS.IO.KEYS(10) <> 80 THEN BEGIN            ! Si no hay ENTER
+          USER.VERIFY.ITEM = 0                       ! Restaura Flag de Verif
+       ENDIF ELSE BEGIN                              ! Si Hubo ENTER
+          CAV% = CAVW%   :   CAVW% = 0               ! Restaura Cant Digitada
+          IF TS.ENTRY.POS = 5 THEN BEGIN             ! Preguntado Precio
+             TS.IO.DATA$(2) = USER.SAVE.ITEM$        ! Restaura Plu digitado
+             IF TS.IO.DATA$(10) = "" THEN BEGIN      ! Si no hay AUTORIZ
+                TS.ENTRY.KEY = 0                     ! Asegura no Impacto
+                TS.ENTRY.POS = 0                     ! de Tecla ENTER
+             ENDIF                                   ! Fin por AUTORIZAC
+          ENDIF                                      ! 
+       ENDIF                                         ! Fin por tecla ENTER
+     ENDIF                                           ! Fin por no BORRAR
+  ENDIF                                              ! Fin de Verif Precio
+!-----------------------------------------------------------------

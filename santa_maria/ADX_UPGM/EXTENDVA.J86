@@ -1,0 +1,23 @@
+!**********************************************************************
+!Variables para expansion del EAMITEMR                                *
+!EXTENDVA.J86                                                         *
+!Autor: Alejandro Farre                                               *
+!Empresa: NUO tecnologia                                              *
+!                                                                     *
+!History:14-10-2021 CCY CANASTA                                       *
+!                                                                     *
+!                   Se incorpora Precio afecto IVA 12% IR.PRECIVA12   *
+!                   Se incorpora Categoria IR.CATEG                   *
+!                   Se incorpora Fecha vencimiento CANASTA IR.VENC    *
+!                                                                     *
+!**********************************************************************
+
+INTEGER*4 GLOBAL   \
+   IR.PRECIVA12,   \ Precio CANASTA afecto a IVA 12%
+   IR.CANTPESO,    \ Cantidad por caja
+   IR.UNDMIN,      \ Unidad minima de compra
+   IR.NDEPTO,      \ Codigo Departamento Comercial
+   IR.SKU,         \ Codigo interno mega santamaria
+   IR.CATEG,       \ Categoria
+   IR.VENC         ! Fecha Hora vencimiento CANASTA formato AMMDDHHMM ej 110142359
+

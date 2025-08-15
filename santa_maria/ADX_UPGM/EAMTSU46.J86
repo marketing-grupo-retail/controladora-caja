@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC46(STAMPS) PUBLIC
+INTEGER*1 TSUPEC46                        ! define variable !IR89374
+INTEGER*4 STAMPS
+END FUNCTION
+

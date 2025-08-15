@@ -1,0 +1,20 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                      !
+! Read a keyed file containing WIC hot card records, sort the records  !
+! by key, and return them in sequence to the caller.                   !
+!                                                                      !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  FUNCTION LOADBINS(FILENAME$) EXTERNAL    ! Read the file and create the tree.
+     INTEGER*4 LOADBINS                    ! The records of the keyed file must
+  END FUNCTION                             ! be 22 bytes in length.
+
+  SUB GETNEXT(RETC%, RECORD$) EXTERNAL     ! Returns the next record in sorted
+     INTEGER*4 RETC%                       !  order.  Note that RECORD$ must be
+  END SUB                                  !  at least 22 bytes else the BASIC
+                                           !  heap will be corrupted.
+
+  FUNCTION FREEALL EXTERNAL                ! Free all the dynamic memory
+     INTEGER*2 FREEALL                     !  allocated by LOADBINS.
+  END FUNCTION                             !

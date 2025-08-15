@@ -1,0 +1,8 @@
+!USER EXIT CALLED AFTER "WAIT" timedout on the IOPROC
+! Despues de finalizar el tiempo de espera del IOPROC (un segundo)
+FUNCTION TSUPEC54 PUBLIC
+
+!JOURNAL ELECTRONICO
+call QXL.TSUPEC54
+
+END FUNCTION

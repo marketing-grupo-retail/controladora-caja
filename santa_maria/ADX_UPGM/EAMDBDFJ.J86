@@ -1,0 +1,31 @@
+\/* TIME STAMP BLOCK ************************************************           
+\** END OF TIME STAMP BLOCK ****************************************/           
+\REM  *****************************************************************         
+\REM  *                                                               *         
+\REM  *          EAMDBDFJ.J86 - FEATURE DECLARATIONS                  *         
+\REM  *                                                               *         
+\REM  * THE FOLLOWING DEFINES ARE THE ADDITIONAL PARAMETERS FOR       *         
+\REM  * FEAUTRE CHAINING. THEY WILL BE ADDED TO EAMUSED.J86           *         
+\REM  *****************************************************************         
+                                                                                
+  INTEGER*4 GLOBAL           \                                                  
+     FE.INDEX                ! Used to index to the next control file entry     
+                                                                                
+  INTEGER  GLOBAL            \                                                  
+     FE.COMP.MSG,            \ COMPLETION MESSAGE                               
+     FE.INSTALLED            ! FLAG FOR RE-ENTRY AFTER CHAIN                    
+                                                                                
+! FE.MODEL$ is packed 5 byte string                                             
+! FE.OA.OPERATOR$ is packed 5 byte string                                       
+  STRING  GLOBAL            \                                                   
+     FEATURE.286$,          \                                                   
+     FE.OA.OPERATOR$,       \  KEYED OPERATOR ID                                
+     FE.OA.PASSWORD$,       \  NEW OPERATOR PASSWORD                            
+     FE.MODEL$,             \  User selected model from EAMDB2AC                
+     FE.ACTION$,            \  Users original selection from screen AUR 1S010   
+     FE.OPTIONSK$,          \  KEY FOR OP AUTHORIZATION RECORD                  
+     FE.FLAGS$,             \  USED FOR RETURN CHAIN PROCESSING EAMDB2FC.B86    
+     FE.FILE$,              \  PASSING FILE NAME TO MMCFEC18 SUB CALLS          
+     FE.TITLE$,             \  USED FOR MULTI FEATURE SCREEN TITLE              
+     FE.RETURN$             !  USED FOR RETURN FROM MMCFEC18 SUB CALLS          
+                                                                                

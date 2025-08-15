@@ -1,0 +1,50 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1966                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR2001.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones para evitar la Linea de Iva de la SMA/4690 en la     **
+!   **    Tira del Cliente (CR)                                              **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   **                                                                       **
+!   ***************************************************************************
+!if TS.PRTBUF$ = TO.HEADERLINE1$ THEN BEGIN               !
+!                TS.PRTBUF$ = " "
+!                WRITE #34;CHR$(1BH)+CHR$(61H)+CHR$(1)            ! Centrado
+!                WRITE #34;CHR$(1DH)+CHR$(2FH)+CHR$(0)+CHR$(3)    !Imprime Logo 
+!endif
+
+IF TS.LINETYPE = 7 THEN BEGIN                        ! Si es linea TOTAL
+    VR$ = RIGHT$(TS.PRTBUF$,12)                      ! Toma el Valor Total
+    TS.PRTBUF$="**SUBTOTAL/TOTAL --->  $ "+VR$       ! Arma STRING de nuevo
+        USR.ITEMS$(450) = TS.PRTBUF$                 ! Guarda Subtotal
+ENDIF                                                !
+!------------------------------------------------------------------------------
+!        PRTLINE = NFF.MAT$+"  " +STR$(NFF.H16%) : CALL QXL.TSUPEC21(PRTLINE)
+IF TO.USEROPTS(4) <> 0 THEN BEGIN                    ! Si Opt Usuario=4 Iva 
+   IF TS.LINETYPE = 18 THEN UE.NIT = 1               ! Si es Header de Inicio
+   IF TS.LINETYPE = 1 OR                            \! Si es Vta Item
+      TS.LINETYPE = 5 THEN BEGIN                     ! 
+         IF UE.NIT = 1 THEN BEGIN                    ! y es Cabecera
+            AUX$ = "    FACTURA DE VENTA # "      + \! Letrero de Factura
+            RIGHT$("000"+TS.STORE$,3)             + \! con Num Almac
+            RIGHT$("000"+STR$(SL.HD.TERMINAL),3)  + \! la terminal
+            RIGHT$("0000"+STR$(SL.HD.TRANSNUM+1),3)  ! y la transaccion
+            FECHTR$ = AUX$
+            AUX$ = "   FECHA DE EXPEDICION:  "    + \! Letrero de Fecha
+            LEFT$(UNPACK$(SL.HD.DATETIME$),2)+"/" + \! compaginada
+            MID$(UNPACK$(SL.HD.DATETIME$),3,2)+"/"+ \! para mejor
+            MID$(UNPACK$(SL.HD.DATETIME$),5,2)       ! presentacion 
+            DATRA$ = AUX$ 
+            UE.NIT = 0                               ! Reset de Inicio
+         ENDIF                                       ! Fin de Cabecera
+   ENDIF                                             ! Fin de Impresion Plu
+ENDIF                                                !
+
+!----------------------------------------------------------------------------

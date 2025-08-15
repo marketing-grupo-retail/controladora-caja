@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC10 PUBLIC                                                        
+! TSUPEC10 - AFTER TE READ                                                      
+
+!CALL SUBSIDIO.SAPCORE(10)          ! SAP-CORE
+
+END FUNCTION

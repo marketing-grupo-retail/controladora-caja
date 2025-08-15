@@ -1,0 +1,50 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* EAMIRRFG.J86    GLOBAL variables declarations for the common item record  *!
+!*                 file routines (EAMIRRFC.BAS).                             *!
+!*****************************************************************************!
+
+STRING      GLOBAL  IRRF.LOCAL.FILE$  !* Item record file name               *!
+STRING      GLOBAL  IRRF.RECORD$    !* Record read from file                 *!
+STRING      GLOBAL  IRRF.FORM1$     !* Form string for read into single strg *!
+STRING      GLOBAL  IRRF.FORM2$     !* Form string for read into IR.????...  *!
+INTEGER*2   GLOBAL  IRRF.RECL       !* Item Record File keyed record length  *!
+INTEGER*2   GLOBAL  IRRF.RECLDEF    !* Default keyed record length           *!
+STRING      GLOBAL  IR.USERDATA$    !* Additional user data from file        *!
+
+!*****************************************************************************!
+!* User exit variables...                                                    *!
+!*****************************************************************************!
+INTEGER*1   GLOBAL  IRRF.EXIT(1)    !* User exit active flags                *!
+INTEGER*1   GLOBAL  IRRB.EXIT(1)    !* User exit active flags - rebuild      *!
+INTEGER*1   GLOBAL  IRUE.BYPASS     !* User exit bypass processing flag      *!
+!*****************************************************************************!
+
+!AENH01 (Feature Enhancement 01) - Added LQD quantity offset variable
+!*****************************************************************************!
+!* Limited Quantity Discount quantity discount variable...                                                    *!
+!*****************************************************************************!
+INTEGER*2   GLOBAL  IRRF.LQDOffset          ! LQD quantity offset
+!*****************************************************************************!
+!ENH01
+
+!AIR29311 - Added Alternate Tax Plans and Item Tare offset variables
+!*****************************************************************************!
+!* Offset variables...                                                       *!
+!*****************************************************************************!
+INTEGER*2   GLOBAL  IRRF.ALTTAXPLNOffset    ! Alternate Tax Plan offset
+INTEGER*2   GLOBAL  IRRF.ITEMTAREOffset     ! Item Tare offset
+!*****************************************************************************!
+!EIR29311
+
+!*****************************************************************************!
+!* Work variables...                                                         *!
+!*****************************************************************************!
+STRING      GLOBAL  IRRF.REST$      !* Remaining options record area         *!
+STRING      GLOBAL  IRRF.WORK$      !* Work area (STRING)                    *!
+INTEGER*2   GLOBAL  IRRF.WORK       !* Work area (INTEGER*2)                 *!
+!*****************************************************************************!
+
+

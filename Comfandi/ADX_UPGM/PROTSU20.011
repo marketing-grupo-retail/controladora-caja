@@ -1,0 +1,24 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : PROTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Impresion de datos para RIFA     *
+!**************************************************
+
+IF UE.PROYECTO(UE.COMF.PROMO%) THEN BEGIN										! Proyecto activo
+  IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN                       ! Si final de trx
+   IF (TS.TOTALS(0,0,0) > 0) AND UE.COMF.INDIMP% = 2 THEN  BEGIN				! Valida compra
+     CALL VENTA.TIQUETE															! Valida items vendidos
+	 CALL IMPRIMA.RECIBO.PROMO                                                  ! Imprime recibo
+	 UE.COMF.INDIMP%= 0                                                         ! Cierra indicador
+   ENDIF
+  ENDIF
+ENDIF
+
+IF (TS.LINETYPE = 6) AND (TS.LINEDATA = 2) AND                                 \! Fin de transaccion
+   (TS.PROCEDURE < 1) AND UE.COMF.INDIMP% = -1 THEN BEGIN                       ! 
+    UE.COMF.INDIMP% = 2
+ENDIF
+

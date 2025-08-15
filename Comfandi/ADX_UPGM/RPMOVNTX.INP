@@ -1,0 +1,5 @@
+RPMOVNTX.286= RPMOVNTX.OBJ ,
+              BASROUT.OBJ,
+              ADXACRCL.L86,
+              EAMCSASC.OBJ,
+              ADXADMBL.L86

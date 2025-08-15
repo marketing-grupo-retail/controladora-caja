@@ -1,0 +1,30 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC06                                                 *!
+!*                                                                           *!
+!* Description    : Called during splitting a item record.                   *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Variables      : IR.USERDATA$    This string contains the extra item      *!
+!*                                  record data (if any).                    *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC06 PUBLIC
+   string tmp$
+
+   ! Expansion del maestro de articulos mega santamaria
+   tmp$ = IR.USERDATA$               ! Datos expandidos
+   IR.PRECIVA12 = GETN4( tmp$, 0 )   ! Precio secundario
+   IR.CANTPESO = GETN4( tmp$, 4 )    ! Cantidad por caja
+   IR.UNDMIN = GETN4( tmp$, 8 )      ! Unidad minima de compra
+   IR.NDEPTO = GETN4( tmp$, 12 )     ! Codigo Departamento Comercial
+   IR.SKU = GETN4( tmp$, 16 )        ! Codigo interno mega santamaria
+   IR.CATEG     = GETN4( tmp$, 20 )  ! Categoria
+   IR.VENC      = GETN4( tmp$, 24)   ! Vencimiento CANASTA AMMDDHHMM EJ:112312359 --> 2021-12-31 23:59
+END SUB
+

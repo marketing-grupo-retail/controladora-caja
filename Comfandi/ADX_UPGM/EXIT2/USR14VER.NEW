@@ -1,0 +1,95 @@
+
+!--- PROCEDIMIENTO VERIFICACION DE PRECIOS
+!--- Grupo Retail - 2018
+
+
+   If TS.IO.KEYS(4) = 100 AND TS.IO.DATA$(2) <> "" Then Begin      ! Consulta de Precio
+      If TS.IO.DEVICE = 3 Then \                                   ! Si escanea producto
+         TS.IO.DATA$(2) = Left$(TS.IO.DATA$(2), Len(TS.IO.DATA$(2)) - 1)
+      BUSCA.PRECIO.ITM:
+      X.CODE$ = Pack$(Right$("000000000000" + TS.IO.DATA$(2), 12))
+      TS.ER.RETURN  = -1
+      %INCLUDE CNVIRRD1.J86                                     		! Lectura EAMITEMR
+
+      If TS.ER.RETURN = -1 Then Begin                              	! Si lo encontre
+         If Unpack$(AR.Indicat2$) = "05" Then Begin               	! Es un codigo de Barra
+            TS.IO.DATA$(2)= UNPACK$(AR.SALEQUAN$ + AR.SALEPRIC$)
+            GOTO BUSCA.PRECIO.ITM
+         EndIf																											! Fin codigo de barra
+         If Unpack$(AR.Indicat2$) = "03" Then Begin               	! Con precio reducido
+            XTMP1$ = Unpack$(AR.SALEPRIC$)                        	! Desempaqueta precio
+            Xtmp3$ = Left$(Xtmp1$, 5)                               ! Toma primeros 5
+            Call Format.Amount(Val(Xtmp3$))                        	! Formateo el Valor
+            XTmp1$ = Right$("        " + TS.TEMP1$, 08)             ! Ajusto Precio
+            XTMP1$ = "*VP*" + XTMP1$
+            XTMP2$ = Unpack$(AR.SALEPRIC$)                        	! Desempaqueta precio
+            Xtmp3$ = Right$(Xtmp2$, 5)                              ! Toma ultimos 5
+            Call Format.Amount(Val(Xtmp3$))                        	! Formateo el Valor
+            XTmp2$ = Right$("        " + TS.TEMP1$, 8)              ! Ajusto Precio
+         EndIf Else Begin                                          	! Precio Unitario
+            XTMP1$ = Unpack$(AR.SALEPRIC$)                        	! Desempaqueta precio
+            Call Format.Amount(Val(Xtmp1$))                        	! Formateo el Valor
+            XTmp2$ = Right$("          " + TS.TEMP1$, 10)
+            If AR.INDICAT0 AND 40H Then                            \! Si es pesable producto
+               XTMP1$ = "*VP* /Klg " ELSE                          \!
+               XTMP1$ = "   *VP*   "                                !
+         EndIf
+         Call Visores4690(1, AR.ITEMNAME$, Xtmp1$ + Xtmp2$, 0, "L")
+      EndIf \
+      Else Begin                                                   ! No encontrado
+         Call TSHIECET
+         Call Visores4690(1, "ARTICULO NO EXISTE", "EN MAESTRA PRODUCTOS", 0, "L")
+      EndIf
+      TS.IO.MOTORKEY = 0
+      Dim TS.IO.DATA$(10)
+      Dim TS.IO.KEYS(10)
+      Exit  Sub 
+   EndIf
+
+EXIT SUB 
+
+! VERIFICA% = 1                                         ! No Verificar
+
+IF TS.IO.STATE    = 10  AND                           \! Si estado MAIN y
+   TS.IO.MOTORKEY = 80  AND                           \! con MOTOR ENTER y
+   TS.IO.KEYS(2)  = 80  AND                           \! Tecla ENTER y
+   TS.IO.KEYS(4)  = 100 AND                           \! con NOSALE
+   TS.IO.DATA$(2) <> "" THEN BEGIN                     ! con Dato PLU
+      VERIAM% = 1                                      ! Indica Verific MAM
+      IF TS.IO.KEYS(6) = 72 THEN BEGIN                 ! con tecla PESO y
+         CALL TSHIEC05                                 !
+         KGCM% = TS.TEMP1I4                            ! Variable Peso
+         IF TS.TEMP1I4 = 0 THEN                       \!
+            KGCM% = VAL(TS.IO.DATA$(6))                ! Coloca string con Kgs 
+         TS.IO.DATA$(6) = STR$(KGCM%)                  ! Coloca string con Kgs 
+         ANUL% = 1                                     ! Reset de Anular
+      ENDIF                                            !
+      IF TS.IO.KEYS(6) = 0 AND                        \! No hay Motor en 6
+         TS.IO.DATA$(6) = "" THEN BEGIN                !
+            TS.IO.KEYS(6) = 75                         ! con tecla CANT y
+            TS.IO.DATA$(6) = "1"                       ! Sin Cant Coloca UNO 
+      ENDIF                                            !
+      IF TS.IO.KEYS(6) = 75 THEN BEGIN                 ! con tecla CANT y
+         KGCM% = VAL(TS.IO.DATA$(6))                   ! Coloca string con Cant
+         ANUL% = 1                                     ! Reset de Anular
+      ENDIF                                            !
+      TS.IO.KEYS(4) = 0                                ! elimina NOSALE
+ENDIF                                                  !
+!------------------------------------------------------------------------------
+
+IF TS.PROCEDURE = 7 OR                                \! Si esta en Training
+   TS.PROCEDURE < 1 THEN BEGIN                         ! Si esta en Venta 
+   IF TS.IO.KEYS(6) = 72 AND                          \! y se Digita PESO
+      TS.IO.MOTORKEY > 0 AND                          \! y el Motor esta OK
+      LEN(TS.IO.DATA$(2)) < 7 THEN BEGIN               ! con Plu Fruver
+         TS.IO.DATA$(2)=RIGHT$("000000"+              \!
+                        TS.IO.DATA$(2),6)              ! Inserta Ceros
+         TS.IO.DATA$(2)="000000" + TS.IO.DATA$(2)      ! Inserta Prefijo 777777
+         TS.IO.MOTORKEY=80                             ! Asigna Tecla ENTER
+         TS.IO.KEYS(2) =80                             ! con MOTOR Enter
+         ANUL% = 1                                     ! Reset de Anular
+         IF TS.IO.KEYS(1) = 70 THEN BEGIN              ! y se Digita VOID
+            ANUL% = -1                                 ! se torna negativo
+         ENDIF                                         ! Fin de Anular
+   ENDIF                                               ! Fin de Balanza
+ENDIF                                                  ! Fin Procedm Vta

@@ -1,0 +1,49 @@
+! USER EXIT CALLED BEFORE WRITING A LINE TO THE CUSTOMER RECEIPT
+! Antes de escribir una linea al recibo del cliente
+FUNCTION TSUPEC20 PUBLIC
+   INTEGER*1 TSUPEC20                        ! define variable !IR89474
+   !CALL SUBSTR(TS.PRTBUF$,28,"EC20",0,4)
+   integer*1 fborra                          ! borra los datos de impresion antes de salir
+
+!call traceNUO( "UE20 TS.RETV.IN.PROGRESS=" + str$(TS.RETV.IN.PROGRESS) + " TS.RECOVERY=" + str$(TS.RECOVERY) )
+!call traceNUO( "UE20 LT=" + str$(TS.LINETYPE) + " LD=" + str$(TS.LINEDATA) + \
+!   " PROC=" + str$(TS.PROCEDURE) + " [" + TS.PRTBUF$ + "]" )
+
+   !Dotacion o Retirada de fondos
+   if (TS.PROCEDURE = 3) or (TS.PROCEDURE = 4) then exit function
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT20
+
+   ! Credito Institucional
+   call MSMTINST20
+
+   ! Inventario
+   if MSMTINVE20 then exit function
+
+   ! Devolucion de IVA
+   call NUOTDIVA20
+
+   ! Tarjetas Bancarias
+   call MSMTTARB20
+
+   ! Recargas Electronicas
+   call MSMTREC20
+
+   !facturacion MSM
+   fborra = MSMTFACT20
+   if fborra then call limpiaImpresion
+
+   ! Clientes y Fidelidad
+   call MSMTCLIE20
+
+   !Remates
+   Call GRREMATES(20)
+
+   !Deliverys
+   CALL GRDOMICILIOS(20)
+
+   !Cupones tienda
+	 CALL GRCUPONES(20)
+   
+END FUNCTION

@@ -1,0 +1,123 @@
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+!  javaguic.j86
+!
+!  Java Gui implementation External Function definitions.
+!
+!  NOTE:
+!      IR53134 *moved* this file from SAVP21 to SA11.
+!
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+! Change History:
+!
+! IR43255 Module Added.
+!         RSH IBM 20Jun00
+!
+! IR52980 Modified java GUI hooks for use with VP, SureVision and AEF.                             */
+!         KHG IBM 28Jan2004
+!
+! END-OF-SPECIFICATIONS
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+
+
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!   function javaGuiInit
+!
+!   parameters:          initialize for Java Gui processing
+!   return data:         none
+!   data areas modified: enumerated values of events
+!                        java class & method variables
+!   references:          java gui initialization user exit
+!
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+FUNCTION javaGuiInit EXTERNAL
+END FUNCTION
+
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+!   function javaEvent
+!
+!   parameters:    event number (based upon enumerated list)
+!   return data:   None
+!   references:    java gui event processing user exit
+!                  cbasic -> java routines
+!
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+FUNCTION javaEvent(eventNum) EXTERNAL RECURSIVE
+  INTEGER*2 eventnum
+END FUNCTION
+
+
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+!   function javaKey
+!
+!   parameters:    key stem to test
+!   return data:   -1 indicates the passed keystem is a java defined key
+!                  -0 indicates the passed keystem is NOT a java defined key
+!
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+FUNCTION javaKey(keystem) EXTERNAL        ! Java Key
+  INTEGER*2                               \
+            javaKey,                      \ return value
+            keystem                       ! passed keystem
+END FUNCTION                              ! javaKey
+
+
+!AIR52980
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+! sub-routine javaGuiAppTrace
+!
+! parms: trace - string containing information regarding the tracing
+!                required by the application specific tracing routine
+!
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+SUB javaGuiAppTrace(trace$) EXTERNAL             ! javaGuiAppTrace
+  STRING                                         \
+          trace$                                 ! passed value to trace
+END SUB
+
+
+
+!***********************************************************************
+!
+!  SUB transmitToJVM
+!
+!  Parms:   eventNum
+!           temp$
+!           eventData$
+!           eventSource (0 = value pack gui, 1 = surevision, 2 = aef)
+!
+!  This subroutine provides the interface between SA and java
+!
+!***********************************************************************
+
+SUB transmitToJVM(eventNum, temp$, eventData$, eventSource) EXTERNAL
+
+   INTEGER*2     \
+     eventNum,   \
+     eventSource
+
+
+   STRING           \
+     eventData$,    \
+     temp$
+
+END SUB
+
+
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+! SUB handleOptionsForJava
+!     handle sending options information to the JVM
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+SUB handleOptionsForJava EXTERNAL
+
+
+END SUB
+!EIR52980
+

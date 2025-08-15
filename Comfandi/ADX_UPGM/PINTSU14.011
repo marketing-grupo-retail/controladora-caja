@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+If TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN    ! Anular Transaccion
+   Ue.Pin.AutAnul% = 0
+   CALL PIN.ANUL.TOTAL
+EndIf
+

@@ -1,0 +1,6 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC25 PUBLIC
+END FUNCTION
+

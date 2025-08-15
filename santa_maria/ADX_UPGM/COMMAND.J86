@@ -1,0 +1,19 @@
+
+!*********************************************************************
+!
+! COMMAND
+!
+! This function returns a string containing the arguments passed to a 
+! big model terminal application.   
+!
+!               DO NOT USE THIS IN THE CONTROLLER!!!
+!
+! This is defect IR52249
+!
+!*********************************************************************
+
+ FUNCTION COMMAND EXTERNAL
+  STRING COMMAND
+ END FUNCTION
+
+

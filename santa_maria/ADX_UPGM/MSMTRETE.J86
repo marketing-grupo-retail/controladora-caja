@@ -1,0 +1,23 @@
+!------------------------------------------------------------------------------
+! Modulo: MSMTRETE.BAS Modulo RETENCIONES
+! Fecha : 07 de Febrero de 2022
+! Autor : Carlos Calderon
+!------------------------------------------------------------------------------
+
+sub MSMTRETE02 external
+end sub
+
+sub MSMTRETE07 external
+end sub
+
+sub MSMTRETE14 external
+end sub
+
+sub MSMTRETE22 external
+end sub
+
+sub MSMTRETE30 external
+end sub
+
+sub MSMTRETE53 external
+end sub

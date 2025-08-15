@@ -1,0 +1,88 @@
+!-----------------------------------------------------------------------------
+! Modulo: MSMTCLIE.BAS Modulo Clientes MSM
+! Fecha : 20 de Mayo de 2022
+! Autor : Carlos Calderon
+!------------------------------------------------------------------------------
+
+sub seteaClienteFidelidad(id$, indic ) external
+   integer*1 indic
+   string id$
+end sub
+
+!-------------------------------------------------------------------------
+! Valida secuencia de teclas ingreso Cliente
+!-------------------------------------------------------------------------
+function secuenciaTeclaCliente external
+   integer*1 secuenciaTeclaCliente
+end function
+
+!------------------------------------------------------------------------
+! Actualiza los archivos PASAPORTE CORREOS y CLIENTES
+!------------------------------------------------------------------------
+sub registraCliente external
+end sub
+
+!------------------------------------------------------------------------------
+! Retorna datos de cliente
+! k = 1 codigo de cliente
+! k = 2 nombre del cliente
+! k = 3 direccion del cliente
+! k = 4 telefono del cliente
+! k = 5 idCliente
+! k = 6 tipo del cliente o "7" si no se ha identificado
+! k = 7 cadena de cliente o "" si no se ha identificado
+! k = 8 idCliente o "9999999999999" si no se ha identificado
+! k = 9 nombre del cliente o "CONSUMIDOR FINAL" si no se ha identificado
+!------------------------------------------------------------------------------
+function datosCliente$(k) external
+   string datosCliente$
+   integer*1 k
+end function
+
+!------------------------------------------------------------------------------
+! Retorna linea de 24 caracteres con datos de cliente o "_" si no existe
+! k = 1 codigo de cliente
+! k = 2 nombre del cliente
+! k = 3 direccion del cliente
+! k = 4 telefono del cliente
+!------------------------------------------------------------------------------
+function datosClienteCupon$(k) external
+   string datosClienteCupon$
+   integer*2 k
+end function
+
+!-------------------------------------------------------------------------
+! Asigna cliente
+! tipo -> tipo de documento 1=cedula, 2=RUC, 3=pasaporte
+! num$ -> numero del documento
+! retorna
+!  0 -> se asigno el cliente
+! -1 -> no se pudo asignar el cliente
+!-------------------------------------------------------------------------
+function asignaCliente( tipo, num$ ) external
+   integer*1 asignaCliente, tipo
+   string num$
+end function
+
+SUB MSMTCLIE02 EXTERNAL
+END SUB
+
+SUB MSMTCLIE07 EXTERNAL
+END SUB
+
+SUB MSMTCLIE14 EXTERNAL
+END SUB
+
+SUB MSMTCLIE20 EXTERNAL
+END SUB
+
+SUB MSMTCLIE30 EXTERNAL
+END SUB
+
+SUB MSMTCLIE53 EXTERNAL
+END SUB
+
+SUB MSMTCLIE68(ENTRY$,ELEMENT) EXTERNAL
+   string ENTRY$
+   integer*2 ELEMENT
+END SUB

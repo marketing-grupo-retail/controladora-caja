@@ -1,0 +1,119 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : mktTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Busqueda de descuento para el    *
+!                articulo                         *
+!**************************************************
+!*
+!* SL.IT.XPRICE   = PRECIO TOTAL
+!* SL.IE.SALEPRIC = PRECIO UNITARIO
+!* ASC.MKP.ANTPRICE%
+!--------------------------------------------------
+! Se controla que si un articulo llega ligado con 
+! un cupon de tienda, no entre a validar ningun tipo
+! de promocion definido por el motor de promociones
+! ajustado por Grupo Retail - OVS 11 julio 2011
+!--------------------------------------------------
+
+If TS.IO.KEYS(4) = 100 And TS.IO.KEYS(2) = 80 Then Begin  										    ! Consulta Precio
+   Exit Sub
+EndIf
+
+If UE.RECASRV.QTY% <> 0 Then begin                                                ! Si es un recaudo
+	 Asc.MKP.DSCT%  = 0 																														! Elimina descuentos aplicacion
+	 ASC.MKP.DSCTO% = 0 																														! de promociones
+	 Gr.Mkp.DstAB%  = 0                                                             !
+	 Exit Sub																																				! Sale del proceso
+EndIf
+
+If UE.EPSS.ON <> 0 Then begin                                                     ! Si es un Convenio
+	 Asc.MKP.DSCT%  = 0 																														! Elimina descuentos aplicacion
+	 ASC.MKP.DSCTO% = 0 																														! de promociones
+	 Gr.Mkp.DstAB%  = 0                                                             !
+	 Exit Sub																																				! Sale del proceso
+EndIf
+
+If IR.INDICAT2$ = PACK$("40") Then Exit Sub                                       ! Si item miscelaneo (Recaudos) no aplica promocion
+
+If IR.LINKEDTO$ <> Pack$("0000") Then Begin      																	! Promocion con cupones Mod11Jul2011
+	 Asc.MKP.DSCT%  = 0 																														! Elimina descuentos aplicacion
+	 ASC.MKP.DSCTO% = 0 																														! de promociones
+	 Gr.Mkp.DstAB%  = 0                                                             !
+	 Exit Sub																																				! Sale del proceso
+EndIf
+
+Asc.MKP.VLRC% 		= SL.IE.SALEPRIC           																			! Precio unitario
+Asc.MKP.DSCT% 		= BUSQUEDA.PROMO(ASC.MKP.VLRC%)                                	! Retorna descuento
+Asc.MKP.ANTPRICE% = SL.IE.SALEPRIC																								! Precio Unitario
+
+If TS.IO.DATA$(6) = "" THEN ASC.MKP.TQTY% = 1 Else                               \! Qty digitada
+   Asc.MKP.TQTY%  = VAL(TS.IO.DATA$(6))                                           ! asigna qty
+      
+If IR.INDICAT0 AND 40H Then Begin                                                 !
+   	  ASC.MKP.TQTY% = 1                                													  ! Si es pesado
+EndIf 
+
+If ASC.MKP.DSCT% <> 0 Then Begin                                                	! Aplico descuento 
+	 If IR.INDICAT0 AND 40H Then Begin																							! Si es pesable producto
+      SL.IE.SALEPRIC   = SL.IE.SALEPRIC - ASC.MKP.DSCT%            								! Precio unitario Sin descuento
+      SL.IT.XPRICE     = (SL.IE.SALEPRIC * SL.IE.QTYORWGT)/1000     						  ! Precio unitario producto
+      ASC.MKP.DSCT%    = (ASC.MKP.DSCT% * SL.IE.QTYORWGT)/1000     						    ! Dscto Total Otorgado
+	 EndIf Else Begin																																! Si es unitario producto
+      SL.IE.SALEPRIC   = SL.IE.SALEPRIC - ASC.MKP.DSCT%            								! Precio unitario Sin descuento
+      SL.IT.XPRICE     = SL.IE.SALEPRIC * Asc.MKP.TQTY%            						    ! Precio Unitario Producto 
+	EndIf																																						!
+	 ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + (ASC.MKP.DSCT%*ASC.MKP.TQTY%)            ! Total de descuento   
+   IR.PRICE1      = SL.IE.SALEPRIC																								! Precio a la aplicacion
+   IR.PRICE2      = SL.IE.SALEPRIC																								! Precio a la aplicacion
+EndIf																																							! Fin aplicacion descuento
+
+If Gr.Mkp.DstSec% = -2 Then \
+ If Val(UnPack$(GR.MKT.DSEC$)) = Val(SL.IT.ITEMCODE$) Then Begin                  !
+    Gr.Mkp.DstSec% = -3
+ EndIf  
+
+If Gr.Mkp.DstSec% = -1 Then Begin 
+
+   IR.LINKEDTO$ = Pack$("0000")																								! Elimina Link
+   Gr.Mkp.SecPrc$ = Str$(SL.IT.XPRICE)																				! Precio antes de descuento
+   Gr.Mkp.SecQty$ = Str$(SL.IE.QTYORWGT)																			! Qty vendida
+   Gr.Mkp.ItmSec$ = SL.IT.ITEMCODE$																						! Item Vendido
+
+   Gr.Tmp% = Float(SL.IT.XPRICE * (ASC.MKP.DSCTO%/10)) / 100      						! Descuento a otorgar
+   If (TS.IO.KEYS(1) = 70 OR TS.IO.KEYS(8) = 67 ) Then Begin      						! Si una anulacion
+     ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + (Gr.Tmp% * -1)      								! Total de descuento
+   EndIf Else Begin 
+     ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + Gr.Tmp%             								! Total de descuento
+   EndIf 
+   ASC.MKP.DscOtorgado% = Gr.Tmp%                             								! Dscto Otorgado
+   If IR.INDICAT0 AND 40H Then Begin                              						! Si articulo pesable
+      SL.IT.XPRICE = SL.IT.XPRICE - Gr.Tmp%                    								! Precio total Sin descuento
+      Gr.Tmp% = Float(SL.IE.SALEPRIC * (ASC.MKP.DSCTO%/10)) / 100 						! Descuento a otorgar
+      SL.IE.SALEPRIC = SL.IE.SALEPRIC - Gr.Tmp%                								! Precio unitario 
+   EndIf Else Begin                                               						!
+      SL.IT.XPRICE = SL.IT.XPRICE - Gr.Tmp%                    								! Precio total Sin descuento
+      SL.IE.SALEPRIC   = SL.IT.XPRICE / SL.IE.QTYORWGT            						! Precio total 
+   EndIf 
+   IR.PRICE1      = SL.IE.SALEPRIC
+   IR.PRICE2      = SL.IE.SALEPRIC
+   If (TS.IO.KEYS(1) = 70 OR TS.IO.KEYS(8) = 67 ) Then \          						! Si una anulacion
+      ASC.MKP.DscOtorgado% = (ASC.MKP.DscOtorgado% * -1)
+   
+   Gr.Mkp.DstSec% = -2
+   Gr.Mkp.Pr$     = Gr.Mkp.Promo$
+EndIf
+
+!If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \
+!    Call Valida.Rifa(-1) Else \                                               ! Valida Boletas para Rifa
+!    Call Valida.Rifa(1)																												! 
+
+!If (IR.INDICAT1 AND 4H) THEN BEGIN																						! Si acumula puntos
+
+!		If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \										! Es una anulacion producto
+!		    Gr.Mkp.VlrCmpBol% = Gr.Mkp.VlrCmpBol% - SL.IT.XPRICE Else \
+!		    Gr.Mkp.VlrCmpBol% = Gr.Mkp.VlrCmpBol% + SL.IT.XPRICE									! Si es una venta de producto
+
+!ENDIF 
+

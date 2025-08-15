@@ -1,0 +1,115 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU51.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR46321 - Add function for new 'Could haved saved' algorithm.
+!            CMJ MGVA 08/01/01
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+L% = CALLPARM
+CALL TSU51.FB
+
+!AIR46321
+  !!*******************************************************************
+  !!** RESTORE TOTALS AND TENDER SEQUENCE AT END OF FALSE REPLAY     **
+  !!*******************************************************************
+   IF SPCS.COULDSAV AND                        \ FALSE REPLAY
+      EMSS.COUP.REPLAY= 0 THEN BEGIN           ! REPLAY IS OVER
+    SPCS.COULDSAV = 0                          ! FLAG FALSE REPLAY
+    EMSS.PANEL.TRANS = 0                       ! FLAG PREFERRED CUSTOMER
+    CA.CUSTNUM$ = ""                           ! CLEAR CUSTOMER NUMBER
+    EMSS.TR.POINTS = 0                         ! CLEAR TRANSACTION POINTS
+    EMSS.TR.PCCPNCNT = 0                       ! CLEAR PC COUPON COUNT
+    IF EMSS.TR.PCCPNAMT = 0 THEN               \ NO AMOUNT FOUND     12/98
+      EMSS.TR.PCCPNAMT = -8888                 ! SET DUMMY ZERO VALU 12/98
+    FOR I% = 0 TO 10                           ! FOR ALL INPUT
+     TS.IO.KEYS(I%) = SPCS.CS.DAT2(I%)         ! RESTORE INPUT KEYS
+     TS.IO.DATA$(I%) = SPCS.CS.DATA$(I%)       ! RESTORE INPUT DATA
+    NEXT I%                                    ! NEXT INPUT
+    TS.IO.HDR$         = SPCS.CS.DATA$(11)     ! RESTORE INPUT HEADER
+    TS.IO.MOTORKEY     = SPCS.CS.DAT2(11)      ! RESTORE MOTORKEY
+    TS.IO.DEVICE       = SPCS.CS.DAT2(12)      ! RESTORE INPUT DEVICE
+    TS.TEMP1I2         = SPCS.CS.DAT2(13)      ! RESTORE INPUT KEY COUNT
+    TS.TRX.STATUS      = SPCS.CS.DAT2(14)      ! RESTORE TRANS STATUS
+    SL.END             = SPCS.CS.DAT2(15)      ! RESTORE TLOG POINTER
+    TS.MAN.REENTRY     = SPCS.CS.DAT2(16)      ! RESTORE MANUAL TENDER
+    TS.IO.PREV.KEYS(7) = SPCS.CS.DAT2(17)      ! RESTORE PRIOR TENDER KEY
+    TS.COUP.QTY        = SPCS.CS.DAT2(18)      ! RESTORE COUPON QUANTITY
+    TS.DELCNT(4)       = SPCS.CS.DAT2(19)      ! RESTORE NEG ENTRY CNT
+    TS.DELCNT(5)       = SPCS.CS.DAT2(20)      ! RESTORE NEG ENTRY CNT
+    TS.PENDCOUNT       = SPCS.CS.DAT2(21)      ! RESTORE PENDING OVR 09/99
+    EMSS.TR.ACOUPSTR   = SPCS.CS.DAT4(01)      ! RESTORE AUTO STR COUPONS
+    EMSS.TR.ACOUPMFR   = SPCS.CS.DAT4(02)      ! RESTORE AUTO MFR COUPONS
+    TS.TENDERED(7)     = SPCS.CS.DAT4(03)      ! RESTORE ALL MFR CPS 02/00
+    TS.TENDERED(8)     = SPCS.CS.DAT4(04)      ! RESTORE ALL STR CPS 02/00
+    TS.BAL.TAKEN = -1                          ! BALANCE TAKEN
+    DIM SPCS.CS.DAT2(0)                        ! CLEAR SAVED INPUT
+    DIM SPCS.CS.DAT4(0)                        ! CLEAR SAVED INPUT
+    DIM SPCS.CS.DATA$(0)                       ! CLEAR SAVED INPUT
+    TS.IO.INPUT.READY = -1                     ! FLAG INPUT IS READY
+    TS.IO.COUNT = 1                            ! PRIMARY INPUT
+                                                                ! RM-01/98
+  !!**************************************************************RM-01/98
+  !!** RESTORE ARRAY DATA IN CASE CARD ENTERED AFTER TENDER       RM-01/98
+  !!**************************************************************RM-01/98
+    EMSS.REPLAY.SAVE = SPCS.C1.SAVE            ! RESTORE REPL CNT RM-01/98
+    IF SPCS.C1.SAVE > 0 THEN BEGIN             ! SAVED PC COUPONS RM-01/98
+     FOR I% = 1 TO SPCS.C1.SAVE                ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 2                          ! FOR ALL ENTRIES  RM-01/98
+       EMSS.REPLAY.DATA(I%,J%) = SPCS.C1.DATA(I%,J%) ! RESTORE IT RM-01/98
+      NEXT J%                                  ! NEXT ENTRY       RM-01/98
+      EMSS.REPLAY.AMTS(I%) = SPCS.C1.AMTS(I%)  ! RESTORE AMTS     RM-01/98
+     NEXT I%                                   ! NEXT ENTRY       RM-01/98
+     DIM SPCS.C1.DATA(0,0)                     ! CLEAR SAVE ARRAY RM-01/98
+     DIM SPCS.C1.AMTS(0)                       ! CLEAR SAVE ARRAY RM-01/98
+     SPCS.C1.SAVE = 0                          ! CLEAR REPLAY CNT RM-01/98
+    ENDIF                                      ! SAVED PC COUPONS RM-01/98
+                                                                ! RM-01/98
+    EMSS.PROMO.SAVE = SPCS.C2.SAVE             ! RESTORE PROM CNT RM-01/98
+    IF OP.PROMO.ACTIVE AND                     \ PROMO VALIDATION RM-01/98
+       SPCS.C2.SAVE > 0 THEN BEGIN             ! SAVED PROMO DATA RM-01/98
+     FOR I% = 1 TO SPCS.C2.SAVE                ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 5                          ! FOR ALL ENTRIES  RM-01/98
+       EMSS.PROMO.DATA(I%,J%) = SPCS.C2.DATA(I%,J%) ! RESTORE IT  RM-01/98
+      NEXT J%                                  ! NEXT ENTRY       RM-01/98
+      FOR J% = 0 TO 1                          ! FOR ALL ENTRIES  RM-01/98
+       EMSS.PROMO.AMTS(I%,J%) = SPCS.C2.AMTS(I%,J%) ! RESTORE IT  RM-01/98
+      NEXT J%                                  ! NEXT ENTRY       RM-01/98
+     NEXT I%                                   ! NEXT ENTRY       RM-01/98
+     DIM SPCS.C2.DATA(0,0)                     ! CLEAR SAVE ARRAY RM-01/98
+     DIM SPCS.C2.AMTS(0,0)                     ! CLEAR SAVE ARRAY RM-01/98
+     SPCS.C2.SAVE = 0                          ! CLEAR PROMO CNT  RM-01/98
+    ENDIF                                      ! SAVED PROMO DATA RM-01/98
+                                                                ! RM-01/98
+    EMSS.WGT.SAVE = SPCS.C3.SAVE               ! RESTORE WGT CNT  RM-01/98
+    IF SPCS.C3.SAVE > 0 THEN BEGIN             ! SAVED WEIGHTS    RM-01/98
+     FOR I% = 1 TO SPCS.C3.SAVE                ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 4                          ! FOR ALL ENTRIES  RM-01/98
+       EMSS.WGT.DATA(I%,J%) = SPCS.C3.DATA(I%,J%) ! RESTORE DATA  RM-01/98
+      NEXT J%                                  ! NEXT ENTRY       RM-01/98
+     NEXT I%                                   ! NEXT ENTRY       RM-01/98
+     DIM SPCS.C3.DATA(0,0)                     ! CLEAR SAVE ARRAY RM-01/98
+     SPCS.C3.SAVE = 0                          ! CLEAR WEIGHT CNT RM-01/98
+    ENDIF                                      ! SAVED WEIGHTS    RM-01/98
+                                                                ! RM-01/98
+    EMSS.PERCENT.SAVE = SPCS.C4.SAVE           ! RESTORE PCNT CNT RM-01/98
+    IF SPCS.C4.SAVE > 0 THEN BEGIN             ! SAVED PERCENTS   RM-01/98
+     FOR I% = 1 TO SPCS.C4.SAVE                ! FOR ALL ENTRIES  RM-01/98
+      EMSS.PERCENT.ITM(I%) = SPCS.C4.DATA(I%)  ! RESTORE DATA     RM-01/98
+      EMSS.PERCENT.AMT(I%) = SPCS.C4.AMTS(I%)  ! RESTORE AMTS     RM-01/98
+     NEXT I%                                   ! NEXT ENTRY       RM-01/98
+     DIM SPCS.C4.DATA(0)                       ! CLEAR SAVE ARRAY RM-01/98
+     DIM SPCS.C4.AMTS(0)                       ! CLEAR SAVE ARRAY RM-01/98
+     SPCS.C4.SAVE = 0                          ! CLEAR PERCNT CNT RM-01/98
+    ENDIF                                      ! SAVED PERCENTS   RM-01/98
+   ENDIF                                       ! FALSE REPLAY IS OVER
+
+!EIR46321
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

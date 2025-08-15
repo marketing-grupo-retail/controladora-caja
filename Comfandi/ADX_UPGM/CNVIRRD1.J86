@@ -1,0 +1,20 @@
+!--- Lectura del Maestro de Articulos
+!--- Para Validar el metodo de Precio del producto
+
+        READ FORM "C6 3I1 C1 C2 C3 2C1 C5 C2 C18 2I2 C31" ;          \
+            #4  KEY X.CODE$;         \ SESSION NUMBER AND RECORD KEY
+               AR.DUMMY$,            \ ITEM CODE                  UPD 6
+               AR.INDICAT0,          \ INDICATOR FLAG BYTE 0      INT 1
+               AR.INDICAT1,          \ INDICATOR FLAG BYTE 1      INT 1
+               AR.INDICAT1A,         \ INDICATOR FLAG BYTE 2      INT 1
+               AR.INDICAT2$,         \ INDICATOR BYTE 3           UPD 1
+               AR.DEPARTME$,         \ DEPARTMENT NUMBER          UPD 2
+               AR.FAMILYNU$,         \ FAMILY COUPON NUMBERS      UPD 3
+               AR.MPGROUP$,          \ MULTIPRICING GROUP NUMBER  UPD 1
+               AR.SALEQUAN$,         \ DEAL QUANTITY              UPD 1
+               AR.SALEPRIC$,         \ PRICE                      UPD 5
+               AR.LINKEDTO$,         \ LINKED ITEM                UPD 2
+               AR.ITEMNAME$,         \ ITEM DESCRIPTION           ASC 18
+               AR.USEREXIT1,         \ RESERVED FOR USER DATA     INT 2
+               AR.USEREXIT2,         \ RESERVED FOR USER DATA     INT 2
+               AR.USERDATA$          ! ADITIONAL DATA ITEM RECOR  ASC 31

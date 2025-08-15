@@ -1,0 +1,23 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit after manager override processing     */
+\/*          verification is complete.                           */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+FUNCTION TSUPEC66 (CALLPARM) PUBLIC
+  INTEGER*1 CALLPARM
+   ! Insert User Exit Code here
+
+CALL RECATS66.011(CALLPARM)          ! RECARGAS ONLINE 
+!CALL EPAYMS66.011(CALLPARM)          ! PAGO ELECTRONICO
+
+CALL PEFMTS66.011(CALLPARM)          ! PAGO ELECTRONICO - FONEDE
+CALL RECASRV(66,CALLPARM)	           ! PAGO SERVICIOS PUBLICOS
+CALL EPSMTS66.011(CALLPARM)          ! Modulo Convenios
+
+END FUNCTION
+

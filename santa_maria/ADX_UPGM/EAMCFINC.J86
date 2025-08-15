@@ -1,0 +1,102 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\ REM!!===============================================================!!
+\ REM!!                         EAMCFINC.J86                          !!
+\ REM!!                                                               !!
+\ REM!! THIS INCLUDE MUST BE IN EVERY MODULE WHICH CALLS              !!
+\ REM!!  HELP, RANGE.CHECK, OR GET.GOOD.ENTRY                         !!
+\ REM!!                                                               !!
+\ REM!!===============================================================!!
+
+         INTEGER*2 GLOBAL        \
+                                 \
+                                 \    MMCFEC04 flags
+           MONEY.FILTER,         \   set on to handle dec point/trailing sign
+           USER.MF.MSG,          \   set to user msg. num for bad money amount
+           QUANTITY,             \   set on if allowing 2*3.00 type entries
+           START.ENTRY,          \   set on to return to first field
+           REPORT.MSG,           \   set on if displaying a report
+                                 \
+           ENTER.PRESSED,        \   set on if enter key was pressed
+           HOME.PRESSED,         \   set on if home key was pressed
+           TAB.PRESSED,          \   set on if tab key was pressed
+           BACKTAB.PRESSED,      \   set on if backtab key was pressed
+           END.PRESSED,          \   set on if end key was pressed
+           PGDN.PRESSED,         \   set on if pgdn key was pressed
+           PGUP.PRESSED,         \   set on if pgup key was pressed
+           QUIT.PRESSED,         \   set on if quit hit
+           ESC.PRESSED,          \   set on if esc hit
+           GOOD.ENTRY,           \   set on if entry is accepted
+                                 \
+                                 \     HELP flags
+           HELP.AVAILABLE,       \   set on if help exists for field
+           FULL.SCREEN,          \   set on if help is full screen
+                                 \
+                                 \      RANGE.CHECK flags
+           NEED.RANGE.CHECK,     \   set on if range checking needed
+           YESORNO,              \   set on if Y/N check is needed
+           ASTRK.OK,             \   set on if '*' accepted
+           BLANK.OK,             \   SET ON IF ' ' ACCEPTED
+           NULL.ENTER,           \   set on if no entry required on enter
+                                 \
+           AUTH.FIELD,           \   Set on if processing an authorization
+                                 \     field for options
+                                 \
+                                 \   MMCFEC03 variables
+           GOOD.RET,             \   Set on if error-free execution
+           MSG.UP,               \
+                                 \   MMCFEC04 variables
+           PAGE,                 \   current page number
+           FKEY.CHECK(1),        \   array use in fec04 to allow
+                                 \   input validation when an f-key is
+                                 \   pressed .
+           MAX.PAGE,             \   maximum page number
+                                 \
+                                 \        MMCFEC06/MMCFEC04
+           NEED.DECIMALS,        \   always 2 dec places flag
+                                 \
+           NUM.ENTRIES,          \   MMCFEC13 variable
+                                 \        HELP variables
+           HELP.SCR.NO,          \   number of help screen for field
+           MAX.HELP,             \   MAXIMUM HELP PAGE NUMBER
+                                 \
+                                 \   MMCFEC39 variables
+           KEY.COUNT,            \   Number of keys found
+           TEXT.SIZE,            \   Size of TEXT.ARRAY$
+           NEED.TEST,            \   Flag if byte test required
+           TEST.ON,              \   Flag if testing that a bit is on
+           OFFSET                !   Offset for test byte
+
+         STRING GLOBAL           \
+           FKEY.ENTRY$,          \  String used in FEC04
+           LOG.ENTRY$(1),        \  Array of fields for MMCFEC13
+           KEY.ARRAY$(1),        \  Array of keys in MMCFEC39
+           TEXT.ARRAY$(1),       \  Array of data displayed by ACEFEC01
+                                 \
+                                 \      RANGE.CHECK variables
+           LOW.END$,             \   minimum - used for range check
+           HIGH.END$,            \   maximum - used for range check
+                                 \
+           DM.DISPFILE$,         \ current display file ID
+           DM.MODULE$            ! module name for MMCFEC05
+
+
+         INTEGER *2 GLOBAL       \
+                                 \        ASCII key codes
+           TAB.KEY,              \
+           BACKTAB.KEY,          \
+           HELP.KEY,             \
+           QUIT.KEY,             \
+           ENTER.KEY,            \
+           ESC.KEY,              \
+           HOME.KEY,             \
+           END.KEY,              \
+           PGUP.KEY,             \
+           PGDN.KEY,             \
+           TERM.KEY,             \ code for most recent key pressed
+                                 \
+           DM.SCRNNO             ! screen number for MMCFEC05
+
+         INTEGER*1 GLOBAL        \
+           MASK                  ! Used in MMCFEC39 key-scan routine
+

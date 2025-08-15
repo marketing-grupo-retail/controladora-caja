@@ -1,0 +1,751 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1403.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Marzo 14 de 1997
+!     Unidad Responsable =  T‚cnicos Sistemas POS
+!-----------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Estas  l¡neas  se  insertan  en la USER EXIT 14 para verificar
+!     los pagos que  se hacen con cargo a  los  Clientes con Cr‚dito
+!     Comfandi  o para verificar los pagos con Tarjeta  de  Cr‚dito,
+!     si el Valor es < o = a la Venta.                                             
+!                         
+!     Se comprueba la existencia de las siguientes ENTRADAS de DATOS
+!
+!           Para Cheques :
+!                No.Banco
+!                No.Cheque (4 Ultimos D¡gitos)
+!                No. de Cta. Cte. del Girador
+!                Nit o Doc. de Identidad del Girador
+!
+!           Para Pagos electr¢nicos (DB ¢ CR)
+!                No. de Autorizaci¢n ¢ Aprobaci¢n
+!                de la Entidad Financiera
+!                Nit o Doc. de Identidad del Usuario
+!
+!           Para Pagos de Cr‚dito COMFANDI
+!                Nit o Doc. de Identidad del Comprador
+!                No. de la Factura del CR de Medicamentos
+!                C¢digo de Barras sobre el Autoadhesivo de CR
+!                %EPS ¢ Cuota Moderadora
+!                Cupo M ximo Autorizado
+!
+!     Tambien  efect£a  la traducci¢n de FUNCTION CODES de teclas de
+!     PROCEDIMIENTO, para indicar al Cajero que se va a producir una 
+!     Mini-Factura para Credito de Medicamentos.                 
+!
+!     Dependiendo de las Modalidades de CR, Calcula y muestra el % ¢
+!     porci¢n del Pago Obligatorio de Contado.
+!
+!     Se ha inclu¡do en las Input Sequence Tables en FC=85, semejante
+!     a la tecla OVERRIDE, para identificar las Cuotas Moderadoras de
+!     los Creditos otorgados mediante EPS's.
+!
+!     Verifica el Ingreso de Informaci¢n del #Factura para los pagos
+!     efectuados a CONCESIONARIOS.
+!                                                         
+!     Para  pagos  en la Modalidad CVC, liquida el 60% y 40% del pago
+!     Efectivo Obligatorio, y le Indica al Cajero                    
+!                                                         
+!     Adicionalmente,  modifica  la  secuencia de Digitaci¢n para los
+!     Pagos 91 y 95, que permite leer  CUPOS y recuperar el NIT de la 
+!     Empr. Afiliada, para Simular con la Funci¢n 90, la Verificaci¢n
+!     del archivo EAMTENDV.                                          
+!
+!     Para  procesar  los  CREDITOS  sin  factura y especialmente los
+!     REINTEGROS que sean  posteriores  al mismo d¡a de la Compra, se
+!     habilit¢ la Variedad 96, con los mismos controles de No. de Fac
+!     Ced de Ciud y NIT de la Empresa Afiliada; cr‚ditos con Copagos.                       
+!
+!     Se Incluye otro Control Adicional para el  FRANQUEO de la Linea
+!     de  Cr‚dito  Especial  EPS's,  con  la  siguiente  Secuencia de 
+!     Digitaci¢n :
+!
+!                     .------------.      .---------.
+!        Grupo %      |    CUOTA   |      | CREDITO |
+!         E.P.S       | MODERADORA |      |         |
+!                      ------------        ---------
+!        Donde :
+!                    Grupo %  ==>    %Clien   %E.P.S.
+!
+!                       1              10%      90%   
+!                       2              20%      80%   
+!                       5              50%      50%   etc. etc.                  
+!------------------------------------------------------------------------
+!ON ERROR GOTO ERRCREDITO
+
+AVISO$ = "    PAGO CON          MINI-FACTURA..!"      !
+AVISA$ = "  DESHABILITADA LA    MINI-FACTURA..!"      !
+
+!--------- Conversi¢n de Pago (+) a (-) cuando hay Balance (-) --------------
+\IF TS.IO.MOTORKEY <> 89 THEN BEGIN	! NO ENTRA SI SE TRATA DE INGRESO DE
+\					! UN NUMERO DE CLIENTE
+IF TS.IO.STATE = 10     AND                          \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> "" AND                          \! digita Variedad,
+   TS.IO.DATA$(7) <> "" AND                          \! con valor, y hay
+   TS.BALDUE(0)   <  0  AND                          \! Saldo o Balance (-)
+   (TS.IO.KEYS(7) = 93 OR                            \! a Efectivo
+    TS.IO.KEYS(7) = 94 OR                            \! a Otros Pagos o
+    TS.IO.KEYS(7) = 95 OR                            \! a Otros Pagos o
+    TS.IO.KEYS(7) = 96)    THEN BEGIN                 ! a Credito,entonces    
+    IF NO.MOD$ <> "0" THEN BEGIN                      ! Si hay Copago
+       TS.IO.DATA$(7) = VRCRE$                        ! 
+    ENDIF ELSE  BEGIN                                 !
+       IF VR.EPS% <> 0 THEN BEGIN                     ! Si hay Cuota Moderad
+          TS.IO.DATA$(7) = STR$(VR.EPS%)              ! el pago=Cuota Moderad
+          TS.IO.DATA$(7) = STR$(VAL(TS.IO.DATA$(7))* -1)! el pago se torna (-)
+          VR.EPS% = 0                                 ! Reset Cuota Moderad
+          VRCRE$ = TS.IO.DATA$(7)                     ! Toma Vr del Pago (-)
+       ENDIF                                          !
+   ENDIF                                              !
+ENDIF                                                 ! Fin de Condic
+
+!---------------- Calcula Porcentaje del CR CVC. 60% -----------------------
+
+IF TS.IO.STATE    = 10   AND                         \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                         \! y si digita "/"
+   TS.IO.DATA$(3) = "5"  AND                         \! con Variedad CVC
+   TS.BALDUE(0)  <>  0   AND                         \! y Saldo en Transac
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                  \! y si Digita TECLA CR
+      TS.IO.DATA$(7) = STR$(TS.BALDUE(0)*.6)          ! el pago=60% de BALDUE. 
+      VRCRE$ = TS.IO.DATA$(7)                         ! Valor del Credito
+      LOCATE #30;1,1,OFF                              ! Ubica Cursor
+      WRITE FORM                                     \! Muestra Venta
+      "C8 PIC($$#,###,###) C9 PIC($$#,###,###)";     \! segun formato
+      #30;"CVC 60%=",TS.BALDUE(0)*.6," CONTADO=",    \! con 60% Cr CVC y
+      TS.BALDUE(0) - TS.BALDUE(0)*.6                  ! con 40% Contado 
+      RATA$ = " CVC. 60%"                             ! Guarda Descriptor
+      WAIT; 2000                                      ! Pausa de 2 Seg
+ENDIF                                                 ! Fin condic
+
+!--------------------- Toma Datos de Medios de Pago -----------------------
+
+DENUEVO:
+IF (TS.IO.MOTORKEY = 92 OR                           \! Si es CHEQUE 
+    TS.IO.MOTORKEY = 94 OR                           \! Si es RED DB/CR
+    TS.IO.MOTORKEY = 95 OR                           \! Si es TAR/CR
+    TS.IO.MOTORKEY = 96) AND                         \! Si es CREDITO
+    TS.BALDUE(0)  <> 0   AND                         \! Con Saldo
+    TS.IO.DATA$(7) = ""  AND                         \! Sin Vr Digitado
+    TS.IO.DATA$(3) = ""  THEN BEGIN                   ! Sin Variedad 
+       INDS% = TS.IO.MOTORKEY - 90                    ! Calcula Indice Pag
+       IF PAGO.CH% = 0 THEN BEGIN                     ! Si NO hay Datos Ch 
+          PAGO.CH% = 1                                ! Indica Comienzo
+          VRCRE$ = ""                                 ! 
+          DSCR%    = 0                                ! Reset de Descriptor
+          NO.BAN$=""  :  NO.CHE$=""  :  NO.CTA$=""    ! Setup Variables
+          NO.APR$=""  :  NO.CED$=""  :  NO.VEN$=""    ! Setup Variables
+          NO.FAC$=""  :  NO.NIT$=""  :  NO.MIN$=""    ! Setup Variables
+          NO.CUP$=""  :  NO.CUO$=""  :  NO.MOD$=""    ! Setup Variables
+       ENDIF                                          ! Fin de Condic 
+      
+!--------------------- Toma de Datos de Cheque -------------------------------
+
+       IF TS.IO.MOTORKEY = 92 THEN BEGIN              ! Si en un CHEQUE
+           IF NO.BAN$ =  "" OR                        \! sin Banco
+             NO.CHE$ =  "" OR                        \! sin No. Cheque
+             NO.CTA$ =  "" THEN BEGIN                 ! sin Cuenta, Inicia
+             DSCR% = DSCR% + 1                        ! Incr los Descrip
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS(2)  = 80                      ! Tecla ENTER
+             TS.IO.KEYS(7)  = 0                       ! Tecla ENTER
+             TS.IO.DATA$(2) = "999999921"             ! No. de Cta.Cte
+          ENDIF                                       ! Fin de Artificio
+          IF NO.CTA$ <> "" THEN BEGIN                 ! Si ya esta la Cta
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS(4)  = 100                     ! Tecla NO-VENTA
+             TS.IO.DATA$(4) = NO.BAN$                 ! No. de Banco
+             TS.IO.KEYS(3)  = 78                      ! Tecla SLASH
+             TS.IO.DATA$(3) = NO.CHE$                 ! No. de Cheque
+             TS.IO.KEYS(2)  = 80                      ! Tecla ENTER
+             TS.IO.DATA$(2) = NO.CTA$                 ! No. de Cta.Cte
+             TS.IO.KEYS(10) = 63                      ! Tecla DATA-ENTRY
+             TS.IO.KEYS(07) = 0                       ! Borra Tecla Pago
+             YA.OK% = 1                               ! Se Completaron Datos
+	     CALL SAVE.PRINT
+	     WRITE FORM "C38";#36;"DATOS CHQ: #BCO"   +  \!
+             "   #CHEQUE     #CUENTA"                 !  
+	     WRITE FORM "C38";#36;"      "+NO.BAN$+  \
+             "      "+NO.CHE$+			     \!
+			"      "+NO.CTA$              !
+	     CALL RESTORE.PRINT
+             PAGO.CH% = 0                             ! Reset de Comienzo
+             DSCR%    = 0                             ! Reset de Descriptor
+             PLUPAGO% = 0                             ! Reset de Plu Verif
+          ENDIF                                       ! Fin sec ENT-DATOS
+       ENDIF                                          ! Fin CHEQUES
+
+!--------------------- Toma de Pagos Electronicos ----------------------------
+
+       IF TS.IO.MOTORKEY = 94 OR                     \! Red Multicolor
+          TS.IO.MOTORKEY = 95 THEN BEGIN              ! ¢ Tarjeta CR
+          IF NO.APR$ =  "" OR                        \!
+             NO.CED$ =  "" THEN BEGIN                 ! Inicia la Toma
+             DSCR% = DSCR% + 1                        ! Incr los Descrip
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS(2)  = 80                      ! Tecla ENTER
+             TS.IO.KEYS(7)  = 0                       ! Tecla ENTER
+             TS.IO.DATA$(2) = "999999921"             ! No. de Cta.Cte
+          ENDIF                                       ! Fin de Artificio
+          IF NO.CED$ <> "" THEN BEGIN                 ! Si esta la Cedula
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS (2) = 80                      ! Tecla ENTER
+             TS.IO.DATA$(2) = NO.CED$                 ! No. de Cedula
+             TS.IO.KEYS (3) = 78                      ! Tecla SLASH
+             TS.IO.DATA$(3) = NO.APR$                 ! No. de Aprobac
+             TS.IO.KEYS (7) = 0                       ! Borra Tecla Pago
+             TS.IO.KEYS(10) = 63                      ! Tecla DATA-ENTRY
+             YA.OK% = 1                               ! Se Completaron Datos
+	     CALL SAVE.PRINT
+	     WRITE FORM "C38";#36;"DATOS T.DEB: #CEDULA"+\!
+             "     #APROBACION"                 !  
+	     WRITE FORM "C38";#36;"          "+NO.CED$+  \
+             "      "+NO.APR$			     !
+	     CALL RESTORE.PRINT
+             PAGO.CH% = 0                             ! Reset de Comienzo
+             DSCR%    = 0                             ! Reset de Descriptor
+             PLUPAGO% = 0                             ! Reset de Plu Verif
+          ENDIF                                       ! Fin sec ENT-DATOS
+       ENDIF                                          ! Fin CHEQUES
+
+!--------------------- Toma de Datos de Creditos -----------------------------
+
+       IF TS.IO.MOTORKEY = 96 THEN BEGIN              ! Si es Credito
+          IF NO.VEN$ =  "" THEN BEGIN                 ! Sin Vendedor
+             DSCR% = DSCR% + 1                        ! Incr los Descrip
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS(2)  = 80                      ! Tecla ENTER
+             TS.IO.KEYS(7)  = 0                       ! Tecla ENTER
+             TS.IO.DATA$(2) = "999999921"             ! No. de Cta.Cte
+          ENDIF ELSE BEGIN                            ! Fin de Artificio
+             IF NO.MIN$  = "" OR                     \! Averigua si MiniFact
+                NO.FAC$  = "" OR                     \! Sin Factura
+                NO.NIT$  = "" OR                     \! Sin cc/Nit
+                NO.CUP$  = "" OR                     \! Sin Cupo
+                NO.CUO$  = "" OR                     \! Sin EPS%
+                NO.MOD$  = "" THEN BEGIN              ! Sin CTAMOD
+                   DSCR% = DSCR% + 1                  ! Incr los Descrip
+                   TS.IO.MOTORKEY = 80                ! Tecla Motor=ENTER
+                   TS.IO.KEYS(2)  = 80                ! Tecla ENTER
+                   TS.IO.KEYS(7)  = 0                 ! Tecla ENTER
+                   TS.IO.DATA$(2) = "999999921"       ! No. de Cta.Cte
+             ENDIF                                    ! Fin de Artificio
+          ENDIF                                       !   
+          IF NO.MOD$ <> "" THEN BEGIN                \! Si ya esta Copago
+             TS.IO.MOTORKEY = 80                      ! Tecla Motor=ENTER
+             TS.IO.KEYS (2) = 80                      ! Tecla ENTER
+             TS.IO.DATA$(2) = NO.NIT$                 ! No. de NIT Comprador
+             TS.IO.KEYS (3) = 78                      ! Tecla SLASH
+             TS.IO.DATA$(3) = NO.CUP$                 ! Cupo de la EPS       
+             TS.IO.KEYS (4) = 100                     ! Tecla NO-VENTA
+             TS.IO.DATA$(4) = NO.CUO$                 ! %EPS
+             TS.IO.KEYS (5) = 74                      ! Tecla PRECIO
+             TS.IO.DATA$(5) = NO.FAC$                 ! No. de Factura
+             TS.IO.KEYS (6) = 75                      ! Tecla CANTIDAD
+             TS.IO.DATA$(6) = NO.VEN$                 ! No. de Vend
+             TS.IO.KEYS (7) = 0                       ! Borra Tecla Pago
+             TS.IO.KEYS(10) = 63                      ! Tecla DATA-ENTRY
+             YA.OK% = 1                               ! Se Completaron Datos
+	     CALL SAVE.PRINT
+	     WRITE FORM "C38";#36;"D.CRD: #NIT"   +  \!
+             " #CUPO   #CUOTA  #FACT "                 !  
+	     WRITE FORM "C38";#36;"  "+NO.NIT$+  \
+             "   "+NO.CUP$+"  "+NO.CUO$+"  "+NO.FAC$
+	     CALL RESTORE.PRINT
+             PAGO.CH% = 0                             ! Reset de Comienzo
+             DSCR%    = 0                             ! Reset de Descriptor
+             PLUPAGO% = 0                             ! Reset de Plu Verif
+       ENDIF                                          ! Fin CHEQUES
+     ENDIF                                            ! Fin CHEQUES
+ENDIF                                                 ! Fin de Verif Precio
+
+!----------  Rutina de Verificacion de Datos de Usuario  --------------
+
+IF USER.VERIFY.CHEQ             THEN BEGIN            ! Item para Verificar
+   IF TS.IO.MOTORKEY    = 73    THEN BEGIN            ! Si se digita BORRAR
+         TS.IO.DATA$(1) = ""                          ! Restaura Dato Asoc
+         TS.IO.KEYS(1)  = 0                           ! Restaura Tecla
+         TS.IO.KEYS(7)  = INDS% + 90                  ! Asigna Pago y
+         TS.IO.MOTORKEY = INDS% + 90                  ! el mismo Motor
+         DSCR% = DSCR% - 1                            ! Decrm los Descrip
+         GOTO DENUEVO                                 !
+   ENDIF ELSE BEGIN                                   !
+      IF TS.IO.KEYS(10) <> 80 THEN BEGIN              ! Si no hay ENTER
+         IF YA.OK% = 1 THEN BEGIN                     ! Si 100% datos ok
+            YA.OK% = 0                                ! Reset para sig vez
+            PAGO.CH% = 0                              ! Retorna al Inicio
+            USER.VERIFY.CHEQ = 0                      ! Restaura Flag de Verif
+         ENDIF                                        ! Fin de Datos Ingr
+      ENDIF                                           ! Fin de no ENTER
+      IF TS.IO.KEYS(10) = 80 THEN BEGIN               ! Si Hubo ENTER
+         IF NO.BAN$ = "" OR                          \! Si no hay Bco 
+            NO.VEN$ = "" OR                          \! ¢ no hay Vendedor
+            NO.APR$ = "" THEN BEGIN                   ! ¢ no hay Aprobac
+               NO.BAN$ = TS.IO.DATA$(10)              ! Toma Bco
+               NO.APR$ = TS.IO.DATA$(10)              ! Toma Autorizac
+               NO.VEN$ = TS.IO.DATA$(10)              ! Toma Vendedor
+         ENDIF ELSE BEGIN                             ! Si n¢,
+            IF NO.MIN$ = "" AND                      \! Si no hay MiniFact
+               INDS%   = 6  THEN BEGIN                ! y es Pago CR
+                  COBAR$ = TS.IO.DATA$(10)            ! No. Verific Barras
+                  NO.CHE$ = COBAR$                    ! Guarda Dato CH
+                  NO.CED$ = COBAR$                    ! Guarda Dato CC
+                  IF LEN(COBAR$) > 7 THEN BEGIN       ! Si vienen mas de 7
+                     COBAR$ = STRING$(20, "0")  +    \! le agrega 20 CEROS
+                               COBAR$                 ! a la lectura
+                     COBAR$ = RIGHT$(COBAR$ , 20)     ! alinea a 20 charact
+                     PROCE% = 1                       ! Marca hacer MiniFac
+                     NITE$ = RIGHT$(COBAR$,13)        ! Toma parte de NIT
+                     NITW$ = NITE$                    ! Guarda NIT
+                     NITE$ = PACK$("0"+NITE$ )        ! Empaqueta NIT 
+                     NITE1$ = NITE$                   ! Suple Nit1 para NO Leer 
+                     NITE2$ = NITE$                   ! Suple Nit2 para NO Leer 
+                     NO.FAC$ = "0"+LEFT$(COBAR$,7)    ! Asigna Num Fact.
+                     FAC$ = NO.FAC$                   ! Guarda Factura
+                     NO.MIN$ = NO.FAC$                ! ¢ Minifactura
+                  ENDIF                               ! Fin de ajuste
+                  IF LEN(COBAR$) < 8 THEN BEGIN       ! Si menos de 8
+                     PROCE% = 0                       ! Reset hacer MiniFac
+                     NITE$ = PACK$(STRING$(14,"0"))   ! Inicia con CEROS
+                     NO.FAC$="00000000"+COBAR$        ! Coloca CEROS
+                     NO.FAC$=RIGHT$(NO.FAC$,8)        ! y toma 8 Derecha
+                     FAC$ = NO.FAC$                   ! Guarda Factura
+                     NO.MIN$ = NO.FAC$                ! Guarda Factura
+                  ENDIF                               ! Fin de ajuste
+            ENDIF ELSE BEGIN                          ! Si n¢,
+               IF NO.CHE$ = "" OR                    \! Si no hay Cheque
+                  NO.CED$ = "" OR                    \! Si no hay Cedula
+                  NO.FAC$ = "" THEN BEGIN             ! Si no hay Factura
+                     NO.CHE$ = TS.IO.DATA$(10)        ! Toma Cheque
+                     NO.FAC$ = TS.IO.DATA$(10)        ! Toma Factura
+                     NO.CED$ = TS.IO.DATA$(10)        ! Toma Cedula
+                     IF NO.FAC$ = "" THEN            \! Si no hubo Min/Fac
+                        NO.FAC$ =  NO.CHE$            ! Toma Factura
+               ENDIF ELSE BEGIN                       ! Si n¢,
+                  IF NO.NIT$ = "" OR                 \! Si no hay CC/Nit
+                     NO.CTA$ = "" THEN BEGIN          ! Si no hay Cta Cte 
+                     NO.CTA$ = TS.IO.DATA$(10)        ! Toma CtaCte
+                     NO.NIT$ = TS.IO.DATA$(10)        ! Toma Cedula/Nit
+                  ENDIF ELSE BEGIN                    ! Si n¢,
+                     IF NO.CUP$ = "" THEN BEGIN       ! Si NO hay Cupo
+                        NO.CUP$ = TS.IO.DATA$(10)     ! Toma CUPO
+                        IF VAL(NO.CUP$) = 0 THEN     \! Si NO digita Cupo 
+                           NO.CUP$ = "0"              ! se habilita CERO
+                     ENDIF ELSE BEGIN                 ! Si n¢,
+                        IF NO.CUO$="" THEN BEGIN      ! Si no % EPS
+                           NO.CUO$=TS.IO.DATA$(10)    ! Toma % EPS
+                           IF VAL(NO.CUO$)=0 THEN    \! Si no hay %EPS
+                              NO.CUO$ = "0"           ! se habilita CERO
+                           IF VAL(NO.CUO$)<>0 THEN   \! Si hay %EPS
+                              CALL CALCUO             ! Calcula la Cuota
+                        ENDIF ELSE BEGIN              ! Si n¢,
+                           IF NO.MOD$="" THEN BEGIN   ! Si no Copago
+                              NO.MOD$=TS.IO.DATA$(10) ! Toma Copago
+                           IF VAL(NO.MOD$)=0 THEN    \! Si no hay Copago
+                              NO.MOD$ = "0"           ! se habilita CERO
+                           IF VAL(NO.MOD$)<>0 THEN   \! Si hay Copago
+                              CALL CALMOD             ! Calcula la Cuota
+                           ENDIF                      ! Fin de Copago
+                        ENDIF                         ! Fin de %EPS   
+                     ENDIF                            ! Fin de Cupo %EPS
+                  ENDIF                               ! Fin de Datos
+               ENDIF                                  ! Fin de Cheque
+            ENDIF                                     ! Fin de Bco
+         ENDIF                                        ! Fin de Vendedor
+         IF TS.IO.DATA$(10)="" THEN PAGO.CH%=0        ! Si NO Digita ALGO
+         TS.IO.KEYS(10)  = 0                          ! Flushing de
+         TS.IO.DATA$(10) = ""                         ! Keyed data
+         TS.IO.KEYS(7)  = INDS% + 90                  ! Asigna Pago y
+         TS.IO.MOTORKEY = INDS% + 90                  ! el mismo Motor
+         GOTO DENUEVO                                 ! Repite la Toma
+      ENDIF                                           ! Fin por tecla ENTER
+   ENDIF                                              ! Fin por no BORRAR
+ENDIF                                                 ! Fin de Verif Precio
+
+!------------------ Verificacion de los Datos del Credito --------------------
+
+IF TS.IO.KEYS(10)  = 63 AND                          \! Si digita ENTR/DATOS
+   TS.IO.KEYS(2)   = 80 AND                          \! y tecla de ENTER
+   TS.BALDUE(0)   <> 0  AND                          \! y hay Saldo
+   TS.IO.DATA$(10) = ""      THEN BEGIN               ! sin Dato Asociado 
+      IF TS.IO.KEYS(5) =  74 THEN BEGIN               ! Si Tecla PRECIO(Factura)
+         IF VAL(TS.IO.DATA$(5)) > 0  AND             \! con Dato Asoc Factura
+            TS.IO.DATA$(2)     <> ""  THEN BEGIN      ! y Cedula  
+               FAC$ = TS.IO.DATA$(5)                  ! Guarda Factura
+               IF LEN(FAC$) > 8 THEN BEGIN            ! Si vienen mas de 8
+                  FAC$ = STRING$(20, "0")+FAC$        ! le agrega 20 CEROS
+                  FAC$ = RIGHT$(FAC$ , 20)            ! y toma 20 digitos
+                  PROCE% = 1                          ! Marca hacer MiniFac
+                  NITE$ = RIGHT$(FAC$,13)             ! Toma parte de NIT
+                  NITW$ = NITE$                       ! Guarda NIT
+                  NITE$ = PACK$("0"+NITE$)            ! Empaqueta NIT 
+                  NITE1$ = NITE$                      ! Suple Nit1 para NO Leer 
+                  NITE2$ = NITE$                      ! Suple Nit2 para NO Leer 
+                  NO.FAC$ = "0"+LEFT$(FAC$,7)         ! Asigna Num Fact.
+                  FAC$ = NO.FAC$                      ! Guarda Factura
+                  NO.MIN$ = NO.FAC$                   ! ¢ Minifactura
+               ENDIF                                  ! Fin de ajuste
+               IF LEN(FAC$) < 8 THEN BEGIN            ! Si menos de 8
+                  PROCE% = 0                          ! Reset hacer MiniFac
+                  NITE$ = PACK$(STRING$(14,"0"))      ! Inicia con CEROS
+                  NO.FAC$="00000000"+FAC$             ! Coloca CEROS
+                  NO.FAC$=RIGHT$(NO.FAC$,8)           ! y toma 8 Derecha
+                  FAC$ = NO.FAC$                      ! Guarda Factura
+                  NO.MIN$ = NO.FAC$                   ! Guarda Factura
+               ENDIF                                  ! Fin de ajuste
+               TI61% = 0   :   TI65% = 0              ! Inicia Flags
+               TI66% = 1   :   NOEM$ = " "            ! Inicia Flags
+               SINF% = 0   :   SINC% = 0              ! para Validac 
+               ERRORCOD$ = "  "                       ! Inicia Estado Leer
+               TS.IO.DATA$(8)  = ""                   ! Borra Dato % Inicial
+               TS.IO.KEYS(8)   = 0                    ! Borra TECLA Cuota Moder
+               IF VAL(UNPACK$(NITE$))=0 THEN BEGIN    ! Si NO se digita NIT
+                  KEY$=PACK$("61"+FAC$)               ! Arma llave para leer
+                  READ FORM "C5 C7";#70 KEY KEY$;    \! Lee CUPOS para Var=1                    
+                       KEY$,NITE1$                    ! y guarda NIT Empresa
+               ENDIF                                  !
+               IF ERRORCOD$ = "  " THEN BEGIN         ! Si existe Registro
+                  TI61% = 1                           ! Indica Lect OK
+                  KEY$ = PACK$("61")+NITE1$           ! Arma llave para leer
+                  READ FORM "C8 C30 2C3 C1";         \! Lee Empresa Afil
+                       #71 KEY KEY$;KEY$,NOEMP1$,    \! y recupera Nombre
+                           FECRED$,FEMODD$,NOVED$     ! F/Crea;F/Mod;Nov
+                       NOEM$ = NOEMP1$                ! Guarda Nombre Empresa
+                  IF ERRORCOD$ <> "  " THEN BEGIN     ! Si NO hay NIT
+                     SINC% = SINC% + 1                ! Marca Flag Error 
+                     TI61% = 0                        ! Indica Lect OK
+                  ENDIF                               ! Fin Cond   
+               ENDIF ELSE BEGIN                       ! Fin Cond
+                  SINF% = SINF% + 1                   ! Marca Flag Error
+               ENDIF                                  ! Fin Cond   
+               ERRORCOD$ = "  "                       ! Inicia Estado Leer
+               IF VAL(UNPACK$(NITE$))=0 THEN BEGIN    ! Si NO se digita NIT
+                  KEY$=PACK$("65"+FAC$)               ! Arma llave para leer
+                  READ FORM "C5 C7";#70 KEY KEY$;    \! Lee CUPOS para Var=5
+                       KEY$,NITE2$                    ! y guarda NIT Empresa
+               ENDIF                                  !
+               IF ERRORCOD$ = "  " THEN BEGIN         ! Si existe Registro
+                  TI65% = 1                           ! Indica Lect OK
+                  IF SINC% <> 0 THEN BEGIN            ! Si no esta por Var=1
+                     KEY$ = PACK$("65")+NITE2$        ! Arma llave para leer
+                     READ FORM "C8 C30 2C3 C1";      \! Lee Empresa Afil
+                          #71 KEY KEY$;KEY$,NOEMP2$, \! y recupera Nombre
+                              FECRED$,FEMODD$,NOVED$  ! F/Crea;F/Mod;Nov
+                     NOEM$ = NOEMP2$                  ! Guarda Nombre Empresa
+                  ENDIF                               ! Fin de Condic
+                  IF ERRORCOD$ <> "  " THEN BEGIN     ! Si NO hay NIT
+                     SINC% = SINC% + 1                ! Marca Flag Error 
+                  ENDIF                               ! Fin Cond   
+               ENDIF ELSE BEGIN                       ! Fin Cond
+                  SINF% = SINF% + 1                   ! Marca Flag Error
+               ENDIF                                  ! Fin Cond   
+               ERRORCOD$ = "  "                       ! Inicia Estado Leer
+               IF TI61% = 1  THEN BEGIN               ! Si Medicamentos OK
+                  LOCATE #30;1,1,OFF                  ! Ubica Cursor
+                  WRITE FORM "C21 C6 C1 C12";#30;    \! Muestra Emp/Fac/NIT
+                  LEFT$(NOEMP1$,20),                 \! Nombre Empresa
+                  STR$(VAL(FAC$)),"-",               \! Numero de factura
+                  STR$(VAL(UNPACK$(NITE1$)))          ! Numero de Nit empre 
+                  WAIT; 2000                          ! Espera 2 seg
+               ENDIF ELSE                            \! Fin Cond
+               IF TI65% = 1 THEN BEGIN                ! Si es CVC OK
+                  LOCATE #30;1,1,OFF                  ! Ubica Cursor
+                  WRITE FORM "C21 C6 C1 C12";#30;    \! Muestra Emp/Fac/NIT
+                  LEFT$(NOEMP2$,20),                 \!
+                  STR$(VAL(FAC$)),":",               \!
+                  STR$(VAL(UNPACK$(NITE2$)))          !  
+                  WAIT; 2000                          ! Pausa de 2 Seg
+               ENDIF                                  ! Fin Cond
+               IF NITE1$ <> "" THEN NITE$ = NITE1$    ! Guarda NIT ausente  
+               IF NITE2$ <> "" THEN NITE$ = NITE2$    ! Guarda NIT ausente  
+	       IF SINF% > 1 THEN BEGIN                ! Si fall¢ #Fact
+                  LOCATE #30;1,1,OFF                  ! Ubica Cursor
+                  WRITE FORM "C20 C12 C8";#30;       \! Muestra Error
+                  " FACTURA INVALIDA..",             \! Factura
+                  " VERIFIQUE:",STR$(VAL(FAC$))       !
+                  WAIT; 1000                          ! Pausa de 1 Seg
+               ENDIF                                  ! Fin Cond
+               IF SINC% > 1 THEN BEGIN                ! Si fall¢ #NIT
+                  LOCATE #30;1,1,OFF                  ! Ubica Cursor
+                  WRITE FORM "C12 C8 C10 C10";#30;   \! Muestra Error
+                  "FACTURA OK.",STR$(VAL(FAC$)),     \! Factura
+                  "ERROR NIT:",                      \!
+                  STR$(VAL(UNPACK$(NITE$)))           !                
+                  TS.IO.MOTORKEY = 0                  ! Reduce procesamiento
+               ENDIF                                  ! Fin Cond
+         ENDIF ELSE BEGIN                             ! Si NO hubo Fact/CC
+           TS.GUIDANCE = 1108                         ! Avisa Omision a cajero
+           TS.IO.MOTORKEY = 0                         ! Reduce procesamiento
+         ENDIF                                        ! Fin datos Cheque
+      ENDIF ELSE BEGIN                                ! y finaliza validacion
+         IF TS.IO.KEYS(6) =  75 THEN BEGIN           \! Tecla de CANTID(Vended)
+            TI61% = 1                                 ! Indica Lect OK
+         ENDIF                                        ! Fin datos Cheque
+      ENDIF                                           ! Fin datos Cheque
+ENDIF                                                 ! Fin Condic
+
+!------------------- Verificaci¢n de los Datos del Cheque --------------------
+
+ IF TS.IO.KEYS(10)  = 63 AND                          \! Si digita ENTR/DATOS
+    TS.IO.KEYS(2)   = 80 AND                          \! y tecla de ENTER
+    TS.IO.KEYS(6)   = 0 AND                           \
+    TS.IO.KEYS(4)   <> 100 AND                        \ Permite ingreso #cliente frecuente
+    TS.IO.DATA$(10) = ""      THEN BEGIN              \! sin Dato Asociado 
+       IF TS.IO.KEYS(4) = 100 THEN BEGIN              \! Tecla de NO-VENTA(No.Bco)
+          IF TS.IO.DATA$(4)      > "0"  AND           \! Verifica Rango de los
+             TS.IO.DATA$(4)      < "99" AND           \! Bancos Locales 
+             TS.IO.KEYS(3)       =  78  AND           \! Si digita "/"(No.Cheq)
+             LEN(TS.IO.DATA$(3)) <   9  AND           \! Verifica 4 dig de Cheque
+             TS.IO.DATA$(2)     <>  ""  THEN BEGIN     ! Verif. exist. dato Cta
+             NUCH$ = TS.IO.DATA$(3)                    ! Guarda No Cheque Subs
+                PAGO.CH% = 1                           ! y coloca Flag de OK
+          ENDIF ELSE BEGIN                             ! de lo contrario
+             TS.GUIDANCE = 1107                        ! Avisa error a cajero  
+             TS.IO.MOTORKEY = 0                        ! Reduce procesamiento
+          ENDIF                                        ! y finaliza ERROR
+       ENDIF                                           ! y finaliza validacion
+ ENDIF                                                 !
+
+!------------------ Verificaci¢n de los Datos de la Concesi¢n -----------------
+IF TS.IO.MOTORKEY = 220 THEN BEGIN                    ! Es Key/Dpto 19=CONC.?
+   IF TS.IO.DATA$(10) = "" THEN BEGIN                 ! y NO hay #Factura
+      LOCATE #30;1,1                                  ! Despliega Error
+      WRITE #30;" FALTA EL #DE       FACTURA..!"      ! Despliega Error
+      TS.IO.MOTORKEY=0                                ! Permanece en este
+   ENDIF ELSE BEGIN                                   ! De lo contrario
+      FACT.NO% = 1                                    ! Coloca Flag Factura
+   ENDIF                                              ! Fin de #Factura
+ENDIF                                                 ! Fin de CONCESIONARIO
+!---------- Habilita el BALDUE si NO se Digita Vr Pago (+) o (-) -------------
+
+IF TS.IO.STATE = 10     AND                          \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> "" AND                          \! digita variedad,
+   TS.IO.DATA$(7) = ""  AND                          \! y NO se digita valor
+   (TS.IO.KEYS(7) = 93 OR                            \! a Otros Pagos
+    TS.IO.KEYS(7) = 94 OR                            \! a Red Multicolor
+    TS.IO.KEYS(7) = 95 OR                            \! a Tarjeta de Credito o 
+    TS.IO.KEYS(7) = 96)    THEN BEGIN                 ! a CR, entonces se hace   
+    IF NO.MOD$ <> "0" THEN BEGIN                     \!
+       TS.IO.DATA$(7) = VRCRE$                        ! el pago=Cuota Moderad
+    ENDIF ELSE BEGIN
+       IF VR.EPS% <> 0 THEN BEGIN                     ! Si hay Cuota Moderad
+          TS.IO.DATA$(7) = STR$(VR.EPS%)              ! el pago=Cuota Moderad
+          VR.EPS% = 0                                 ! Reset Cuota Moderad
+       ENDIF ELSE BEGIN                               ! de lo contrario
+          TS.IO.DATA$(7) = STR$(TS.BALDUE(0))         ! el pago=BALDUE. 
+       ENDIF                                          ! Fin de Cuota EPS
+       VRCRE$ = TS.IO.DATA$(7)                        ! Valor del Credito
+    ENDIF
+    IF SINF% > 1 THEN TS.IO.DATA$(3)  = "6"           ! Si Fac Inv, Asig Vrd=6
+ENDIF                                                 ! Fin de Condic
+
+IF TS.IO.STATE = 10     AND                        \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> "" AND                        \! digita variedad,
+   TS.IO.DATA$(7) = ""  AND                        \! y NO se digita valor
+   (TS.IO.KEYS(7) = 93 OR                          \! a Otros Pagos
+    TS.IO.KEYS(7) = 94 OR                          \! a Red Multicolor
+    TS.IO.KEYS(7) = 95 OR                          \! a Tarjeta de Credito o 
+    TS.IO.KEYS(7) = 96)    THEN BEGIN               ! a CR, entonces se hace   
+    TS.IO.DATA$(7) = STR$(TS.BALDUE(0))             ! el pago=BALDUE. 
+ENDIF                                               ! Fin de Condic
+
+!--------- Asigna NIT a Pago CR sin Factura y Obliga a VERIFICACION -----------
+
+IF TS.IO.STATE    = 10   AND                         \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                         \! y si digita "/"
+   TS.IO.DATA$(3) = "4"  AND                         \! con Var CR Especial
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                   ! y si Digita TECLA CR
+      IF FAC$    <> ""   THEN BEGIN                   ! Con No de Factura
+         TS.IO.DATA$(9)=STR$(VAL(UNPACK$(NITE$)))     ! Coloca el Nit OK
+         TS.IO.KEYS(9) = 90                           ! Indica Verific SMA
+      ENDIF ELSE BEGIN                                ! Si no Hubo Lect OK
+         TS.GUIDANCE   = 1108                         ! Avisa error omision
+         TS.IO.MOTORKEY = 0                           ! Reduce procesamiento
+   ENDIF                                              ! Fin Condic
+ENDIF                                                 ! Fin Condic
+
+!--------- Controla si Factura coresp a Pago CR/Medicam y VERIFICA ------------
+
+IF TS.IO.STATE    = 10   AND                         \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                         \! y si digita "/"
+   TS.IO.DATA$(3) = "1"  AND                         \! con Variedad Medicam
+   TS.IO.KEYS(4) <> 100  AND                         \! Sin Tecla NO-VENTA
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                  \! y si Digita TECLA CR
+      IF TI61% = 1       THEN BEGIN                   ! Si todo Bien..
+         TS.IO.DATA$(9) = UNPACK$(NITE1$)             ! Coloca el Nit OK
+         TS.IO.KEYS(9)  = 90                          ! Indica Verific SMA
+      ENDIF ELSE BEGIN                                ! Si no Hubo Lect OK
+         IF TI65% = 1       THEN BEGIN                ! Si era CVC originalmente
+            LOCATE #30;1,1,OFF                        ! Ubica Cursor
+            WRITE FORM "C20 C12 C8";#30;             \! Muestra Error
+            " NO ES FAC/MED/EMP.!",                  \! Factura
+            " VERIFIQUE:",STR$(VAL(FAC$))             ! en Display Operador
+            TS.IO.MOTORKEY = 0                        ! Reduce procesamiento
+         ENDIF ELSE BEGIN                             ! Si no Hubo Lect OK
+           TS.GUIDANCE = 1108                         ! Avisa error omision
+           TS.IO.MOTORKEY = 0                         ! Reduce procesamiento
+         ENDIF                                        ! Fin de Error
+      ENDIF                                           ! Fin Validac Fact
+ENDIF                                                 ! Fin Condic
+
+!------------ Controla si Factura coresp a CVC. 60% y VERIFICA ---------------
+IF TS.IO.STATE    = 10   AND                         \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                         \! y si digita "/"
+   TS.IO.DATA$(3) = "5"  AND                         \! con Variedad CVC
+   TS.IO.KEYS(4) <> 100  AND                         \! Sin Tecla NO-VENTA
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                  \! y si Digita TECLA CR
+      IF TI65% = 1       THEN BEGIN                   ! Si todo Bien..
+         TS.IO.DATA$(7) = STR$(TS.BALDUE(0)*.6)       ! el pago=60% de BALDUE. 
+         VRCRE$ = TS.IO.DATA$(7)                      ! Valor del Credito
+         TS.IO.DATA$(9) = UNPACK$(NITE2$)             ! Coloca el Nit OK
+         TS.IO.KEYS(9)  = 90                          ! Indica Verific SMA
+      ENDIF ELSE BEGIN                                ! Si no Hubo Lect OK
+      IF TI61% = 1       THEN BEGIN                   ! Si era Medicam orignlmt
+         LOCATE #30;1,1,OFF                           ! Ubica Cursor
+         WRITE FORM "C20 C12 C8";#30;                \! Muestra Error
+         " NO ES FACT. CVC..! ",                     \! Factura
+         " VERIFIQUE:",STR$(VAL(FAC$))                !                
+         TS.IO.MOTORKEY = 0                           ! Reduce procesamiento
+      ENDIF ELSE BEGIN                                ! Si no Hubo Lect OK
+        TS.GUIDANCE = 1108                            ! Avisa error omision
+        TS.IO.MOTORKEY = 0                            ! Reduce procesamiento
+      ENDIF                                           ! 
+    ENDIF                                             ! Fin Condic
+ENDIF                                                 ! Fin Condic
+
+!------------- Controla que NO hubo Fact para CR sin Factura ------------------
+
+IF TS.IO.STATE    = 10   AND                         \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                         \! y si digita "/"
+   TS.IO.DATA$(3) = "6"  AND                         \! con Var CR sin Fact
+   TS.IO.KEYS(4) <> 100  AND                         \! Sin Tecla NO-VENTA
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                   ! y si Digita TECLA CR
+      IF TI66% <> 1      THEN BEGIN                   ! Si todo Bien..
+        TS.GUIDANCE = 1108                            ! Avisa error omision
+        TS.IO.MOTORKEY = 0                            ! Reduce procesamiento
+      ENDIF                                           ! 
+ENDIF                                                 ! Fin Condic
+
+!--------- Controla si hay Numero de Variedad para algunos Pagos  ------------
+
+IF TS.IO.STATE        = 10  AND                      \! Si esta en MAIN y NO se
+   TS.IO.KEYS(3)      = 0   AND                      \! digita (/) con variedad, a
+   (TS.IO.KEYS(7)     = 92  OR                       \! CHEQUE, o 
+    TS.IO.KEYS(7)     = 94  OR                       \! Red Multicolor o
+    TS.IO.KEYS(7)     = 95  OR                       \! Tarjeta Credito o
+    TS.IO.KEYS(7)     = 96)    THEN BEGIN             ! Linea de CR, entonces 
+       TS.IO.DATA$(3) = "0"                           ! anula numero de variedad
+       TS.IO.KEYS(3)  = 78                            ! y se simula un ERROR..!
+ENDIF                                                 ! Fin de Condic
+
+!---------------------------------------------------------------------------
+! PRUEBA JORGE LOSADA 
+!IF  TS.IO.STATE =   10      AND                        \! Si esta en MAIN y se
+!  TS.IO.KEYS(3)  = 78 AND         \                   ! Asigna Slash
+! TS.IO.DATA$(3) = "1" AND                           \! digita codigo de variedad,
+! TS.IO.KEYS(7) =   96 AND    \                       ! a Credito,entonces se hace   
+! TS.BALDUE(0)   > 1 AND       \ 
+! VAL(NO.CUO$)   > 1     THEN BEGIN   
+!TS.IO.DATA$(7) = ""  AND      \
+!PROCE%  =1       THEN BEGIN                     
+! for i% = 0 to 10   
+!    write form "c7 c6 c25";#34;"Key "+str$(i%),    \
+!         "= "+ str$(ts.io.keys(i%)),              \
+!       "Dato "+ts.io.data$(i%)
+!next i%   
+! PROCE% = 1
+! CEDU$ = NO.NIT$                                    ! Guarda la CC
+! VENDE$ = STR$(VAL(NO.VEN$))                        ! Guarda Vendedor
+! VENDE$ = RIGHT$("000000" + VENDE$,6)               ! Inserta 0's a Vendedor
+! NOMBV$ = " "                                       ! Reset al Nombre Vend
+!VAR.CR$ = TS.IO.DATA$(3)                           ! Guarda Variedad
+!CALL ETIQUETAR                                     ! Busca Variedad de CR
+!CALL BUSCAVEND                                     ! Busca Vendedor
+!   CALL ENCABEZA   
+!  CALL IMPRIMIR   
+!  PROCE% = 0
+! TI65% = 0                                       ! NO para CVC
+! TS.IO.KEYS(03) = 78                             ! Asigna SLASH
+! TS.IO.DATA$(3) = "6"                            ! Asigna Variedad
+! TS.IO.KEYS(07) = 93                             ! Asigna F/S=Otros Pagos
+! TS.IO.MOTORKEY = 93                             ! Motor Otros Pagos
+!ENDIF                                                 ! valor, lo respeta.
+!--------- Control para CONVERTIR a Tecla de CR con Mini Factura --------------
+!IF (TS.IO.MOTORKEY = 96  OR                          \! Si es Pago a Credito
+!   TS.IO.MOTORKEY  = 90) AND                         \! ¢ Verificacion Credito
+!   TS.IO.DATA$(7) <> ""  THEN BEGIN                   ! y se digita valor
+!   CEDU$ = NO.NIT$                                    ! Guarda la CC
+!   VENDE$ = STR$(VAL(NO.VEN$))                        ! Guarda Vendedor
+!   VENDE$ = RIGHT$("000000" + VENDE$,6)               ! Inserta 0's a Vendedor
+!   NOMBV$ = " "                                       ! Reset al Nombre Vend
+!   VAR.CR$ = TS.IO.DATA$(3)                           ! Guarda Variedad
+!   CALL ETIQUETAR                                     ! Busca Variedad de CR
+!   CALL BUSCAVEND                                     ! Busca Vendedor
+!   IF PROCE% = 1 THEN BEGIN                           ! Si hay CR(mf)
+!      TI65% = 0                                       ! NO para CVC
+!      TS.IO.KEYS(03) = 78                             ! Asigna SLASH
+!      TS.IO.DATA$(3) = "6"                            ! Asigna Variedad
+!      TS.IO.KEYS(07) = 93                             ! Asigna F/S=Otros Pagos
+!      TS.IO.MOTORKEY = 93                             ! Motor Otros Pagos
+!   ENDIF                                              ! Fin de CR(mf)
+!ENDIF                                                 ! Fin de Condic
+
+!--------- Control para Pagos con Variedad que requieren Valor  ------------
+!IF TS.IO.STATE        = 10 AND                       \! Si esta en MAIN y se
+!   TS.IO.DATA$(3)    <> "" AND                       \! digita codigo de variedad,
+!   TS.IO.DATA$(7)     = "" AND                       \! y NO se digita valor con pago
+!   (TS.IO.KEYS(7)     = 91 OR                        \! a EFECTIVO con o sin Factura, o
+!    TS.IO.KEYS(7)     = 92)   THEN BEGIN              ! CHEQUE con o sin Factura, se
+!       TS.IO.DATA$(3) = "0"                           ! anula numero de variedad
+!       TS.IO.KEYS(3)  = 78                            ! y se simula un ERROR..!
+!ENDIF                                                 !
+!--------- Control para los Datos Asociados a Pagos Electronicos   ------------
+!IF TS.IO.STATE = 10     AND                          \! Si esta en MAIN 
+!   TS.IO.DATA$(3) <> "" AND                          \! y hay codigo de variedad,
+!   TS.IO.DATA$(7) <> "" AND                          \! y hay valor
+!   (TS.IO.KEYS(7) =  94 OR                           \! con pago a Red o
+!    TS.IO.KEYS(7) =  95)     THEN BEGIN               ! con pago a Tarj Credito
+!      IF NO.APR$  = ""       OR                      \! Si NO digita No.Aprob
+!         NO.CED$  = ""       THEN BEGIN               ! o no tiene Dato Asociado
+!            TS.GUIDANCE = 1109                        ! Avisa error omision a cajero
+!         TS.IO.MOTORKEY = 0                           ! Reduce procesamiento
+!      ENDIF                                           ! y finaliza validacion
+!ENDIF                                                 !
+!---------------- Control para los Datos de los Cheques --------------------
+!IF TS.IO.STATE          = 10 AND                     \! Si esta en MAIN 
+!   TS.IO.DATA$(3)      <> "" AND                     \! y hay codigo de variedad,
+!   TS.IO.DATA$(7)      <> "" AND                     \! y hay valor
+!   TS.IO.KEYS(7)        = 92     THEN BEGIN           ! con pago a CHEQUE
+!      IF VAL(NO.CTA$)   = 0      THEN BEGIN           ! Si no hay datos Girador
+!         TS.GUIDANCE    = 1107                        ! Avisa error omision a cajero
+!         TS.IO.MOTORKEY = 0                           ! Reduce procesamiento
+!      ENDIF                                           !
+!ENDIF                                                 !
+!----------- Digito de Control para los Cheques de Subsidio -------------------
+!IF TS.IO.STATE          = 10  AND                    \! Si esta en MAIN 
+!   TS.IO.DATA$(3)       = "3" AND                    \! y hay codigo de variedad,
+!   TS.IO.DATA$(7)      <> ""  AND                    \! y hay valor
+!   TS.IO.KEYS(7)        = 92     THEN BEGIN           ! con pago a CHEQUE
+!      CALL CALDIGI                                    ! Invoca Rut Dig/Ctrl
+!      IF PAGO.CH%       = 2      THEN BEGIN           ! Si no hay datos Girador
+!         LOCATE #30;1,1,OFF                           ! Ubica Cursor
+!         WRITE FORM "C20 C20";#30;                   \! Muestra Error
+!         "ERROR DIG/CTRL #CH.!",                     \! Digito de Chequeo
+!         LEFT$(NUCH$,LEN(NUCH$)-1)+"("+DIG$+")"+     \! y despliega dato
+!         "  REPITA.!"                                 ! en Visor Operador
+!         TS.IO.MOTORKEY = 0                           ! Reduce procesamiento
+!         PAGO.CH% = 0                                 ! Ignora datos Cheque
+!      ENDIF                                           !
+!ENDIF                                                 !
+!-------------------  Salida para Error de Lecturas  -------------------------
+!ERRCREDITO:                                           !
+!  IF (ERRF% = 70 OR ERRF% = 71) AND                  \! Si error en CUPOS/EMP 
+!    (ERR="OE" OR ERR="FU" OR ERR="EF") THEN BEGIN     ! Apertura, Lect, EOF
+!          ERRORCOD$ = ERR                             ! Toma Error
+!          RESUME                                      ! Restaura
+!  ENDIF                                               ! Finaliza
+!------------------------------------------------------------------------------
+!ENDIF		! CERRAMOS VALIDACION DE TECLA 89 DE CLIENTE FRECUENTE
+

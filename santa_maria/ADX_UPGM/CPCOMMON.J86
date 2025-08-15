@@ -1,0 +1,901 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\*                                                                 */
+\*  Change Log:                                                    */
+\*                                                                 */
+\*  IR_CHG1    Changes added to LEGAL function to:                 */
+\*             - leave a blank between cents and cents descriptor  */
+\*             - for French, hyphenate most tens and ones combos   */
+\*             - for French, remove AND in 81 and 91 (hyphenate)   */
+\*             - for French, no cents if Exact Dollar Desc. blank  */
+\*             MCM   IBM/9EF     Aug 13, 1992                      */
+\*                                                                 */
+\*  IR39486    Add code to support Multiple Currency Feature.      */
+\*             Bump number of fields from 33 to 34 to hold one     */
+\*             additional field, Monetary ID/Symbol.               */
+\*             RDG   IBM         Jan 18, 1999                      */
+\*                                                                 */
+\*  IR47305    When a dollar amount is exactly $1000.xx the word   */
+\*             'one' is not printed in front of the word 'thousand'*/
+\*             CVM SYSTECH/MGVA 29NOV01                            */
+\*                                                                 */
+\*******************************************************************/
+\REM!! This module contains common check printing routines used by both
+\REM!! the terminal sales modules and the check format editor.
+
+\REM!! ALL modules that use this must include CPVARS.J86.
+
+
+
+\REM!!*********************** READ.FORMAT **********************************!!
+\REM!!  This subroutine will read in a group of check format attributes     !!
+\REM!!  from the format definition file.                                    !!
+\REM!!                                                                      !!
+\REM!!  CPFORMAT and RD.CPFORMAT must be defined before this sub is called. !!
+\REM!!  The format definition file must be opened prior to calling.         !!
+\REM!!**********************************************************************!!
+
+SUB READ.FORMAT PUBLIC
+
+INTEGER*2 RECNO,      \Record offset
+          INIT.RECNO, \ Initial Record offset  IR39486
+          RECORD,     \ Record Number          IR39486
+          K           !Loop counter
+
+   RECNO = ((RD.CPFORMAT - 1) * 33)
+   FOR K = 1 TO 33            !Read fields 1-33
+       READ #64,RECNO + K; FF.ROW(CPFORMAT,K), FF.LENGTH(CPFORMAT,K),          \
+                          FF.START(CPFORMAT,K), FF.FONT(CPFORMAT,K),          \                     \
+                          FF.DS(CPFORMAT,K), FF.CASE(CPFORMAT,K),             \
+                          FF.PAD.CHAR(CPFORMAT,K), FF.PAD.BEFORE(CPFORMAT,K), \
+                          FF.PAD.AFTER(CPFORMAT,K)
+   NEXT K
+
+!AIR39486 - Add additional field for Multiple Currency Feature ID/Symbol Field
+   IF MC.ENABLED THEN BEGIN    ! If MC Enabled
+     INIT.RECNO = 204          ! Set Initial Record number
+     RECNO = INIT.RECNO      + \ Set Record Number
+                 (CPFORMAT -1) !
+     K = 34                    ! Set field 34
+     RECORD = RECNO + (K -33)  ! Set Record number to read
+     READ #64, RECORD;         \ Read the record
+     FF.ROW(CPFORMAT,K),       \ Field Row
+     FF.LENGTH(CPFORMAT,K),    \ Field Length
+     FF.START(CPFORMAT,K),     \ Field Start Position
+     FF.FONT(CPFORMAT,K),      \ Field Font
+     FF.DS(CPFORMAT,K),        \ Field Double Strike
+     FF.CASE(CPFORMAT,K),      \ Field Case
+     FF.PAD.CHAR(CPFORMAT,K),  \ Field Pad Character
+     FF.PAD.BEFORE(CPFORMAT,K),\ Field Pad Before
+     FF.PAD.AFTER(CPFORMAT,K)  ! Field Pad After
+   ENDIF                       ! MC Enabled
+!EIR39486
+
+END SUB
+
+\REM!!*********************** READ.FORMATOP ********************************!!
+\REM!!  This subroutine will read a check format field options group from   !!
+\REM!!  the format definition file.                                         !!
+\REM!!                                                                      !!
+\REM!!  CPFORMAT and RD.CPFORMAT must be defined.                           !!
+\REM!!  The format definition file must be opened prior.                    !!
+\REM!!**********************************************************************!!
+
+SUB READ.FORMATOP PUBLIC
+
+READ #64,198 + RD.CPFORMAT; LEGAL.HUND.SEP$(CPFORMAT),     \hundredths seperator
+                         LEGAL.CENT.SEP$(CPFORMAT),     \cents seperator
+                         LEGAL.CENT.DESC$(CPFORMAT),    \cents descriptor
+                         LEGAL.DOL.DESC$(CPFORMAT),     \dollars descriptor
+                         LEGAL.ONE.DOL.DESC$(CPFORMAT), \dollar descriptor
+                         LEGAL.EXACT$(CPFORMAT),        \exact amount descriptor
+                         CONV.SEP$(CPFORMAT),           \conv amount seperator
+                         CP.DATEFORM(CPFORMAT)          !Type of format of date field
+
+END SUB
+
+
+\REM!!*********************** LCASE *********************************!!
+\REM!!  This function will check to see if a character is lowercase. !!
+\REM!!  A value of true or false is returned.  The ASCII value of    !!
+\REM!!  the character is passed.                                     !!
+\REM!!                                                               !!
+\REM!!  IF the character is between 97 and 122 inclusive then        !!
+\REM!!     it is lowercase                                           !!
+\REM!!  ELSE it is not lowercase                                     !!
+\REM!!                                                               !!
+\REM!!***************************************************************!!
+
+FUNCTION LCASE (CH)
+
+INTEGER*1 LCASE    !Function is true or false
+INTEGER*2 CH       !ASCII value of a character
+
+  IF (CH >= 97) AND (CH <=122) THEN LCASE = -1 \
+  ELSE LCASE = 0
+
+FEND
+
+
+\REM!!*********************** UCASE *********************************!!
+\REM!!  This function will check to see if a character is uppercase. !!
+\REM!!  A value of true or false is returned.  The ASCII value of    !!
+\REM!!  the character is passed.                                     !!
+\REM!!                                                               !!
+\REM!!  IF the character is between 65 and 90 inclusive then         !!
+\REM!!     it is uppercase                                           !!
+\REM!!  ELSE it is not uppercase                                     !!
+REM!!                                                               !!
+\REM!!***************************************************************!!
+
+FUNCTION UCASE (CH)
+
+INTEGER*1 UCASE    !Function is true or false
+INTEGER*2 CH       !ASCII value of a character
+
+  IF (CH >= 65) AND (CH <=90) THEN UCASE = -1 \
+  ELSE UCASE = 0
+
+FEND
+
+\REM!!*********************** CASE.CONVERT *********************************!!
+\REM!!  This subroutine will take the passed string and convert it to       !!
+\REM!!  uppercase, lowercase, or the first letter in each word uppercase.   !!
+\REM!!                                                                      !!
+\REM!!  Pre-Call Setups: CPFORMAT    !Current format number active          !!
+\REM!!                   CPFIELD     !Current field number active           !!
+\REM!!                                                                      !!
+\REM!!  The check format field attribute variables must be read in for the  !!
+\REM!!  current format.                                                     !!
+\REM!!                                                                      !!
+\REM!!  The conversion type used will be based on the value stored in       !!
+\REM!!      FF.CASE(CPFORMAT, CPFIELD)                                      !!
+\REM!!                                                                      !!
+\REM!!      Value           Conversion type                                 !!
+\REM!!        1             No conversion done.                             !!
+\REM!!        2             All uppercase characters                        !!
+\REM!!        3             Al lowercase characters                        !!
+\REM!!        4             First letter in each word uppercase             !!
+\REM!!                                                                      !!
+\REM!!                                                                      !!
+\REM!!**********************************************************************!!
+
+SUB CASE.CONVERT(CONVERT$) PUBLIC
+
+STRING WORK1$,         \Temp work string
+       CONVERT$       !String to convert
+
+INTEGER*2  CH         !Character to convert
+
+INTEGER*1  FIRST,     \First character found (ON/OFF)
+           CASE,      \
+           K          !Loop counter
+
+  WORK1$ = ""
+  CASE = FF.CASE(CPFORMAT, CPFIELD)         !Current character case
+  IF CASE = 2 THEN BEGIN                    !Need all uppercase
+     WORK1$ = UCASE$(CONVERT$)
+  ENDIF ELSE IF CASE <> 1 THEN BEGIN        !Lowercase and First letter Ucase
+     FIRST = 0                              !First letter in word not found
+     FOR K = 1 TO LEN(CONVERT$)             !All characters in string
+        CH = ASC(MID$(CONVERT$, K, 1))      !Get ASCII value of a character
+        IF NOT FIRST AND (UCASE(CH) OR LCASE(CH)) THEN BEGIN
+           FIRST = -1                       !First char in word found
+           IF LCASE(CH) AND CASE = 4 THEN \ !Need first char uppercase
+              CH = CH - 32                  !Convert to uppercase
+           IF UCASE(CH) AND CASE = 3 THEN \ !Need first char lowercase
+              CH = CH + 32                  !Convert to lowercase
+        ENDIF ELSE BEGIN
+          IF FIRST THEN BEGIN                !Rest of word
+             IF UCASE(CH) THEN              \!Need all chars in word lcase
+                CH = CH + 32                 !Convert to lowercase
+             IF CH = 32 THEN FIRST = 0       !Space ends the word
+          ENDIF
+        ENDIF
+        WORK1$ = WORK1$ + CHR$(CH)
+     NEXT K
+  ENDIF ELSE WORK1$ = CONVERT$               !Don't change string if CASE = 1
+  CONVERT$ = WORK1$
+END SUB
+
+
+\REM!!***********************  PAD.STRING **********************************!!
+\REM!!  This subroutine will take the passed string and fill it with the    !!
+\REM!!  required number of pad characters specified in the format field     !!
+\REM!!  attributes.
+\REM!!                                                                      !!
+\REM!!  Pre-Call Setups: CPFORMAT    !Current format number active          !!
+\REM!!                   CPFIELD     !Current field number active           !!
+\REM!!                   DATALENGTH  !Length of field data in characters    !!
+\REM!!                                                                      !!
+\REM!!  The check format field attribute variables must be read in for the  !!
+\REM!!  current format.                                                     !!
+\REM!!                                                                      !!
+\REM!!  The number and type of pad characters are determined by the         !!
+\REM!!  following variables:                                                !!
+\REM!!                                                                      !!
+\REM!!      FF.PAD.BEFORE (CPFORMAT, CPFIELD)                               !!
+\REM!!      FF.PAD.AFTER  (CPFORMAT, CPFIELD)                               !!
+\REM!!      FF.PAD.CHAR   (CPFORMAT, CPFIELD)                               !!
+\REM!!                                                                      !!
+\REM!!  A pad before or after value of 6 specifies the entire field is      !!
+\REM!!  to be filled before or after the field data.                        !!
+\REM!!                                                                      !!
+\REM!!  If the string to pad is of length greater than DATALENGTH, the      !!
+\REM!!  string will be truncated so the length will not exceed DATALENGTH   !!
+\REM!!  - PAD.AFTER.                                                        !!
+\REM!!                                                                      !!
+\REM!!  Global Variables Modified: NONE                                     !!
+\REM!!                                                                      !!
+\REM!!**********************************************************************!!
+
+SUB PAD.STRING(PAD$,REMAIN$) PUBLIC
+
+STRING               \
+       PAD$,         \String to pad
+       REMAIN$       !Leftover to be truncated - used only for Legal Amount string
+
+INTEGER*4   PAD.BEFORE,    \
+            PAD.AFTER
+
+INTEGER*1   PAD.CHAR,      \
+            I,             \
+            BLANK.FOUND
+
+  PAD.BEFORE = FF.PAD.BEFORE(CPFORMAT, CPFIELD)  !Pad chars before data
+  PAD.AFTER = FF.PAD.AFTER(CPFORMAT, CPFIELD)    !Pad chars after data
+  PAD.CHAR = FF.PAD.CHAR(CPFORMAT, CPFIELD)      !Character to pad
+
+  IF (LEN(PAD$) >= DATALENGTH) THEN BEGIN        !If more characters in string
+     I = DATALENGTH
+     IF (CPFIELD =4) OR (CPFIELD =33) THEN BEGIN !  If its the legal amount string
+        BLANK.FOUND = 0
+        WHILE NOT BLANK.FOUND
+           BLANK.FOUND = (MID$(PAD$,I,1) = " ")
+           IF BLANK.FOUND AND (PAD.AFTER <> 6) AND \
+              (PAD.BEFORE <> 6) THEN BEGIN
+              IF I > (DATALENGTH - PAD.BEFORE - PAD.AFTER) THEN BEGIN
+                 BLANK.FOUND = 0
+              ENDIF
+           ENDIF
+           IF NOT BLANK.FOUND THEN BEGIN
+              I = I - 1
+           ENDIF
+        WEND
+        REMAIN$ = RIGHT$(PAD$,LEN(PAD$) - I)
+        PAD$    = LEFT$(PAD$,I)                  !   Else, if any other string.
+     ENDIF ELSE BEGIN
+        REMAIN$ = RIGHT$(PAD$,LEN(PAD$) - I)
+     ENDIF
+  ENDIF
+
+  IF PAD.BEFORE = 6 AND PAD.AFTER =6 THEN BEGIN
+     PAD.BEFORE = ROUND((DATALENGTH - LEN(PAD$))/2,0,0)
+     PAD.AFTER  = ROUND((DATALENGTH - LEN(PAD$))/2,0,0)
+  ENDIF ELSE IF PAD.BEFORE = 6 THEN BEGIN    !Fill entire data field before data
+     PAD.BEFORE = DATALENGTH - LEN(PAD$)     !Number of fill chars
+  ENDIF ELSE IF PAD.AFTER = 6 THEN BEGIN     !Fill entire data field after data
+     PAD.AFTER = DATALENGTH - LEN(PAD$)      !Number of fill chars
+  ENDIF
+
+  IF PAD.BEFORE < 0 THEN PAD.BEFORE = 0      !Make pad before not less than 0
+  IF PAD.AFTER < 0 THEN PAD.AFTER = 0        !Make pad after not less than 0
+
+
+  PAD$ = STRING$(PAD.BEFORE,CHR$(PAD.CHAR)) + PAD$
+
+  IF (DATALENGTH - PAD.AFTER) >= 0 THEN                   \
+     IF LEN(PAD$) > (DATALENGTH - PAD.AFTER) THEN BEGIN   !No room for pad.after
+       IF (CPFIELD <> 4) THEN \
+          REMAIN$ = MID$(PAD$,LEN(PAD$),1)                !   truncate data.
+       PAD$ = LEFT$(PAD$, DATALENGTH - PAD.AFTER)         !
+     ENDIF
+
+  PAD$ = PAD$ + STRING$(PAD.AFTER, CHR$(PAD.CHAR)) !Add pad chars
+
+  PAD$ = LEFT$(PAD$ + STRING$(80, " "), DATALENGTH) !Fill entire data field
+END SUB
+
+
+\ REM!!====================> REMOVE.BLANKS$ <=========================!!
+\ REM!!                                                               !!
+\ REM!!  This function removes any blanks from a string.              !!
+\ REM!!                                                               !!
+\ REM!! FUNCTION REMOVE.BLANKS$(ANY.STR$) PUBLIC                      !!
+\ REM!!  STRING ANY.STR$                                              !!
+\ REM!!                                                               !!
+\ REM!!  locate end of leading blanks                                 !!
+\ REM!!  locate start of trailing blanks                              !!
+\ REM!!  remove leading and trailing blanks                           !!
+\ REM!!                                                               !!
+\ REM!! END FUNCTION                                                  !!
+\ REM!!                                                               !!
+\ REM!!===============================================================!!
+
+
+  FUNCTION REMOVE.BLANKS$(ANY.STR$) PUBLIC
+
+  STRING    REMOVE.BLANKS$,  \
+            ANY.STR$         !
+
+  INTEGER*2 FRONT,            \
+            BACK,             \
+            TOTAL.LENGTH,     \
+            I,J               !
+
+    TOTAL.LENGTH = LEN(ANY.STR$)
+    FRONT = 0
+    FOR I = 1 TO TOTAL.LENGTH              ! locate end of leading blanks
+      IF MID$(ANY.STR$,I,1) <> " " THEN \
+        FRONT = I  :\
+        I = TOTAL.LENGTH + 1
+    NEXT
+
+    IF FRONT = 0 THEN \ ! all blanks
+      ANY.STR$ = ""  :\
+      GOTO FINISHED.VAL
+
+    BACK = 0
+    FOR I = 0 TO TOTAL.LENGTH - 1          ! locate end of trailing blanks
+      J = TOTAL.LENGTH - I
+      IF MID$(ANY.STR$,J,1) <> " " THEN \
+        BACK = J :\
+        I = TOTAL.LENGTH
+    NEXT I
+
+    ! strip off leading and trailing blanks
+    ANY.STR$ = MID$(ANY.STR$,FRONT,(BACK-FRONT+1))
+
+FINISHED.VAL:
+    REMOVE.BLANKS$ = ANY.STR$      ! set function equal to the number
+  END FUNCTION
+
+
+
+\REM!!*********************** READ.CPDESC **********************************!!
+\REM!!  This subroutine will read in the check printing descriptors needed  !!
+\REM!!  in both terminal sales and the check editor.                        !!
+\REM!!                                                                      !!
+\REM!!  1. Legal amount monetary descriptors                                !!
+\REM!!  2. Month descriptors                                                !!
+\REM!!                                                                      !!
+\REM!!  SUB READ.CPDESC PUBLIC                                              !!
+\REM!!    Read in 12 month strings from descriptor file and strip spaces    !!
+\REM!!    Read in 38 legal strings from descriptor file and strip spaces    !!
+\REM!!**********************************************************************!!
+
+SUB READ.CPDESC PUBLIC
+
+INTEGER*1  WORK     !Loop control
+
+   FOR WORK = 1 TO 12    !Read month descriptors
+      READ #64, WORK; CP.MONTH$(WORK)
+      CP.MONTH$(WORK) = REMOVE.BLANKS$(CP.MONTH$(WORK))
+   NEXT WORK
+
+   FOR WORK = 0 TO 38    !Read monetary strings
+      READ #64, WORK + 13; CP.DENOM$(WORK)
+      CP.DENOM$(WORK) = REMOVE.BLANKS$(CP.DENOM$(WORK))
+   NEXT WORK
+
+
+END SUB
+
+
+\REM!!*********************** ALPAH.DATE$ **********************************!!
+\REM!!  This function will return a date string in the form YYMMMDD.        !!
+\REM!!  the basic function DATE$ is used to obtain the current system date. !!
+\REM!!**********************************************************************!!
+
+FUNCTION ALPHA.DATE$ PUBLIC
+
+STRING ALPHA.DATE$
+
+INTEGER*1 MNTH
+
+   MNTH = VAL(MID$(DATE$,3,2))
+   ALPHA.DATE$ = RIGHT$(DATE$,2) + CP.MONTH$(MNTH) + LEFT$(DATE$,2)
+
+FEND
+
+
+
+\REM!!************************* LEGAL$ *************************************!!
+\REM!!  This subroutine will take a convenience amount string and convert   !!
+\REM!!  it to the amount in words.                                          !!
+\REM!!                                                                      !!
+\REM!!**********************************************************************!!
+
+FUNCTION LEGAL$ (AMOUNT$, DEC.POS) PUBLIC
+
+!Amount must be passed as a string in the correct monetary format (999.99)
+!Decimal Place indicator in MM.STATUS must also be passed since it is
+!   different in Terminal (37) and Controller (23).
+!
+! SPEC.PROC = 0       English speaking countries
+!           = 1       General for World Trade Countries (non-English)
+!           = 2       French specific
+!           = 3       German specific
+!
+!************************************************************************
+
+
+
+INTEGER*1    DEC.POS     ! Position of Deicmal indicator in MM.STATUS
+
+INTEGER*1    HUN.SEP.PLACED  ! Flag stating hundredths sep. has been placed.
+
+INTEGER*4    Q,          \
+             AMOUNT,     \
+             DIVISOR,    \
+             H           !
+
+STRING       AMOUNT$,         \
+             WHICH.DOL.DESC$, \
+             DENOM$,          \
+             WORD$,           \
+             BLANK$,          \
+             LEGAL$,          \
+             DENOM2$
+
+   BLANK$ = " "
+
+!AIR39486 - Get legal options for selected Foreign Currency
+   IF MC.ENABLED THEN BEGIN   ! If MC Feature is active
+     IF SEL.FC.SLOT = 0       \
+                   THEN BEGIN ! If Selected FC Slot not Set
+       SEL.FC.SLOT = 1        ! Set it to 1 (Pri Base Currency).
+     ENDIF                    ! Selected FC Slot not Set
+
+     MC.LEGAL.HUND.SEP$ =     \
+      CPOP.ARR$(SEL.FC.SLOT,1)! get hundredths seperator from Exchg Rate file.
+     MC.LEGAL.CENT.SEP$ =     \
+      CPOP.ARR$(SEL.FC.SLOT,2)! get cents seperator from Exchg Rate file.
+     MC.LEGAL.CENT.DESC$ =    \
+      CPOP.ARR$(SEL.FC.SLOT,3)! get cents descriptor from Exchg Rate file.
+     MC.LEGAL.DOL.DESC$ =     \
+      CPOP.ARR$(SEL.FC.SLOT,4)! get dollars descriptor from Exchg Rate file.
+     MC.LEGAL.ONE.DOL.DESC$ = \
+      CPOP.ARR$(SEL.FC.SLOT,5)! get dollar descriptor from Exchg Rate file.
+     MC.LEGAL.EXACT$ =        \
+      CPOP.ARR$(SEL.FC.SLOT,6)! get exact amount desc. from Exchg Rate file.
+     MC.CONV.SEP$ =           \
+      CPOP.ARR$(SEL.FC.SLOT,7)! get conv amount seperator from Exchg Rate file.
+     MC.CP.DATEFORM$ =        \
+      CPOP.ARR$(SEL.FC.SLOT,8)! get Type of format of date field from Exchg
+                              !  Rate file.
+   ENDIF                      ! MC Feature is enabled
+!EIR39486
+
+   IF SPEC.PROC = 3 THEN BLANK$ = ""  ! German words to run together
+
+   WORD$ = ""
+   HUN.SEP.PLACED = 0
+   IF VAL(MID$(MM.STATUS$,DEC.POS,1)) <> 0 THEN BEGIN
+      IF (LEFT$(AMOUNT$,LEN(AMOUNT$) - 3)) = "" THEN BEGIN
+         AMOUNT = 0
+      ENDIF ELSE BEGIN
+         AMOUNT = VAL(LEFT$(AMOUNT$,LEN(AMOUNT$) - 3)) !Get dollar amount
+      ENDIF
+   ENDIF ELSE BEGIN
+      AMOUNT = VAL(AMOUNT$)                         !Get dollar amount
+   ENDIF
+   IF (AMOUNT = 1) THEN BEGIN                       !If a single dollar
+      WHICH.DOL.DESC$ = LEGAL.ONE.DOL.DESC$(CPFORMAT)
+!AIR39486 - Select proper Legal One Dollar Descriptor
+      IF MC.ENABLED THEN BEGIN                      ! If MC Feature Enabled
+        IF MC.LEGAL.ONE.DOL.DESC$ <> "" THEN BEGIN  ! IF MC Defined
+          WHICH.DOL.DESC$ = MC.LEGAL.ONE.DOL.DESC$  !  Use it.
+        ENDIF                                       ! MC Defined
+      ENDIF                                         ! MC Feature Enabled
+!EIR39486
+   ENDIF ELSE BEGIN
+      WHICH.DOL.DESC$ = LEGAL.DOL.DESC$(CPFORMAT)
+!AIR39486 - Select proper Legal One Dollar Descriptor
+      IF MC.ENABLED THEN BEGIN                      ! If MC Feature Enabled
+        IF MC.LEGAL.DOL.DESC$ <> "" THEN BEGIN      ! IF MC Defined
+          WHICH.DOL.DESC$ = MC.LEGAL.DOL.DESC$      !  Use it.
+        ENDIF                                       ! MC Defined
+      ENDIF                                         ! MC Feature Enabled
+!EIR39486
+   ENDIF
+   IF AMOUNT = 0 THEN BEGIN                         !If dollar amount is  0
+      WORD$ = CP.DENOM$(0) + BLANK$                 !   put "zero" in string
+   ENDIF
+   WHILE AMOUNT > 0                              !Amount not zero
+      IF AMOUNT > 1000000 THEN BEGIN             !Millionths place
+         DIVISOR = 1000000
+         DENOM$ = CP.DENOM$(38) + BLANK$
+         HUN.SEP.PLACED = 0
+      ENDIF ELSE \
+!AIR47305
+!        IF AMOUNT > 1000 THEN BEGIN
+         IF AMOUNT >= 1000 THEN BEGIN            ! Need the word 'one' in front of
+                                                 ! thousand when amount is exactly $1000.XX
+!EIR47305
+            DIVISOR = 1000
+            DENOM$ = CP.DENOM$(37) + BLANK$      !Thousandths place
+            HUN.SEP.PLACED = 0
+         ENDIF ELSE BEGIN
+            DIVISOR = 1                          !No millionths or thousandths
+            DENOM$ = ""                          !left
+            HUN.SEP.PLACED = 0
+         ENDIF
+
+      Q = INT%(AMOUNT / DIVISOR)
+      AMOUNT = AMOUNT - (DIVISOR * Q)
+
+      IF (SPEC.PROC = 1) OR (SPEC.PROC = 2) THEN BEGIN
+         IF (Q=1) AND (DIVISOR=1000) THEN Q=0    ! No ONE before thousand
+      ENDIF
+
+      DENOM2$ = ""
+      IF Q > 100 THEN BEGIN                      !Hundredths place
+         H = INT%(Q / 100)
+         DENOM2$ = CP.DENOM$(H + 27) + BLANK$
+         Q = Q - (100 * H)
+
+! If ENGLISH speaking then use the Hundredths Separator to
+! separator hundredths and tenths.
+
+         IF (SPEC.PROC = 0) THEN BEGIN
+!AIR39486 - Select proper Legal Hundreds Separator.
+!           IF (Q <> 0) AND (NOT HUN.SEP.PLACED) AND \
+!              (LEGAL.HUND.SEP$(CPFORMAT) <> "") THEN BEGIN
+!              DENOM2$ = DENOM2$ + LEGAL.HUND.SEP$(CPFORMAT) + BLANK$
+!              HUN.SEP.PLACED = -1
+!           ENDIF
+
+            IF NOT(MC.ENABLED) THEN BEGIN        ! If not MC Enabled
+              IF (Q <> 0) AND                    \
+                 (NOT HUN.SEP.PLACED) AND        \
+                 (LEGAL.HUND.SEP$(CPFORMAT) <>   \
+                                  "") THEN BEGIN ! If need to place hund. sep.
+                DENOM2$ = DENOM2$              + \
+                     LEGAL.HUND.SEP$(CPFORMAT) + \
+                                          BLANK$ ! Assemble data
+                HUN.SEP.PLACED = -1              ! Flag as complete.
+              ENDIF                              ! need to place hundreths. sep.
+            ENDIF ELSE BEGIN                     ! else if MC Feature active
+              IF MC.LEGAL.HUND.SEP$ = ""         \ If not defined in the
+                                      THEN BEGIN !  Exchg Rate File.
+                MC.LEGAL.HUND.SEP$ =             \
+                       LEGAL.HUND.SEP$(CPFORMAT) ! Get default hundreths separator
+              ENDIF                              ! defined in Exchg Rate File
+              IF (Q <> 0) AND                    \
+                        (NOT HUN.SEP.PLACED) AND \
+                   (LEGAL.HUND.SEP$(CPFORMAT) <> \
+                                  "") THEN BEGIN ! If need to place hundreths sep.
+                DENOM2$ = DENOM2$              + \
+                            MC.LEGAL.HUND.SEP$ + \
+                                          BLANK$ ! Assemble data
+                HUN.SEP.PLACED = -1              ! Flag as complete
+              ENDIF                              ! need to place hundreths sep.
+            ENDIF                                ! not MC Feature Enabled
+!EIR39486
+         ENDIF
+
+      ENDIF
+
+! If any country but GERMAN, use this processing.  It will order
+! the words in tenths followed by ones.
+
+      IF (SPEC.PROC = 0) OR \
+         (SPEC.PROC = 1) OR \
+         (SPEC.PROC = 2) THEN BEGIN
+
+      H = 0
+      IF Q > 19 THEN BEGIN                       !Tenths place
+         H = INT%(Q / 10)
+         IF (SPEC.PROC <> 2) THEN BEGIN
+            DENOM2$ = DENOM2$ + CP.DENOM$(H + 18) + BLANK$
+         ENDIF
+         Q = Q - (10 * H)
+
+
+! If France, then the seventies and the nineties are handled in a
+! special case (France has no word for seventy and ninety.
+! Seventy one is even more of an exception to the rule.
+
+         IF (SPEC.PROC = 2) THEN BEGIN
+            IF (H = 7) AND (Q = 1) THEN BEGIN              ! If 71 then,
+!AIR39486 - Select proper Legal Hundredths Separator
+!              DENOM2$ = DENOM2$ + CP.DENOM$(6 + 18) +     \
+!                        BLANK$ +                          \
+!                        LEGAL.HUND.SEP$(CPFORMAT) +       \
+!                        BLANK$ + CP.DENOM$(11) + BLANK$   !Sixty+eleven
+
+               IF NOT(MC.ENABLED) THEN BEGIN               ! If not MC Enabled
+                 DENOM2$ = DENOM2$ + CP.DENOM$(6 + 18) +   \ Assemble Denom2
+                           BLANK$ +                        \  variable.
+                         LEGAL.HUND.SEP$(CPFORMAT) +       \
+                         BLANK$ + CP.DENOM$(11) + BLANK$   !Sixty+eleven
+               ENDIF ELSE BEGIN                            ! else if MC Enabled
+                 IF MC.LEGAL.HUND.SEP$ = "" THEN BEGIN     ! if not defined in ERF
+                   MC.LEGAL.HUND.SEP$ =                    \  use base definition
+                                 LEGAL.HUND.SEP$(CPFORMAT) !
+                 ENDIF                                     ! not defined in ERF
+                 DENOM2$ = DENOM2$ + CP.DENOM$(6 + 18)   + \
+                           BLANK$                        + \ Assemble Denom2
+                           MC.LEGAL.HUND.SEP$            + \  variable.
+                           BLANK$                        + \
+                           CP.DENOM$(11)                 + \
+                           BLANK$                          ! Sixty+eleven
+               ENDIF                                       ! not MC Enabled
+!EIR39486
+               Q = 0
+            ENDIF ELSE IF (H = 7) OR (H = 9) THEN BEGIN ! If 70's
+                                                        !   or 90's
+               DENOM2$ = DENOM2$ + CP.DENOM$(H - 1 + 18)
+               Q = Q + 10
+               DENOM2$ = DENOM2$ + "-" + CP.DENOM$(Q) + BLANK$
+               Q = 0
+            ENDIF ELSE BEGIN
+               DENOM2$ = DENOM2$ + CP.DENOM$(H + 18)
+
+!AIR_CHG1 Other French tens and ones must be separated by a hyphen.
+               IF (Q = 0) OR                              \ no ones digit
+                  ((Q=1) AND (H<>8)) THEN BEGIN
+                  DENOM2$ = DENOM2$ + BLANK$
+               ENDIF ELSE IF (H <> 0 ) AND ((H < 7)OR(H = 8)) THEN BEGIN
+                  DENOM2$ = DENOM2$ + "-"
+               ENDIF
+            ENDIF
+!EIR_CHG1
+         ENDIF                                            ! End French
+
+      ENDIF
+
+! If World Trade countries separate the tens and ones with
+! an AND when its 21, 31, 41, 51, 61, 71, 81, and 91.
+
+      IF (SPEC.PROC = 1) THEN BEGIN
+         IF (Q = 1) AND (H > 1) THEN BEGIN
+!AIR39486 - Select proper Legal Hundreths Separator
+!           DENOM2$ = DENOM2$ + LEGAL.HUND.SEP$(CPFORMAT) + \
+!                     BLANK$ + CP.DENOM$(Q) + BLANK$
+
+            IF NOT(MC.ENABLED) THEN BEGIN                   ! If MC not active
+              DENOM2$ = DENOM2$ + LEGAL.HUND.SEP$(CPFORMAT)+\
+                        BLANK$ + CP.DENOM$(Q) + BLANK$
+            ENDIF ELSE BEGIN                                ! else if MC active
+              IF MC.LEGAL.HUND.SEP$ = "" THEN BEGIN         ! If not def. in ERF
+                MC.LEGAL.HUND.SEP$ =                        \ Use base
+                                  LEGAL.HUND.SEP$(CPFORMAT) !  definition.
+              ENDIF                                         ! defined in ERF
+              DENOM2$ = DENOM2$                           + \
+                        MC.LEGAL.HUND.SEP$                + \ Assemble Denom2
+                        BLANK$                            + \  data.
+                        CP.DENOM$(Q)                      + \
+                        BLANK$                              !
+            ENDIF                                           ! MC not active
+!EIR39486
+            Q = 0
+         ENDIF
+      ENDIF
+
+!AIR_CHG1
+! If French based countries separate the tens and ones with
+! an AND when its 21, 31, 41, 51, 61, and 71.
+
+      IF (SPEC.PROC = 2) THEN BEGIN
+         IF (Q = 1) AND (H > 1) AND (H < 8) THEN BEGIN
+!AIR39486 - Select proper Legal Hundreths Separator
+!           DENOM2$ = DENOM2$ + LEGAL.HUND.SEP$(CPFORMAT) + \
+!                     BLANK$ + CP.DENOM$(Q) + BLANK$
+
+            IF NOT(MC.ENABLED) THEN BEGIN                   ! If MC not active
+              DENOM2$ = DENOM2$ + LEGAL.HUND.SEP$(CPFORMAT)+\
+                        BLANK$ + CP.DENOM$(Q) + BLANK$
+            ENDIF ELSE BEGIN                                ! else if MC active
+              IF MC.LEGAL.HUND.SEP$ = "" THEN BEGIN         ! If not def. in ERF
+                MC.LEGAL.HUND.SEP$ =                        \ Use base
+                                  LEGAL.HUND.SEP$(CPFORMAT) !  definition.
+              ENDIF                                         ! defined in ERF
+              DENOM2$ = DENOM2$                           + \
+                        MC.LEGAL.HUND.SEP$                + \ Assemble Denom2
+                        BLANK$                            + \  data.
+                        CP.DENOM$(Q)                      + \
+                        BLANK$                              !
+            ENDIF                                           ! MC not active
+
+!EIR39486
+            Q = 0
+         ENDIF
+      ENDIF
+!EIR_CHG1
+
+      IF Q >= 1 THEN BEGIN                             !1-19
+         DENOM2$ = DENOM2$ + CP.DENOM$(Q) + BLANK$
+      ENDIF
+
+! If GERMAN, then we do a reversal of ones and tens.  21 is written
+! ONE and TWENTY.
+
+      ENDIF ELSE IF (SPEC.PROC = 3) THEN BEGIN
+         H = 0
+         IF Q > 19 THEN BEGIN                            ! Get tens and
+            H = INT%(Q / 10)                             !   ones places
+            Q = Q - (10 * H)
+         ENDIF
+         IF Q >= 1 THEN BEGIN                            ! Put ones place
+            DENOM2$ = DENOM2$ + CP.DENOM$(Q)
+         ENDIF
+         IF H <> 0 THEN BEGIN                            ! If tens place,
+            IF Q <> 0 THEN BEGIN
+!AIR39486 - Select proper Legal Hundreths Separator
+!              DENOM2$ = DENOM2$ +                       \
+!                        LEGAL.HUND.SEP$(CPFORMAT) +     \ add after
+!                        CP.DENOM$(H + 18)               !  a connector.
+
+               IF NOT(MC.ENABLED) THEN BEGIN             ! If not MC Enabled
+               DENOM2$ = DENOM2$ +                       \
+                         LEGAL.HUND.SEP$(CPFORMAT) +     \ add after
+                         CP.DENOM$(H + 18)               !  a connector.
+               ENDIF ELSE BEGIN                          ! else if MC Enabled
+                 IF MC.LEGAL.HUND.SEP$ = "" THEN BEGIN   ! If not defined in ERF
+                   MC.LEGAL.HUND.SEP$ =                  \ use base definition
+                               LEGAL.HUND.SEP$(CPFORMAT) !
+                 ENDIF                                   ! not defined in ERF
+                 DENOM2$ = DENOM2$                     + \
+                           MC.LEGAL.HUND.SEP$          + \ add after
+                           CP.DENOM$(H + 18)             !  a connector.
+               ENDIF                                     ! not MC Enabled
+!EIR39486
+            ENDIF ELSE BEGIN
+               DENOM2$ = DENOM2$ + CP.DENOM$(H + 18)     !
+            ENDIF
+         ENDIF
+      ENDIF
+
+
+      WORD$ = WORD$ + DENOM2$ + DENOM$
+
+    WEND
+
+    IF WHICH.DOL.DESC$ <> "" THEN                \
+       WORD$ = WORD$ + WHICH.DOL.DESC$ + " "     !denomination descriptor
+
+    AMOUNT = 0
+    IF VAL(MID$(MM.STATUS$,DEC.POS,1)) <> 0 THEN BEGIN
+       AMOUNT = VAL(RIGHT$(AMOUNT$, 2))                 !Get the change
+    ENDIF
+    IF AMOUNT > 0 THEN BEGIN                            !Add the change
+!AIR39486 - Select proper Legal Cents Separator
+!      IF LEGAL.CENT.SEP$(CPFORMAT) <> "" THEN          \ change left
+!         WORD$ = WORD$ + LEGAL.CENT.SEP$(CPFORMAT) + BLANK$
+
+       IF NOT(MC.ENABLED) THEN BEGIN                    ! If not MC Enabled
+         IF LEGAL.CENT.SEP$(CPFORMAT) <> "" THEN BEGIN  ! change left
+           WORD$ = WORD$                              + \
+                   LEGAL.CENT.SEP$(CPFORMAT)          + \ Assemble word
+                   BLANK$                               !
+         ENDIF                                          ! change left
+       ENDIF ELSE BEGIN                                 ! else if MC Enabled
+         IF MC.LEGAL.CENT.SEP$ = "" THEN BEGIN          ! If not defined in ERF
+           MC.LEGAL.CENT.SEP$ =                         \
+                              LEGAL.CENT.SEP$(CPFORMAT) ! use base definition
+         ENDIF                                          ! not defined in ERF
+         IF MC.LEGAL.CENT.SEP$ <> "" THEN BEGIN         ! change left
+           WORD$ = WORD$                              + \
+                   MC.LEGAL.CENT.SEP$                 + \ Assemble word data
+                   BLANK$                               !
+         ENDIF                                          ! change left
+       ENDIF                                            ! not MC Enabled
+!EIR39486
+
+! If GERMAN, then don't include the change if no cents descriptor
+! has been specified.
+! Otherwise, for every other country, add on the change and descriptor.
+!
+! IR_CHG1 Added a space between cents and cents descriptor.
+
+       IF SPEC.PROC = 3 THEN BEGIN
+!AIR39486 - Select proper Legal Cents Descriptor
+!         IF LEGAL.CENT.DESC$(CPFORMAT) <> "" THEN \
+!            WORD$ = WORD$+RIGHT$(AMOUNT$,2)+BLANK$+ LEGAL.CENT.DESC$(CPFORMAT)
+
+          IF NOT(MC.ENABLED) THEN BEGIN            ! If not MC Enabled
+            IF LEGAL.CENT.DESC$(CPFORMAT) <> ""    \ If descriptor defined
+                                        THEN BEGIN !
+              WORD$ = WORD$                      + \
+                      RIGHT$(AMOUNT$,2)          + \ Assemble data
+                      BLANK$                     + \
+                      LEGAL.CENT.DESC$(CPFORMAT)   !
+            ENDIF                                  ! descriptor defined
+          ENDIF ELSE BEGIN                         ! else if MC Enabled
+            IF MC.LEGAL.CENT.DESC$ = "" THEN BEGIN ! If not defined in ERF
+              MC.LEGAL.CENT.DESC$ =                \ use base definition
+                        LEGAL.CENT.DESC$(CPFORMAT) !
+            ENDIF                                  ! not defined in ERF
+            IF MC.LEGAL.CENT.DESC$ <> ""           \ if descriptor defined
+                                        THEN BEGIN \
+              WORD$ = WORD$                      + \ Assemble data
+                      RIGHT$(AMOUNT$,2)          + \
+                      BLANK$                     + \
+                      MC.LEGAL.CENT.DESC$          !
+            ENDIF                                  ! descriptor defined
+          ENDIF                                    ! not MC Enabled
+          LEGAL$ = WORD$                           ! return string
+!EIR39486
+       ENDIF ELSE BEGIN
+!AIR39486 - Select proper Legal Cents Descriptor
+!         WORD$ = WORD$ + RIGHT$(AMOUNT$,2)+BLANK$+ LEGAL.CENT.DESC$(CPFORMAT)
+
+          IF NOT(MC.ENABLED) THEN BEGIN            ! If not MC Enabled
+            WORD$ = WORD$                        + \
+                    RIGHT$(AMOUNT$,2)            + \ Assemble data
+                    BLANK$                       + \
+                    LEGAL.CENT.DESC$(CPFORMAT)     !
+          ENDIF ELSE BEGIN                         ! else if MC Enabled
+            IF MC.LEGAL.CENT.DESC$ = "" THEN BEGIN ! If not defined in ERF
+              MC.LEGAL.CENT.DESC$ =                \ use base definition
+                        LEGAL.CENT.DESC$(CPFORMAT) !
+            ENDIF                                  ! not defined in ERF
+            WORD$ = WORD$                        + \
+                    RIGHT$(AMOUNT$,2)            + \ Assemble data
+                    BLANK$                       + \
+                    MC.LEGAL.CENT.DESC$            !
+          ENDIF                                    ! not MC Enabled
+          LEGAL$ = WORD$                           ! return string
+!EIR39486
+       ENDIF
+    ENDIF ELSE BEGIN
+!AIR39486 - Select proper Legal Cent Desc. based on Foreign Currency
+!      IF LEGAL.EXACT$(CPFORMAT) = "" THEN BEGIN         ! no change
+!
+! If not GERMAN, then put a ZERO if no change.  GERMAN will have nothing
+! instead.
+!
+! IR_CHG1  Also, French will behave the same here.
+!
+!         IF (SPEC.PROC <> 3) AND (SPEC.PROC <> 2) THEN BEGIN
+!            WORD$ = WORD$ + CP.DENOM$(0)                ! zero desc
+!            WORD$ = WORD$ + LEGAL.CENT.DESC$(CPFORMAT)
+!         ENDIF
+!      ENDIF ELSE WORD$ = WORD$ + LEGAL.EXACT$(CPFORMAT) ! or exact desc
+!   ENDIF
+!   LEGAL$ = WORD$
+
+      IF NOT(MC.ENABLED) THEN BEGIN                      ! If not MC Enabled
+        IF LEGAL.EXACT$(CPFORMAT) = "" THEN BEGIN        ! if no change
+
+! If not GERMAN, then put a ZERO if no change.  GERMAN will have nothing
+! instead.
+!
+! IR_CHG1  Also, French will behave the same here.
+!
+          IF (SPEC.PROC <> 3) AND                        \ If spec proc <> 3 and
+             (SPEC.PROC <> 2) THEN BEGIN                 !  spec proc <> 2
+             WORD$ = WORD$ + CP.DENOM$(0)                ! zero desc
+             WORD$ = WORD$ + LEGAL.CENT.DESC$(CPFORMAT)  ! Assemble word
+          ENDIF                                          ! spec proc <> 3 & <> 2
+        ENDIF ELSE BEGIN                                 ! else if change
+          WORD$ = WORD$ + LEGAL.EXACT$(CPFORMAT)         ! Assemble word
+        ENDIF                                            ! no change
+        LEGAL$ = WORD$                                   ! Set Variable
+      ENDIF ELSE BEGIN                                   ! else if MC Enabled
+        IF MC.LEGAL.EXACT$ = "" THEN BEGIN               ! If not defined in ERF
+          MC.LEGAL.EXACT$ = LEGAL.EXACT$(CPFORMAT)       ! use base definition
+        ENDIF                                            ! not defined in ERF
+        IF MC.LEGAL.EXACT$ = "" THEN BEGIN               ! no change
+
+! If not GERMAN, then put a ZERO if no change.  GERMAN will have nothing
+! instead.
+!
+! IR_CHG1  Also, French will behave the same here.
+!
+          IF (SPEC.PROC <> 3) AND                        \ If spec proc not 2
+             (SPEC.PROC <> 2) THEN BEGIN                 !  or 3.
+            WORD$ = WORD$ + CP.DENOM$(0)                 ! zero desc
+            WORD$ = WORD$ + MC.LEGAL.CENT.DESC$          ! assemble word
+          ENDIF                                          ! spec proc not 2 or 3
+        ENDIF ELSE BEGIN                                 ! else if change
+          WORD$ = WORD$ + MC.LEGAL.EXACT$                ! or exact desc
+        ENDIF                                            ! no change
+        LEGAL$ = WORD$                                   ! set variable
+      ENDIF                                              ! not MC Enabled
+!EIR39486
+    ENDIF
+FEND
+

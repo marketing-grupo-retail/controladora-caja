@@ -1,0 +1,87 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!-- Virtual
+
+FUNCTION TSUPEC20 PUBLIC
+!CALL SUBSTR(TS.PRTBUF$,28,"EC20",0,4)
+INTEGER*1 TSUPEC20                 ! define variable !IR89474
+
+
+!CALL MKTPTS20.011                  ! MODULO PROMOCIONES
+
+%INCLUDE EAMTSE20.J86              ! Electronic Marketing PRPQ
+CALL RTITSU20.011                  ! Modulo Ivas
+!CALL LIBLINE(20,1)                 ! Formato de linea de CR y Plu en Cust.Receipt
+
+CALL LIBLINE(20,2)                 ! Imprime x por @
+CALL PROMOCIONV2(20)               ! MOTOR PROMOCIONES V2
+
+If (Ue.Cnv.Fiscal% = 0) Then      \!
+   CALL LIBLINE(20,3)              ! Imprime Subtotal sin IVA y Num de Factura
+CALL LIBLINE(20,4)                 ! Imprime linea Adicional despues de TOTAL
+CALL LIBLINE(20,5)                 ! Impresion Resumen Liquid Iva
+CALL CFTSU20.011                   ! Modulo de ofertas
+CALL RECASRV(20,0)		             ! PAGO SERVICIOS PUBLICOS
+CALL LIBLINE(20,6)                 ! Franqueo de Concesiones 
+CALL LIBLINE(20,7)                 ! Impresion de Minifactura
+CALL LIBLINE(20,8)                 ! Reset Flag de Verificacion
+CALL COMFTS20.011                  ! COMFANDI - CISA
+CALL COLMTS20.011                  ! RECAUDO COLEGIOS
+CALL EDUMTS20.011                  ! RECAUDO SIEMPRE EDUCANDO
+
+!CALL EPAYMS20.011                  ! PAGO ELECTRONICO
+
+CALL DOMIMS20.011                  ! MODULO DOMICILIOS
+CALL RECATS20.011                  ! RECARGAS ONLINE
+CALL PEFMTS20.011                  ! PAGO ELECTRONICO - FONEDE
+
+
+!CALL PROMOCIONV2(20)               ! MOTOR PROMOCIONES V2
+
+CALL BONOCOMPRAS(20)               ! BONOS RECOMPRA
+CALL BONOCOMPRASPAGO(20)           ! Bono recompra forma pago
+
+CALL GR.DIA.SINIVA(20)             ! DIA SIN IVA
+CALL GRMOVRMS(20)                  ! Remisiones de mercancia
+
+!CALL GR.FE.NATURAL(20)             ! FE PERSONAS NATURALES
+
+If (Ue.Cnv.Fiscal% = 0) Then Begin !
+   CALL IVATSU20.011               ! IMPRESION DE IVAS
+   CALL FISMTS20.011		           ! Modulo Fiscal
+EndIf 
+
+CALL IVATSU20.012                  ! IMPRESION DE IVAS - OBSERVACIONES FECO
+CALL NOTASCREDITOPOS(20)           ! NOTAS CREDITO
+CALL LCFTSU20.011                  ! Modulo Lealtad Clientes Online
+
+CALL GR.FE.NATURAL(20)             ! FE PERSONAS NATURALES
+CALL EPSEANTS20                    ! MINIFACTURA - FACTURA ELECTRONICA
+CALL REMISION(20)                  ! REMISION MERCANCIA
+CALL LIBLINE(20,1)                 ! Formato de linea de CR y Plu en Cust.Receipt
+CALL EPSMTS20.011                  ! Modulo Convenios
+CALL EPSMTS20.012                  ! Modulo Convenios
+
+!CALL GRMOVRMS(20)                  ! Remisiones de mercancia
+
+CALL GRMBONOS(20)                  ! Modulo Bonos Lealtad
+CALL ESCALONADO(20)          			 ! DESCUENTOS ESCALONADOS
+CALL GRPFIZER(20)                  ! DSCTO ESCALONADO PFIZER
+CALL GRFAMILIAS(20)                ! FAMILIAS EN ACCION 
+CALL CRDEMPRESAS(20)               ! CREDITO EMPRESARIAL
+CALL BRCOMPRAPAGO(20)              ! RECOMPRA FORMA PAGO
+!CALL GR.DIA.SINIVA(20)             ! DIA SIN IVA
+
+CALL GRABJSN(20)                   ! ESCALONADO ABBOT JSON
+CALL BONOS.ELECTRO(20)             ! CONTROL BONO ELECTROFIESTA
+CALL BONOS.ELECTROSUPDRG(20)       ! BONOS ELECTRO SUPDRG
+CALL BONOS.KUPI(20)                ! BONO ELECTRONICO KUPI
+CALL AUTORIZA.PRECIO(20)           ! CONTROL CAMBIO DE PRECIO
+CALL REDEPREMIOLEAL(20)        		 ! LEALTAD CLIENTES - LEAL
+CALL BONODEVPAGO(20)               ! Bono nota devolucion 
+
+%INCLUDE UEECR120.U86              ! MODULO TEF REDEBAN
+
+END FUNCTION
+

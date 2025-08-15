@@ -1,0 +1,361 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+! ModIficaciones:
+!--------------------------------------------------
+!Mod01Nov2004
+! Se ajusta rutina para controlar la secuencia de 
+! tecleo donde al solicitar una autorizacion de super-
+! visor y estando en un pago electronico, el cajero en vez
+! de solicitar o por algun motivo cancelan el proceso 
+! de autorizacion presionando borrar no reversaba la 
+! operacion de P.E.S. Desarrollado por Oscar Valencia
+!---------------------------------------------------
+!Mod 12Abr2010
+! Se controla en el proceso de pago si esta cerca 
+! una recogida total de caja, no permita el proceso
+! de pago y solicite al cajero realizar la recogida
+! de dinero.
+! desarrollado por Grupo Retail - OVS
+!---------------------------------------------------
+
+!--- ADD OVS 01Nov2005
+
+
+If (TS.IO.MOTORKEY = 73) Then \																							! Tecla Borrar
+ If (Asc.Pay.InDevol% = -1) Then Begin   																		! En un proceso de autorizacion
+   If ( Asc.Pay.Tipo% = VAL(LEFT$(Asc.Pay.tpvr$,1)) ) AND 							   \! Si proceso en pleno pago     
+      ( Asc.Pay.Vari% = VAL(RIGHT$(Asc.Pay.tpvr$,1))) Then Begin						! Electronico 
+      Call Visores4690(1,"REVERSANDO OPERACION",Asc.Pay.NumNota$,0,"l")     ! Reversa nota capturada anteriormente
+      Asc.Pay.Tipo%  = 0 : Asc.Pay.Vari%  = 0      													! Inicializa variables
+      Asc.Pay.InDevol% = 0																									!
+      TS.TEMP1$ = Anula.Credencial(Asc.Pay.NumNota$,"0",Unpack$(TS.OPER$))  ! Anula la credencial en la trx
+      Call U.IMPRIME("ANUL CREDENCIAL "+Asc.Pay.NumNota$,6100H)							! Registra en SJ y CR la anulacion
+      Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                         			! Init vectores entrada
+      TS.IO.MOTORKEY = 73                                              			! cancela proceso    
+   EndIf
+EndIf 
+
+If TS.IO.MOTORKEY >= 91 AND TS.IO.MOTORKEY <= 97 Then Begin									! Si medio de pago
+    Asc.Pay.Tipo%   = (TS.IO.MOTORKEY - 90)																	! Init variables con tipo
+    Asc.Pay.Vari%   = VAL(TS.IO.DATA$(3)) 																	! y variedad
+EndIf																																				!
+ 
+If Asc.Pay.NtCap% <> -1 Then Begin
+ If TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pay.tpvr$,1)) AND \
+    TS.IO.DATA$(3) = Right$(Asc.Pay.tpvr$,1) Then Begin 
+    TS.IO.MOTORKEY = 0
+    Dim TS.IO.KEYS(10)
+    Dim TS.IO.DATA$(10)
+    TS.GUIDANCE = 1034     ! Msg ProceDimiento no valido
+    EXIT SUB	    	         
+ EndIf 
+EndIf 
+
+
+If TS.INTRX And Asc.Pay.OptTrx$ = "12" Then  begin                                  \! En una trx de venta
+ If TS.IO.MOTORKEY = 81 Then Exit Sub                                                ! Si presiona tecla total
+ If (TS.IO.MOTORKEY <> Asc.Pay.Motora%) Then Begin 
+      Call Visores4690(1,"PRESIONE TECLA DE","PAGO ELECTRONICO....",1200,"L")
+      TS.IO.MOTORKEY = 73
+      Dim TS.IO.KEYS(10)
+      Dim TS.IO.DATA$(10)
+
+ Endif Else Begin
+      TS.IO.MOTORKEY = 0
+      Dim TS.IO.KEYS(10)
+      Dim TS.IO.DATA$(10)
+      TS.IO.DATA$(7) = Asc.Pay.VlrBono$                                         ! Valor del subsidio
+		  TS.IO.DATA$(9) = Asc.Pay.NumNota$                                         ! Graba numero credencial	
+		  TS.IO.KEYS(9)  = 90
+		  TS.IO.KEYS(3)  = 78                                                       ! Simula pago al tipo y variedad
+		  TS.IO.DATA$(3) = Right$(Asc.Pay.tpvr$,1)                                  ! de pago parametrizada para 
+		  TS.IO.MOTORKEY = VAL("9"+Left$(Asc.Pay.tpvr$,1))                          !
+		  TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pay.tpvr$,1))                          !      
+  EndIf		  
+EndIf
+
+
+!If (TS.IO.KEYS(5) = 61) AND (TS.IO.STATE = 20) Then Begin
+!  If MATCH(STR$(VAL(TS.IO.DATA$(5))),"1234567890",1) > 1 Then Begin 
+!	    If Asc.Pay.Cambio% = 2 Then Begin
+!         TS.IO.MOTORKEY = 0     
+!         Dim TS.IO.KEYS(10)
+!         Dim TS.IO.DATA$(10)
+!         TS.GUIDANCE = 1094     ! Msg ProceDimiento no valido
+!         EXIT SUB	    
+!	    EndIf 
+!   	    
+!  EndIf
+!EndIf
+
+If (TS.IO.MOTORKEY = Asc.Pay.Motora%) AND NOT(TS.INTRX) AND                     \! Si tecla otros pago y
+    Asc.Pay.Cambio% = 0  Then Begin                                              ! no hay venta
+    If TS.TRAINING Then Begin                                           
+      Call VISOR.AND.BORRAR("PROCESO NO VALIDO EN ENTRENAMIENTO")
+      Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+    EndIf     
+    Dim TS.IO.KEYS(10)                                               			       !
+    Dim TS.IO.DATA$(10)                                                          !
+    
+	!  Call VISORES4690(1,"PAGO DE SUBSIDIO","ELECTRONICO",500,"C")                 !
+	
+    TO.MGRKEY      = 0                                                           ! Simula Cambio de bono
+	  GoTo ENTRADA.ELECTRONICO
+    TS.IO.DATA$(5) = "1"                                                         ! por efectivo
+    TS.IO.KEYS(5)  = 61                                                          !
+    TS.IO.MOTORKEY = 61                                                          !
+    TS.IO.STATE    = 10                                                          !
+    Asc.Pay.Cambio% = 2
+EndIf
+
+If TS.IO.MOTORKEY = Asc.Pay.Motora% AND Asc.Pay.Cambio% = 2  Then Begin		 ! Si pago electronico no recogida
+   If (TS.IO.PREV.KEYS(2) NE 81) AND  \                                          ! Si no presiono Total
+      (TS.IO.PREV.KEYS(2) NE 0)  Then Begin                                      ! Si no presiono Total
+      TS.IO.MOTORKEY = 0
+      Dim TS.IO.KEYS(10)
+      Dim TS.IO.DATA$(10)
+      TS.GUIDANCE = 1020                                                         ! Msg presione total
+      EXIT SUB
+  EndIf
+  ENTRADA.ELECTRONICO:
+
+!-- Si cerca de llegar al 2do limite del cajon monedro
+       If (TE.TR.AMT(1) + 50000) >= To.CDLIMIT2 Then Begin    ! SOBREPASA LIMITE CAJON MONEDERO
+   	      Call VISOR.AND.BORRAR("REALICE PROCESO DE RECOGIDA CAJERO AHORA")
+   	      Call VISOR.AND.BORRAR("PROCESO P.E.S.  CANCELADO")
+          Dim TS.IO.DATA$(10): Dim TS.IO.KEYS(10)
+          TS.IO.MOTORKEY = 73
+          Exit Sub 
+       EndIf 	
+
+!-- Si en modalidad de intercambio de medios de pago
+!-- Presiona tecla PES, cancela el proceso
+!-- Ajuste realizado el 28 mayo 2007 OVS 
+  
+    If TS.IO.STATE = 20 Then Begin 
+      Call VISOR.AND.BORRAR("ERROR SECUENCIA DE  TECLEO / BORRAR")
+      Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 73                                         
+      Asc.Pay.Trx% = 0 
+      Asc.Pay.OptTrx$ = "00"
+      TS.NS.VOID = -1                                                            ! 
+      Call TSCSEC10                                                              ! Genera Anulacion Total
+      Call INIT.TRX																														   ! Inicializa transaccion
+      Call Dim.SL.STR(GC.SL.SIZE + 10)
+      Exit Sub 
+    EndIf 
+
+    TS.TEMP1I4 = TS.TENDIX(4, 3)                																 ! TOMA INDICE DE LA FORMA DE PAGO
+
+    If TO.TENDOPTS(TS.TEMP1I4,7) <> 2 Then Begin 							                   ! si verificacion forma pago inactiva
+       Call VISOR.AND.BORRAR("FORMA DE PAGO PES   MAL DEFINIDA")                 ! Msg al operador
+       Call VISOR.AND.BORRAR("PAGO SUBSIDIO NO AUTORIZADO")                      !
+       Dim TS.IO.DATA$(10): Dim TS.IO.KEYS(10)                                   ! Inicializa secuencia de tecleo
+       TS.IO.MOTORKEY = 73
+       Exit Sub 
+    EndIf																																				 !
+  
+
+    TS.TEMP1$ = ASIC.DATOS$("FAVOR ESCANEE EL   ","NUMERO DE CREDENCIAL")		     ! Captura credencial
+    If (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") Then Begin				     					     ! No se capturo dato
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 0 
+       Asc.Pay.Cambio% = 0
+       Asc.Pay.OptTrx$ = "00"
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 		
+
+!--- Mod 06Ene2009
+    If Asic.Device% <> 3 Then Begin 
+       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 0 
+       Asc.Pay.Cambio% = 0
+       Asc.Pay.OptTrx$ = "00"
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 																															         ! 
+
+    To.CDLIMIT2 = 99999999                                                       ! Control Maximo para autorizar
+    Asc.Pay.NtCap% = -1																													 ! 
+    Asc.Pay.NumNota$ = TS.TEMP1$                                                 !
+    Asc.Pay.Trx% = 12
+    Call Validacion.Compra.Pago.Electronico("12")                                !
+    If Asc.Pay.Cambio% = 4 Then Begin                                            ! Si retorna proceso con fallas
+       Call Reverso.Trama.Error(Asc.Pay.NumNota$)
+       Asc.Pay.Trx% = 0 
+       Asc.Pay.OptTrx$ = "00"
+       Asc.Pay.Pago% = 0 
+       TS.NS.VOID = -1                                                           ! 
+       Call TSCSEC10                                                             ! Genera Anulacion Total
+       Call INIT.TRX																														 ! Inicializa transaccion
+       Call Dim.SL.STR(GC.SL.SIZE + 10)
+
+       EXIT SUB          																												 ! ADD OVS FEB 7 2006
+    EndIf
+
+!    TS.IO.MOTORKEY = 0
+!    Dim TS.IO.DATA$(10) : DIM TS.IO.KEYS(10) 													    ! Init vectores de carga
+!    TS.IO.DATA$(2) = Asc.Pay.Miscelaneo$												          ! Item Miscelaneo
+!    TS.IO.KEYS(2)  = 80																										! Tecla ENTER
+!    TS.IO.MOTORKEY = 80																										! Tecla ENTER  
+!    Asc.Pay.Cambio% = 0
+
+
+    Dim Ts.Io.Keys(10)
+    Dim Ts.Io.Data$(10)
+    Dim Ts.Io.Prev.Keys(10)               						!Clear The Array
+    Ts.Io.MOTORKEY = 80 															!ENTER
+    Ts.Io.Keys(2)  = 80																!ENTER
+    Ts.Io.Data$(2) = Asc.Pay.Miscelaneo$							!PLU
+    Ts.Io.Count = 1																		!Count Of Input Times On Same Entry
+    Asc.Pay.Pago% = -1
+    
+EndIf
+
+!--- New Lines 
+If TS.INTRX  Then                                                               \! En una trx de venta
+If (TS.IO.KEYS(1) NE 70) AND                                                    \! Si no devolucion
+   (TS.IO.MOTORKEY = 81) AND (Asc.Pay.Pago% = -1)  Then Begin                    ! pago electronico y no devolucion
+    DIM TS.IO.KEYS(10) : DIM TS.IO.DATA$(10)
+    TS.IO.PREV.KEYS(6) = 81
+       TS.BAL.TAKEN = -1
+    TS.IO.MOTORKEY = Asc.Pay.Motora%
+ENDIF
+
+If TS.INTRX  Then                                                               \! En una trx de venta
+If (TS.IO.KEYS(1) NE 70) AND                                                    \! Si no devolucion
+   (TS.IO.MOTORKEY = Asc.Pay.Motora%)  Then Begin                                ! pago electronico y no devolucion
+   If TS.TRAINING Then Begin                                           
+      Call VISOR.AND.BORRAR("PROCESO NO VALIDO EN ENTRENAMIENTO")
+      Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+   EndIf 
+    Asc.Pay.ManLin% = -1 																												 ! Autorizacion en linea
+    Asc.Pay.NtCap% = 0
+    If TS.IO.PREV.KEYS(6) <> 81 Then Begin                                       ! No presiono tecla total antes
+           Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 0                                                    ! cancela proceso
+           TS.GUIDANCE    = 1020                                                 ! mensaje para que totalice
+           exit sub 																														 ! Sale de la sub
+    EndIf 
+    
+    TS.TEMP1I4 = TS.TENDIX(4, 3)                																 ! TOMA INDICE DE LA FORMA DE PAGO
+
+    If TO.TENDOPTS(TS.TEMP1I4,7) <> 2 Then Begin 							                   ! si verificacion forma pago inactiva
+       Call VISOR.AND.BORRAR("FORMA DE PAGO PES   MAL DEFINIDA")                 ! Msg al operador
+       Call VISOR.AND.BORRAR("PAGO SUBSIDIO NO AUTORIZADO")                      !
+       Dim TS.IO.DATA$(10): Dim TS.IO.KEYS(10)                                   ! Inicializa secuencia de tecleo
+       TS.IO.MOTORKEY = 73
+       Exit Sub 
+    EndIf																																				 !
+    
+    TS.TEMP1$ = ASIC.DATOS$("DIGITE O ESCANEE   ","NUMERO DE CREDENCIAL")		     ! Captura credencial
+    If (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") Then Begin				     					     ! No se capturo dato
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73																											 ! Tecla borrar
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 																																			 ! 
+!--- Mod 06Ene2009
+    If Asic.Device% <> 3 Then Begin 
+       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 	
+
+    Asc.Pay.NtCap% = -1																													 ! 
+    Asc.Pay.NumNota$ = TS.TEMP1$               
+    Asc.Pay.Trx% = 11                                                            !
+    Call Validacion.Compra.Pago.Electronico("11")                                !
+    If Asc.Pay.Cambio% = 4 Then begin
+       Call Reverso.Trama.Error(Asc.Pay.NumNota$)
+       Asc.Pay.OptTrx$ = "00"
+       TS.IO.MOTORKEY = 73
+       Dim TS.IO.DATA$(10) : DIM TS.IO.KEYS(10) 													       ! Init vectores de carga
+
+    Endif 
+    Asc.Pay.Tipo%   = (TS.IO.MOTORKEY - 90)
+    Asc.Pay.Vari%   = VAL(TS.IO.DATA$(3)) 
+    Asc.Pay.Cambio% = 0
+    Asc.Pay.Trx% = 0
+       
+EndIf
+
+If TS.INTRX Then                                                                \! En una trx de venta
+If (TS.IO.KEYS(1) EQ 70) AND                                                    \! Si devolucion
+   (TS.IO.MOTORKEY = Asc.Pay.Motora%)  Then Begin                                ! pago electronico y no devolucion
+   If TS.TRAINING Then Begin                                           
+      Call TSHIECET 																														 !
+      Call VISOR.AND.BORRAR("PROCESO NO VALIDO EN ENTRENAMIENTO")
+      Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+   EndIf    
+    Asc.Pay.ManLin% = -1 																												 ! Autorizacion en linea
+    Asc.Pay.NtCap% = 0
+    If TS.IO.PREV.KEYS(6) <> 81 Then Begin                                       ! No presiono tecla total antes
+           Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 0                                                    ! cancela proceso
+           TS.GUIDANCE    = 1020                                                 ! mensaje para que totalice
+           exit sub 																														 ! Sale de la sub
+    EndIf 
+    
+    
+    TS.TEMP1I4 = TS.TENDIX(4, 3)                																 ! TOMA INDICE DE LA FORMA DE PAGO
+
+    If TO.TENDOPTS(TS.TEMP1I4,7) <> 2 Then Begin 							                   ! si verificacion forma pago inactiva
+       Call VISOR.AND.BORRAR("FORMA DE PAGO PES   MAL DEFINIDA")                 ! Msg al operador
+       Call VISOR.AND.BORRAR("PAGO SUBSIDIO NO AUTORIZADO")                      !
+       Dim TS.IO.DATA$(10): Dim TS.IO.KEYS(10)                                   ! Inicializa secuencia de tecleo
+       TS.IO.MOTORKEY = 73
+       Exit Sub 
+    EndIf																																				 !
+    
+    
+    TS.TEMP1$ = ASIC.DATOS$("AN DIGITE O ESCANEE","NUMERO DE CREDENCIAL")		     ! Captura credencial
+    If (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") Then Begin				     					     ! No se capturo dato
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73		
+       Asc.Pay.OptTrx$ = "00"																									 ! Tecla borrar
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 																																			 ! 
+!--- Mod 06Ene2009
+    If Asic.Device% <> 3 Then Begin 
+       Call VISOR.AND.BORRAR("SOLO SE PERMITE DATO POR ESCANER")
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 73		
+       Asc.Pay.OptTrx$ = "00"																									 ! Tecla borrar
+       Exit Sub 																																 ! Sale de la rutina
+    EndIf 	
+
+    Asc.Pay.NtCap% = -1																													 ! 
+    Asc.Pay.NumNota$ = TS.TEMP1$                                                 !
+    TS.TEMP1$ = Anula.Credencial(Asc.Pay.NumNota$,"0",Unpack$(TS.OPER$))         !
+    If VAL(TS.TEMP1$) > 0 Then Begin 
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                                  ! Init vectores entrada
+       TS.IO.MOTORKEY = 0                                                        ! cancela proceso        
+       TS.IO.KEYS(1)  = 70                                                       ! Simula anulacion 
+       TS.IO.DATA$(7) = TS.TEMP1$                                                ! Valor del subsidio
+       TS.IO.DATA$(9) = Asc.Pay.NumNota$                                         ! Graba numero credencial	
+       TS.IO.KEYS(9)  = 90
+	     TS.IO.KEYS(3)  = 78                                                       ! Simula pago al tipo y variedad
+	     TS.IO.DATA$(3) = Right$(Asc.Pay.tpvr$,1)                                  ! de pago parametrizada para 
+	     TS.IO.MOTORKEY = VAL("9"+Left$(Asc.Pay.tpvr$,1))                          !
+       TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pay.tpvr$,1))                          !    
+       Asc.Pay.Pago%  = 0    
+       
+    EndIf ELSE Begin 
+           Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)                              ! Init vectores entrada
+           TS.IO.MOTORKEY = 73                                                   ! cancela proceso    
+    EndIf 
+EndIf
+

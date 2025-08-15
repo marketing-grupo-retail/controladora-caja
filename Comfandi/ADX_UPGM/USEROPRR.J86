@@ -1,0 +1,94 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** USEROPRR.J86 ************************************************!
+! TITLE: Read Electronic Marketing report options
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!   CHANGE ACTIVITY:
+!
+!   IR42997 - Add lines to read option 20.3 SHOW ONLY PAPER COUPONS *
+!             IN CASH DRAWER REPORTS.                               *
+!             LLU MGVA 18May2000                                    *
+!                                                                   *
+!!*******************************************************************
+!!** READ FREQUENT BUYER OPTIONS INTO MEMORY FOR REPORT EXITS      **
+!!*******************************************************************
+
+!!***** PROGRAM NAME (20 CHARACTERS)  LINE 1
+       READ #8; PGM.NAME$,            \ SAVE PROGRAM NAME
+                WORK$,                \ RAIN CHECK ID
+                WORK$,                \ APPEND TO LINK TO OFFSET
+                I%,I%,I%,I%,I%,       \ COUPONS FOR FIRST USAGE OF CARD
+                WORK$,                \ RESERVED
+                WORK$                 ! RESERVED
+
+       IF LEFT$(PGM.NAME$,2) = "\\" THEN OP.NO.EM = -1 ! NO EM PROCESSING
+
+!!***** ACTIVITY FILE DEFINITIONS     LINE 2
+       READ #8; LINE WORK$        ! ACTIVITY FILE DEFINITIONS
+
+!!***** YES/NO OPTIONS FOR TERMINAL PROCESSING   LINE 3
+       READ #8; I%,I%,I%,I%,I%,I%,I%,I%, \ FIRST 8 OPTIONS
+                OP.WHOLE.PTS,I%       ! SHOW ONLY WHOLE POINTS
+
+!!***** PERSONALIZATION MESSAGE OPTIONS  LINE 4
+       READ #8; I%,                   \ PERSONALIZATION MESSAGE FORMAT
+                OP.PPAMT,             \ POINTS PER CENTS
+                OP.AMTPP,             \ CENTS PER POINTS
+                I%,X%,I%,X%,I%,I%,I%  ! LAST 7 OPTIONS
+
+       READ #8; LINE WORK$        ! READ RECORD 5
+       READ #8; LINE WORK$        ! READ RECORD 6
+
+!!***** CUST. UPC AND HOME STORE PARAMETERS   LINE 7
+       READ #8; I%,I%,I%,I%,I%,I%,I%, \ FIRST 7 OPTIONS
+                J%,I%,I%              ! COUNT OF HOME STORES SUPPORTED
+!!***** HOME STORE NUMBER DEFINITIONS         LINE 8
+       IF J% > 0 AND J% < 10 THEN BEGIN
+         READ #8; LINE WORK$        ! READ RECORD
+       ENDIF
+
+       READ #8; LINE WORK$        ! READ RECORD 9
+       READ #8; LINE WORK$        ! READ RECORD 10
+       READ #8; LINE WORK$        ! READ RECORD 11
+       READ #8; LINE WORK$        ! READ RECORD 12
+       READ #8; LINE WORK$        ! READ RECORD 13
+       READ #8; LINE WORK$        ! READ RECORD 14
+
+!!***** BOUNDRY OPTIONS               LINES 15.1 = 15.?
+       READ #8; J%                ! NUMBER OF BOUNDRIES (0-20)
+       IF J% > 0 AND J% < 21 THEN BEGIN
+         FOR I% = 1 TO J%
+           READ #8; LINE WORK$        ! READ RECORD
+         NEXT I%
+       ENDIF
+
+!!***** FILE OPTIONS                  LINE  16
+       READ #8; I%,I%,I%,I%,I%,I%,I%, \ FIRST 7 OPTIONS
+                OP.DEP.MFR,           \ DEPOSIT AUTO MFR TO MISC TRANS
+                OP.DEP.STR,           \ DEPOSIT AUTO STR TO MISC TRANS
+                OP.DEP.DBL            ! DEPOSIT AUTO DBL TO MISC TRANS
+           
+!AIR42997
+       READ #8; LINE WORK$            ! READ RECORD 17
+       READ #8; LINE WORK$            ! READ RECORD 18
+       READ #8; LINE WORK$            ! READ RECORD 19
+!!***** FILE OPTIONS                  LINE 20
+       READ #8; I%,I%,                \ FIRST 2 OPTIONS 20.1 20.2
+                OP.PAPER.CDPR,        \ 20.3 ONLY PAPER COUPS IN CASH DRAWER
+                I%,I%,I%,I%,I%,I%,I%  ! 20.4 - 20.0
+!EIR42997                
+
+EOF.FBOPT:
+
+!!*******************************************************************
+!!** ASSIGN DEFAULT OPTIONS IF INPUT OPTIONS ARE INVALID           **
+!!*******************************************************************
+       IF OP.PPAMT < 0 OR OP.PPAMT > 100 THEN \
+         OP.PPAMT = 1          ! POINTS PER AMOUNT = 1
+       IF OP.AMTPP < 1 OR OP.AMTPP > 100000 THEN \
+         OP.AMTPP = 1          ! AMOUNT PER POINTS = 1
+

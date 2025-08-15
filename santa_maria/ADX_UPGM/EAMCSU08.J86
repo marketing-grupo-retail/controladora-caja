@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+! Antes de escribir un registro al archivo de transacciones miscelaneas
+!-----------------------------------------------------------------------
+!User exit called before writing miscellaneous transactions record
+FUNCTION CSUPEC08(P1) PUBLIC
+   INTEGER*1 P1
+
+
+END FUNCTION

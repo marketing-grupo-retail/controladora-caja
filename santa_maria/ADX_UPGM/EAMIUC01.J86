@@ -1,0 +1,34 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC01                                                 *!
+!*                                                                           *!
+!* Description    : Initialization User Exit                                 *!
+!*                  Called during item record file initialization...         *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Notes          : This can be called multiple times if we detect a change  *!
+!*                  in the item record length.                               *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC01 PUBLIC
+   string tmp$
+
+   ! EXPANSION DEL EAMITEMR
+   if IRRF.RECL NE 77 then begin
+
+      tmp$ = "55" + right$( "00" + str$(IRRF.RECL), 2 ) + "AF88888888" 
+
+      CALL ADXERROR( 0,           \ 0 for controller
+         ASC("B"),                \ msg displayed
+         007,                     \ msg number
+         3,                       \ severity level
+         2,                       \ 2 = checkout support
+         tmp$                )    ! Mensaje
+
+   endif
+
+END SUB
+

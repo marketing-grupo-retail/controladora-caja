@@ -1,0 +1,50 @@
+
+!  LINEAS INSERTADAS PARA LA PROMOCION BONO SUBSIDIO
+!  EAMTSU14.J86
+!  ABRIL 2003
+!  JORGE LOSADA
+
+IF TS.IO.STATE          = 10  AND                    \! Si esta en MAIN 
+   TS.IO.DATA$(3)       = "4" AND                    \! y hay codigo de variedad,
+   TS.IO.DATA$(7)      <> ""  AND                    \! y hay valor
+   TS.IO.KEYS(7)        = 93     THEN BEGIN           ! con pago a CHEQUE
+      VALOCH$           =  TS.IO.DATA$(7)             !
+      NO.CHE$           =  LEFT$(NUMBO$,8)            !
+      NOCHE$            = "M" + RIGHT$("00000000"+NO.CHE$,8)  !
+    ! XX%               = MATCH(VALOCH$,SSUB2$,1)     !
+      YY%               = MATCH(NOCHE$,SSUB1$,1)      !
+ !     WRITE #34;" YY "+STR$(YY%)                      !
+  !     WRITE #34;" TOT " +STR$(TS.BALDUE(0))          !
+      IF YY% <> 0 THEN BEGIN                          !
+         IF TS.TOTALS(0,0,0) > = VAL(VALOCH$) THEN BEGIN   !Si compra > = cheque 
+          GANSUB% = 1                                 !
+          MUEST%  = 1                                 !
+         ENDIF                                        !
+      ENDIF                                           !
+ENDIF                                                 !
+
+!WRITE#34; " NCH "+ NOCHE$+ " CH " + NUMBO$
+
+!   LINEAS INSERTADAS PARA LA PROMOCION CHEQUE SUBSIDIO
+!  EAMTSU14.J86
+!  JULIO 2002
+!  JORGE LOSADA
+
+IF TS.IO.STATE          = 10  AND                    \! Si esta en MAIN 
+   TS.IO.DATA$(3)       = "3" AND                    \! y hay codigo de variedad,
+   TS.IO.DATA$(7)      <> ""  AND                    \! y hay valor
+   TS.IO.KEYS(7)        = 92     THEN BEGIN           ! con pago a CHEQUE
+      VALOCH$           =  TS.IO.DATA$(7)             !
+      NOCHE$            = "M" + RIGHT$("00000000"+NO.CHE$,8)  !
+    ! XX%               = MATCH(VALOCH$,SSUB2$,1)      !
+      YY%               = MATCH(NOCHE$,SSUB1$,1)       !
+ !     WRITE #34;" YY "+STR$(YY%)                      !
+  !     WRITE #34;" TOT " +STR$(TS.BALDUE(0))          !
+      IF YY% <> 0 THEN BEGIN                           !
+         IF TS.TOTALS(0,0,0) > = VAL(VALOCH$) THEN BEGIN   !Si compra > = cheque 
+          GANSUB% = 1                                 !
+          MUEST%  = 1                                 !
+         ENDIF                                        !
+      ENDIF                                           !
+ENDIF                                                 !
+

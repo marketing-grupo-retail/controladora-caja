@@ -1,0 +1,7 @@
+IF TS.IO.KEYS(2)        = 89 AND           \! SI CLIENTE
+   CLIENTE% = 1              AND           \! 
+   VAL(TS.IO.DATA$(10)) > 99999999   THEN BEGIN
+   PRTLINE = " CLIENTE No: " + TS.IO.DATA$(10)
+   CALL U.IMPRIMIR(PRTLINE,6100H)
+   CLIENTE% = 0
+ENDIF

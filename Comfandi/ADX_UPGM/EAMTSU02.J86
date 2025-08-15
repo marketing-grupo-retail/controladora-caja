@@ -1,0 +1,70 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC02 PUBLIC
+! TSUPEC02 - AFTER TX
+INTEGER*1 TSUPEC02                 ! define variable !IR89374
+
+CALL SUBSIDIO.SAPCORE(02)          ! SAP-CORE
+CALL SUBSIDIO.FOSFEC(02)           ! FOSFEC SAPCORE
+
+CALL RECASRV(02,0)	  	           ! PAGO SERVICIOS PUBLICOS
+CALL CRDEMPRESAS(02)               ! CREDITO EMPRESARIAL
+CALL CREDITOSOCIAL(02)             ! CREDITO SOCIAL
+CALL GRABBOT(02)                   ! ESCALONADO ABBOT
+CALL GRABJSN(02)                   ! ESCALONADO ABBOT JSON
+CALL BRCOMPRAPAGO(02)              ! Recompra forma pago
+CALL BONOCOMPRAS(02)               ! BONOS RECOMPRA
+CALL BONOCOMPRASPAGO(02)           ! Bono recompra forma pago
+CALL BONODEVPAGO(02)               ! Bono nota devolucion 
+CALL GRMBONOS(02)                  ! Modulo Bonos Lealtad
+
+!CALL MKTPTS02.011                  ! MODULO PROMOCIONES
+
+CALL PROMOCIONV2(02)               ! MOTOR PROMOCIONES V2
+
+%INCLUDE EAMTSE02.J86              ! EMS PRPQ
+CALL QXL.TSUPEC02                  ! EJ V2
+CALL RECATS02.011                  ! RECARGAS ONLINE
+CALL RTITSU02.011                  ! Consulta ivas
+CALL EPSEANTS02                    ! ENTREGA MEDICA.
+CALL LIBLINE(2,1)                  ! Para Reset de Memoria Transacciones de CR
+CALL LIBLINE(2,2)                  ! Para Imprimir NIT Empresa en Summary Journal
+CALL FISMTS02.011                  ! NUMERACION FISCAL
+CALL COMFTS02.011                  ! COMFANDI - CISA
+CALL COLMTS02.011                  ! RECAUDO COLEGIOS
+CALL EDUMTS02.011                  ! RECAUDO SIEMPRE EDUCANDO
+!CALL EPAYMS02.011                 ! PAGO ELECTRONICO
+
+CALL DOMIMS02.011                  ! MODULO DOMICILIOS
+CALL PTOMTS02.011                  ! PUNTOS ADICIONALES
+CALL PEFMTS02.011                  ! PAGO ELECTRONICO - FONEDE
+CALL EPSMTS02.011                  ! Modulo Convenios
+
+CALL CONTROL.CLIENTE(2)  	         ! CONTROL CLIENTES
+CALL REMISION(02)                  ! REMISION MERCANCIA
+CALL IVATSU02.011                  ! IMPRESION DE IVAS
+CALL PROPINA(02)                   ! Modulo propinas
+CALL LCFTSU02.011                  ! Modulo Lealtad Clientes Online
+CALL GRMOVRMS(02)                  ! Remisiones de mercancia
+!CALL PRMFPAGO(02)                  ! PROMOCION FORMAS DE PAGO
+
+CALL ESCALONADO(02)                ! DESCUENTOS ESCALONADOS
+CALL GRPFIZER(02)                  ! DSCTO ESCALONADO PFIZER
+CALL GRFAMILIAS(02)                ! FAMILIAS EN ACCION 
+CALL SUBSIDIO.MPAC(02)             ! MPAC
+CALL PRECIO.TECHO(02)              ! PRECIO TECHO
+CALL GRMIMEI(02)                   ! CAPTURA IMEI CELULAR
+CALL GR.DIA.SINIVA(02)             ! DIA SIN IVA
+CALL Autoriza.Precio(02)           ! CONTROL CAMBIO PRECIO
+CALL BONOS.ELECTRO(02)             ! CONTROL BONO ELECTROFIESTA
+CALL BONOS.KUPI(02)                ! BONO ELECTRONICO KUPI
+CALL REDEPREMIOLEAL(02)        		 ! LEALTAD CLIENTES - LEAL
+CALL BONOS.ELECTROSUPDRG(02)       ! BONOS SUPER Y DROGUERIA
+CALL GR.FE.NATURAL(02)             ! FE PERSONAS NATURALES
+CALL NOTASCREDITOPOS(02)           ! NOTAS CREDITO
+
+%INCLUDE UEECR102.U86              ! MODULO TEF REDEBAN
+
+END FUNCTION
+

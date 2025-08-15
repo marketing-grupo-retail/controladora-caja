@@ -1,0 +1,21 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudos Colegios        *
+!**************************************************
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN
+ IF (TS.TOTALS(0,0,0) > 0) AND (Asc.Col.Impr% = -1) THEN BEGIN
+     Asc.Col.Slend% = SL.END								! Total de strings
+ EndIf
+EndIf
+
+IF TS.LINETYPE =  1 AND VAL(UNPACK$(IR.DEPARTME$)) = 861 THEN BEGIN                      ! Si EDUCACION
+   TS.TEMP1$ = "Colegio: " + "  "+UE.CENCOS$+ " Recibo: "     \!
+    + UE.RECIVE$
+   CALL U.IMPRIME(TS.TEMP1$,6100H)
+ENDIF
+

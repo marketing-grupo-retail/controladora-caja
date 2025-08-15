@@ -1,0 +1,68 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU03.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!  IR27269 - If the option is used to append to the four digit
+!             linked-to item, Item Movement is not kept for the
+!             newly created item code.
+!             CMJ MGVA 07Sep94
+!
+!!  IR27701 - Item movement updated incorrectly for preferred
+!             coupons which alias to a non-preferred weight coupon.
+!             JEO MGVA 13Oct94
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+%INCLUDE EAMCSC03.J86      ! COUPON ENHANCEMENT CODE
+
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+! CODE FOR PRPQ 5799-DCB (COUPON ENHANCEMENTS) MUST PRECEDE THIS CODE
+! IF THE PRPQ CODE IS IMPLEMENTED
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+
+!!*******************************************************************
+!!** SAVE ADDITIONAL ACCT DATA ON MULTIPLIED COUPONS               **
+!!*******************************************************************
+ IF ((SL.IT.INDICAT2 AND 0400H) NE 0) AND      \ MULTIPLIED COUPON
+    SL.IT.INDICAT3A = 7 THEN BEGIN             !  STORE COUPON
+   CALL ADDIN4(CS.ACOT$,392,SL.IT.XPRICE)      ! UPDATE DBL CPN AMT
+   CALL ADDIN4(CS.ACOT$,122,SL.IT.XPRICE)      ! ADD TO ON HAND TENDER
+   CALL ADDIN4(CS.ACOT$,154,-SL.IT.XPRICE)     ! SUB FROM NET TENDER
+   IF OP.NO.AUTOCNT THEN BEGIN                 ! NO AUTO CPN COUNTS
+     CALL ADDIN2(CS.ACOT$,320,-SL.IE.QTYORWGT) ! SUB CNT FROM ACCT IR96361
+     CALL ADDIN2(CS.OPOP$,224,-SL.IE.QTYORWGT) ! SUB CNT FROM PERF IR96361
+   ENDIF                                       ! NO AUTO CPN COUNTS
+ ENDIF                                         ! NOT MULTIPLIED COUPON
+
+!!*******************************************************************
+!!** PROCESS MOVEMEMT FOR ALIAS COUPON                             **
+!!*******************************************************************
+ IF EMSS.ALIAS.UPC THEN BEGIN             ! Alias item code saved
+   IF SL.IT.INDICAT3B = 3 AND             \ Linked to
+     (SL.IT.INDICAT3A = 6 OR              \ Coupon item
+      SL.IT.INDICAT3A = 7) THEN BEGIN     !
+     I% = VAL(UNPACK$(XL.IT.ITEMCODE$))   ! Item code for this item
+     IF EMSS.ALIAS.UPC NE I% THEN BEGIN   ! Not same as alias
+       A$ = XL.IT.ITEMCODE$                          ! Save current UPC
+!AIR27269 use the appended code
+!      XL.IT.ITEMCODE$ = PACK$(STR$(EMSS.ALIAS.UPC)) ! New item code
+       XL.IT.ITEMCODE$ = OP.LINK.AP$ + PACK$(STR$(EMSS.ALIAS.UPC)) !
+!EIR27269
+       GF.ITEMCODE.LEN = LEN(XL.IT.ITEMCODE$)        ! New length
+!AIR27701
+!      SL.IT.INDICAT1 = SL.IT.INDICAT1 AND NOT 4100H ! No weight
+!EIR27701
+       CALL CSIMEC01                                 ! Update movement
+       XL.IT.ITEMCODE$ = A$                          ! Restore UPC
+       GF.ITEMCODE.LEN = LEN(XL.IT.ITEMCODE$)        ! New length
+     ENDIF                                ! Not same as alias
+   ENDIF                                  ! Linked to coupon
+   EMSS.ALIAS.UPC = 0                     ! Clear saved alias UPC
+ ENDIF                                    ! Alias item code saved
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

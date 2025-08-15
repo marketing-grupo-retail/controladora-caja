@@ -1,0 +1,20 @@
+
+!--------- USER EXIT PARA OBLIGAR A CAPTURAR MEDICO  --------------
+!--------- CON NIT NITIMB$
+
+IF  VAL(NITIM$) = 890303208022  AND            \! control captura imban
+    TS.IO.KEYS(7) = 96          AND            \!
+    TS.IO.DATA$(3) <> ""        AND            \!
+    DIAGNOS$ = ""               THEN BEGIN     \!
+    TS.IO.MOTORKEY = 0
+    IMBA% = 1
+    PROCE% = 0
+ENDIF
+IF  VAL(NITIM$) = 890303208022  AND            \! Control cap imban.
+    TS.IO.KEYS(7) = 96          AND            \!
+    TS.IO.DATA$(3) <> ""        AND            \!
+    SCAN% = 1                   THEN BEGIN     \!
+    TS.IO.MOTORKEY = 0
+    IMBA% = 1
+ENDIF
+

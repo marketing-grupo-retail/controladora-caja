@@ -1,0 +1,83 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN
+ IF ( (TS.TOTALS(0,0,0) <> 0)  OR Ue.Cnv.Fiscal% = -1 )THEN BEGIN
+     Asc.Cnv.Slend% = SL.END								! Total de strings
+ EndIf
+EndIf
+
+If TS.LINETYPE = 22 Then UE.EPSS.ON = 0
+
+If UE.EPS.FOTO% Then Begin
+	UE.EPS.LINE% = UE.EPS.LINE% + 1
+	UE.EPS.PARR(UE.EPS.LINE%) = TS.PRTBUF$
+EndIf
+
+If (TS.LINETYPE = 6 AND TS.LINEDATA = 1) AND UE.EPSS.ON Then	\
+	Begin
+	 UE.EPS.FOTO% = 0
+	EndIf
+	
+!If (TS.LINETYPE = 4 AND TS.LINEDATA = 1) AND (UE.EPSS.ON <> 0) Then Begin
+!     If VAL(UE.EPS.VLRCOPAGO$) > 0 Then \
+!        TS.TEMP1I4 = (ABS(TS.TOTALS(0,0,0)) - VAL(UE.EPS.VLRCOPAGO$)) \
+!     Else TS.TEMP1I4 = 0
+!
+!       Call FORMAT.AMOUNT(TS.TEMP1I4)
+!       TS.TEMP1$ = Right$("                "+TS.TEMP1$,16)
+!       Call U.Imprime("  CUOTA MODERADORA   "+TS.TEMP1$,6100H)
+!
+!EndIf
+
+
+!--- Se modifica formato de grabacion de String, pasandolo a grabacion
+!--- como string de usuario 99 
+
+
+If (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) Then Begin              ! Si final de trx
+
+If UE.EPSS.ON <> 0  AND UE.EPSS.HEAD = 0 Then Begin
+ If Val(UE.EPS.CAPITACION$) = 1 Then Begin
+   TS.TEMP1I4 = VAL(UE.EPS.VLRCOPAGO$)
+   UE.EPS.VLRCOPAGO$ = "100"
+ EndIf
+EndIf Else GoTo NEXT.STEP.CNV
+
+ If UE.EPS.GRABAString% = -1 AND VAL(UE.EPS.VLRCOPAGO$) <> 0 Then Begin
+ 
+    If Ue.Cnv.AplicaCopago% = -1 Then Begin
+        UE.EPS.VLRCOPAGO$ = Str$(TS.TEMP1I4)
+    EndIf
+    
+    IF (Val(Asc.Cnv.NumNit$) <> 0) Then Begin 											 ! Si EPS asume parte cuota moderadora
+       UE.EPSS.DAT(1) = Asc.Cnv.NumNit$
+    Endif 
+  
+  If UE.EPS.VLRCOPAGO$ = "100" and Val(UE.EPS.CAPITACION$) = 1 Then Begin
+     UE.EPS.VLRCOPAGO$ = "0"
+  EndIf 
+    
+  Asc.Cnv.Tmp$ = PACK$(Right$(String$(16,"0")+UE.EPSS.DAT(1),16))+ \ ! Codigo CONVENIO
+				":"+PACK$(Right$(String$(12,"0")+UE.EPSS.MEDICO$,12))+	   \ ! Codigo Medico
+				":"+PACK$(Right$("0000"+UE.EPSS.IPS$,4))+	                 \ ! Codigo Eps
+				":"+PACK$(Right$(String$(12,"0")+UE.EPSS.DAT(2),12))+	     \ ! F.MEDICA
+				":"+PACK$(Right$(String$(12,"0")+UE.EPSS.DAT(3),12))+	     \ ! BENEFICIARIO
+				":"+PACK$(Right$(String$(12,"0")+UE.EPSS.NoDIAG$,12))+	   \ ! DIAGNOSTICO
+				":"+PACK$(Right$(String$(2,"0")+UE.EPS.BESTRATO$,2))+	     \ ! CATEGORIA BENEFICIARIO
+				":"+PACK$(UE.EPS.VLRCOPAGO$)+":"+Pack$("00")                 !
+				
+  Call Grabacion.Cadena.Usuario("20060508",Asc.Cnv.Tmp$)             ! Graba String usuario
+  UE.EPS.GRABAString% = 0
+	UE.EPS.COPIA% = 2
+
+ EndIf
+EndIf
+
+NEXT.STEP.CNV:

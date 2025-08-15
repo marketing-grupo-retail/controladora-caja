@@ -1,0 +1,119 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/*********************************************************************/
+\/*   CHANGE DATA:                                                    */
+\/*                                                                   */
+\/*********************************************************************/
+\ REM!!***************************************************************!!
+\ REM!!                   EAMCHAIN.J86                                !!
+\ REM!!  THIS INCLUDE FILE CONTAINS THE STATEMENT USED TO CHAIN TO    !!
+\ REM!!  A MODULE.                                                    !!
+\ REM!!********************    EXIT    *******************************!!
+\ REM!!***************************************************************!!
+
+        IF (MM.CHAINFROM$ NE "EAMRPARL.286") AND            \
+           (CHAINTO$ NE "EAMRPARL.286")   THEN BEGIN
+          CLEARS                            ! Clear the screen
+!AIR81329 Move the line below fromafter endif
+          BLANK.OK = CLSDIS                 ! close the display file
+        ENDIF  ELSE BEGIN
+          IF (CHAINTO$ EQ "EAMRP11L.286")      \
+             OR (MM.CHAINFROM$ EQ "EAMRP11L.286")   THEN BEGIN
+            CLEARS                            ! Clear the screen
+!AIR81329 Move the line below fromafter endif
+          BLANK.OK = CLSDIS             ! AIR81329 close the display file
+          ENDIF
+        ENDIF
+!AIR81329  BLANK.OK = CLSDIS             !  close the display file
+
+!AIRxxxxx
+!**************************************************************************
+!
+! If we are chaining to a menu that is handled by the common menu function
+! then we may need to do some special processing, and we definitely need
+! to use a logical name on the chain.
+!
+! We use the misleadingly named BLANK.OK variable to avoid having to
+! define a new variable in all the modules.  Here it is used as a menu
+! index.
+!
+!**************************************************************************
+
+  IF (RIGHT$(MM.STATUS$, 2) = "MM") THEN BEGIN
+    IF (UCASE$(LEFT$(CHAINTO$, 3)) = "EAM") THEN BEGIN
+    ! This complicated statement will return a menu number or zero
+      BLANK.OK = (MATCH(UCASE$(MID$(CHAINTO$, 4, 4)),               \
+                "MM00.AC11.RP11.DM11.DB11.APM1.UPMM.RPUR.", 1)    \
+                + 4) / 5
+
+!**************************************************************************
+!
+! BLANK.OK > 0 means we are chaining to a menu that may have been replaced
+! by the feature.  If this is the case then we will use the filename
+! without the extension as a logical filename and this will point to the
+! menu program we really chain to.
+!
+! MM.SCRN.INPUT$(10) contains the "stack" of menus that we went through
+! to get to the program we are now chaining back from.  There are only
+! two reasons why we may want to mess with this stack:
+!
+!   1. ESC was pressed and we are chaining back to the main menu
+!      - simply reset the stack
+!   2. F7 Rpts or F7 Acct was pressed and so we are chaining to a specific
+!      menu.  - we have to alter the stack.
+!
+!**************************************************************************
+
+      IF (BLANK.OK > 0) THEN BEGIN
+        IF (BLANK.OK = 1) THEN BEGIN        ! If chaining to the main menu
+          MM.SCRN.INPUT$(10) = ""           !  throw away the menu stack
+        ENDIF ELSE BEGIN
+          MM.SCRN.INPUT$(10) = "EAMMM00L" + LEFT$(CHAINTO$, 8)
+        ENDIF
+
+        CHAINTO$ = "EAMMM11L.286"           ! Use a common menu
+      ENDIF
+    ENDIF
+
+  ENDIF
+
+!EIRxxxxx
+
+  CHAINTO$ = "ADX_IPGM:" + CHAINTO$   ! Add sub-directory spec.
+        CHAIN CHAINTO$,        \ Name of program to chain to
+              MM.CHAINFROM$,      \ Name of program chained from
+              MM.SCRN.INPUT$(1),  \ Input from last screen ......
+              MM.SCRN.INPUT$(2),  \
+              MM.SCRN.INPUT$(3),  \
+              MM.SCRN.INPUT$(4),  \
+              MM.SCRN.INPUT$(5),  \
+              MM.SCRN.INPUT$(6),  \
+              MM.SCRN.INPUT$(7),  \
+              MM.SCRN.INPUT$(8),  \
+              MM.SCRN.INPUT$(9),  \
+              MM.SCRN.INPUT$(10), \
+              MM11POID$,       \ Operator ID, Key to Authorization File
+              MM11PDMA$,       \ Display Manager Control Codes
+              MM.OPTIONSK$,    \ Key to options authorization files
+              MM.INDICAT2,     \ Main menu
+              MM.INDICAT3,     \ Accounting
+              MM.INDICAT4,     \ Reports
+              MM.INDICAT5,     \ Reports
+              MM.INDICAT6,     \ Reports
+              MM.INDICAT7,     \ User reports
+              MM.INDICAT8,     \ Delayed maintenance
+              MM.INDICAT9,     \ Delayed maintenance
+              MM.INDICAT10,    \ Data maintenance
+              MM.INDICAT11,    \ Data maintenance
+              MM.INDICAT12,    \ Data maintenance
+              MM.INDICAT13,    \ Shelf label print
+              MM.INDICAT14,    \ Personalization
+              MM.INDICAT15,    \ User procedures
+              MM.ACCOUNT.TYPE, \ Accountability
+              MM.STORACCT,     \ If store-wide totals are kept
+              MM.STATUS$,      \ Status string from ADXSERVE
+              MM.RECNUM,       \ Used by reports generator
+              MM.REPORT,       \ Used by reports generator
+              MM11PCMP$,       \ Completion Code
+              MM14PCN1$        ! Completion Code
+

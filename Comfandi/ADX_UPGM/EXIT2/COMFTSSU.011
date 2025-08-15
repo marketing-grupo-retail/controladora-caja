@@ -1,0 +1,62 @@
+!   ***************************************************************************
+!   **    Date       :  Julio de 2003                                        **
+!   **    Project    :  CASA INFORMATICA - COMFANDI                          **
+!   **    User Exit  :  COMFTSSU.011                                         **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :                                                       **
+!   **                                                                       **
+!   **               DEFINICION DE SUBRUTINAS DESARROLLOS COMFANDI           **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+SUB EPSEANTS02 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+SUB EPSEANTS07 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+
+SUB EPSEANTS14 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+SUB EPSEANTS20 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+SUB EPSEANTS32 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+SUB EPSEANTS56 EXTERNAL                 ! RUTINA EPS ASIC
+END SUB
+
+SUB COMFTS01.011 EXTERNAL               ! Rutina Inicio de Transac Var Dialog
+END SUB                                 !
+
+SUB COMFTS02.011 EXTERNAL               ! Rutina Inicio de Transac Var Dialog
+END SUB                                 !
+                                        !
+SUB COMFTS07.011 EXTERNAL               ! Rutina Carga de opciones            
+END SUB                                 !
+
+SUB COMFTS08.011 EXTERNAL               ! Rutina Carga de opciones            
+END SUB                                 !
+                                        !
+SUB COMFTS14.011 EXTERNAL               ! Rutina captura datos teclado       
+END SUB                                 !
+                                        !
+SUB COMFTS20.011 EXTERNAL               ! Impresion de datos            
+END SUB                                 !
+
+SUB COMFTS27.011 EXTERNAL               ! Control de errores
+END SUB                                 !
+
+SUB COMFTS53.011 EXTERNAL               ! Recuperacion de transaccion
+END SUB                                 !
+
+SUB COMFTS56.011 EXTERNAL               ! Durante suspension trx
+END SUB                                 !
+                                        !
+!------------------------------------------------------------------------------
+

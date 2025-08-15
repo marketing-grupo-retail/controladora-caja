@@ -1,0 +1,24 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PTOMTSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Puntos Adicionales       *
+!**************************************************
+
+Sub PTOMTS02.011  External
+End Sub
+
+Sub PTOMTS07.011  External
+End Sub
+
+Sub PTOMTS08.011  External
+End Sub
+
+Sub PTOMTS60.011  External
+End Sub
+
+Sub PTOMTS68.011(XB$)  External
+STRING XB$
+End Sub

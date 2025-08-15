@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+SUB CSUPEC18 PUBLIC
+Asc.Err.Proceso$ = "CSU18"
+!insert user code
+
+ END SUB

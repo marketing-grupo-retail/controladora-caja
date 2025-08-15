@@ -1,0 +1,76 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** USERCADF.J86 ************************************************!
+! TITLE: Electronic Marketing customer activity file definition
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!
+!!*******************************************************************
+!!** DEFINE VARIABLES FOR THE CUSTOMER ACTIVITY FILE               **
+!!*******************************************************************
+ STRING GLOBAL              \
+         CA.CUSTNUM$,       \         18 DIGIT ACCOUNT NUMBER
+         CA.ALT.NUM$,       \         ALTERNATE ACCOUNT NUMBER
+         CA.KEY$,           \         RECORD KEY
+         CA.LKEY$,          \         LAST GOOD ALIAS KEY
+         CA.DATA$,          \         ALL RECORD DATA
+         CA.CUSTOMER$,      \         CUSTOMER NAME
+         AL.CUSTOMER$,      \         ALIAS CUSTOMER NAME
+         CA.DOLP$,          \         DATE OF LAST PURCHASE (YYMMDD)
+         CA.PERIOD$,        \         START OF LAST POINTS PERIOD (MMDD)
+         CA.TARGETC$,       \         5 TARGETED COUPONS
+         CA.DOLR$,          \         DATE OF LAST REDEMPTION (YYMMDD)
+         CA.USER$,          \         RESERVED FOR USER/TARGETED
+         CA.FM$             !         RECORD FORMAT
+ 
+ INTEGER*4 GLOBAL           \
+         CA.SALES,          \         TOTAL SALES (GROSSPOS - GROSSNEG)
+         CA.POINTS,         \         TOTAL POINTS
+         CA.PPOINTS,        \         POINTS IN PERIOD
+         CA.REDEEMED,       \         REDEEMED POINTS
+         CA.PREDEEM,        \         REDEEMED POINTS IN PERIOD
+         CA.TR.POINTS,      \         POINTS FOR LAST TRANSACTION
+         CA.AUTOCOUP        !         AUTO COUPON AMOUNT
+ 
+ INTEGER GLOBAL             \
+         CA.TRANS,          \         NUMBER OF TRANSACTIONS
+         CA.PTRANS,         \         NUMBER OF TRANSACTIONS IN PERIOD
+         CA.LTNBR,          \         LAST ORDER NUMBER (LOW BYTE)
+         CA.STATUS,         \         STATUS LEVEL
+         CA.MSGNUM,         \         MESSAGE NUMBER
+         CA.DISCG,          \         DISCOUNT GROUP NUMBER
+         CA.PMULT,          \         POINTS MULTIPLIER (TENTHS)
+         CA.OPTIONS,        \         OPTIONS
+         AL.OPTIONS         !         ALIAS OPTIONS
+ 
+ INTEGER GLOBAL                     \
+         AL.CNT,                    \ ALIAS COUNT
+         USER.FBACT.OPEN,           \ ACTIVITY FILE OPENED
+         USER.FBACT.NOLK,           \ READ WITH NO LOCK
+         USER.FBACT.NOAL,           \ READ WITH NO ALIAS
+         USER.FBACT.READ,           \ SUCCESSFUL READ OF FILE
+         USER.FBACT.ERROR,          \ FILE ACCESS ERROR
+         USER.FBACT.NOTHOME         ! NOT IN HOME STORE
+ 
+!        SAVE AREA FOR SEEING FIELDS THAT CHANGED
+ STRING GLOBAL              \
+         IN.CA.DOLP$,       \         DATE OF LAST PURCHASE
+         IN.CA.TARGETC$,    \         10 TARGETED COUPONS
+         IN.CA.ALT.NUM$     !         ALTERNATE ACCOUNT NUMBER
+ INTEGER*4 GLOBAL           \
+         IN.CA.POINTS,      \         TOTAL POINTS
+         IN.CA.PPOINTS,     \         PERIOD POINTS
+         IN.CA.REDEEMED,    \         REDEEMED POINTS
+         IN.CA.PREDEEM,     \         PERIOD REDEEMED POINTS
+         IN.CA.TR.POINTS    !         POINTS FOR LAST TRANSACTION
+ INTEGER GLOBAL             \
+         IN.CA.TRANS,       \         TOTAL TRANSACTIONS
+         IN.CA.LTNBR,       \         LAST ORDER NUMBER (LOW BYTE)
+         IN.CA.PTRANS,      \         PERIOD TRANSACTIONS
+         IN.CA.STATUS,      \         STATUS LEVEL
+         IN.CA.MSGNUM,      \         MESSAGE NUMBER
+         IN.CA.OPTIONS      !         OPTIONS
+ 

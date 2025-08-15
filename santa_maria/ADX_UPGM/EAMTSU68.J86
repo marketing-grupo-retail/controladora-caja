@@ -1,0 +1,35 @@
+! Before writing an entry to the summary log array
+! Antes de escribir una entrada en la matriz de transacciones
+SUB TSUPEC68(ENTRY$,ELEMENT) PUBLIC
+   STRING    ENTRY$
+   INTEGER*2 ELEMENT
+
+!call traceNUO( "UE68 1 ELEMENT=" + str$(ELEMENT) + " TS.RECOVERY=" + str$(TS.RECOVERY) )
+!call traceNUO( lineahex$( ENTRY$ ) )
+
+   ! Inventario
+   if MSMTINVE68( ENTRY$, ELEMENT ) then exit sub
+
+   ! Clientes y Fidelidad
+   call MSMTCLIE68( ENTRY$, ELEMENT )
+
+   ! Facturas MSM
+   call MSMTFACT68( ENTRY$, ELEMENT )
+
+   ! Credito Institucional
+   call MSMTINST68( ENTRY$, ELEMENT )
+
+   !Tarjeta de REGALO
+   call MSMTGIFT68( ENTRY$, ELEMENT )
+
+   ! Recargas Electronicas
+   call MSMTREC68( ENTRY$, ELEMENT )
+
+   ! Tarjetas Bancarias
+   call MSMTTARB68( ENTRY$, ELEMENT )
+
+!call traceNUO( "UE68 2 ELEMENT=" + str$(ELEMENT) )
+!call traceNUO( lineahex$( ENTRY$ ) )
+
+END SUB
+

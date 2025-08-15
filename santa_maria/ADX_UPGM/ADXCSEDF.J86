@@ -1,0 +1,79 @@
+\/* TIME STAMP BLOCK ************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+REM******************************************************************
+REM
+REM  THIS IS THE TERMINAL STATUS DEFINITION FILE DEFINED IN EALTERMS.
+REM  SEPARATE INCLUDE FILE HERE FOR USE BY ADXCSE__.
+REM
+REM   CHANGE ACTIVITY:
+REM
+
+REM********************************************************************
+REM                  TERMINAL STATUS FILE DEFINITION                  *
+REM********************************************************************
+     STRING   GLOBAL          \
+              ST.TERMINAL$,   \ The key to all records is the terminal
+                              \ number.  The store record is accessed as
+                              \ terminal number 9999.  (2-bytes packed)
+              ST.OPERATOR$,   \ Operator number of most recent user of
+                              \ of this terminal.  (4-bytes packed)
+              ST.TRANSNUM$,   \ Current or most recent transaction number
+                              \ for this terminal. (2-bytes packed)
+              ST.TSL.NAME$,   \ Name of most recent TSLOG close
+              ST.MONITOR$,    \ Number of last monitoring terminal or  \AREL2 !
+                              \ 9999 for steamboat. (2-bytes packed)   \EREL2 !
+              ST.TLOG.FLAG$,  \ TLOG fixed indicator              !!IR73323
+              ST.CONTROLLER$, \ ID of the controller the terminal is   !AREL2
+                              \ attached to                            !AREL2
+              ST.USEREXIT$    ! User field (9 bytes)
+
+    INTEGER*1 GLOBAL          \
+              ST.INDICATOR,   \ The flags in the store record are:
+                              \
+                              \ 0 - store is open.
+                              \-1 - store is closed and sales support
+                              \     disabled.
+                              \
+                              \ The flags in the terminal record are:
+                              \
+                              \ x'80' indicates that the terminal totals
+                              \       are to be reset.
+                              \ x'40' indicates that the transaction
+                              \       number is to be reset.
+                              \ x'20' indicates that a controller loan
+                              \       or withdrawal is to be reflected
+                              \       in the terminal totals.
+                              \ x'10' indicates that the terminal is
+                              \       disabled.
+                              \ x'08' indicates that an operator is
+                              \       active on this terminal.
+                              \ x'04' indicates that the store options
+                              \       record is to be reloaded.
+                              \ x'02' indicates that the terminal
+                              \       options record is to be reloaded.
+                              \ x'01' indicates that the summary log
+                              \       is to be re-opened.
+                              \
+              ST.INDICAT1     ! The flags in the store record are:    \AREL2 !
+                              !-1 = unprocessed 'close' record in the
+                              !     transaction summary log.
+                              !
+                              ! The flags in the terminal record are:
+                              ! x'80' indicates a terminal is being
+                              !       monitored
+                              ! x'40' Terminal monitor transaction in
+                              !       progress flag
+                              ! x'20' Out of Store Verification of
+                              !       tenders is active.              \EREL2 !
+
+    INTEGER*4 GLOBAL          \
+              ST.TOTALS(1)    ! 7 element totals array
+                              ! Entry(1) = Gross plus amount
+                              ! Entry(2) = Gross minus amount
+                              ! Entry(3) = Net cash amount
+                              ! Entry(4) = Net non-cash amount
+                              ! Entry(5) = Loan amount
+                              ! Entry(6) = Withdrawal amount
+                              ! Entry(7) = Counted cash amount
+
+REM

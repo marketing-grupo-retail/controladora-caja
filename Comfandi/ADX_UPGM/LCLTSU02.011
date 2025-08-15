@@ -1,0 +1,31 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+Gr.Lcl.Points$ = ""            ! Inicializacion de variables
+Gr.Lcl.Name$   = ""            ! por cambio de transaccion
+Gr.Lcl.Ctrl%   = -1            ! 
+Gr.Lcl.Clte$   = ""            ! 
+USER.FBACT.READ =  0           ! Inicializacion Variable
+GR.LCL.PTO1%    =  0
+GR.LCL.PTO2%    =  0
+GR.LCL.PROCESA% =  0 
+Gr.Lcl.Ptot%    =  0
+Gr.Lcl.TpClte$  = ""
+Gr.Lcl.TipClte$ = ""
+Gr.Lcl.Tipifica$ = ""
+
+Gr.Lcl.eMail$ = ""
+Gr.Lcl.City$  = ""
+Gr.Lcl.surnames$ = ""
+Gr.Lcl.Address$  = ""
+Gr.Lcl.Phone$    = ""
+Gr.Lcl.IdClte$   = ""

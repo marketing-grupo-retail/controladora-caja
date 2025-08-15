@@ -1,0 +1,50 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU54.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+!!*******************************************************************
+!!** ALLOW MSR ENTRY IN KIOSK MODE BY AUTO KEYING WHEN MSR DATA    **
+!!*******************************************************************
+  IF EMSS.PC.KIOSK THEN BEGIN                   ! IN KIOSK MODE
+   IF TS.IO.INPUT.READY = 0 AND                 \ NO INPUT ALREADY
+      EVENT% = 0 AND                            \ NO INPUT WAITING
+      TS.INTRX = 0 THEN BEGIN                   ! NOT IN A TRANSACTION
+    IF TS.PROCEDURE < 3 AND                     \ DEALING WITH CUSTOMER
+       TS11.OVRFLAG = 0 AND                     \ INTIAL ENTRY
+       TS.IO.STATE = 10 THEN BEGIN              ! MAIN STATE
+      TS.ER.RETURN = -1                         ! RETURN FROM ERROR
+      WAIT 41; 10                               ! WAIT FOR MSR INPUT
+      IF EVENT% = 41 THEN BEGIN                 ! MSR INPUT READY
+        DIM TS.IO.KEYS(10)                      ! Clear out all input
+        DIM TS.IO.DATA$(10)
+        TS.IO.KEYS(2) = 80                      ! Enter key
+        TS.IO.KEYS(4) = 100                     ! No-sale key
+        TS.IO.KEYS(10) = 63                     ! Data entry key
+        TS.TEMP1I2 = 3                          ! Bypass fast path
+        TS.IO.COUNT = 1                         ! Primary input
+        TS.IO.DEVICE = 1                        ! Keyed input
+        CALL TSU14.FB                           ! Process exit 14
+        IF TS.GUIDANCE THEN BEGIN               ! Error found
+          TS.SPEC.SIGN.OFF = 0                  ! Process error
+          TS.AUTO.SIGN.OFF = 7FFFH
+        ENDIF ELSE BEGIN                        ! No Error found
+          TS.IO.INPUT.READY = -1                ! Input is ready
+        ENDIF                                   ! No Error found
+      ENDIF ELSE BEGIN                          ! NO MSR INPUT READY
+        TS.ER.RETURN = -1                       ! RETURN FROM ERROR
+        UNLOCKDEV  41                           ! UNLOCK THE MSR
+      ENDIF                                     ! NO MSR INPUT READY
+      TS.ER.RETURN = 0
+    ENDIF                                       ! CORRECT STATE
+   ENDIF                                        ! NOT ACTIVE
+  ENDIF                                         ! IN KIOSK MODE
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE
+ 

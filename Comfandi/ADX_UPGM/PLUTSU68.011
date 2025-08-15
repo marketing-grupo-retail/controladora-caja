@@ -1,0 +1,46 @@
+!**************************************************
+!Empresa       : ASIC S.A UNIDAD DE RETAIL        *
+!Programa      : PLUTSU68.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Fecha         : Abril del 2004                   *
+!Observaciones : Grabacion String datos venta     *
+!                producto                         *
+!**************************************************
+
+If (UNPACK$(LEFT$(ENTRA$,1)) = "01") Then Begin                    ! Movimiento Item
+ If Not (TS.RETV.IN.PROGRESS) Then Begin                           ! No en recuperación de transaccion
+     Asc.ITEMCODE$ = IR.ITEMCODE$																	 ! Codigo del producto vendido
+     IF TS.STANDALONE THEN BEGIN                           				 ! Si terminal OFFLINE
+        %INCLUDE EAMIRRD5.J86                              				 ! Lectura de registro EAMIMAGE
+     ENDIF \
+     Else BEGIN                                            				 ! Si esta en linea
+        %INCLUDE EAMIRRD4.J86                              				 ! Lectura EAMITEMR
+     ENDIF
+     ASC.IR.SKU%  = GETN4(IR.USERDATA$,16)							           ! SKU INTERNO 
+
+      If UNPACK$(Asc.INDICAT2$) = "03" Then BEGIN                  ! Precio Mayorista
+      	 TS.TEMP3$ = Left$(UNPACK$(Asc.SALEPRIC$),5)               ! P.V.P Normal
+      	 TS.TEMP6$ = Right$(UNPACK$(Asc.SALEPRIC$),5)              ! P.V.P Mayorista
+      	 TS.TEMP3$ = Str$(Val(TS.TEMP3$))
+      	 TS.TEMP6$ = Str$(Val(TS.TEMP6$))
+      EndIf Else Begin 																						 ! Precio Normal
+      	 TS.TEMP3$ = Str$(Val(UNPACK$(Asc.SALEPRIC$)))             ! P.V.P Normal
+      	 TS.TEMP6$ = "0"                                           ! P.V.P Mayorista
+      EndIf
+
+      TS.TEMP5$ = "00"																						 ! Signo de la operacion
+      If (SL.IT.INDICAT3A = 8) Then TS.TEMP5$ = "01"               ! Si es una anulacion 
+      TS.TEMP1$ = Pack$(SL.IT.ITEMCODE$)                + ":" +   \! SKU Vendido
+               Pack$(Str$(ASC.IR.SKU%))                 + ":" +   \! Codigo interno santa maria
+               Pack$(Str$(TS.TEMP5I4))                  + ":" +   \! Precio antes de IVA
+               Pack$(Str$(UE.TABLAIVA(RH.DSC.TARIfA%))) + ":" +   \! Tarifa de IVA Producto
+               Pack$(TS.TEMP5$)                         + ":" +   \! Signo del movimiento
+               Pack$(TS.TEMP3$)                         + ":" +   \! P.V.P Normal
+               Pack$(TS.TEMP6$)                                    ! P.V.P Mayorista     
+
+      Call Grabacion.Cadena.Usuario("20130225", TS.TEMP1$)         ! Almacena String
+      IR.LINKEDTO$ = TS.TEMP4$                                     ! Retorna link Item
+    EndIF
+ EndIf																														 ! No en recuperacion 
+EndIf 																														 ! Fin Validacion Item

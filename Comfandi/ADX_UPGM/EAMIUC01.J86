@@ -1,0 +1,21 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC01                                                 *!
+!*                                                                           *!
+!* Description    : Initialization User Exit                                 *!
+!*                  Called during item record file initialization...         *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Notes          : This can be called multiple times if we detect a change  *!
+!*                  in the item record length.                               *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC01 PUBLIC
+
+CALL EXTMIR01.011    ! EXPANSION DEL EAMITEMR
+
+END SUB
+

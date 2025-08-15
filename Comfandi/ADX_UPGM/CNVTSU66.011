@@ -1,0 +1,16 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : Cnvtsu66.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 Ibm                   * 
+!Observaciones : Modulo De Eps / Convenios        *
+!**************************************************
+
+If X.Callparm% <> -1 Then Begin     																				! No ingreso autorizacion
+   If Asc.Cnv.ApplCobro% = -2 Then \																				! Si pago cuota moderadora
+      Asc.Cnv.ApplCobro% = 0																						    ! Reversa proceso y obliga a ejecutar nuevamente
+EndIf Else Begin 
+ If Asc.Cnv.ApplCobro% = -2 Then \																				  ! Si pago cuota moderadora
+   Asc.Cnv.ApplCobro% = -1		          																		! Control aplicacion reverso cuota moderadora
+EndIf 
+

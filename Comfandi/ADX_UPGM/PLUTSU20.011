@@ -1,0 +1,70 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : PLUTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Fecha         : Abril del 2013                   *
+!Observaciones : Impresion del plu en el tiquete  *
+!                del cliente y rollo auditoria    *
+!**************************************************
+! Modificaciones
+
+
+If (TS.LINETYPE = 1 And TS.LINEDATA = 1) Then Begin									  			! Impresion Item
+ 	   If Left$(TS.PRTBUF$,8) <> "        "  Then Begin
+ 	    	TS.TEMP4$ = Str$(SL.IE.QTYORWGT) + " x "
+ 	    	If TS.LINEDATA2 = 1 Then 																					 \!
+ 	    		 Call Format.Amount(SL.IE.SALEPRIC2) Else                        \!
+ 	    		 Call Format.Amount(SL.IE.SALEPRIC)                               !
+ 	    	TS.TEMP4$ = TS.TEMP4$ + TS.TEMP1$
+ 	      TS.TEMP4$ = Left$(TS.TEMP4$+String$(38," "),38)											! Ajusta Tiquete
+ 	      Call U.IMPRIME(TS.TEMP4$,4100H)																			!
+ 	      Call U.IMPRIME(TS.TEMP4$,2100H)																			!
+ 	      TS.TEMP3$  = UnPack$(Ue.Iva.Item$)																	! Codigo del Item
+ 	      TS.TEMP3$  = Str$(Val(TS.TEMP3$))																		! Elimina Ceros izqierda
+ 	      TS.TEMP2$  = Right$("            "+TS.TEMP3$,12)										! Ajusta dato Impresion
+        If SL.IT.INDICAT3A = 8 Or SL.IT.INDICAT3A = 2 Then                 \! Si es anulacion o reintegro Item
+           Call Format.Amount(SL.IT.XPRICE * -1) Else											 \!
+       	   Call Format.Amount(SL.IT.XPRICE)      														!
+ 	      TS.TEMP1$  = Right$("            "+TS.TEMP1$,09)										! Ajusta dato Impresion valor producto
+ 	      TS.TEMP4$  = TS.TEMP2$ + " " + LEFT$(IR.ITEMNAME$,13) + " " + TS.TEMP1$ + \! Arma String de impresion Item, Name,
+ 	                   Gr.Ind.Iva$																						! price, tax flag
+ 	      TS.TEMP4$  = Left$(TS.TEMP4$+String$(38," "),38)										! Ajusta Tiquete
+ 	      Call U.IMPRIME(TS.TEMP4$,4100H)																			!
+ 	      Call U.IMPRIME(TS.TEMP4$,2100H)																			!
+ 	   	  TS.PRTBUF$ = ""																											! Limpia Buffer de impresion
+        TS.FORMCR$ = "C38 A0" 
+        Exit Sub 
+     EndIf Else Begin  
+ 	    	TS.TEMP4$ = Str$(SL.IE.QTYORWGT) + " X "
+ 	    	If TS.LINEDATA2 = 1 Then 																					 \!
+ 	    		 Call Format.Amount(SL.IE.SALEPRIC2) Else                        \!
+ 	    		 Call Format.Amount(SL.IE.SALEPRIC)                               !
+ 	    	TS.TEMP4$ = TS.TEMP4$ + TS.TEMP1$
+ 	      TS.TEMP4$ = Left$(TS.TEMP4$+String$(38," "),38)											! Ajusta Tiquete
+ 	      Call U.IMPRIME(TS.TEMP4$,4100H)																			!
+ 	      Call U.IMPRIME(TS.TEMP4$,2100H)																			!
+ 	   	  TS.PRTBUF$ = ""																											! Limpia Buffer de impresion
+        TS.FORMCR$ = "C38 A0" 
+ 	    EndIf
+EndIf																																				! Fin impresion Item
+
+If (TS.LINETYPE = 1 And TS.LINEDATA = 0) Then Begin									  			! Impresion Item
+ 	      TS.TEMP3$  = UnPack$(Ue.Iva.Item$)																	! Codigo del Item
+ 	      TS.TEMP3$  = Str$(Val(TS.TEMP3$))																		! Elimina Ceros izqierda
+ 	      TS.TEMP2$  = Right$("            "+TS.TEMP3$,12)										! Ajusta dato Impresion
+        If SL.IT.INDICAT3A = 8 Or SL.IT.INDICAT3A = 2 Then                 \! Si es anulacion o reintegro Item
+           Call Format.Amount(SL.IT.XPRICE * -1) Else											 \!
+       	   Call Format.Amount(SL.IT.XPRICE)      														!
+ 	      TS.TEMP1$  = Right$("            "+TS.TEMP1$,09)										! Ajusta dato Impresion valor producto
+ 	      TS.TEMP3$  = TS.TEMP2$ + " " + LEFT$(IR.ITEMNAME$,13) + " " + TS.TEMP1$ + \! Arma String de impresion Item, Name,
+ 	                   Gr.Ind.Iva$																						! price, tax flag
+ 	      TS.TEMP3$  = Left$(TS.TEMP3$+String$(38," "),38)										! Ajusta Tiquete
+ 	      Call U.IMPRIME(TS.TEMP3$,4100H)																			!
+ 	      Call U.IMPRIME(TS.TEMP3$,2100H)																			!
+ 	   	  TS.PRTBUF$ = ""																											! Limpia Buffer de impresion
+        TS.FORMCR$ = "C38 A0" 
+EndIf
+
+
+Exit Sub 

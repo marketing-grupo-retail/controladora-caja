@@ -1,0 +1,34 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de Rutinas            *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+SUB LCFTSU02.011 EXTERNAL
+END SUB
+
+SUB LCFTSU07.011 EXTERNAL
+END SUB
+
+SUB LCFTSU14.011 EXTERNAL
+END SUB
+
+SUB LCFTSU20.011 EXTERNAL
+END SUB
+
+SUB LCFTSU53.011 EXTERNAL
+END SUB
+
+SUB LCFTSU56.011 EXTERNAL
+END SUB
+
+Sub LCFTSE14.011 EXTERNAL
+END SUB 
+
+Sub LCFTSE05.011 EXTERNAL
+END SUB

@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Inicializacion de variables      *
+!**************************************************
+!*
+
+ASC.MKP.OK% = 0
+ASC.MKP.OK2% = 0
+ASC.MKP.REC% = 0
+ASC.MKP.TMP1$ = ""
+ASC.MKP.TOTDSCT% = 0
+ASC.MKP.DscOtorgado% = 0 

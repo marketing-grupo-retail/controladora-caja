@@ -1,0 +1,97 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*                  REPORTS USER EXIT                                     
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE PROVIDES A PLACE TO PUT USER EXIT                   
+\ REM!!*  CODE SUCH THAT THE CODE WILL GET CONTROL ONCE FOR EACH                
+\ REM!!*  LINE IN ANY OR ALL OF THE REPORTS LISTED BELOW.                       
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  REPORT NAME:                                 LOAD MODULE:             
+\ REM!!*                                                                        
+\ REM!!*  CASH REPORT                                    EAMRPCRL               
+\ REM!!*  CASH DRAWER POSITION REPORT                    EAMRPC1L               
+\ REM!!*  DEPARTMENT ANALYSIS REPORT                     EAMRPD1L               
+\ REM!!*  ITEM MOVEMENT REPORT                           EAMRPIML               
+\ REM!!*  MISCELLANEOUS TRANSACTION RECAP                EAMRPM1L               
+\ REM!!*  OVER/SHORT REPORT                              EAMRPOSL               
+\ REM!!*  OPERATOR PERFORMANCE REPORT                    EAMRPPFL               
+\ REM!!*  OPERATOR SALES REPORT                          EAMRPSRL               
+\ REM!!*  SYSTEM STATUS REPORT                           EAMRPSSL               
+\ REM!!*  STORE TOTALS RECAP                             EAMRPSTL               
+\ REM!!*  TENDER LISTING REPORT                          EAMRPTLL               
+\ REM!!*  TERMINAL PRODUCTIVITY REPORT                   EAMRPTPL               
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  CODE PLACED IN THIS FILE IS INSERTED INTO THE REPORT                  
+\ REM!!*  COMMON FUNCTIONS MODULE EAMRPCFC WHICH IS LINKED INTO                 
+\ REM!!*  EACH OF THE LOAD MODULES LISTED ABOVE.  THIS CODE IS                  
+\ REM!!*  INSERTED INTO THE TOP OF THE ROUTINE RPCFEC01 WHICH                   
+\ REM!!*  IS CALLED TO PRINT, DISPLAY, OR FILE EACH LINE IN ALL                 
+\ REM!!*  OF THESE REPORTS.                                                     
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  TO USE THIS USER EXIT, INSERT CODE INTO THIS MODULE WHICH             
+\ REM!!*  TESTS AND ALTERS ONE OR MORE LINES IN ONE OR MORE OF THESE            
+\ REM!!*  REPORTS, THEN COMPILE MODULE EAMRPCFC AND RELINK THE LOAD             
+\ REM!!*  MODULE(S) FOR THE REPORT(S) TO BE IMPACTED.  NOTE THAT                
+\ REM!!*  THIS MODULE CAN BE USED TO ALTER MULTIPLE REPORTS OR                  
+\ REM!!*  MULTIPLE COPIES OF THIS MODULE CAN BE USED WITH SEPARATE              
+\ REM!!*  COMPILES AND LINKS TO SEPARATELY IMPACT THE INDIVIDUAL                
+\ REM!!*  REPORTS.  THE SECOND ALTERNATIVE SHOULD BE CONSIDERED IF              
+\ REM!!*  THE CODE FOR ONE REPORT APPEARS TO IMPACT THE PERFORMANCE             
+\ REM!!*  OF ANOTHER REPORT.                                                    
+\ REM!!*                                                                        
+\ REM!!*  NOTE THAT THERE ARE NO OPTIONS WHICH ENABLE OR DISABLE THIS           
+\ REM!!*  USER EXIT.  IF THE CODE IS PRESENT IN THE LOAD MODULE, THEN           
+\ REM!!*  IT WILL BE EXECUTED.                                                  
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING STRING VARIABLE CONTAINS THE LINE TO BE REPORTED        
+\ REM!!*  AND MAY BE TESTED AND/OR ALTERED:                                     
+\ REM!!*                                                                        
+\ REM!!*  LINE$              REPORT LINE                                        
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING INTEGER VARIABLES ARE AVAILABLE FOR TESTING:            
+\ REM!!*                                                                        
+\ REM!!*  LINE.NO            POSITION ON SCREEN/PRINTER                         
+\ REM!!*                       1-22 FOR DISPLAY, 1-66 FOR PRINTER               
+\ REM!!*  DESTINATION        DESTINATION OF REPORT                              
+\ REM!!*                       1 = DISPLAY, 2 = PRINTER, 3 = FILE               
+\ REM!!*  PERIOD             PERIOD REPORTED ON                                 
+\ REM!!*                       1 = CURRENT, 2 = PREVIOUS                        
+\ REM!!*  OP.OR.TERM         OPERATOR OR TERMINAL INDICATOR                     
+\ REM!!*                       1 = OPERATOR, 2 = TERMINAL                       
+\ REM!!*  NO.MAX.PAGE        MAXIMUM NUMBER OF PAGES IN THE REPORT              
+\ REM!!*                       (TO BE DISPLAYED AS IN "PAGE 2 OF XXX")          
+\ REM!!*  MM.PRINTLEN        PRINTER FORM LENGTH                                
+\ REM!!*                                                                        
+\ REM!!*                                                                        
+\ REM!!*  THE FOLLOWING STRING VARIABLES ARE AVAILABLE FOR TESTING:             
+\ REM!!*                                                                        
+\ REM!!*  RP.TITLE$          REPORT TITLE                                       
+\ REM!!*  AUTO.REPORT$       NAME OF AUTOMATIC REPORTS PROCEDURE                
+\ REM!!*  RP.DATETIME$       DATE AND TIME OF START OF PERIOD (PACKED)          
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE DOES NOT CONTAIN A BASIC FUNCTION, BUT SINCE        
+\ REM!!*  IT IS INCORPORATED INTO THE TOP OF A FUNCTION, LOCAL VARIABLES        
+\ REM!!*  CAN BE DEFINED AS THE FIRST ENTRIES WITHIN THIS FILE.                 
+\ REM!!*  GLOBAL VARIABLES CAN BE DEFINED IN EAMRPUVA.J86 AND EXTERNAL          
+\ REM!!*  ROUTINES CAN BE DEFINED IN EAMRPUSU.J86.                              
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  INSERT USER EXIT CODE HERE:                                           
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+!         START OF USER EXIT CODE                                               
+                                                                                
+!         END OF USER EXIT CODE                                                 
+\ REM!!****************************************************************         

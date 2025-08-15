@@ -1,0 +1,1405 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMEXCHR.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: Read Exchange Rate File Options.        */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      This module attempts to read the file "EAMCDESC.DAT"      */
+\/*      which contains the Multiple Currency Descriptors and      */
+\/*      the Exchange Rate File.                                   */
+\/*                                                                */
+\/*      If the file is NOT found, the application will act as     */
+\/*         if the feature is NOT installed.                       */
+\/*                                                                */
+\/*                                                                */
+\/*      AUTHOR: Ralph D. Gustafson                                */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 26Oct98                                     */
+\/*                                                                */
+\/*  IR39274 - Add the capability to select the Exchange Rate      */
+\/*            file to Load and edit.  Allow user to select        */
+\/*            a different file name when the file is being        */
+\/*            saved.                                              */
+\/*            RDG IBM 10Dec98                                     */
+\/*                                                                */
+\/*  IR39486 - Add Record Type 40 to support the options fields    */
+\/*            for the Check Printing feature.                     */
+\/*            RDG IBM 12Jan99                                     */
+\/*                                                                */
+\/*  IR40090 - Design change for Multiple Currecy Feature.         */
+\/*            RSH MGVA 17Mar99                                    */
+\/*                                                                */
+\/*  IR40508 If the descriptor file (EAMCDESC.DAT) or the Exchange */
+\/*          Rate file (EAMEXCHR.DAT) are missing the application  */
+\/*          should post an error and stop execution.  Also,       */
+\/*          corrected the variable name for the ERR return.       */
+\/*          CMJ MGVA 17May99                                      */
+\/*                                                                */
+\/*  IR40543 Remove IR39274 to return to one exchange rate file.   */
+\/*          RSH MGVA 20May99                                      */
+\/*                                                                */
+\/*  IR43567 Add code to change the format of the Foreign Exchange */
+\/*          Rate file to 512 byte record length Direct file.      */
+\/*          CMJ MGVA 16Aug2000                                    */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+ RF.SESS% = 64                                   ! using IO session 64
+ EAMEXISO.PROCESSED = 0                          ! reset EAMEXISO processed flag
+ EAMEXCHG.PROCESSED = 0                          ! reset EAMCDESC processed flag
+ FIELD.ERROR = 0                                 ! reset field error flag
+ MC.ENABLED = 0                                  ! reset MC Feature flag
+ FILE.NAME$ = ""                                 ! file name for opens & sizes
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$  = ""                              ! reset ERR variable IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ CLOSE RF.SESS%                                  ! ensure session is closed
+ NUM.DESCS = 100                                 ! set initial descriptors cnt
+
+!AIR40090 - Preserve Heap
+ DIM MC.ISO.ARR$(0,0)                            ! ISO array
+ DIM FC.DESC.ARR$(0,0)                           ! Descriptor Array
+ DIM FCER.ARR$(0,0)                              ! FC Exchange Array
+ DIM TTAR.ARR$(0,0)                              ! Tender Type/Var. Array
+ DIM CPOP.ARR$(0,0)                              ! Chk Prt Opt Array
+!EIR40090
+
+!*****************************************************************************
+!*                                                                           *
+!*   This section attempts to read the file "EAMEXISO" file and puts the     *
+!*  information away in the MC.ISO.ARR$ array.                               *
+!*                                                                           *
+!*****************************************************************************
+!
+
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   FILE.NAME$ = "R::EAMEXISO"                    ! file to open
+ ENDIF ELSE BEGIN                                ! else if running in controller
+   FILE.NAME$ = "EAMEXISO"                       ! file to open
+ ENDIF                                           ! running in terminal
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$  = ""                              ! reset ERR variable IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+
+ OPEN FILE.NAME$ AS RF.SESS% NOWRITE NODEL       ! Get MC ISO Definition File
+ IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if error detected
+   GOTO MC.DONE                                  ! exit
+ ENDIF                                           ! error detected
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   TS.ER.RETURN = 0                              ! set flag to bypass file read
+   MC.ENABLED = -1                               ! set Feature flag on
+ ENDIF ELSE BEGIN                                ! else if running in controller
+   EAMEXISO.PRESENT = -1                         ! set ISO present flag
+   MC.ENABLED = -1                               ! set feature flag on
+   RD.ISO.FILE = -1                              ! set read ISO file flag on
+   RD.FIRST.LINE = -1                            ! set read first line flag on
+
+   FC.TEMP1$ = ""                                ! reset work string
+   ERROR.TYPE$ = ""                              ! reset error type string
+   !TS.TS11.WERR$ = ""                            ! set error work variable
+   TS.TS11WERR$  = ""                            ! reset ERR variable IR40508
+   TS.ER.RETURN = -1                             ! set user will handle flag
+ ENDIF                                           ! running in terminal
+
+ WHILE TS.ER.RETURN                              ! while no error detected
+
+   READ #RF.SESS%; LINE FC.TEMP1$                ! Read ISO FILE LINE
+
+   IF TS.ER.RETURN THEN BEGIN                    ! if no error detected
+
+     IF EAMEXISO.PROCESSED = -1 THEN BEGIN       ! if ISO count captured
+       RD.FIRST.LINE = 0                         ! Reset Variable
+     ENDIF                                       ! ISO count captured
+
+     IF (LEFT$(FC.TEMP1$, 1) <> "!") AND         \ If NOT a Remark line
+      (LEFT$(FC.TEMP1$, 1) <> "\") AND           \ and NOT a blank line
+      (FC.TEMP1$ <> "") THEN BEGIN               !
+
+       FIELD.ERROR = 0                           ! field error flag
+
+       FLD.START = 1                             ! set field start pointer
+       FLD.END = MATCH(",", FC.TEMP1$, FLD.START)! set field end pointer
+
+       IF FLD.END THEN BEGIN                     ! If field end
+         FLD.LEN = (FLD.END -2) - FLD.START      ! Adjust pointer
+       ENDIF ELSE BEGIN                          ! else find end of line
+         FLD.END = MATCH(" ", FC.TEMP1$,         \ look for a blank
+                         FLD.START)              !
+         IF FLD.END THEN BEGIN                   ! If blank found
+           FLD.LEN = (FLD.END -2) - FLD.START    ! Adjust pointer
+         ENDIF ELSE BEGIN                        ! otherwise if no blank found
+           FLD.END = EOL                         ! Use End of Line as Fld End
+           FLD.LEN = (FLD.END -1) - FLD.START    ! Adjust pointer
+         ENDIF                                   ! blank found
+         IF FLD.END = 0 THEN BEGIN               ! if no field end found
+           ERROR.TYPE$ = "RI0"                   ! Set Record Type error
+           RD.EXCHG.FILE = 0                     ! Reset Flag
+           FIELD.ERROR = -1                      ! Missing ending Comma
+         ENDIF                                   ! no field end found
+       ENDIF                                     ! field end
+
+       IF (FIELD.ERROR = 0) AND                  \ if no field error
+        (RD.FIRST.LINE) THEN BEGIN               ! if read first line flag set
+         NUM.ISO$ = MID$(FC.TEMP1$,              \ Remove double quotes from
+                         FLD.START +1, FLD.LEN)  !  string.
+         NUM.ISO% = INT%(VAL(NUM.ISO$))          ! make into an integer
+
+         IF LEN(NUM.ISO$) = 0 THEN BEGIN         ! if no ISO number found
+           ERROR.TYPE$ = "900"                   ! Set Record 90, Field 0 error
+           RD.ISO.FILE = 0                       ! Hard error, must exit
+           ERROR.TYPE = 99                       ! set the error type
+           MC.ENABLED = 0                        ! if MC feature not active
+         ENDIF ELSE BEGIN                        ! else if ISO number found
+           DIM MC.ISO.ARR$(NUM.ISO%, 3)          ! Initialize ISO array
+           MC.ISO.ARR$(0,0) = "0"                ! Set Element Count
+           EAMEXISO.PROCESSED = -1               ! Set Processed flag
+         ENDIF                                   ! ISO number found
+       ENDIF                                     ! no fld error & rd 1st line
+       IF (FIELD.ERROR = 0) AND                  \ if no field error yet and
+        (RD.FIRST.LINE = 0) THEN BEGIN           ! read first line not set
+
+         SLOT = VAL(MC.ISO.ARR$(0,0)) + 1        ! Find next open position
+
+         FLD.START = 1                           ! set field start pointer
+         FLD.END = MATCH(",", FC.TEMP1$,         \ find the field end
+                         FLD.START)              ! find the field end
+
+         IF FLD.END THEN BEGIN                   ! If field end
+           FLD.LEN = (FLD.END -2) - FLD.START    ! Adjust pointer
+         ENDIF ELSE BEGIN                        ! else use blank or EOL
+           FLD.END = MATCH(" ", FC.TEMP1$,       \ look for a blank
+                           FLD.START)            !
+           IF FLD.END THEN BEGIN                 ! If blank found
+             FLD.LEN = (FLD.END -2) - FLD.START  ! Adjust pointer
+           ENDIF ELSE BEGIN                      ! otherwise if blank not found
+             FLD.END = EOL                       ! Use End of Line as Field End
+             FLD.LEN = (FLD.END -1) - FLD.START  ! Adjust pointer
+           ENDIF                                 ! blank found
+           IF FLD.END = 0 THEN BEGIN             ! if still no field end found
+             ERROR.TYPE$ = "901"                 ! Set Record 90, Field 1 error
+             RD.ISO.FILE = 0                     ! Hard error, must exit
+             FIELD.ERROR = -1                    ! set field error flag
+           ENDIF                                 ! still no field end
+         ENDIF                                   ! use blank or EOL
+
+         IF FIELD.ERROR = 0 THEN BEGIN           ! if no field error yet
+           CMCICODE$ = MID$(FC.TEMP1$,           \ Country Monetary Currency ID
+                            FLD.START +1,        \ Remove double quotes from
+                            FLD.LEN)             !  string
+
+           IF CMCICODE$ <> "" THEN BEGIN         ! if CMCI code found
+             MC.ISO.ARR$(0,0) = STR$(SLOT)       ! Set Position taken
+             MC.ISO.ARR$(SLOT, 1) = RIGHT$("  " +\ Put away
+                                    CMCICODE$,3) !
+           ENDIF ELSE BEGIN                      ! else if no CMCI code found
+             ERROR.TYPE$ = "901"                 ! Set Record 90, Field 1 error
+             RD.ISO.FILE = 0                     ! Hard error, must exit
+             FIELD.ERROR = -1                    ! goto try next ISO record
+           ENDIF                                 ! CMCI code found
+
+           IF FIELD.ERROR = 0 THEN BEGIN         ! if no field error yet
+             FLD.START = FLD.END + 1             ! set field start pointer
+             FLD.END = MATCH(",", FC.TEMP1$,     \ find field end
+                             FLD.START)          !
+
+             IF FLD.END THEN BEGIN               ! If field end
+               FLD.LEN = (FLD.END -2)            \ Adjust pointer
+                       - FLD.START               !
+             ENDIF ELSE BEGIN                    ! else use blank or EOL
+               FLD.END = MATCH(" ", FC.TEMP1$,   \ look for blank in line
+                               FLD.START)        !
+               IF FLD.END THEN BEGIN             ! If blank found
+                 FLD.LEN = (FLD.END -2)          \ Adjust pointer
+                         - FLD.START             ! Adjust pointer
+               ENDIF ELSE BEGIN                  ! otherwise if not blank
+                 FLD.END = EOL                   ! Use End of Line as Fld End
+                 FLD.LEN = (FLD.END -1)          \ Adjust pointer
+                         - FLD.START             ! Adjust pointer
+               ENDIF                             ! blank found
+               IF FLD.END = 0 THEN BEGIN         ! if field end not found
+                 ERROR.TYPE$ = "902"             ! Set Record 90, Field 2 error
+                 RD.ISO.FILE = 0                 ! Hard error, must exit
+                 FIELD.ERROR = -1                ! set field error flag
+               ENDIF                             ! field end not found
+             ENDIF                               ! field end
+           ENDIF                                 ! no field error yet
+         ENDIF                                   ! field end found
+
+         IF FIELD.ERROR = 0 THEN BEGIN           ! if no field error
+           CURR.NUM$ = MID$(FC.TEMP1$,           \ get currency number
+                            FLD.START +1,        \ Remove double quotes from
+                            FLD.LEN)             !  string.
+           IF LEN(CURR.NUM$) = 0 THEN BEGIN      ! if no currency number found
+             ERROR.TYPE$ = "902"                 ! Set Record 90, Field 2 error
+             RD.ISO.FILE = 0                     ! Hard error, must exit
+             FIELD.ERROR = -1                    ! set field error flag on
+           ENDIF ELSE BEGIN                      ! else if currency number found
+!AIR40090  Store Currency Number as 4 bytes
+             CURR.NUM$ = RIGHT$("0000" +         \ Normalize Currency Number
+                                CURR.NUM$,4)     !
+!EIR40090
+             MC.ISO.ARR$(SLOT, 2) = CURR.NUM$    ! Set curr num into array
+
+             FLD.START = FLD.END + 1             ! set field start pointer
+             FLD.END = MATCH(",", FC.TEMP1$,     \ find field end
+                             FLD.START)          !
+
+             IF FLD.END THEN BEGIN               ! If field end
+               FLD.LEN = (FLD.END -2)            \ Adjust pointer
+                       - FLD.START               !
+             ENDIF ELSE BEGIN                    ! else use blank or EOL
+               FLD.END = MATCH(" ", FC.TEMP1$,   \ look for blank in line
+                               FLD.START)        !
+               IF FLD.END THEN BEGIN             ! If blank found
+                 FLD.LEN = (FLD.END -2)          \ Adjust pointer
+                         - FLD.START             !
+               ENDIF ELSE BEGIN                  ! otherwise if no blank found
+                 FLD.END = EOL                   ! Use End of Line as Field End
+                 FLD.LEN = (FLD.END -1)          \ adjust pointer
+                         - FLD.START             !
+               ENDIF                             ! blank found
+               IF FLD.END = 0 THEN BEGIN         ! if no field end found
+                 ERROR.TYPE$ = "903"             ! Set Record 90, Field 3 error
+                 RD.ISO.FILE = 0                 ! Hard error, must exit
+                 FIELD.ERROR = -1                ! set field error flag
+               ENDIF                             ! no field end found
+             ENDIF                               ! field end
+           ENDIF                                 ! no field error yet
+         ENDIF                                   ! field end found
+
+         IF FIELD.ERROR = 0 THEN BEGIN           ! if no field error
+           FC.SYMBOL$ = MID$(FC.TEMP1$,          \ get FC Symbol
+                             FLD.START +1,       \ Remove double quotes from
+                             FLD.LEN)            !  string.
+         ENDIF                                   ! no symbol found
+         IF FC.SYMBOL$ = "" THEN BEGIN           ! if no symbol
+           FC.SYMBOL$ = "0"                      ! set symbol to 0
+         ENDIF                                   ! no symbol
+
+         MC.ISO.ARR$(SLOT, 3) = FC.SYMBOL$       ! Set curr num into array
+
+         IF ERROR.TYPE$ <> "" THEN BEGIN         ! if Error type to log
+           WORK$  = "EX01" +                     \ Module EAMEXCHG
+                    "R" + LEFT$(ERROR.TYPE$, 2) +\ Record Number
+                    "-" + RIGHT$(ERROR.TYPE$, 1) ! Field Number
+           WORK1I2 = ADXERROR(0,ASC("B"),429,1,  \ log the error
+                              75,WORK$)          !
+           ERROR.TYPE$ = ""                      ! reset the error type flag
+         ENDIF                                   ! error type to log
+       ENDIF                                     ! read first line and
+                                                 !  no error.
+     ENDIF                                       ! Not a blank line
+   ENDIF                                         ! not EOF detected
+ WEND                                            ! while no error detected
+
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   TS.ER.RETURN = -1                             ! set user will handle error
+   !TS.TS11.WERR$ = ""                            ! clear ERR type
+   TS.TS11WERR$  = ""                            ! reset ERR variable IR40508
+ ENDIF                                           ! running in terminal
+
+ IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if error detected
+!AIR40508 Use correct variable name
+!  IF (TS.TS11.WERR$ NE "") AND                  ! if no err set and
+!   (TS.TS11.WERR$ NE "EF") THEN BEGIN           ! if not End Of File
+   IF (TS.TS11WERR$ NE "") AND                   \ if error set
+      (TS.TS11WERR$ NE "EF") THEN BEGIN          ! if not End Of File
+!EIR40508
+     MC.ENABLED = 0                              ! reset feature enabled flag
+     GOTO MC.DONE                                ! exit
+   ENDIF                                         ! not End Of File
+ ENDIF                                           ! error detected
+
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   DIM MC.ISO.ARR$(0,0)                          ! reset array (not needed)
+ ENDIF                                           ! running in terminal
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$ = ""                               ! set error work var IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ CLOSE RF.SESS%                                  ! Close the session
+ FIELD.ERROR = 0
+
+!*****************************************************************************
+!*                                                                           *
+!*   This section attempts to read the file "EAMCDESC" file and puts the     *
+!*  information away in the FC.DESC.ARR$ array.                              *
+!*                                                                           *
+!*****************************************************************************
+!
+ RD.EAMCDESC.FILE:
+
+ TS.ER.RETURN = -1                               ! Set user will handle flag
+ !TS.TS11.WERR$ = ""                              ! reset error work variable
+ TS.TS11WERR$ = ""                               ! reset error work var IR40508
+
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   FILE.NAME$ = "R::EAMCDESC"                    ! set file name to use
+   TS.ER.RETURN = 0                              ! set for error display IR40508
+ ENDIF ELSE BEGIN                                ! else if running in controller
+   FILE.NAME$ = "EAMCDESC"                       ! set file name to use
+ ENDIF                                           ! running in terminal
+
+ OPEN FILE.NAME$ AS RF.SESS% NOWRITE NODEL       ! Get MC Descriptors File
+!AIR40508
+!IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if no error detected
+ IF (TS.TS11WERR$ <> "") THEN BEGIN              ! if error detected
+!EIR40508
+   MC.ENABLED = 0                                ! reset feature flag
+   GOTO MC.DONE                                  ! exit
+ ENDIF                                           ! no error detected
+
+ DESC.READ = -1                                  ! set loop file
+ DIM FC.DESC.ARR$(NUM.DESCS,1)                   ! Dim the Descriptor Array
+ FC.DESC.ARR$(0,0) = STR$(NUM.DESCS)             ! Place Descriptor count in Array
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$ = ""                               ! set error work var IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ FC.L = 1                                        ! set initial value
+ EOF.DETECTED = 0                                ! Reset End Of File Detected
+
+ WHILE (DESC.READ)                               ! while descriptor read flag
+
+   WHILE NOT(EOF.DETECTED)                       ! while not End of File
+     READ #RF.SESS%; LINE FC.TEMP1$              ! read a descriptor line
+
+     IF TS.ER.RETURN THEN BEGIN                  ! if no error detected
+       EOL = LEN(FC.TEMP1$)                      ! set End Of Line pointer
+
+       IF (LEFT$(FC.TEMP1$, 1) <> "!") AND       \ If NOT a Remark line and
+        (LEFT$(FC.TEMP1$, 1) <> "\") AND         \  NOT a blank line.
+        (FC.TEMP1$ <> "") THEN BEGIN             !
+
+         FLD.START = 1                           ! set field start pointer
+         FLD.END = MATCH(",", FC.TEMP1$,         \ find the field end
+                         FLD.START)              !
+
+         IF FLD.END THEN BEGIN                   ! If field end
+           FLD.LEN = (FLD.END -2) - FLD.START    ! Adjust pointer
+         ENDIF ELSE BEGIN                        ! else if no field end
+           FLD.END = MATCH(" ", FC.TEMP1$,       \ look for a blank in the line
+                           FLD.START)            !
+           IF FLD.END THEN BEGIN                 ! If blank found
+             FLD.LEN = (FLD.END -2)              \ Adjust pointer
+                     - FLD.START                 !
+           ENDIF ELSE BEGIN                      ! otherwise if no blank found
+             FLD.END = EOL                       ! Use End of Line as Field End
+             FLD.LEN = (FLD.END -1)              \ Adjust pointer
+                     - FLD.START                 !
+           ENDIF                                 ! blank found
+         ENDIF                                   ! field end found
+
+         IF FC.L = 4 THEN BEGIN                  ! if descriptor 4
+           PM.1.DESC$ = MID$(FC.TEMP1$,          \ get descriptor
+                             FLD.START +1,       \ Remove doublequotes from
+                             FLD.LEN)            !  string.
+           PM.1.DESC$ = LEFT$(PM.1.DESC$,31)     ! just left hand 31 characters
+         ENDIF                                   ! descriptor 4
+         IF FC.L = 5 THEN BEGIN                  ! descriptor 5
+           PM.26.DESC$ = MID$(FC.TEMP1$,         \ get descriptor
+                              FLD.START +1,      \ Remove double quotes from
+                              FLD.LEN)           !  string.
+           PM.26.DESC$ = LEFT$(PM.26.DESC$,31)   ! just left hand 31 characters
+         ENDIF                                   ! descriptor 5
+         IF FC.L = 6 THEN BEGIN                  ! else if descriptor 6
+           PM.345.DESC$ = MID$(FC.TEMP1$,        \ get descriptor
+                               FLD.START +1,     \ Remove double quotes from
+                               FLD.LEN)          !  string.
+           PM.345.DESC$ =                        \ just left hand 31 characters
+                         LEFT$(PM.345.DESC$,31)  !
+         ENDIF                                   ! descriptor 6
+         IF FC.L = 51 THEN BEGIN                 ! if descriptor 51
+           FC.NOT.FND.MSG$ = MID$(FC.TEMP1$,     \ get descriptor
+                             FLD.START +1,       \ remove double quotes from
+                             FLD.LEN)            !  string.
+         ENDIF                                   ! descriptor 51
+
+         IF NOT TS.READ THEN BEGIN               ! if running in controller
+           FC.DESC.ARR$(FC.L,0)                  \ get descriptor and remove
+                  = MID$(FC.TEMP1$,              \ double quotes from string.
+                         FLD.START +1, FLD.LEN)  !
+         ENDIF                                   ! running in controller
+
+         FLD.START = FLD.END +1                  ! point to start of next field
+         FLD.END = MATCH(",", FC.TEMP1$,         \ find field end
+                         FLD.START)              !
+
+         IF FLD.END THEN BEGIN                   ! If field end
+           FLD.LEN = (FLD.END -2) - FLD.START    ! Adjust pointer
+         ENDIF ELSE BEGIN                        ! else if no field end
+           FLD.END = MATCH(" ", FC.TEMP1$,       \ look for blank
+                           FLD.START)            !
+           IF FLD.END THEN BEGIN                 ! If blank found
+             FLD.LEN = (FLD.END -2)              \ Adjust pointer
+                     - FLD.START                 !
+           ENDIF ELSE BEGIN                      ! otherwise if no blank found
+             FLD.END = EOL                       ! Use End of Line as Field End
+             FLD.LEN = (FLD.END -1) -            \ Adjust pointer
+                     - FLD.START                 !
+           ENDIF                                 ! blank found
+         ENDIF                                   ! field end
+
+         IF NOT(TS.READ) THEN BEGIN              ! if running in controller
+           FC.DESC.ARR$(FC.L, 1)                 \ get descriptor length
+                  = MID$(FC.TEMP1$,              \ and remove double quotes
+                         FLD.START +1,FLD.LEN)   ! from string.
+         ENDIF                                   ! running in controller
+
+         FC.L = FC.L + 1                         ! bump array position pointer
+
+       ENDIF ELSE BEGIN                          ! else if a remark line
+         FC.TEMP1$ = ""                          ! reset work string
+       ENDIF                                     ! not a remark line
+       IF FC.L > NUM.DESCS THEN BEGIN            ! if all descriptors read
+         EOF.DETECTED = -1                       ! force an End of File
+         DESC.READ = 0                           ! reset loop flag
+       ENDIF                                     ! all descriptors read
+     ENDIF ELSE BEGIN                            ! if error detected
+       EOF.DETECTED = -1                         ! set End Of File to exit
+       DESC.READ = 0                             ! reset loop flag
+       FC.L = NUM.DESCS +1                       ! reset loop flag
+     ENDIF                                       ! no error detected
+   WEND                                          ! while not End Of File
+ WEND                                            ! while read descriptor flag
+
+ IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if error detected
+!AIR40508 Use correct variable name
+!  IF (TS.TS11.WERR$ NE "") AND                  ! if no err set and
+!   (TS.TS11.WERR$ NE "EF") THEN BEGIN           ! if not End Of File
+   IF (TS.TS11WERR$ NE "") AND                   \ if err set and
+    (TS.TS11WERR$ NE "EF") THEN BEGIN            ! if not End Of File
+!EIR40508
+     MC.ENABLED = 0                              ! reset feature enabled flag
+     GOTO MC.DONE                                ! exit
+   ENDIF                                         ! not End Of File
+ ENDIF                                           ! error detected
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$ = ""                               ! set error work var IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ CLOSE RF.SESS%                                  ! close the session
+
+ IF TS.READ THEN BEGIN                           ! if running in terminal
+   DIM FC.DESC.ARR$(0,0)                         ! Reset FC Descriptors Array
+ ENDIF                                           ! running in terminal
+
+!*****************************************************************************
+!*                                                                           *
+!*   This section attempts to read the file "EAMEXCHG" file and puts the     *
+!*  information away in the FCER.ARR$ array.                                 *
+!*                                                                           *
+!*****************************************************************************
+!
+
+ TS.ER.RETURN = -1                               ! Set user will handle flag
+ !TS.TS11.WERR$ = ""                              ! reset error work variable
+ TS.TS11WERR$ = ""                               ! reset error work var IR40508
+ CREATE.EXCHG.FILE = 0                           ! reset create file flag
+
+!AIR40543
+! IF TS.READ THEN BEGIN                           ! if running in terminal
+!!AIR39274
+!!  FILE.NAME$ = "R::EAMEXCHG"                    ! file to open
+!   FILE.NAME$ = "R::"                          + \
+!                "ADX_IDT1:"                    + \ path +
+!                SELECTED.FILE.NAME$              !  file to open
+!!EIR39274
+! ENDIF ELSE BEGIN                                ! else if running in controller
+!!AIR39274
+!!  FILE.NAME$ = "EAMEXCHG"                       ! file to open
+!   FILE.NAME$ = "ADX_IDT1:"                    + \ Path +
+!                SELECTED.FILE.NAME$              !  file to open
+!!EIR39274
+! ENDIF                                           ! running in terminal
+
+ FILE.NAME$ = ""
+ IF (TS.READ <> 0) THEN BEGIN                    ! Running in the terminal
+   FILE.NAME$ = "R::"                            ! Prefix name
+ ENDIF                                           ! Running in the terminal
+ FILE.NAME$ = FILE.NAME$ + "EAMEXCHG"            ! Build file name
+!EIR40543
+
+!AIR43567
+!OPEN FILE.NAME$ AS RF.SESS% NOWRITE NODEL       ! Get FC Exchange Rate File
+ OPEN FILE.NAME$ DIRECT RECL 512 AS RF.SESS% NOWRITE NODEL
+!EIR43567
+
+!AIR40508
+!IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if error detected
+ IF (TS.TS11WERR$ <> "") AND                     \ error detected
+    (TERM.READ <> 0) THEN BEGIN                  ! second read
+!EIR40508
+   MC.ENABLED = 0                                ! reset feature enabled flag
+   GOTO MC.DONE                                  ! exit
+ ENDIF                                           ! error detected
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$ = ""                               ! set error work var IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ IF NOT(CREATE.EXCHG.FILE) THEN BEGIN            ! if no exchange rate file
+   EAMEXCHG.PRESENT = -1                         ! set EAMEXCHG present flag
+
+   RD.EXCHG.FILE = -1                            ! Set loop flag
+
+!AIR43567
+!  WHILE (RD.EXCHG.FILE)                         ! Loop while records ok
+!
+!    FC.TEMP1$ = ""                              ! reset work string
+!    ERROR.TYPE$ = ""                            ! reset error type flag
+!    FIELD.ERROR = 0                             ! reset field error flag
+!
+!    READ #RF.SESS%; LINE FC.TEMP1$              ! Read FC EXCHANGE RATE LINE
+!
+!
+!    IF TS.ER.RETURN THEN BEGIN                  ! if no error detected
+!
+!      IF (LEFT$(FC.TEMP1$, 1) <> "!") AND       \ If NOT a Remark line and
+!       (LEFT$(FC.TEMP1$, 1) <> "\") AND         \  NOT a blank line.
+!       (FC.TEMP1$ <> "") THEN BEGIN             !
+!
+!        FLD.START = 1                           ! set field start pointer
+!        FLD.END = MATCH(",", FC.TEMP1$,         \ find the field end
+!                        FLD.START)              !
+!
+!        RECORD.TYPE = 0                         ! reset record type
+!        IF FLD.END = 0 THEN BEGIN               ! if field end not found
+!          ERROR.TYPE$ = "RT0"                   ! Set Record Type error
+!          RD.EXCHG.FILE = 0                     ! reset loop flag
+!          FIELD.ERROR = -1                      ! Missing ending Comma
+!        ENDIF ELSE BEGIN                        ! else if field end found
+!          REC.TYPE$ = UNPACK$(MID$(FC.TEMP1$,   \ get record type
+!                      FLD.START,                \
+!                      FLD.END - FLD.START))     !
+!          RECORD.TYPE = INT%(VAL(REC.TYPE$))    ! make into integer
+!        ENDIF                                   ! field end not found
+!        IF RECORD.TYPE = 10 THEN BEGIN          ! FC record count
+!
+!          FLD.START = FLD.END + 1               ! point to next field
+!          FLD.END = MATCH(",", FC.TEMP1$,       \ find end of field
+!                          FLD.START)            !
+!
+!          IF FLD.END = 0 THEN BEGIN             ! if no field end found
+!            ERROR.TYPE$ = "101"                 ! Set Record 10, Field 1 error
+!            RD.EXCHG.FILE = 0                   ! Hard error, must exit
+!            FIELD.ERROR = -1                    ! reset field error flag
+!          ENDIF ELSE BEGIN                      ! no field end found
+!            NUM.CURR$ = UNPACK$(MID$(FC.TEMP1$, \ get number of currencies
+!                      FLD.START,                \  defined.
+!                      FLD.END - FLD.START))     !
+!            IF LEN(NUM.CURR$) = 0 THEN BEGIN    ! if no currencies defined
+!              ERROR.TYPE$ = "101"               ! Set Record 10, Field 1 error
+!              RD.EXCHG.FILE = 0                 ! Hard error, must exit
+!              FIELD.ERROR = -1                  ! set field error flag
+!            ENDIF ELSE BEGIN                    ! else if some currencies
+!              NUM.FCSA = VAL(NUM.CURR$)         ! make an integer
+!
+!              DIM FCER.ARR$(NUM.FCSA, 15)       ! Dim FC Exchange Array
+!              FCER.ARR$(0,0) = "0"              ! set currency count
+!
+!              DIM TTAR.ARR$(NUM.FCSA, 36)       ! Dim Tender Type/Var. Array
+!              FOR L = 0 TO NUM.FCSA             ! loop through TTAR array
+!                FOR J = 1 TO 36                 ! loop through fields
+!                  TTAR.ARR$(L,J) = "0"          ! initialize the field
+!                NEXT J                          ! next field
+!              NEXT L                            ! next array entry
+!AIR39486
+!              DIM CPOP.ARR$(NUM.FCSA, 8)        ! Dim Chk Prt Opt Array
+!              FOR L = 1 TO NUM.FCSA             ! Loop through CPOP Array
+!                CPOP.ARR$(L, 8) = "1"           ! Set default value
+!              NEXT L                            ! next array entry
+!EIR39486
+!              EAMEXCHG.PROCESSED = -1           ! Indicate processing Started
+!            ENDIF                               ! some currencies defined
+!          ENDIF                                 ! no field end
+!        ENDIF                                   ! End Rec type 10 proc.
+!
+!        IF RECORD.TYPE = 20 THEN BEGIN          ! EXCHANGE RATE RECORD
+!
+!          SLOT = VAL(FCER.ARR$(0,0)) + 1        ! Find next open position
+!
+!          FLD.START = FLD.END + 1               ! point to start of field
+!          FLD.END = MATCH(",", FC.TEMP1$,       \  find field end.
+!                          FLD.START)            !
+!
+!          IF FLD.END = 0 THEN BEGIN             ! if no field end found
+!            ERROR.TYPE$ = "201"                 ! Set Record 20, Field 1 error
+!            FIELD.ERROR = -1                    ! set field error flag
+!          ENDIF ELSE BEGIN                      ! else if field end found
+!
+!            CURR.KEY.CODE$                      \ get Short Cut Key
+!                = UNPACK$(MID$(FC.TEMP1$,       \
+!                          FLD.START,            \
+!                         FLD.END - FLD.START))  !
+!           IF CURR.KEY.CODE$ <> "" THEN BEGIN   ! if shortcut key found
+!             FCER.ARR$(0,0) = STR$(SLOT)        ! Set Position taken
+!             FCER.ARR$(SLOT, 1) =               \ put it away
+!                       CURR.KEY.CODE$           !
+!            ENDIF ELSE BEGIN                    ! else if no shortcut key
+!              ERROR.TYPE$ = "201"               ! Set Record 20, Field 1 error
+!              FIELD.ERROR = -1                  ! set field error flag
+!            ENDIF                               ! shortcut key found
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! no field error detected
+!              FLD.START = FLD.END + 1           ! point to start of next field
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                      FLD.START, 1) NE          \  double quote
+!                      CHR$(22H) THEN BEGIN      !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!            ENDIF                               ! field error detected
+!
+!            IF FLD.END = 0 THEN BEGIN           ! if no field end found
+!              ERROR.TYPE$ = "202"               ! Set Record 20, Field 2 error
+!              FIELD.ERROR = -1                  ! set field error flag
+!            ENDIF ELSE BEGIN                    ! else if field end found
+!              FCNAME$ = MID$(FC.TEMP1$,         \ get Foreign Currency
+!                           FLD.START,           \  Name.
+!                           FLD.END - FLD.START) !
+!              FCER.ARR$(SLOT, 2) = FCNAME$      ! Set FC Name into array
+!
+!              FLD.END = MATCH(",", FC.TEMP1$,   \ find field end
+!                              FLD.START)        !
+!              FLD.START = FLD.END + 1           ! point to start of next field
+!              FLD.END = MATCH(",", FC.TEMP1$,   \ find field end
+!                              FLD.START)        !
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "203"             ! Set Record 20, Field 3 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! field end found
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error
+!              CMCICODE$ = MID$(FC.TEMP1$,       \ get Country Monetary Code ID
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              IF LEN(CMCICODE$) = 0 THEN BEGIN  ! if no CMCI Code found
+!                ERROR.TYPE$ = "203"             ! Set Record 20, Field 3 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if CMCI code found
+!                FCER.ARR$(SLOT, 3) =            \ put it away
+!                    RIGHT$("  " + CMCICODE$, 3) !
+!
+!                FLD.START = FLD.END + 1         ! point to next record
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "204"           ! Set Record 20, Field 4 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! CMCI code found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error found
+!              CURR.NUM$ = UNPACK$(MID$(         \ get Currency number
+!                          FC.TEMP1$,            \
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)) !
+!              IF LEN(CURR.NUM$) = 0 THEN BEGIN  ! if no currency number found
+!                ERROR.TYPE$ = "204"             ! Set Record 20, Field 4 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if no curr. num. found
+!AIR40090 Store currency number as 4 bytes
+!                CURR.NUM$ = RIGHT$("0000" +     \ Normalize to 4 digits
+!                                   CURR.NUM$,4) !
+!EIR40090
+!                FCER.ARR$(SLOT, 4) = CURR.NUM$  ! Set curr num into array
+!
+!                FLD.START = FLD.END + 1         ! poing to next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find end of field
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "205"           ! Set Record 20, Field 5 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! currency number found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              PROC.METHOD$ = UNPACK$(MID$(      \ get processing method
+!                         FC.TEMP1$, FLD.START,  \
+!                         FLD.END - FLD.START))  !
+!              IF LEN(PROC.METHOD$) =            \ if no processing method
+!                                   0 THEN BEGIN !  found.
+!                ERROR.TYPE$ = "205"             ! Set Record 20, Field 5 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if PM found
+!                FCER.ARR$(SLOT, 5) =            \ set Currency Processing
+!                                   PROC.METHOD$ !  Method.
+!                IF PROC.METHOD$ = "1" THEN BEGIN! If Primary Base Currency
+!                  FCER.ARR$(SLOT, 15) =         \ set PBC Descriptor
+!                                     PM.1.DESC$ !  descriptor.
+!                ENDIF                           ! Primary Base Currency
+!                IF (PROC.METHOD$ = "2") OR      \ if Alt Base Currency
+!                 (PROC.METHOD$ = "6") THEN BEGIN!
+!                  FCER.ARR$(SLOT,15) =          \ set Alt Base Currency
+!                                    PM.26.DESC$ !  descriptor.
+!                ENDIF                           ! Alt Base Currency
+!                IF (PROC.METHOD$ = "3") OR      \ if Processing Method 3
+!                 (PROC.METHOD$ = "4") OR        \  or Processing Method 4
+!                 (PROC.METHOD$ = "5") THEN BEGIN!  or Processing Method 5
+!                  FCER.ARR$(SLOT,15) =          \ set FC descriptor
+!                                   PM.345.DESC$ !  descriptor.
+!                ENDIF                           ! PM 3, 4 or 5
+!
+!                FLD.START = FLD.END + 2         ! Point to start of next field (Skip over Double Quote)
+!                FLD.END = MATCH(CHR$(22H),      \ find end of field
+!                          FC.TEMP1$, FLD.START) !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "206"           ! Set Record 20, Field 6 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! PM found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              EXCHRATE$ = MID$(FC.TEMP1$,       \ get Exchange Rate
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              FLD.END = FLD.END + 1             ! find field end
+!              IF LEN(EXCHRATE$) = 0 THEN BEGIN  ! if no exchange rate found
+!                ERROR.TYPE$ = "206"             ! Set Record 20, Field 6 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if exchange rate found
+!                FCER.ARR$(SLOT, 6) = EXCHRATE$  ! Set exchg rate into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "207"           ! Set Record 20, Field 7 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! exchange rate found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              DECFLAG$ = MID$(FC.TEMP1$,        \ get Deciaml Format
+!                         FLD.START,             \  Indicator.
+!                         FLD.END - FLD.START)   !
+!              IF LEN(DECFLAG$) = 0 THEN BEGIN   ! no decimal flag found
+!                ERROR.TYPE$ = "207"             ! Set Record 20, Field 7 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if decimal flag found
+!                FCER.ARR$(SLOT, 7) = DECFLAG$   ! Set Dec Curr flag into array
+!
+!                FLD.START = FLD.END + 1         ! point to next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find end of field
+!                                FLD.START)      !
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "208"           ! Set Record 20, Field 8 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! deciaml flag found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              LOANABLE$ = MID$(FC.TEMP1$,       \ get loanable flag
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              IF LEN(LOANABLE$) = 0 THEN BEGIN  ! if no loanable flag found
+!                ERROR.TYPE$ = "208"             ! Set Record 20, Field 8 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if loanable flag found
+!                FCER.ARR$(SLOT, 8) = LOANABLE$  ! Set Loanable flag into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "209"           ! Set Record 20, Field 9 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! loanable flag found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              FC.SYMBOL$ = UNPACK$(MID$(        \ get Currency Symbol
+!                           FC.TEMP1$,           \
+!                           FLD.START,           \
+!                           FLD.END - FLD.START))!
+!              IF LEN(FC.SYMBOL$) = 0 THEN BEGIN ! if no symbol found
+!                ERROR.TYPE$ = "209"             ! Set Record 20, Field 9 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF ELSE BEGIN                  ! else if symbol found
+!                FCER.ARR$(SLOT, 9) = FC.SYMBOL$ ! Set Curr. Symbol into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "210"           ! Set Record 20, Field 10 error
+!                  FIELD.ERROR = -1              ! set field error flag
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! currency symbol found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              AUTHLEVEL$ = UNPACK$(MID$(        \ get Change Authorization
+!                           FC.TEMP1$,           \  level.
+!                           FLD.START,           \
+!                           FLD.END - FLD.START))!
+!              IF LEN(AUTHLEVEL$) = 0 THEN BEGIN ! if no auth. level found
+!                ERROR.TYPE$ = "210"             ! Set Record 20, Field 10 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF ELSE BEGIN                  ! else if auth. level found
+!                FCER.ARR$(SLOT, 10) = AUTHLEVEL$! Set Auth Lev flag into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "211"           ! Set Record 20, Field 11 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! auth. level found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              CHKINDFLD$ = UNPACK$(MID$         \ get Check Indicator Field
+!                           (FC.TEMP1$,          \
+!                           FLD.START,           \
+!                           FLD.END - FLD.START))!
+!              IF (LEN(CHKINDFLD$) > 0) AND      \ If field marked and
+!               ((VAL(CHKINDFLD$) < 0) OR        \  invalid field entered.
+!                (VAL(CHKINDFLD$) > 3))          \
+!                                     THEN BEGIN !
+!                ERROR.TYPE$ = "211"             ! Set Record 20, Field 11 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF ELSE BEGIN                  ! else field, and in range
+!                FCER.ARR$(SLOT, 11) = CHKINDFLD$! Set Check Ind Fld into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",",            \ find field end
+!                          FC.TEMP1$, FLD.START) !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "212"           ! Set Record 10, Field 12 error
+!                  FIELD.ERROR = -1              ! set field error flag
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! Check Ind. field found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              CHKINDOFF$ = UNPACK$(MID$         \ get Check Indicator offset
+!                           (FC.TEMP1$,          \
+!                           FLD.START,           \
+!                           FLD.END - FLD.START))!
+!              IF LEN(CHKINDOFF$) = 0 THEN BEGIN ! if no check ind. offset found
+!                ERROR.TYPE$ = "212"             ! Set Record 20, Field 12 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if chk ind. offset found
+!                FCER.ARR$(SLOT, 12) = CHKINDOFF$! Set offset into array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                FLD.START)      !
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "213"           ! Set Record 20, Field 13 error
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! Check Ind. off. found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              CHECKIND$ = UNPACK$(MID$          \ get Check Indicator
+!                          (FC.TEMP1$,           \
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)) !
+!              IF LEN(CHECKIND$) = 0 THEN BEGIN  ! if no check indicator found
+!                ERROR.TYPE$ = "213"             ! Set Record 20, Field 13 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF ELSE BEGIN                  ! else if check indicator found
+!                FCER.ARR$(SLOT, 13) = CHECKIND$ ! Set Chk Ind into Array
+!
+!                FLD.START = FLD.END + 1         ! point to start of next field
+!                IF MID$(FC.TEMP1$,              \ if first character is not a
+!                        FLD.START,1) NE         \ double quote
+!                        CHR$(22H) THEN BEGIN    !
+!                  FLD.END = MATCH(",",          \ look for the field end
+!                                  FC.TEMP1$,    \
+!                                  FLD.START)    !
+!                ENDIF ELSE BEGIN                ! else if it is a dbl quote
+!                  FLD.START = FLD.START +1      ! point to next character
+!                  FLD.END = MATCH(CHR$(22H),    \ find field end
+!                            FC.TEMP1$,          \
+!                            FLD.START)          !
+!                ENDIF                           ! 1st char. is dbl quote
+!
+!                IF FLD.END = 0 THEN BEGIN       ! if no field end found
+!                  ERROR.TYPE$ = "214"           ! Set Record 20, Field 14 error
+!                  FIELD.ERROR = -1              !  set field error
+!                ENDIF                           ! no field end found
+!              ENDIF                             ! Check Indicator found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!
+!              USERDATA$ = MID$(FC.TEMP1$,       \ get User Data Field
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              FCER.ARR$(SLOT, 14) = USERDATA$   ! Set User Data into array
+!            ENDIF                               ! no field error
+!          ENDIF                                 ! field end found
+!        ENDIF                                   ! Rec type 20 processing
+!
+!        IF RECORD.TYPE = 30 THEN BEGIN          ! Tendier Acceptance Record
+!
+!         RECORD.LEN = LEN(FC.TEMP1$)            ! get record length
+!         FLD.START = FLD.END + 1                ! point to start of next field
+!         FLD.END = MATCH(",", FC.TEMP1$,        \ find field end
+!                         FLD.START)             !
+!
+!          IF FLD.END = 0 THEN BEGIN             ! if no field end found
+!            ERROR.TYPE$ = "301"                 ! Set Record 30, Field 1 error
+!            FIELD.ERROR = -1                    ! set field error
+!          ENDIF ELSE BEGIN                      ! else if field end found
+!
+!            FLD.NUM = 0                         ! reset field number
+!            FLD.END = MATCH(",", FC.TEMP1$,     \ find field end
+!                            FLD.START)          !
+!            WHILE ((FLD.END <=                  \
+!                            LEN(FC.TEMP1$)) AND \ while not at end of line
+!                   (FLD.END NE 0))              !
+!              FIELD.ERROR = 0                   ! reset field error flag
+!              FLD.NUM = FLD.NUM +1              ! bump field number
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "30" +            \ set Record 30, field n error
+!                              STR$(FLD.NUM)     !
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF ELSE BEGIN                  ! else if field end found
+!                                                ! Type/Variety Definition
+!                TVADEF$ = UNPACK$(MID$          \ get Tender Type/Variety
+!                          (FC.TEMP1$,           \  acceptance definition
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)) !
+!                IF LEN(TVADEF$) <> 2 THEN BEGIN ! if more than 2 characters
+!                  ERROR.TYPE$ = "30" +          \ Set Rec 30, Field n error
+!                                 STR$(FLD.NUM)  !
+!                  FIELD.ERROR = -1              ! set field error
+!                ENDIF ELSE BEGIN                ! else if more than 2 chars.
+!                  FC.TTYPE$ = LEFT$(TVADEF$,1)  ! Pull Tender Type
+!                  FC.TVAR$ = MID$(TVADEF$,2,1)  ! Pull Tender Variety
+!
+!                  J = ((VAL(FC.TTYPE$)-1) *6) + \ set array index pointer
+!                      VAL(FC.TVAR$)             !
+!
+!                  TTAR.ARR$(SLOT, J) = "1"      ! Set into array
+!
+!                  FLD.START = FLD.END + 1       ! point to start of next field
+!                  FLD.END = MATCH(",",          \ find field end
+!                                  FC.TEMP1$,    \
+!                                  FLD.START)    !
+!                ENDIF                           ! more than 2 characters
+!              ENDIF                             ! field end found
+!              IF ERROR.TYPE$ <> "" THEN BEGIN   ! Error to log
+!                WORK$  = "EX64" + "R" +         \ Module EAMEXCHG
+!                          LEFT$(ERROR.TYPE$,2) +\ Record Number
+!                          "-" +                 \
+!                          RIGHT$(ERROR.TYPE$, 1)! Field Number
+!                WORK1I2 = ADXERROR(0,ASC("B"),  \ log the error
+!                                   429,1,       \
+!                                   75,WORK$)    !
+!                FIELD.ERROR = -1                ! set field error indicator
+!              ENDIF                             ! error to log
+!              IF FIELD.ERROR THEN BEGIN         ! if field error
+!                FLD.END = 0                     ! reset loop flag
+!              ENDIF                             ! field error
+!            WEND                                ! while not at end of line
+!          ENDIF                                 ! field end found
+!        ENDIF                                   ! Rec type 30 proc.
+!
+!        IF RECORD.TYPE = 40 THEN BEGIN          ! Check Options Record
+!
+!          FLD.START = FLD.END + 1               ! point to start of field
+!          IF MID$(FC.TEMP1$,                    \ if first char is not a
+!                FLD.START, 1) NE                \  double quote
+!                CHR$(22H) THEN BEGIN            !
+!            FLD.END = MATCH(",",                \
+!                               FC.TEMP1$,       \ find field end
+!                          FLD.START)            !
+!          ENDIF ELSE BEGIN                      ! else if double quote found
+!             FLD.START = FLD.START +1           ! point to next char position
+!             FLD.END = MATCH(CHR$(22H),         \ find next double quote
+!                    FC.TEMP1$, FLD.START)       !
+!          ENDIF                                 ! 1st char is a dbl quote
+!          IF FLD.END = 0 THEN BEGIN             ! if no field end found
+!            ERROR.TYPE$ = "401"                 ! Set Record 40, Field 1 error
+!            FIELD.ERROR = -1                    ! set field error flag
+!          ENDIF ELSE BEGIN                      ! else if field end found
+!
+!            HUND.SEP$ =                         \ get Hundredths Separator
+!                  MID$(FC.TEMP1$, FLD.START,    \
+!                           FLD.END - FLD.START) !
+!            CPOP.ARR$(SLOT, 1) = HUND.SEP$      ! put it away
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! no field error detected
+!              FLD.START = FLD.END + 1           ! point to start of next field
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                    FLD.START, 1) NE            \  double quote
+!                    CHR$(22H) THEN BEGIN        !
+!                FLD.END = MATCH(",",            \
+!                                   FC.TEMP1$,   \ find field end
+!                              FLD.START)        !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                 FLD.START = FLD.START +1       ! point to next char position
+!                 FLD.END = MATCH(CHR$(22H),     \ find next double quote
+!                        FC.TEMP1$, FLD.START)   !
+!              ENDIF                             ! 1st char is a dbl quote
+!            ENDIF                               ! field error detected
+!            IF FLD.END = 0 THEN BEGIN           ! if no field end found
+!              ERROR.TYPE$ = "402"               ! Set Record 40, Field 2 error
+!              FIELD.ERROR = -1                  ! set field error flag
+!            ENDIF ELSE BEGIN                    ! else if field end found
+!              CENTS.SEP$ = MID$(FC.TEMP1$,      \ get Foreign Currency
+!                           FLD.START,           \  Name.
+!                           FLD.END - FLD.START) !
+!              CPOP.ARR$(SLOT, 2) = CENTS.SEP$   ! Set FC Name into array
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "403"             ! Set Record 40, Field 3 error
+!                FIELD.ERROR = -1                ! set field error flag
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! field end found
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error
+!              CENTS.DESC$ = MID$(FC.TEMP1$,       \ get Country Monetary Code ID
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              CPOP.ARR$(SLOT, 3) = CENTS.DESC$  ! put it away
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "404"             ! Set Record 40, Field 4 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error found
+!              DOLLAR.DESC$ = MID$(FC.TEMP1$,    \
+!                                  FLD.START,    \
+!                           FLD.END - FLD.START) !
+!              CPOP.ARR$(SLOT, 4) = DOLLAR.DESC$ ! Set curr num into array
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "405"             ! Set Record 40, Field 5 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              SING.DOLR.DESC$ = MID$(FC.TEMP1$, \ get processing method
+!                                     FLD.START, \
+!                           FLD.END - FLD.START) !
+!              CPOP.ARR$(SLOT, 5) =              \ set Currency Processing
+!                                SING.DOLR.DESC$ !  Method.
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "406"             ! Set Record 40, Field 6 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              EXAC.DOLR.DESC$ = MID$(FC.TEMP1$, \ get Exchange Rate
+!                          FLD.START,            \
+!                          FLD.END - FLD.START)  !
+!              CPOP.ARR$(SLOT, 6) =              \
+!                               EXAC.DOLR.DESC$  ! Set exchg rate into array
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "407"             ! Set Record 40, Field 7 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              DEC.SEP$ = MID$(FC.TEMP1$,        \ get Deciaml Format
+!                         FLD.START,             \  Indicator.
+!                         FLD.END - FLD.START)   !
+!              CPOP.ARR$(SLOT, 7) = DEC.SEP$     ! Set Dec Curr flag into array
+!
+!              FLD.START = FLD.END + 1           ! point to next record
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              IF MID$(FC.TEMP1$,                \ if first char is not a
+!                               FLD.START, 1) NE \  double quote
+!                           CHR$(22H) THEN BEGIN !
+!                FLD.END = MATCH(",", FC.TEMP1$, \ find field end
+!                                     FLD.START) !
+!              ENDIF ELSE BEGIN                  ! else if double quote found
+!                FLD.START = FLD.START +1        ! point to next char position
+!                FLD.END = MATCH(CHR$(22H),      \ find next double quote
+!                          FC.TEMP1$, FLD.START) !
+!              ENDIF                             ! 1st char is a dbl quote
+!
+!              IF FLD.END = 0 THEN BEGIN         ! if no field end found
+!                ERROR.TYPE$ = "408"             ! Set Record 40, Field 8 error
+!                FIELD.ERROR = -1                ! set field error
+!              ENDIF                             ! no field end found
+!            ENDIF                               ! no field error
+!
+!            IF FIELD.ERROR = 0 THEN BEGIN       ! if no field error yet
+!              DATE.FRMT$ = MID$(FC.TEMP1$,      \
+!                          FLD.START,            \ get loanable flag
+!                          FLD.END - FLD.START)  !
+!              CPOP.ARR$(SLOT, 8) = DATE.FRMT$   ! Set Loanable flag into array
+!
+!              FLD.START = FLD.END + 1           ! point to start of next field
+!              IF MID$(FC.TEMP1$, FLD.START, 1) =\
+!                                 "," THEN BEGIN ! If field separator found
+!                FLD.START = FLD.START +1        ! Bump to next char position
+!              ENDIF                             ! field separator found
+!
+!              FLD.END = MATCH(",", FC.TEMP1$,   \ find field end
+!                                     FLD.START) !
+!            ENDIF                               ! no field error
+!          ENDIF                                 ! no field end found
+!        ENDIF                                   ! Rec type 40 proc.
+!        IF ERROR.TYPE$ <> "" THEN BEGIN         ! Error to log
+!          WORK$  = "EX64" + "R" +               \ Module EAMEXCHG
+!                   LEFT$(ERROR.TYPE$, 2) +      \ Record Number
+!                   "-" +                        \
+!                   RIGHT$(ERROR.TYPE$, 1)       ! Field Number
+!          WORK1I2 = ADXERROR(0,ASC("B"),        \ log the error
+!                             429,1,75,WORK$)    !
+!          FIELD.ERROR = -1                      ! set field error indicator
+!        ENDIF                                   ! error to log
+!      ENDIF                                     ! not blank or remark ln
+!    ENDIF ELSE BEGIN                            ! else if error detected
+!      RD.EXCHG.FILE = 0                         ! reset loop flag
+!    ENDIF                                       ! no error detected
+!  WEND                                          ! while read exchange records
+
+   READ FORM "C512";#RF.SESS%, 1; FC.TEMP1$       ! Read first record of file
+   FLD.START = 1                                 ! Start of search
+   FLD.END   = MATCH(CHR$(3AH), FC.TEMP1$, FLD.START) ! Match for comma
+   IF (FLD.END <> 0) THEN BEGIN                  ! Comma found
+     NUM.FCSA  = VAL(LEFT$(FC.TEMP1$, FLD.END - 1))! Set number of currencies
+   ENDIF ELSE BEGIN                              ! .no comma
+     FIELD.ERROR = -1                            ! Set error
+   ENDIF                                         ! .comma
+   FLD.START = FLD.END + 1                       ! Increment start-next search
+   FLD.END   = MATCH(CHR$(3AH), FC.TEMP1$, FLD.START)! Find next comma
+   CASHBK$ =                                     \
+       MID$(FC.TEMP1$,FLD.START,FLD.END - FLD.START) !Set flag
+   IF (CASHBK$ = "Y") THEN BEGIN                 !
+     CASHBACK.ALLOWED = -1                       \ CashBack flag
+   ENDIF ELSE BEGIN                              !
+     CASHBACK.ALLOWED = 0                        \ CashBack flag
+   ENDIF                                         !
+   IF (FIELD.ERROR) OR (NUM.FCSA = 0) THEN BEGIN ! Error or no currencies
+     RD.EXCHG.FILE = 0                           ! Do not enter loop
+   ENDIF ELSE BEGIN                              ! .no error
+     DIM FCER.ARR$(NUM.FCSA,15)                  ! Dim array for FC
+     DIM TTAR.ARR$(NUM.FCSA,36)                  ! Dim array for Tender
+     DIM CPOP.ARR$(NUM.FCSA,8)                   ! Dim array for Check Printing
+   ENDIF                                         ! .error
+
+   FC.L = 1                                      ! Set loop variable
+   WHILE ((RD.EXCHG.FILE) AND (FC.L <= NUM.FCSA)) ! No error/More currencies
+
+     READ FORM "C512";#RF.SESS%, FC.L + 1; FC.TEMP1$       ! Read first record of file
+     FLD.START = 1                               ! Start of search
+     FOR I% = 1 TO  14                           ! All elements of array
+       FLD.END = MATCH(CHR$(3AH),FC.TEMP1$,FLD.START) ! Find comma
+       IF (FLD.END = 0) THEN BEGIN               ! No value in field
+         FCER.ARR$(FC.L,I%) = " "                ! Set to a space
+       ENDIF ELSE BEGIN                          ! .comma found
+         FCER.ARR$(FC.L,I%) = MID$(FC.TEMP1$,     \ Set array element to
+                  FLD.START, FLD.END - FLD.START)  ! value found
+       ENDIF                                     ! .comma
+       IF (I% = 5) THEN BEGIN                    ! Fifth element of array
+         IF (FCER.ARR$(FC.L,I%) = "1") THEN BEGIN ! Proc. Method = 1
+           FCER.ARR$(FC.L,15) = PM.1.DESC$       ! Set descriptor
+         ENDIF ELSE BEGIN                        ! .not proc 1
+           IF (FCER.ARR$(FC.L,I%) = "2") OR      \ Proc. Method = 2
+              (FCER.ARR$(FC.L,I%) = "6") THEN BEGIN !Proc. Method = 6
+             FCER.ARR$(FC.L,15) = PM.26.DESC$    ! Set descriptor
+           ENDIF ELSE BEGIN                      ! .not proc 2/6
+             IF(FCER.ARR$(FC.L,I%) = "3") OR     \ Proc. Method = 3
+               (FCER.ARR$(FC.L,I%) = "4") OR     \ Proc. Method = 4
+               (FCER.ARR$(FC.L,I%) = "5") THEN BEGIN ! Proc. Method = 5
+               FCER.ARR$(FC.L,15) = PM.345.DESC$ ! Set descriptor
+             ENDIF                               ! .pric 3/4/5
+           ENDIF                                 ! .proc 2/6
+         ENDIF                                   ! .proc 1
+       ENDIF                                     ! .element 5
+       FLD.START = FLD.END + 1                   ! Increment start-next search
+     NEXT I%                                     ! .next element
+
+     FOR I% = 1 TO  8                            ! All elements of array
+       FLD.END = MATCH(CHR$(3AH),FC.TEMP1$,FLD.START)! Find comma
+       IF (FLD.END = 0) THEN BEGIN               ! No comma found
+         CPOP.ARR$(FC.L,I%) = " "                ! Set value to space
+       ENDIF ELSE BEGIN                          ! .comma found
+         CPOP.ARR$(FC.L,I%) = MID$(FC.TEMP1$,     \ Set array element to
+                  FLD.START, FLD.END - FLD.START)  ! value found
+       ENDIF                                     ! .comma
+       FLD.START = FLD.END + 1                   ! Increment start-next search
+     NEXT I%                                     ! .next element
+
+     FOR I% = 1 TO  36                           ! All elements of array
+       FLD.END = MATCH(CHR$(3AH),FC.TEMP1$,FLD.START)! Find comma
+       IF (FLD.END = 0) THEN BEGIN               ! No comma found
+         TTAR.ARR$(FC.L,I%) = " "                ! Set value to space
+       ENDIF ELSE BEGIN                          ! .comma found
+         TTAR.ARR$(FC.L,I%) = MID$(FC.TEMP1$,     \ Set array element to
+                   FLD.START, FLD.END - FLD.START) ! value found
+       ENDIF                                     ! .comma
+       FLD.START = FLD.END + 1                   ! Increment start-next search
+     NEXT I%                                     ! .next element
+     FC.L = FC.L + 1                             ! Increment record number
+   WEND                                          ! .more currencies
+!EIR43567
+
+ ENDIF                                           ! not create file flag
+
+ IF NOT(TS.ER.RETURN) THEN BEGIN                 ! if error detected
+!AIR40508 Use correct variable name
+!  IF (TS.TS11.WERR$ NE "") AND                  ! if no err set and
+!   (TS.TS11.WERR$ NE "EF") THEN BEGIN           ! if not End Of File
+   IF (TS.TS11WERR$ NE "") AND                   \ if err set and
+    (TS.TS11WERR$ NE "EF") THEN BEGIN            ! if not End Of File
+!EIR40508
+     MC.ENABLED = 0                              ! reset feature enabled flag
+     GOTO MC.DONE                                ! exit
+   ENDIF                                         ! not End Of File
+ ENDIF                                           ! error detected
+
+ !TS.TS11.WERR$ = ""                              ! set error work variable
+ TS.TS11WERR$ = ""                               ! set error work var IR40508
+ TS.ER.RETURN = -1                               ! set user will handle flag
+ CLOSE RF.SESS%                                  ! close the IO session
+ ERROR.TYPE = 0                                  ! reset the error type
+ FCER.ARR$(0,0) = STR$(NUM.FCSA)                 ! set num of currencies
+
+ MC.DONE:                                        ! exit
+!*************************************************************************
+!                END OF INCLUDE : EAMEXCHR.J86
+!*************************************************************************

@@ -1,0 +1,35 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR03UV.011 
+!     Punto de Entrada   =  EAMTSUVA.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!---------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!  Estas varibales de usuario se requieren para usu de la USEREXIT 14
+!
+!---------------------------------------------------------------------
+
+INTEGER* 2      L                                  ! Indice para Arreglos
+INTEGER* 1 GLOBAL    VERI%                         ! Flag para VERIFICAR
+INTEGER* 1 GLOBAL    VERIFICA%                     ! Flag para VERIFICAR
+INTEGER* 1 GLOBAL    CREA.CODBAR%                  ! Flag para CREAR Cod/Bar
+INTEGER* 1 GLOBAL    USER.VERIFY.CHEQ              ! Flag para Verif CHEQUE
+INTEGER* 1 GLOBAL    USER.VERIFY.ITEM              ! Flag para Verif PLU
+\INTEGER* 2 GLOBAL    REPEAT.COUNT                  ! Contador de Repetic
+\INTEGER* 2 GLOBAL    FAST.EXIT                     ! Flag para Salir
+\INTEGER* 2 GLOBAL    IR.PRICING.METHOD             ! Datos para Mostrar
+INTEGER* 4 GLOBAL    CAV%                          ! Cantidad Digitada 
+\INTEGER* 4 GLOBAL    IR.PRICE1,  IR.PRICE2         ! Datos Precio PLU
+INTEGER* 4 GLOBAL    RETVAL%,    SALDLIQ%          ! Datos Retenc en Fte
+INTEGER* 4 GLOBAL    VRLIQ%,     YALIQ%            ! Datos Retenc en Fte
+INTEGER* 4 GLOBAL    VAL.IPO%                      ! Valor Impuesto Consumo
+REAL       GLOBAL    RETPOR                        ! Datos % de Rte de Fte
+REAL       GLOBAL    EPS%                          ! Datos % Cuota Moderadora
+REAL       GLOBAL    EMI%                          ! Var dcto EMI
+STRING     GLOBAL    RALMA$                        ! Var Lect Datos RetFte
+STRING     GLOBAL    RATA$                         ! Aviso Variable %EPS
+STRING     GLOBAL    IR.CODBAR$                    ! Cod/Barras de Item
+STRING     GLOBAL    USER.SAVE.ITEM$               ! Cod de Item de Input
+!--------------------------------------------------------------------

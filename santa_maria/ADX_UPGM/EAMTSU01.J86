@@ -1,0 +1,23 @@
+!USER EXIT CALLED PRIOR TO FIRST ENTRY IN A TRANSACTION
+! Antes de la primera entrada en una transaccion
+FUNCTION TSUPEC01 PUBLIC
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC01
+
+   !Inventario
+   if MSMTINVE01 then exit function
+
+   !Asigna valor a variables globales de uso general
+   call NUOTRUTI01
+
+   !Selecciona tipo de caracteres Font A y 15 CPI
+   !write #34; LetraNormal$
+
+   ! Promociones
+   call NUOTPROM01
+
+   !Facturacion MSM
+   call MSMTFACT01
+
+END FUNCTION

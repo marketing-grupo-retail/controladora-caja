@@ -1,0 +1,42 @@
+
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR14VE.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  FEBRERO DE 2005
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertaran en el archivo EAMTSU14.J86
+! a manera de INCLUDE para SALVAR E IMPRIMIR el 
+! codigo y nombre del vendedor de medicamentos que despacha la formula
+! Lee el archivo de OPERADORES para por tanto los vendedores deben estar 
+! matriculados. como operadores del pos perfil 3       
+!-----------------------------------------------------------
+
+
+IF  TO.USEROPTS(5) <> 0  and                                     \!  opcion encendida
+    TS.IO.MOTORKEY = 253 then begin                               ! tecla vendedor medica.
+       Vend.Medica$ = ASIC.DATOS$("Ingrese El Vendedor ?","")     ! pide vendedor
+       If (Vend.Medica$ = "") Or (Vend.Medica$ = "E") Then Begin  ! Si no existe 
+         DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)	                ! reset vectores
+         TS.IO.MOTORKEY = 73																		  ! Tecla Borrar
+       EndIf Else Begin																						! Dato Capturado
+         KEY.OP$ = RIGHT$(PACK$("0000000000"+Vend.Medica$),5)     ! Arma llave de busqueda
+         TS.ER.RETURN = -1                                        ! Control de errores
+         READ FORM "C32 C20 C20";#44 KEY KEY.OP$;                \! Lee EAMOPERA
+         CE.NADA1$,NOM.OPER$,CE.NADA2$                            !                         
+         If TS.ER.RETURN = -1 Then BEGIN 												  ! Existe Vendedor
+            TS.IO.KEYS(10) = 63																	  ! Almacena data entry
+            TS.IO.DATA$(2) = Vend.Medica$                         !
+            TS.IO.MOTORKEY = 80   															  !
+            TS.IO.KEYS(2)  = 80																  	!
+            TS.IO.MOTORKEY = 73																 	  ! Tecla Borrar
+         EndIf Else Begin 																				! Vendedor no definido
+            Call VISOR.AND.BORRAR("ERROR DE VENDEDOR   VERIFIQUE: "+Vend.Medica$) 	
+            DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)	            ! reset vectores
+            TS.IO.MOTORKEY = 73																		! Tecla Borrar
+         EndIf 																										!
+       EndIf
+EndIf

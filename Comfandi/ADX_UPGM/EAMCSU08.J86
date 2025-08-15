@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC08(P1) PUBLIC
+ INTEGER*1 P1
+Asc.Err.Proceso$ = "CSU08" 
+! insert user exit code here
+
+  
+ END FUNCTION

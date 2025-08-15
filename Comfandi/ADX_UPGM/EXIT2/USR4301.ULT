@@ -1,0 +1,34 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR4301.011 
+!     Punto de Entrada   =  EAMTSU43.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!  DESCUENTOS: Calcular descuento por articulo y acumularlo
+!              Esta UE se incluye en el EAMTSU43, para 
+!              ser ejecutada despues de calcular el
+!              precio de un articulo.   
+!-----------------------------------------------------------
+!    WRITE FORM "C38 A1";#34;STR$(CA.PPOINTS)+"VRA"+STR$(CA.POINTS)+"VRC"+STR$(XF.TO.POINTS)!
+!    WRITE FORM "C38 A1";#34;STR$(CA.TR.POINTS)+"VR"+STR$(XF.POINTS)+"VRC"+STR$(X%)
+!-----------------------------------------------------------------------------
+IF TS.IO.KEYS(1) = 70  THEN          \!  es reintegro 
+SIGNO% = -1 ELSE SIGNO% = 1
+
+if ts.io.keys(0) <> 79 then begin
+
+IF DCTO.COUP =   10 THEN BEGIN
+ TOT.COUP = TOT.COUP+(SL.IT.XPRICE)*signo%
+ DCTO.COUP = 0
+ENDIF
+
+!IF DCTO.COUP =   8 THEN BEGIN
+ !TOT.COUE = TOT.COUE+(SL.IT.XPRICE)*signo%
+! DCTO.COUP = 0
+!ENDIF
+endif
+
+!-----------------------------------------------------------

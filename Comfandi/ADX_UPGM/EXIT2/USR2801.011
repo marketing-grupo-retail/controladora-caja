@@ -1,0 +1,38 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2801.011 
+!     Punto de Entrada   =  EAMTSU28.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para 
+!     recuperar el nombre de la Operadora
+!-----------------------------------------------------------
+
+ LLAV1$ = TS.OPER$                             ! Toma Cod. Operador
+ IF LLAV1$ <> "" THEN                         \! Si Hay Llave
+    READ FORM "C32 C20 C20";#44 KEY LLAV1$;   \! Lee EAMOPERA
+               CE.NADA1$,NOMOPER$,CE.NADA2$    !
+ IF NOMOPER$  = "" THEN BEGIN                  ! Si no leyo nombre
+    TS.DISP1$ = "CODIGO ARTICULO:"             ! Modifica Linea 1
+    TS2.DISP1$ = TS.DISP1$                     ! Modifica Linea 1 D2
+ ENDIF
+!      WRITE FORM "C38 A1"; #34;"  --- INICIO DE SESION ---"
+ DIM USR.ITEMS$(500)                           ! Dimension y Reset del arreglo
+ USR.IND1% = 0                                 ! Indice para Items
+ USR.IND2% = 0                                 ! Indice para Totales
+ LINCR%    = 25                                ! Lineas Disponibles Totales
+ LINMF%    = 25                                ! Lineas Disponibles (mf)
+
+ OPE$  = STR$(VAL(UNPACK$(LLAV1$)))            ! Guarda Cod Ope
+ CAJA$ = TS.TERMINAL$                          ! Guarda No.Terminal
+
+ FRA.FEC$ = DATE$                              ! Toma Fecha Sistema
+ FRA.AA$  = LEFT$(FRA.FEC$,2)                  ! Arma ano
+ FRA.MM$  = MID$(FRA.FEC$,3,2)                 ! Arma mes
+ FRA.DD$  = RIGHT$(FRA.FEC$,2)                 ! Arma dia
+ FRA.FAC$ = FRA.AA$+"   "+FRA.MM$+"   "    +  \! Arma Linea Franq
+            FRA.DD$+"     "+TS.STORE$
+!----------------------------------------------------------------------

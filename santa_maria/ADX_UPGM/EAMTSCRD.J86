@@ -1,0 +1,11 @@
+\/*
+\/* Scrolling receipt declarations
+\/*
+
+
+ STRING GLOBAL TS.OPER.NAME$     ! operator name
+ STRING GLOBAL scItems$          ! number of items descriptor
+ STRING GLOBAL scSubtotal$       ! subtotal descriptor
+ STRING GLOBAL scTax$            ! tax descriptor
+ STRING GLOBAL scTotal$          ! total descriptor
+ STRING GLOBAL scClosed$         ! terminal closed descriptor

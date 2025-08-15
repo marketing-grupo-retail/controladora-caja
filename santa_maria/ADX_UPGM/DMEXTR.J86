@@ -1,0 +1,78 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+!*******************************************************************/
+!   IR89354 4/24/90 CTS
+!           Added Declarations for undeclared variables...
+!           Needed due to removal of bug in compiler.
+!*******************************************************************/
+REM  INCLUDE FILE FOR  DISPLAY MANAGER EXTERNAL FUNCTIONS FOR CB80  June 7/82
+
+        DEF CLRSCR EXTERNAL             REM Clear screen for Display Manager
+        INTEGER CLRSCR
+        FEND
+
+        DEF CLSDIS EXTERNAL
+        INTEGER CLSDIS
+        FEND                            REM Close Display Manager
+
+        DEF DISPD(I%) EXTERNAL          REM Display a display.
+        INTEGER DISPD, I%        ! Added I% Defn IR89354
+        FEND
+
+        DEF CURS(X$) EXTERNAL           REM turn on/off cursor visibility.
+        STRING CURS, X$          ! Added X$ Defn IR89354
+        FEND
+
+        DEF ENDF EXTERNAL               REM ENDF method of return.
+        INTEGER ENDF
+        FEND
+
+        DEF GETF EXTERNAL               REM GETF get data from a field
+        STRING GETF
+        FEND
+
+        DEF INITDM(A$) EXTERNAL         REM INITIALIZE Display Manager
+        INTEGER INITDM
+        STRING A$               ! Added A$ Defn IR89354
+        FEND
+
+        DEF NXTF(I%)  EXTERNAL          REM NXTF Go to Next Field
+        INTEGER NXTF, I%        ! Added I% Defn IR89354
+        FEND
+
+        DEF POSF(I%) EXTERNAL           REM POSTION on Field
+        INTEGER POSF, I%         ! Added I% Defn IR89354
+        FEND
+
+        DEF OPNDIS(A$) EXTERNAL         REM OPEN DISPLAY FILE
+        INTEGER OPNDIS
+        STRING A$                ! Added A$ Defn IR89354
+        FEND
+
+        DEF PUTF(A$)  EXTERNAL          REM PUT data to Field
+        INTEGER PUTF
+        STRING A$                ! Added A$ Defn IR89354
+        FEND
+
+        DEF RESF(I%)  EXTERNAL          REM RESUME field
+        INTEGER I%               ! Added I% Defn IR89354
+        STRING RESF
+        FEND
+
+        DEF RETDM  EXTERNAL             REM RETURN Display Mgr Characteristics
+        STRING RETDM
+        FEND
+
+        DEF SETF(A$) EXTERNAL           REM SET Field  video attributes
+        STRING SETF, A$          ! Added A$ Defn IR89354
+        FEND
+
+        DEF UPDF  EXTERNAL                      REM UPDATE Field data
+        STRING UPDF
+        FEND
+
+        DEF RETF EXTERNAL
+        STRING RETF
+        FEND
+
+   REM  END OF INCLUDE FILE FOR DISPLAY MANAGER CALLS FOR CB80

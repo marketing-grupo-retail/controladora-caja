@@ -1,0 +1,20 @@
+STRING   GLOBAL                 \
+         IOPDATA$,   QK$,       \
+         BQ$,        CQ$,       \
+         DQ$,        EQ$,       \
+         FQ$,        GQ$,       \
+         HQ$,        IQ$,       \
+         JQ$,        KQ$,      \
+         NO.DGN$,    NU.MED$,  \
+         SDGN$,      NU.FAC$,  \
+         DIAGNOS$,   SMED$,    \
+         COME$,      NITIM$,   \
+         CODG$
+
+INTEGER*1                    \
+          FIS.BOR%,  ND% ,   \
+          NM%,       SCAN%,  \
+          IMBA%
+
+INTEGER*2                    \
+          FIS.ENT%          

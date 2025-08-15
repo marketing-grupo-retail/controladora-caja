@@ -1,0 +1,16 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit prior to auto power down of the       */
+\/*          terminal.                                           */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+FUNCTION TSUPEC58 PUBLIC
+
+   ! Insert User Exit Code here
+
+END FUNCTION
+

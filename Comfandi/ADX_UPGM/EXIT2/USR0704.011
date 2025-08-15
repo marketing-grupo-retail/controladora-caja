@@ -1,0 +1,34 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0700.011 
+!     Punto de Entrada   =  EAMTSU07.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!    Esta linea se inserta para abrir el archivo ADXIMBA.DAT
+!-----------------------------------------------------------
+!
+  SSUB1$ = "M"                                          ! 
+  SSUB2$ = "D"                                          !
+  FILCHE$ = "R::C:\CHEQUE.DAT"                          ! Archivo Ctrl Almacen
+  OPEN FILCHE$ AS 60 BUFFSIZE 1024 NOWRITE NODEL        ! Archivo Ctrl Almacen
+  IF END #60 THEN FINAL                                 !
+  LEACHEQ:
+     READ #60;LINE RALMA$                               ! Lee Control Almac
+       IF MID$(RALMA$,25,1) = "1"  THEN BEGIN
+       NUCHE$ = MID$(RALMA$,1,8)                        !
+       SSUB1$ = SSUB1$ + NUCHE$ + "M"                   !
+      ! VALCHE$ = MID$(RALMA$,7,5)                       !
+      ! SSUB2$ = SSUB2$+VALCHE$ +  "D"                   !
+   
+       !WRITE #34;SSUB1$ + " " +SSUB2$   
+       ENDIF  
+    GOTO LEACHEQ                                       !
+     !WRITE #34;CHEQ$ + " " +VALCHQ$   
+  FINAL:                                               !
+  CLOSE 60                                             !
+
+     
+!-------------------------------------------------------------------------------

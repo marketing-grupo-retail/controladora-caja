@@ -1,0 +1,22 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC06                                                 *!
+!*                                                                           *!
+!* Description    : Called during splitting a item record.                   *!
+!*                                                                           *!
+!* Parameters     : None.                                                    *!
+!*                                                                           *!
+!* Variables      : IR.USERDATA$    This string contains the extra item      *!
+!*                                  record data (if any).                    *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC06 PUBLIC
+
+CALL EXTMIR06.011    ! EXPANSION DEL EAMITEMR
+
+END SUB
+

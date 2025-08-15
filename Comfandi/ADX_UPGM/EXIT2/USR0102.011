@@ -1,0 +1,29 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0102.011 
+!     Punto de Entrada   =  EAMTSU01.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 01 para poder  
+! restaurar el area de memoria que contiene los PLU's de  
+! una transaccion para posible Credito de Medicamentos    
+!                                                  
+!------------------------------------------------------------
+
+DIM USR.ITEMS$(500)            ! Dimension y Reset del arreglo
+SINF%     = 0                  ! Flag de Facturas
+SINC%     = 0                  ! Flag de NIT's
+TI61%     = 0                  ! Flag CR Medicamentos
+TI65%     = 0                  ! Flag CR Medicamentos CVC
+TI66%     = 0                  ! Flag CR Medicamentos sin Factura
+NUCH$     = ""                 ! Num Cheque Subsidio
+USR.IND1% = 0                  ! Indice para Items
+USR.IND2% = 0                  ! Indice para Totales
+LINCR%    = 25                 ! Lineas Disponibles Totales
+LINMF%    = 25                 ! Lineas Disponibles Totales (mf)
+FAC$ = " "                     !
+!NITIM$ = " "
+!---------------------------------------------------------------

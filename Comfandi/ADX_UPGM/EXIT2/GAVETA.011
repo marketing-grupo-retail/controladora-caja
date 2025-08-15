@@ -1,0 +1,16 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : GAVETA.011                       *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio de 2006                    *
+!Observaciones : Ctrl secuencia apertura gaveta   *
+!**************************************************
+!Observaciones
+
+IF TS.IO.KEYS(2) = 80 AND TS.IO.KEYS(4) = 100 AND TS.IO.KEYS(8) = 0 THEN BEGIN
+   CALL VISOR.AND.BORRAR("SECUENCIA TECLEO    NO AUTORIZADA /BORRA")
+   TS.IO.MOTORKEY = 73
+   DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)
+   
+ENDIF

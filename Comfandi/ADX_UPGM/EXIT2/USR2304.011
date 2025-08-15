@@ -1,0 +1,43 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2302.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Exit para desplegar Datos en el Visor del Operador
+!
+!     Algoritmo:                                                 
+!               Se despliega letrero registrado en la variable MENSA$
+!               transferido desde el Archivo C:\ADXMENS.DAT mediante
+!               Loop de instrucciones que recortan la parte Izq de la
+!               variable MENS$.
+!
+!     Variables:                                                 
+!              TS.LINETYPE:  Tipo de display.  6 ==> Prompt de Ventas
+!              TS.DISP1$:    Primera linea de despliegue                  
+!------------------------------------------------------------------------
+   IF TS.LINETYPE = 6 THEN BEGIN 	          \! Si es Prompt Ventas
+      WRITE FORM "4C10";#30;                      \! Despliegue de
+      "  Hoy es:",LEFT$(DATE$,2)+"/"     +        \! Fecha
+                   MID$(DATE$,3,2)+"/"   +        \! y Hora
+                 RIGHT$(DATE$,2),                 \! separando AAMMDD
+      " Son las:",LEFT$(TIME$,2)+":"     +        \! y HHMMSS
+                   MID$(TIME$,3,2)+":"   +        \! en el Visor Pleno
+                 RIGHT$(TIME$,2)                   !
+      WAIT;2000                                    ! Esper 3 seg
+      IF TO.USEROPTS(3) <> 0 THEN BEGIN            ! UsrOpts 3=Y Scroll Diply
+         MENSA$ = MENS$                            ! Salva String
+         XMENS% = LEN(MENS$)                           ! Toma mensaje Diario
+         FOR YMENS% = 0 TO XMENS%                          ! Inicia Loop Despliegue
+             YY% = XMENS% - YMENS%                         ! Recorta 1 Posic
+             MENS$ = RIGHT$(MENS$,YY%)             ! Guarda nuevo Mensaje
+             WRITE FORM "2C20";#30;MENS$," "       ! y lo despliega
+             WAIT; 200                             ! por 60 miliseg
+         NEXT YMENS%                                   ! siguiente Loop
+         MENS$ = MENSA$                            ! Restaura Mensaje
+      ENDIF                                        ! Fin de Condic
+   ENDIF                                           ! Fin de Condic
+!------------------------------------------------------------------------

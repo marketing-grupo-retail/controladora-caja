@@ -1,0 +1,15 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/*                                                              */
+\/*    IR98338  Parameter change to be a 4 byte integer.         */
+\/*             DRV MGVA 10Jul92                                 */
+\/*                                                              */
+ FUNCTION CSUPEC06(P1) PUBLIC
+\INTEGER*2 P1                !IR98338
+ INTEGER*4 P1                !IR98338
+! insert user exit code here
+
+Asc.Err.Proceso$ = "CSE06"
+%INCLUDE EAMCSE06.J86            ! Electronic Marketing PRPQ
+Asc.Err.Proceso$ = "CSU06"
+  END FUNCTION

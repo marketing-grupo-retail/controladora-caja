@@ -1,0 +1,509 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSUSU.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR34278  Replaced external reference to the day of week function
+!           with one that is year 2000 compliant.
+!           KHG IBM 03/04/97
+!
+%INCLUDE EAMCSCSU.J86      ! COUPON ENHANCEMENT CODE
+
+!********************************************************************
+!*     COMMON ERROR PROCESSING AND LOGGING ROUTINES                 *
+!********************************************************************
+SUB CSWREC52 EXTERNAL                  ! Exception logging routine
+END SUB
+
+SUB CSIMEC01 EXTERNAL                  ! Item movement routine
+END SUB
+
+FUNCTION ADXSTART(NAME$,PARM$,MESS$) EXTERNAL ! Start background program
+INTEGER*2 ADXSTART
+STRING    NAME$,PARM$,MESS$
+END FUNCTION
+
+FUNCTION ERRNHEX$ EXTERNAL             ! Error logging routine
+ STRING ERRNHEX$
+END FUNCTION
+
+!AIR34278
+!FUNCTION DAY.OF.WEEK EXTERNAL          ! Compute day of week
+! INTEGER*2 DAY.OF.WEEK
+!END FUNCTION
+
+FUNCTION ?DAY.OF.WEEK(TEST.DATE$) EXTERNAL
+    INTEGER*2 ?DAY.OF.WEEK, YEAR, MONTH, DAY, CENTURY, ADJMONTH,  \
+              ADJYEAR, MONTHCORRECTION, YEARCORRECTION, LSTTWO
+    STRING WORK$, TEST.DATE$
+END FUNCTION
+!EIR34278
+
+SUB EMSS.PANEL EXTERNAL
+END SUB
+
+SUB READ.FILTER EXTERNAL
+END SUB
+
+SUB AUTO.BATCH.TIME EXTERNAL           ! Start Batch Maintenance
+END SUB
+
+SUB AUTO.UXFER.TIME EXTERNAL           ! Start Transfer Processing
+END SUB
+
+SUB AUTO.UREFA.TIME EXTERNAL           ! Start Reference Processing
+END SUB
+
+!!*******************************************************************
+!!** CODE MOVED TO EAMCSFBX.BAS TO FREE SPACE IN EAMCSUPC.BAS      **
+!!*******************************************************************
+SUB CSU04.FB  EXTERNAL           ! CODE FOR EXIT 04
+END SUB
+
+SUB CSU12.FB  EXTERNAL           ! CODE FOR EXIT 12
+END SUB
+
+SUB CSU15.FB  EXTERNAL           ! CODE FOR EXIT 15
+END SUB
+
+SUB CSU16.FB  EXTERNAL           ! CODE FOR EXIT 16
+END SUB
+
+!!*******************************************************************
+!!** ELECTRONIC MARKETING UNIQUE EXIT CODE                         **
+!!*******************************************************************
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC01         : CALLED AFTER THE READ OF A CUSTOMER ACTIVITY
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!                     OP.CA.RSIZE
+\ REM!!                     OP.CA.DSOFF
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBACT.READ
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!                     CA.KEY$
+\ REM!!                     CA.DATA$
+\ REM!!                     CA.CUSTNUM$
+\ REM!!                     CA.POINTS
+\ REM!!                     CA.TRANS
+\ REM!!                     CA.REDEEMED
+\ REM!!                     CA.AUTOCOUP
+\ REM!!                     CA.DOLP$
+\ REM!!                     CA.TR.POINTS
+\ REM!!                     CA.STATUS
+\ REM!!                     CA.MSGNUM
+\ REM!!                     CA.OPTIONS
+\ REM!!                     CA.DISCG
+\ REM!!                     CA.PMULT
+\ REM!!                     CA.TARGETC$
+\ REM!!                     CA.ALT.NUM$
+\ REM!!                     CA.PERIOD$
+\ REM!!                     CA.PPOINTS
+\ REM!!                     CA.PTRANS
+\ REM!!                     CA.PREDEEM
+\ REM!!                     CA.DOLR$
+\ REM!!                     CA.SALES
+\ REM!!                     CA.CUSTOMER
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!
+\ REM!!  COMMENTS         : THE VARIABLES USER.FBACT.READ, USER.FBACT.ERROR,
+\ REM!!                     AND USER.FBACT.NOTHOME DEFINE WHETHER THE READ
+\ REM!!                     WAS SUCCESSFUL, AND IF NOT, WHETHER THIS IS A
+\ REM!!                     HOME STORE CUSTOMER.  IF THE READ WAS SUCCESSFUL,
+\ REM!!                     THEN THIS IS A HOME STORE CUSTOMER.
+\ REM!!                     THE CODE IN USERCARD.J86 IS EXECUTED JUST
+\ REM!!                     PRIOR TO THIS EXIT.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC01.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC02         : CALLED AFTER THE READ OF A CUSTOMER TRANSFER
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBPEND.READ
+\ REM!!                     CA.KEY$
+\ REM!!                     XF.DATA$
+\ REM!!                     XF.DOLP$
+\ REM!!                     XF.POINTS
+\ REM!!                     XF.AUTOCOUP
+\ REM!!                     XF.TRANS
+\ REM!!                     XF.TR.POINTS
+\ REM!!                     XF.TO.POINTS
+\ REM!!                     XF.TO.AUTOCOUP
+\ REM!!                     XF.TO.TRANS
+\ REM!!                     XF.RESERVE
+\ REM!!
+\ REM!!  COMMENTS         : THE CODE IN USERXFRD.J86 IS EXECUTED JUST
+\ REM!!                     PRIOR TO THIS EXIT
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC02.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC03         : CALLED BEFORE THE WRITE OF A CUSTOMER
+\ REM!!  --------           ACTIVITY RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!                     OP.CA.RSIZE
+\ REM!!                     OP.CA.DSOFF
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!                     USER.FBACT.ERROR
+\ REM!!                     USER.FBACT.NOTHOME
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBACT.READ
+\ REM!!                     CA.KEY$
+\ REM!!                     CA.DATA$
+\ REM!!                     CA.CUSTNUM$
+\ REM!!                     CA.POINTS
+\ REM!!                     CA.TRANS
+\ REM!!                     CA.REDEEMED
+\ REM!!                     CA.AUTOCOUP
+\ REM!!                     CA.DOLP$
+\ REM!!                     CA.TR.POINTS
+\ REM!!                     CA.STATUS
+\ REM!!                     CA.MSGNUM
+\ REM!!                     CA.OPTIONS
+\ REM!!                     CA.DISCG
+\ REM!!                     CA.PMULT
+\ REM!!                     CA.TARGETC$
+\ REM!!                     CA.ALT.NUM$
+\ REM!!                     CA.PERIOD$
+\ REM!!                     CA.PPOINTS
+\ REM!!                     CA.PTRANS
+\ REM!!                     CA.PREDEEM
+\ REM!!                     CA.DOLR$
+\ REM!!                     CA.SALES
+\ REM!!                     CA.CUSTOMER
+\ REM!!
+\ REM!!  COMMENTS         : THE CODE IN USERCAUP.J86 IS EXECUTED JUST
+\ REM!!                     AFTER THIS EXIT
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC03.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC04         : CALLED BEFORE THE WRITE OF A CUSTOMER
+\ REM!!  --------           TRANSFER RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : USER.FBPEND.READ
+\ REM!!                     CA.KEY$
+\ REM!!                     XF.DOLP$
+\ REM!!                     XF.POINTS
+\ REM!!                     XF.AUTOCOUP
+\ REM!!                     XF.TRANS
+\ REM!!                     XF.TR.POINTS
+\ REM!!                     XF.TO.POINTS
+\ REM!!                     XF.TO.AUTOCOUP
+\ REM!!                     XF.TO.TRANS
+\ REM!!                     XF.RESERVE
+\ REM!!
+\ REM!!  COMMENTS         : THE CODE IN USERXFUP.J86 IS EXECUTED JUST
+\ REM!!                     AFTER THIS EXIT
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC04.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC05         : CALLED BEFORE THE WRITE OF AN ACTIVITY
+\ REM!!  --------           TRANSFER RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!                     OP.XFER.ACT
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : X$
+\ REM!!
+\ REM!!  COMMENTS         : X$ CONTAINS THE RECORD TO BE WRITTEN JUST
+\ REM!!                     AFTER THIS EXIT
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC05.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC06         : CALLED AFTER THE UPDATE OF ACCOUNTING TOTALS
+\ REM!!  --------
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : CS.ACOT$
+\ REM!!                     CS.OPOP$
+\ REM!!
+\ REM!!  COMMENTS         : CS.ACOT$ AND CS.OPOP$ HAVE BEEN UPDATED WITH
+\ REM!!                     E.M. UNIQUE DATA.  BASE CODE WRITES RECORDS.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC06.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC07         : CALLED BEFORE THE WRITE OF A PREFERRED
+\ REM!!  --------           CUSTOMER AUDIT LOG RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.LAST.TIME$
+\ REM!!                     EMSS.PANEL.TRANS
+\ REM!!                     EMSS.TR.POINTS
+\ REM!!                     EMSS.TR.PCCPNAMT
+\ REM!!                     EMSS.TR.PCCPNCNT
+\ REM!!                     EMSS.TR.MSGNUM
+\ REM!!                     EMSS.XF.TRANS
+\ REM!!                     EMSS.XF.POINTS
+\ REM!!                     EMSS.BO.POINTS
+\ REM!!                     EMSS.RD.POINTS
+\ REM!!                     EMSS.NEW.ALT.NUM$
+\ REM!!                     EMSS.TG.CPN.CNT
+\ REM!!                     EMSS.TG.CPN(1)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : RA.DATA$
+\ REM!!
+\ REM!!  COMMENTS         : THE CODE IN USERRAUP.J86 IS EXECUTED JUST
+\ REM!!                     AFTER THIS EXIT TO WRITE RA.DATA$ TO FILE
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC07.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC08         : CALLED BEFORE THE WRITE OF A PANEL DIARY
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     CS.INPUT$
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : EMSS.OUTPUT$
+\ REM!!
+\ REM!!  COMMENTS         : EMSS.OUTPUT$ IS WRITTEN TO FILE JUST AFTER
+\ REM!!                     AFTER THIS EXIT.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC08.J86
+
+\ REM!!****************************************************************
+\ REM!!  CSEMEC09         : CALLED BEFORE THE WRITE OF A COUPON TRACKING
+\ REM!!  --------           RECORD
+\ REM!!  TYPE             : I/O EXIT
+\ REM!!
+\ REM!!  INPUT PARMS.     : NONE
+\ REM!!
+\ REM!!  OUTPUT PARMS.    : NONE
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  REFERENCE ONLY   : SL.HD.TRANSNUM
+\ REM!!                     SL.HD.TERMINAL$
+\ REM!!                     SL.HD.OPERATOR$
+\ REM!!                     SL.HD.GROSSPOS
+\ REM!!                     SL.HD.GROSSNEG
+\ REM!!                     SL.HD.TRANTYPE
+\ REM!!                     OP.PACK.LOGDATA
+\ REM!!                     WORK4I2  (CONTAINS SESSION NUMBER)
+\ REM!!
+\ REM!!  GLOBALS FOR
+\ REM!!  UPDATE           : WORK$
+\ REM!!
+\ REM!!  COMMENTS         : WORK$ IS WRITTEN TO FILE JUST AFTER
+\ REM!!                     AFTER THIS EXIT.
+\ REM!!
+\ REM!!****************************************************************
+
+%INCLUDE EAMEMC09.J86
+
+!

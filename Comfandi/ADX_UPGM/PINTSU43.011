@@ -1,0 +1,17 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+
+IF Ue.Pin.IrPrice% = -1 THEN BEGIN                  ! Cambia precio de recarga
+   SL.IE.SALEPRIC = VAL(Ue.Pin.Vlr$)                !
+   SL.IT.XPRICE   = VAL(Ue.Pin.Vlr$)                !
+   CALL ASIGNA.TELEFONO															! Graba telefono
+   CALL Save.TmpOper.Recarga                        ! 
+   Ue.Pin.IrPrice% = 0
+ENDIF

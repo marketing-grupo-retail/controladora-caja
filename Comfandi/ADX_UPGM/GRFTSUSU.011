@@ -1,0 +1,61 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : GRFTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo Numeracion Fiscal         *
+!                Legislacion Tributaria Colombia  *
+!**************************************************
+
+Sub FISMTS02.011 External
+End Sub 
+
+Sub FISMTS07.011 External
+End Sub 
+
+Sub FISMTS14.011 External
+End Sub 
+
+Sub FISMTS20.011 External
+End Sub 
+
+Sub FISMTS56.011 External
+End Sub 
+
+Sub FISMTS53.011 External
+End Sub 
+
+!--- Rutinas Para manejo de IVAS 
+
+Sub IVATSU01.011 External
+End Sub
+
+Sub IVATSU02.011 External
+End Sub
+
+Sub IVATSU07.011 External
+End Sub
+
+Sub IVATSU08.011 External
+End Sub
+
+Sub IVATSU20.011 External
+End Sub
+
+Sub IVATSU20.012 External
+End Sub
+
+Sub IVATSU21.011 External
+End Sub
+
+Sub IVATSU23.011 External
+End Sub
+
+Sub IVATSU28.011 External
+End Sub
+
+Sub IVATSU53.011 External
+End Sub
+
+Sub IVATSU56.011 External
+End Sub

@@ -1,0 +1,35 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU20.012                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+
+IF (TS.LINETYPE = 1) AND (TS.PROCEDURE < 1) THEN BEGIN                       !Si linea de articulo
+ If UE.EPS.CAPITACION$ = "1" Then Begin                                      !
+    TS.TEMP1I4 = LEN(TS.PRTBUF$) - 11                                        ! 
+    TS.TEMP3$ = LEFT$(TS.PRTBUF$,TS.TEMP1I4)     		                         ! Toma vlr
+    !TS.PRTBUF$= TS.TEMP3$ + STRING$(11," ")                                 ! Rellena con 11 caracteres
+    TS.PRTBUF$ = ""
+    TS.FORMCR$ = "C38 A0"
+ EndIf                   
+EndIf 
+
+If UE.EPS.CAPITACION$ = "1" Then  begin
+ If Ts.Linetype = 7 and Ts.Linedata = 1 Then Begin
+   A$ = Right$(Ts.PrtBuf$,12)
+   !Ts.PrtBuf$ = string$(38,"*")
+   Ts.PrtBuf$ = ""
+ EndIf
+EndIf  
+ 
+ If UE.EPS.CAPITACION$ = "1" Then  begin                                     ! Elimina string de impresion
+  If Ts.Linetype = 2 and Ts.Linedata = 60 Then Begin                         ! de la forma de pago
+     TS.PrtBuf$ = ""                                                         !
+  EndIf 
+  If Ts.Linetype = 4 and Ts.Linedata = 1 Then Begin                          ! Elimina string de cambio
+     TS.PrtBuf$ = ""                                                         !
+  EndIf 
+EndIf 

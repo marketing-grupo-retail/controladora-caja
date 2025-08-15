@@ -1,0 +1,35 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : PROTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Jilio 8 de 2.003                 *
+!Observaciones : Apertura proyecto de promociones *
+!				                                  *  
+!**************************************************
+! Se define la apertura del proyecto y la carga    
+! de paramentros de este.
+
+UE.COMF.PROMO% = 04                       										! Manejo de bonos proy 4
+TS.ER.RETURN = -1                     											! Control errores
+
+OPEN "R::CONTROL" KEYED RECL 104 AS 56   										! Abre archivo de control
+IF TS.ER.RETURN = -1 THEN BEGIN													! Apertura OK
+   CALL LECTURA.CONTROL(UE.COMF.PROMO%)											! Lectura Parametros
+   UE.COMF.SES2% = VAL(PAR.PROY$(1,1))											! Sesiones de apertura de archivos
+   UE.COMF.QTY%  = VAL(PAR.PROY$(1,2))                                          ! Qty minima de compra
+   UE.COMF.VLR%  = VAL(PAR.PROY$(1,3))                                          ! Valor minimo de compra
+   UE.COMF.MSG1$ = PAR.PROY$(2,1)												! Mensaje tiquete 1
+   UE.COMF.MSG2$ = PAR.PROY$(3,1)												! Mensaje tiquete 2
+   UE.COMF.MSG3$ = PAR.PROY$(4,1)												! Mensaje tiquete 3
+   UE.COMF.MSG4$ = PAR.PROY$(5,1)												! Mensaje tiquete 4
+   UE.COMF.FECI$ = PAR.PROY$(1,4)        										! Fecha inicial promocion
+   UE.COMF.FECF$ = PAR.PROY$(1,5)                                               ! Fecha Final promocion
+   UE.COMF.INDIMP% = -1															! Indicador de impresion
+   CLOSE 56																	    ! Cierre control
+ENDIF ELSE BEGIN																! Error de apertura
+   CALL MSG.DISP("Proyecto Proveedores","Cancelado..!!",30,1500,3)              ! Msg alerta
+   UE.PROYECTO(UE.COMF.BONOS%) = 0                                              ! Cancela Proyecto
+ENDIF
+
+

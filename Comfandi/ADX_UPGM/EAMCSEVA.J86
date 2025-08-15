@@ -1,0 +1,97 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSUVA.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!/**************** CORRECTIONS AND CHANGES *************************/
+!/*                                                                */
+!/*  IR98664 -  Electronic Coupons are not being added to the      */
+!/*             Counted Tender fields of the accounting record if  */
+!/*             the Tender Count procedure is performed at the     */
+!/*             terminal.                                          */
+!/*             BAH MGVA 16Sep92                                   */
+!/*                                                                */
+!/*  IR39149 -  Add variables to support manufacturer coupons by   */
+!/*             variety.  Co-req IR39147                           */
+!/*             RSH MGVA 12Nov98                                   */
+!/*                                                                */
+!!*******************************************************************
+
+%INCLUDE EAMCSCVA.J86      ! COUPON ENHANCEMENT CODE
+
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER VARIABLES                               **
+!!*******************************************************************
+
+%INCLUDE USERCADF.J86               ! CUSTOMER ACTIVITY FILE DEFINITION
+%INCLUDE USERXFDF.J86               ! PENDING TRANSFER FILE DEFINITION
+%INCLUDE USERRADF.J86               ! REDEMPTION AUDIT FILE DEFINITION
+INTEGER  GLOBAL USER.FBXFER.OPEN    ! ACTIVITY TRANSFER FILE DEFINITION
+%INCLUDE USEROPDF.J86               ! FREQUENT BUYER OPTIONS DEFINITION
+%INCLUDE USERFLDF.J86               ! FILTER FILE DEFINITION
+STRING   GLOBAL B$                  ! FILTER WORK STRING
+
+STRING    GLOBAL \
+          EMSS.ERROR$(1),           \ ERROR DESCRIPTORS
+          EMSS.STORE$,              \ THIS STORE NUMBER (PACKED)
+          EMSS.OUTPUT$,             \ TRANSLATED TRANSACTION
+          EMSS.NEW.ALT.NUM$         ! AUTO UPDATE OF ALT NUMBER
+
+INTEGER*4 GLOBAL \
+          EMSS.TR.PCCPNAMT,         \ TRANSACTION PC COUPON AMOUNT
+          EMSS.TR.ACOUPMFR,         \ TRANSACTION MFR AUTO COUPONS AMT
+          EMSS.TR.ACOUPSTR,         \ TRANSACTION STR AUTO COUPONS AMT
+          EMSS.TR.POINTS,           \ TRANSACTION POINTS
+          EMSS.BO.POINTS,           \ TRANSACTION BONUS POINTS
+          EMSS.RD.POINTS,           \ TRANSACTION REDEEMED POINTS
+          EMSS.XF.POINTS            ! TRANSFER FILE POINTS
+
+INTEGER   GLOBAL \
+          EMSS.PANEL.TRANS,         \ FLAG FOR PANEL TRANSACTION
+          EMSS.XF.TRANS,            \ NUMBER OF XFERRED TRANSACTIONS
+          EMSS.ALIAS.UPC,           \ ALIAS ITEM CODE
+          EMSS.TR.PCCPNCNT,         \ TRANSACTION PC COUPON COUNT
+          EMSS.TR.ACMFRCNT,         \ TRANSACTION MFR AUTO COUPONS CNT
+          EMSS.TR.ACSTRCNT,         \ TRANSACTION STR AUTO COUPONS CNT
+          EMSS.TR.MSGNUM,           \ PRINTED MESSAGE FOR TRANSACTION
+          EMSS.TG.CPN.CNT,          \ COUNT OF USED TARGETED COUPONS
+          EMSS.TG.CPN(1)            ! USED TARGETED COUPON LIST
+
+
+!********************************************************************
+!*    DEFINE BASE VARIABLES NEEDED FOR ELECTRONIC MARKETING         *
+!********************************************************************
+ INTEGER GLOBAL NUMSTRINGS                   ! Access base variable
+ INTEGER GLOBAL TS.ER.RETURN                 ! VARIABLES FOR GLOBAL
+ STRING  GLOBAL TS.TS11WERR$                 ! DISK ERROR PROCESSING
+
+!AIR98664
+
+!**************************************************************************
+!*    VARIABLES NEEDED FOR UPDATING TENDER COUNT FIELDS FOR ELEC. COUPONS *
+!**************************************************************************
+
+ INTEGER*4      \
+         EMSS.STR.COUP,                 \ ELECTRONIC STORE COUPON AMOUNT
+         EMSS.MFR.COUP,                 \ ELECTRONIC VENDOR COUPON AMOUNT
+         EMSS.DBL.COUP,                 \ amount of Double coupons taken
+         EMSS.STRTOTL.COUP              ! Store coupon total amount
+
+!EIR98664
+
+!AIR39149
+INTEGER*1 GLOBAL                        \
+         ENH01.ENABLE,                  \ Is TBV enabled
+         CS.AC.TBV                      ! Holds Tender by Variety
+
+INTEGER*2 GLOBAL                        \
+         EMSS.EMC.VAR                   ! Variety containing Elec Mfr Cpns
+
+STRING    GLOBAL                        \
+         CS.ACTC$,                      \ Tender Count Accounting Record
+         CS.ACNT$                       ! Net Tender Accounting Record
+!EIR39149

@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC38 PUBLIC
+! TSUPEC38 - DEPARTMENT KEY PROC
+INTEGER*1 TSUPEC38                        ! define variable !IR89474
+END FUNCTION
+

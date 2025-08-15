@@ -1,0 +1,118 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC14 PUBLIC
+! TSUPEC14 - AFTER IOPROC READ
+
+
+!FOR I% = 1 TO 10
+!    CALL U.IMPRIME("DATA "+STR$(I%)+" :"+TS.IO.DATA$(I%),6100H)
+!    CALL U.IMPRIME("KEYS "+STR$(I%)+" :"+STR$(TS.IO.KEYS(I%)),6100H)
+!NEXT I%
+!CALL U.IMPRIME("MOTORKEY :"+STR$(TS.IO.MOTORKEY),6100H)
+!CALL U.IMPRIME("------------------------",6100H)
+
+	If TS.IO.KEYS(2)  = 80 And 																							 \!
+     (Len(TS.IO.DATA$(2)) > 10 And Left$(TS.IO.DATA$(2),2) = "99") Then Begin
+     Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)
+     TS.IO.MOTORKEY = 0
+     TS.GUIDANCE = 1003
+     Exit FUNCTION 
+  EndIf
+
+IF TS.IO.MOTORKEY <> 73 THEN \
+ IF (Asc.Pay.Pago% = -1) AND (TS.IO.MOTORKEY <> Asc.Pay.Motora%) THEN BEGIN
+   CALL TSHIECET
+   Call Visores4690(1,"PRESIONE TECLA DE","PAGO ELECTRONICO....",1200,"L")
+   DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10) 
+   TS.IO.MOTORKEY = 81 : TS.IO.KEYS(6) = 81
+   EXIT FUNCTION 
+ ENDIF 
+
+!CALL SEC.DIGIT                       ! Secuencias digitacion 
+
+CALL SIMULAR.VENTA.POS(14)
+
+CALL GR.FE.NATURAL(14)               ! FE PERSONAS NATURALES
+
+CALL LIBLINE(14,3)                   ! OBLIGA VENDEDOR
+CALL SEC.DIGIT                       ! Secuencias digitacion 
+
+!CALL PROMOCIONV2(14)                 ! MOTOR PROMOCIONE V2
+
+CALL GRPFIZER(14)                    ! DSCTO ESCALONADO PFIZER
+CALL GRABBOT(14)                     ! ESCALONADO ABBOT
+CALL GRABJSN(14)                     ! ESCALONADO ABBOT JSON
+CALL LIBLINE(14,11)                  ! Consulta Precio Articulos
+CALL RECATS14.011                    ! RECARGAS ONLINE
+CALL LIBLINE(14,1)                   ! Vende medicamento
+CALL LIBLINE(14,2)                   ! Medicos
+
+!CALL LIBLINE(14,3)                   ! OBLIGA VENDEDOR
+
+
+CALL COMFTS14.011                    ! COMFANDI - CISA
+CALL COLMTS14.011                    ! RECAUDO COLEGIOS
+CALL EDUMTS14.011                    ! RECAUDO SIEMPRE EDUCANDO
+CALL LIBLINE(14,4)                   ! Bonos de descuento. INCLUYE LA USR1400
+CALL EPSEANTS14                      !
+CALL LIBLINE(14,5)                   ! VERIFICAR PRECIOS
+CALL LCFTSE14.011                    ! Modulo Lealtad Clientes Online
+%INCLUDE EAMTSE14.J86                ! EMS PRPQ
+CALL LCFTSU14.011                    ! Modulo Lealtad Clientes Online
+
+If (Ue.Cnv.Fiscal% = 0) Then        \!
+  CALL FISMTS14.011                  ! Modulo Fiscal
+ 
+CALL RECASRV(14,0)	                 ! PAGO SERVICIOS PUBLICOS  
+CALL CFTSU14.011                     ! Modulo de ofertas.
+CALL LIBLINE(14,6)                   ! Medicos
+!CALL SEC.DIGIT                       ! Secuencias digitacion 
+
+CALL FDEMTS14.011                    ! FONDECOM
+CALL LIBLINE(14,7)                   ! Manejo y Control de Datos Concesionarios
+CALL LIBLINE(14,8)                   ! Restaura Variables Cr de Medicamentos
+CALL LIBLINE(14,9)                   ! Permite Conf/Ignor/Camb Precio PLU's de Verif
+CALL LIBLINE(14,10)                  ! Asigna Cant digitada para Calculo Imp Consumo
+CALL RTITSU14.011                    ! Consulta ivas 
+!CALL EPAYMS14.011                   ! PAGO ELECTRONICO
+
+CALL DOMIMS14.011                    ! MODULO DOMICILIOS
+!CALL EPSMTS14.011                    ! Modulo Convenios
+
+CALL PEFMTS14.011                    ! PAGO ELECTRONICO - FONEDE
+
+%INCLUDE UEECR114.U86                ! MODULO TEF REDEBAN
+CALL PROMOCIONV2(14)                 ! MOTOR PROMOCIONE V2
+
+CALL GR.DIA.SINIVA(14)               ! DIA SIN IVA
+CALL REMISION(14)                    ! REMISION MERCANCIA
+!CALL MKTPTS14.011                    ! MODULO PROMOCIONES
+
+CALL PROPINA(14)                     ! Modulo propinas
+CALL GRMOVRMS(14)                    ! Remisiones de mercancia
+CALL GRMBONOS(14)                    ! Modulo Bonos Lealtad
+
+!CALL PRMFPAGO(14)                    ! PROMOCION FORMAS DE PAGO
+
+CALL ESCALONADO(14)                  ! DESCUENTOS ESCALONADOS
+CALL GRFAMILIAS(14)                  ! FAMILIAS EN ACCION 
+CALL CRDEMPRESAS(14)                 ! CREDITO EMPRESARIAL
+CALL SUBSIDIO.MPAC(14)               ! MPAC
+CALL CREDITOSOCIAL(14)               ! CREDITO SOCIAL
+CALL SUBSIDIO.SAPCORE(14)            ! SAP-CORE
+CALL SUBSIDIO.FOSFEC(14)             ! FOSFEC SAPCORE
+CALL GRMIMEI(14)                     ! CAPTURA IMEI CELULAR
+CALL BRCOMPRAPAGO(14)                ! RECOMPRA FORMA PAGO
+CALL BONODEVPAGO(14)                 ! Bono nota devolucion 
+CALL BONOS.KUPI(14)                  ! BONO ELECTRONICO KUPI
+CALL REDEPREMIOLEAL(14)              ! LEALTAD CLIENTES - LEAL
+CALL BONOS.ELECTROSUPDRG(14)         ! BONOS SUPER Y DROGUERIA
+CALL NOTASCREDITOPOS(14)             ! NOTAS CREDITO
+
+!CALL GR.FE.NATURAL(14)               ! FE PERSONAS NATURALES
+
+CALL QXL.TSUPEC14                    ! EJ V2
+
+END FUNCTION
+

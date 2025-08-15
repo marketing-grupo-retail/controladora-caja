@@ -1,0 +1,116 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : BONTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Control de captura de cheques    *
+!				                                  *  
+!**************************************************
+! Se adiciona control de monto capturado, evitando
+! el paso del EAN del bono en la venta o cambio de este
+! desarrollado por Oscar Valencia 28 Oct. 2003
+!--------------------------------------------------
+! Se controla en los cambios de bonos que ingresen a un procedimiento
+! diferente. ajustado por Asic el 31 de agosto d2 2.005 OVS
+!------------------------------------------------
+
+IF UE.PROYECTO(UE.COMF.BONOS%) THEN BEGIN										! Proyecto activo
+
+ IF (TS.IO.KEYS(5) = 61) AND (TS.IO.STATE = 20) THEN BEGIN
+  IF MATCH(TS.IO.DATA$(5),"123456789",1) > 0 THEN BEGIN 
+	    IF UE.COMF.STAT% = 2 THEN BEGIN
+         TS.IO.MOTORKEY = 0
+         DIM TS.IO.KEYS(10)
+         DIM TS.IO.DATA$(10)
+         TS.GUIDANCE = 1094     ! Msg Procedimiento no valido
+         EXIT SUB	    
+	    ENDIF 
+ENDIF
+ENDIF
+
+
+IF (TS.IO.KEYS(5) = 61) AND (TS.IO.STATE = 10) THEN BEGIN
+	IF (VAL(TS.IO.DATA$(5)) = 2) OR \
+	   (VAL(TS.IO.DATA$(5)) = 3) OR \
+	   (VAL(TS.IO.DATA$(5)) = 4) THEN BEGIN
+   	    UE.COMF.STAT% = 4
+ENDIF
+ENDIF
+
+
+ IF (TS.IO.MOTORKEY = 93) AND NOT(TS.INTRX) AND                                \! Si tecla otros pago y
+    UE.COMF.STAT% = 0 THEN BEGIN                                                ! no hay venta
+    DIM TS.IO.KEYS(10)                                               			      !
+    DIM TS.IO.DATA$(10)                                                         !
+   	CALL MSG.DISP("INTERCAMBIO CHEQUE","SUBSIDIO..",30,1000,3)
+    TO.MGRKEY      = 0                                                          ! Simula Cambio de bono
+    TS.IO.DATA$(5) = "1"                                                        ! por efectivo
+    TS.IO.KEYS(5)  = 61                                                         !
+    TS.IO.MOTORKEY = 61                                                         !
+    TS.IO.STATE    = 10                                                         !
+    UE.COMF.STAT%  = 2                                                         !
+ ENDIF
+
+IF TS.IO.MOTORKEY = 93 AND UE.COMF.STAT% <> 4 THEN BEGIN  						          ! Si pago de bonos y no recogida
+   IF (TS.IO.PREV.KEYS(2) NE 81) AND                                           \! Si no presiono Total
+     (TS.IO.PREV.KEYS(2) NE 0)  THEN BEGIN                                      ! Si no presiono Total
+     TS.IO.MOTORKEY = 0
+     DIM TS.IO.KEYS(10)
+     DIM TS.IO.DATA$(10)
+     TS.GUIDANCE = 1020                                                         ! Msg presione total
+     EXIT SUB
+  ENDIF
+   ENTRADA.VARIEDAD:
+    UE.COMF.DATA$ = ENTRADA.DATO("VARIEDAD (1-6)?","")
+    IF (MID$(UE.C.IOPDATA$,13,1)<>"I") AND UE.COMF.ERROR% = 0 THEN GOTO FINAL.ENTRADA.BONO             ! si presiono borrar
+    IF MID$(UE.C.IOPDATA$,13,1) = "P" THEN BEGIN ! Presiono enter
+       UE.COMF.DATA$ = RIGHT$(UE.COMF.DATA$,LEN(UE.COMF.DATA$)-1)
+    ENDIF
+    IF VAL(UE.COMF.DATA$) < 1 OR VAL(UE.COMF.DATA$) > 6 THEN BEGIN
+       CALL MSG.DISP("VARIEDAD ERRADA","...",30,1500,3)
+       GOTO ENTRADA.VARIEDAD     ! Error de dato
+    ENDIF
+    IF UE.COMF.STAT% = 2 AND VAL(UE.COMF.DATA$) NE UE.COMF.VARI% THEN BEGIN
+       CALL MSG.DISP("VARIEDAD NO","AUTORIZADA...",30,2000,3)
+       GOTO FINAL.ENTRADA.BONO
+    ENDIF
+    TS.IO.DATA$(3) = STR$(VAL(UE.COMF.DATA$))                                   ! Asigno variedad
+    TS.IO.KEYS(7)  = TS.IO.MOTORKEY                                             ! Tomo tipo de pago
+	TS.IO.KEYS(3)  = 78                                                         ! Simulo variedad
+    IF VAL(TS.IO.DATA$(3)) NE UE.COMF.VARI% THEN BEGIN                          ! Si variedad de bono	
+       UE.COMF.DATA$ = ENTRADA.DATO("VALOR PAGO?","")	   					    ! Valor del pago
+       IF LEN(UE.COMF.DATA$) > 7 THEN BEGIN
+          CALL MSG.DISP("LONGITUD",STR$(LEN(UE.COMF.DATA$)),30,1500,3)
+          CALL MSG.DISP("VALOR CAPTURADO","MUY ALTO",30,1800,3)
+          GOTO FINAL.ENTRADA.BONO
+       ENDIF
+       IF (MID$(UE.C.IOPDATA$,13,1)<>"I") AND UE.COMF.ERROR% = 0 THEN GOTO FINAL.ENTRADA.BONO             ! si presiono borrar
+       IF MID$(UE.C.IOPDATA$,13,1) = "P" THEN BEGIN ! Presiono enter
+          UE.COMF.DATA$ = RIGHT$(UE.COMF.DATA$,LEN(UE.COMF.DATA$)-1)
+       ENDIF
+       TS.IO.DATA$(7) = UE.COMF.DATA$                                           ! Asigna valor
+	ENDIF   
+	IF VAL(TS.IO.DATA$(3)) = UE.COMF.VARI% THEN BEGIN                           ! Si variedad de bono
+           UE.COMF.DATA$ = VALIDA.BONO                                          ! Captura y valida bono
+           UE.COMF.STAT% = 0
+	   TO.MGRKEY     = -1                                                   !
+	   IF UE.COMF.DATA$ = "" THEN GOTO SALIDA.NORMAL.BONO	                    ! Si bono OK!!
+	ENDIF ELSE GOTO SALIDA.NORMAL.BONO
+   FINAL.ENTRADA.BONO:
+     TS.IO.MOTORKEY = 73										    	        ! Inicializa datos
+     DIM TS.IO.KEYS(10)                                               
+     DIM TS.IO.DATA$(10)                                             
+   SALIDA.NORMAL.BONO:
+ ENDIF
+ENDIF
+ 
+IF TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN                      ! Anular Transaccion
+ IF UE.COMF.NCHQ% > 0 THEN BEGIN												! Cheques capturados
+   CALL DEVO.CHEQUES
+ ENDIF  
+ UE.COMF.NCHQ% = 0
+ UE.COMF.STAT% = 0
+ TO.MGRKEY     = -1
+ENDIF
+

@@ -1,0 +1,44 @@
+!------------------------------------------------------------------------------
+!                 Subrutinas del Modulo Fiscal FIS2002.BAS
+!------------------------------------------------------------------------------
+SUB GETUNPK EXTERNAL                                   ! Desempaqueta Strings
+END SUB                                                ! 
+SUB GETPLAG EXTERNAL                                   ! Obtiene Flags 
+END SUB                                                ! 
+SUB FIS.STRING1 EXTERNAL                               ! Obtiene Campos STR 1
+END SUB                                                !
+SUB FIS.STRING99 EXTERNAL                              ! Obtiene Campos STR 99
+END SUB                                                !
+SUB FISTSU01.011 EXTERNAL                              ! Reset de Variables
+END SUB                                                !
+SUB FISTSU02.011 EXTERNAL                              ! Reset de Variables
+END SUB                                                !
+SUB FISTSU07.011 EXTERNAL                              ! Abre/Proc Arch Fisc
+END SUB                                                !
+SUB FISTSU08.011 EXTERNAL                              ! Toma Inf EAMITEMR
+END SUB                                                !
+SUB FISTSU10.011 EXTERNAL                              ! Toma Info de EAMTERMS
+END SUB                                                !
+SUB FISTSU14.011 EXTERNAL                              ! Control Teclado
+END SUB                                                !
+SUB FISTSU18.011 EXTERNAL                              ! Control escitura LOG
+END SUB                                                !
+SUB FISTSU20.010 EXTERNAL                              ! Contro Impresion Head
+END SUB                                                !
+SUB FISTSU20.011 EXTERNAL                              ! Control Impresion CR
+END SUB                                                !
+SUB FISTSU23.011 EXTERNAL                              ! Control AnDisplay
+END SUB                                                !
+SUB FISTSU28.011 EXTERNAL                              ! Control Signon
+END SUB                                                !
+SUB FISTSU43.011 EXTERNAL                              ! Calculo de Precio
+END SUB                                                !
+SUB FISTSU44.011 EXTERNAL                              ! Control Descuentos
+END SUB                                                !
+SUB FISTSU53.011 EXTERNAL                              ! Control Recovery
+END SUB                                                !
+SUB FISTSU56.011 EXTERNAL                              ! Control Suspend
+END SUB                                                !
+SUB FISTSU57.011 EXTERNAL                              ! Control Retrieve
+END SUB                                                !
+!-----------------------------------------------------------------------------

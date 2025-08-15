@@ -1,0 +1,87 @@
+!************************************************** 
+!Empresa       : ASIC CONSULTING GROUP S.A.RETAIL *
+!Programa      : EPSTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variales           *
+!**************************************************
+
+STRING   GLOBAL       \
+         DM.OPCION$,  \         ! Variable Captura de opciones
+         DM.OPCION2$, \         ! Variable Captura de opciones
+         DM.NIT$,     \  				! Nit de la empresa
+         DM.RAZON$,   \					! Razon social empresa
+         DM.SIGLA$,   \ 				! Nombre Comercial
+         DM.ALMACEN$, \	        ! Codigo del punto de venta
+         DM.BASURA$,  \					! Resto del registro
+         DM.LLAVE$,   \         ! Llave registro de control
+         DM.NOMPRO$,  \         ! Nombre del proyecto
+         DM.ESTPRO$,  \         ! Estado del proyecto
+         DM.DATO$,    \         ! Captura de dato en pantalla
+         TOT.CAM$,    \         ! Captura de dato en pantalla
+         DM.PARAM$,   \         ! Captura datos de parametrizacion
+         DM.NOFIELDS$, \				! Numero de campos
+         DM.TMP.KEY$(1), \      ! Arreglo llaves del aplicativo
+         TMP.CADENA$, \
+         CADENA.FINAL$
+
+INTEGER*2 GLOBAL        \
+          DM.NOPROY%,   \				! Numero de proyectos definidos
+          DM.NOCAMPOS%, \				! Numero de campos en proyecto
+          RET.ERR%,     \       ! Numero de rutina para Display Manager
+          CALL.ORDER%,  \       ! Numero de orden de llamado de pantalla
+          DM.NOREG%,    \       ! Numero de registros
+          DM.NOCAMP%,   \       ! Numero de campos
+          INI.CAMPO%    \       ! Control despliege de proyectos en pantalla
+
+     
+STRING GLOBAL ARCH1$,   \				! Variable nombre arch. control
+              BAN.PRG$, \				! Bandera del programa
+              LEC$,    	\				! Definicion formato registro
+              FIN$,     \				! Variable de control programa
+              FIN2$,    \				! Variable de control programa
+              CICLO$,   \				! Variable de control programa
+              TMP.MSG$, \       ! Variable temporal de trabajo
+              TMP.KEY$, \				! Almacena temporalmente la llave del registro
+              NOREG$,   \       ! Numero de registros
+              NOCAMP$,  \       ! Numero de campos
+              CADENA$   \       ! Cadena de caracteres parametrizacion
+
+INTEGER   GLOBAL     \
+          AREA1%,    \          ! Definicion area de trabajo
+          AREA2%,    \          ! Definicion area de trabajo
+          PNT.ANT%,  \          ! Captura de la pantalla anterior
+          CURR.FLD%, \          ! Campo actual 
+          ENTER.KEY, \         	! Definicion de la tecla Enter
+          TAB.KEY,   \          ! Definicion de la tecla TAB
+          ESC.KEY,   \        	! Definicion de la tecla ESCAPE
+          F1.AYUDA,  \         	! Deficion de la tecla de funcion F1 
+          F2.KEY  ,  \         	! Deficion de la tecla de funcion F2 
+          F3.SALIR,  \      		! Deficion de la tecla de funcion F3
+          F4.KEY  ,  \         	! Deficion de la tecla de funcion F4 
+          F5.KEY  ,  \         	! Deficion de la tecla de funcion F5 
+          F6.KEY  ,  \         	! Deficion de la tecla de funcion F6 
+          F7.KEY  ,  \         	! Deficion de la tecla de funcion F7 
+          F8.KEY  ,  \         	! Deficion de la tecla de funcion F8 
+          F9.KEY  ,  \         	! Deficion de la tecla de funcion F9 
+          FA.KEY  ,  \         	! Deficion de la tecla de funcion F10
+          HELP%   ,  \        	! Llamado Segunda Pantalla Display Manager
+          I%,        \					! Control de ciclos
+          J%,        \					! Control de ciclos
+          K%,        \					! Control de ciclos
+          L%,        \					! Control de ciclos
+          CAMPO%,    \          ! Captura posicion en pantalla del cursor
+          F%,        \          ! Variable de control ciclico
+          LONGITUD%, \          ! Logitud cadena de caracteres
+          NOREG%, NOCAMP%
+
+STRING  GLOBAL  INITDM$, OPNDIS$, DISPD$,  POSF$,   NXTF$,     \
+                PUTF$,   CURS$,   CLSDIS$, PRM.ON$, PRM.OFF$,  \
+                ON$,     OFF$,    TABS$,   TERM$,   INP$,      \
+                ATTR$,   RET$,    KEY$,    KEY2$,   ERRFX$,    \
+                Z$,      MSG$
+
+INTEGER*4 GLOBAL HX%, S%, SX%, SUM%
+
+STRING GLOBAL DM.USER$,DM.PASWD$,DM.MODELO$,DM.RESTO$, DM.OPER$, \!
+              CLAVE.MEM$

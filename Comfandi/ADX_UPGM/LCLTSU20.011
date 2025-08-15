@@ -1,0 +1,82 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!                ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+
+If MATCH(TS.SDESC$(59),TS.PRTBUF$,1) > 0 Then Begin 							                      ! Si mensaje de Anulacion Total
+   Gr.Lcl.Ctrl%   = 0																																		! Cierra proceso
+EndIf 
+
+If (TS.PROCEDURE < 1 AND TS.INTRX) Then Begin       																		! En una trx
+ If(TS.LINETYPE = 6 And TS.LINEDATA = 1) Then Begin                                     ! Personalized message
+  If  USER.FBACT.READ AND  Gr.Lcl.Ctrl% <> 0 Then Begin																	! Si cliente y no anul trx
+    If UE.RECASRV.QTY% > 0 Then Exit Sub  																							! Si es recaudo no presenta Mod 3 Abr 2017
+    If Gr.Mrm.Cap% = -1 THEN Exit sub 																									! No almacena datos vecino fiel
+    If Gr.NtaCrd.InTrx% <> 0 Then Gr.Lcl.IdClte$ = Gr.NtaCrd.TipClte$										! Reporta tipo fiscal factura origen
+    	
+    Call U.Imprime("*----   INFORMACION DE PUNTAJE  ----*",4101H)												! Impresion de puntaje 
+    Call U.Imprime("*----   INFORMACION DE PUNTAJE  ----*",2100H)												! Impresion de puntaje 
+    TS.TEMP1$ = "ESTIMADO(A):"+CA.CUSTOMER$                                             ! Nombre del cliente
+    TS.TEMP1$ = LEFT$(TS.TEMP1$ + STRING$(38," "),38)																		!
+    Call U.Imprime(TS.TEMP1$,6100H)																											!
+    If Gr.Lcl.Acumula% <> -1 Then BEGIN 																								! Msg si acumula en batch
+       Call U.Imprime("A CONTINUACION ENCONTRARA EL ESTADO DE",6100H)										!
+       Call U.Imprime("SUS PUNTOS HASTA EL DIA DE AYER.      ",6100H)										!
+    EndIf Else Begin																																		! Msg Si acumula en linea
+       Call U.Imprime("A CONTINUACION ENCONTRARA EL ESTADO DE",6100H)										!
+       Call U.Imprime("SUS PUNTOS                            ",6100H)										!
+    EndIf 
+    Call U.Imprime("CONCEPTO                        PUNTOS",6100H)											! del cliente tanto en el CR y SJ
+    
+    If Gr.Lcl.Online% = -1 Then Begin 																									! Si consulta cliente en linea
+       Call FORMAT.AMOUNT(Gr.Lcl.Ptot%)																									! presenta puntaje acumulado
+       TS.TEMP1$ = Right$(string$(22," ")+TS.TEMP1$,22)																	! del cliente
+       Call U.Imprime("Puntaje Acumul:"+TS.TEMP1$,6100H)																! 
+    EndIf																																								!
+
+    Call U.Imprime(String$(37,"-"),6100H)																								!
+    Call U.imprime("IDENTIFICACION CLIENTE :"+Gr.Lcl.Clte$,2100H)												!
+    Call U.IMPRIME("TIP:"+Gr.Lcl.TipClte$,2100H)                                        ! Tipificaciones de cliente al SJ
+    Call U.IMPRIME("TIP:"+Gr.Lcl.Tipifica$,4100H)                                       ! Tipificaciones de cliente al SJ
+
+!--- Datos factura fiscal 21Oct2021
+
+    Call U.Imprime(" ----  INFORMACION DEL CLIENTE  ---- ",2100H)                       !
+    TS.TEMP1$ = LEFT$("Clte :"+Gr.Lcl.Clte$+STRING$(37," "),37)
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+    TS.TEMP1$ = LEFT$(Gr.Lcl.Name$+" "+Gr.Lcl.Surnames$+STRING$(37," "),37)             !
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+    TS.TEMP1$ = LEFT$("Mail :"+left$(Gr.Lcl.eMail$,31)+STRING$(37," "),37)              !
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+    TS.TEMP1$ = LEFT$("Dir. :"+left$(Gr.Lcl.Address$,31)+STRING$(37," "),37)            !
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+    TS.TEMP1$ = LEFT$("Tel. :"+Gr.Lcl.Phone$+STRING$(37," "),37)                        !
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+    TS.TEMP1$ = LEFT$("Ciud.:"+Gr.Lcl.City$+STRING$(37," "),37)                         !
+    Call U.imprime(TS.TEMP1$,2100H)																			                !
+
+    Gr.Lcl.Tmp1$ = PACK$(Gr.Lcl.Clte$)          +                              		     \! Id del cliente
+		    ":"+PACK$(Right$("0000000000"+Str$(EMSS.TR.POINTS),10))    			+							 \! Puntos ganados en la trx
+		    ":"+PACK$(Right$("0000000000"+Str$(EMSS.RD.POINTS),10))     		+	             \! Puntos redimidos en la trx
+		    ":"+PACK$(Right$("0000000000"+Str$(TS.TOTALS(0,0,0)),10))   		+		           \! Valor de la transaccion
+		    ":"+PACK$(Right$("0000000000"+Str$(GR.LCL.PTO1%),10))     			+	             \! Puntos Totales
+		    ":"+PACK$(Right$("0000000000"+Str$(GR.LCL.PTO2%),10))     			+	             \! Puntos Redimidos
+		    ":"+PACK$(Right$("0000000000"+Str$(GR.LCL.PTO3%),10))     			+	             \! Puntos Acm Evento
+		    ":"+PACK$(Right$("0000000000"+Str$(GR.LCL.PTO4%),10))     			+	             \! Puntos x vencer
+        ":"+PACK$(Gr.Lcl.IdClte$)                                       +              \! Tipo cliente tributario
+		    ":"+"00"			                             																			! 
+    If NOT(TS.TRAINING) Then 																													 \!
+      Call Grabacion.String.Usuario2("20040608",Gr.Lcl.Tmp1$)                           ! Graba String de Usuario
+
+!   If NOT(TS.TRAINING) Then 																													 \!
+!     Call Grabacion.String.Usuario2("20220607",Gr.Lcl.Tmp1$)                           ! Graba String de Usuario
+
+  EndIf
+ EndIf   
+EndIf  

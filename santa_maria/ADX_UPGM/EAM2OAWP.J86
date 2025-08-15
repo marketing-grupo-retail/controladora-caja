@@ -1,0 +1,48 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+
+!**************************************************************************
+! This module writes an operator authorization record to the outbound
+! translate pipe.  If includes the fields used in the expanded operator
+! authorization feature from the Supermarket Enhancement Feature Two.
+! It is used in module EAMDMESC.
+!**************************************************************************
+
+
+  WRITE FORM "C5,C4,C1,2I2,18I1,C20,C20,2I1,5I4,C20,C42,C12,C2"; #SESS.OUT; \
+                                OA.OPERATOR$,                       \
+                                OA.PASSWORD$,                       \
+                                OA.OPTIONSK$,                       \
+                                OA.INDICAT0,                        \
+                                OA.INDICAT1,                        \
+                                OA.INDICAT2,                        \
+                                OA.INDICAT3,                        \
+                                OA.INDICAT4,                        \
+                                OA.INDICAT5,                        \
+                                OA.INDICAT6,                        \
+                                OA.INDICAT7,                        \
+                                OA.INDICAT8,                        \
+                                OA.INDICAT9,                        \
+                                OA.INDICAT10,                       \
+                                OA.INDICAT11,                       \
+                                OA.INDICAT12,                       \
+                                OA.INDICAT13,                       \
+                                OA.INDICAT14,                       \
+                                OA.INDICAT15,                       \
+                                OA.INDICAT16,                       \
+                                OA.INDICAT17,                       \
+                                OA.INDICAT18,                       \
+                                OA.INDICAT19,                       \
+                                OA.OPERNAME$,                       \
+                                OA.USEREXIT$,                       \
+                                USERFLAG1,                          \
+                                USERFLAG2,                          \
+                                USERFIELD1,                         \
+                                USERFIELD2,                         \
+                                USERFIELD3,                         \
+                                USERFIELD4,                         \
+                                USERFIELD5,                         \
+                                USERFIELD6$,                        \
+                                PWDEXPIR$,                          \
+                                OA.RESERVED2$,                      \
+                                CAR$

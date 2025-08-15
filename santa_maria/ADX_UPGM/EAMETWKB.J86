@@ -1,0 +1,64 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!***********************************************************************
+!  EFT TERMINAL WORKING STORAGE
+!***********************************************************************
+!  Change History
+!
+!  IR94602 - Added a variable to track the status of an MSR
+!            that is not attached to an external pinpad.
+!            JSM IBM/G53 21Jul91
+!
+!***********************************************************************
+
+ INTEGER*1 GLOBAL       \ IR94602
+ TS.MSR.ONKBD           ! IR94602  Is MSR on Keyboard open?
+
+ INTEGER*2 GLOBAL       \
+ TS.SERIAL,             \ flag indicating upstream link established
+ TS.NO.MSRPIN,          \ flag indicating no msr/pin in the system
+ TS.ET.STATE,           \ reft state:
+                        \   0 - no trx in progress
+                        \   1 - waiting for auth rsp
+ TS.ET.LINK.OPEN        ! flag showing whether link open or closed
+
+
+ INTEGER*2 GLOBAL       \
+ TS.IN.CHKOUT,          \   CHECKOUT MUST PROCESS
+ TS.OUT.CHKOUT,         \   CHECKOUT MUST PROCESS
+ TS.EFT.TDR.ERROR       \ used during automatic void of external tenders
+                        \ at void transaction to show a verification
+                        \ error occurred (so cash change will be given
+                        ! for remaining tenders)
+
+
+ INTEGER*2 GLOBAL       \
+ TS.ET.RC,              \ RETURN CODE FROM READS/WRITES
+ TS.EFT.EVENT,          \ SET IF PIPE MESSAGE RECEIVED
+ TS.ET.RESET.TRX        \ RESET REQD; CHECKOUT MUST RESET TRANSACTION
+                        ! (ALSO SET BY CC TO TELL REFT TO RESET)
+
+
+ INTEGER*2 GLOBAL       \
+ TS.MSR.RESET.PEND,     \ reset msr when 'clear' key hit to clear
+                        \ error message from msr display
+ TS.EFT.DISP.CHG,       \ terminal display to change to 'enter ac#'
+                        \ prompt after timeout
+ TS.EFT.DISP.ID,        \ msg to be displayed when disp changes; 'enter
+                        \ ac#/ovr/clear' or 'enter ac#/clear' for debit
+                        \ tenders
+ TS.EXT.TDR.REQD,       \ flag set by tender vern. to tell mainline
+                        \ to periodically call REFT and perform
+                        \ special processing
+ TS.EXT.TDR.PROC,       \ flag as above but used internally by mainline
+                        \ to ensure TS.EXT.TDR.REQD always gets reset
+                        \ in mainline
+ TS.TMOUT.OCCURRED      \ flag set to trigger 'timeout' display on
+                        ! terminal if it occurs
+
+
+
+
+ INTEGER*4 GLOBAL       \
+ TS.EFT.DISP.TMOUT      \ timeout corresponding to TS.EFT.DISP.CHG
+                        ! described above

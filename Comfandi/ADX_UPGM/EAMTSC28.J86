@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSU28.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+!!***** SCANNED COUPON AS 1ST ENTRY  ***
+ TS.TRX.STATUS = 4   ! ALLOW 1ST ENTRY IN TRANS TO BE UPC5 COUPON
+ 

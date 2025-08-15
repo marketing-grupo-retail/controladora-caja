@@ -1,0 +1,76 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+
+FUNCTION TSUPEC07 PUBLIC
+! TSUPEC07- AFTER IN
+INTEGER*1 XJ%
+STRING XDALE$, DATAQR$
+
+CALL QXL.TSUPEC07                   ! EJ V2
+CALL COMFTS07.011                   ! COMFANDI - CISA
+%INCLUDE EAMTSE07.J86               ! EMS PRPQ
+CALL CFTSU07.011                    ! Modulo de ofertas
+CALL LIBLINE(7,1)                   ! Cupos Empr Vend y Mensaj Fact Lin e iva
+CALL EPSEANTS07                     !
+CALL RTITSU07.011                   ! Consulta ivas
+CALL LIBLINE(7,3)                   ! Cupos Empr Vend y Mensaj Fact Lin e iva
+CALL COLMTS07.011                   ! RECAUDO COLEGIOS
+CALL EDUMTS07.011                   ! RECAUDO SIEMPRE EDUCANDO
+CALL FDEMTS07.011                   ! FONDECOM
+!CALL EPAYMS07.011                   ! PAGO ELECTRONICO
+
+CALL SUBSIDIO.SAPCORE(07)           ! SAP-CORE
+CALL DOMIMS07.011                   ! MODULO DOMICILIOS
+CALL PTOMTS07.011                   ! PUNTOS ADICIONALES
+CALL EPSMTS07.011                   ! Modulo Convenios
+
+CALL PEFMTS07.011                   ! PAGO ELECTRONICO - FONEDE
+CALL CONTROL.CLIENTE(7)             ! CONTROL CLIENTES
+CALL REMISION(07)                   ! REMISION MERCANCIA
+CALL IVATSU07.011                   ! IMPRESION DE IVAS
+CALL PROPINA(07)                    ! Modulo propinas
+!CALL MKTPTS07.011                   ! MODULO PROMOCIONES
+
+CALL LCFTSU07.011                   ! Modulo Lealtad Clientes Online
+CALL GRMOVRMS(07)                   ! Remisiones de mercancia
+CALL GRMBONOS(07)                   ! Modulo Bonos Lealtad
+CALL RECASRV(07,0)		              ! PAGO SERVICIOS PUBLICOS
+CALL FISMTS07.011		                ! Modulo Fiscal
+CALL RECATS07.011                   ! RECARGAS ONLINE
+CALL ESCALONADO(07)                 ! DESCUENTOS ESCALONADOS
+CALL GRPFIZER(07)                   ! DSCTO ESCALONADO PFIZER
+CALL GRFAMILIAS(07)                 ! FAMILIAS EN ACCION 
+CALL CRDEMPRESAS(07)                ! CREDITO EMPRESARIAL
+CALL BONOCOMPRAS(07)                ! BONOS RECOMPRA
+CALL BONOCOMPRASPAGO(07)            ! Bono recompra forma pago
+CALL SUBSIDIO.MPAC(07)              ! MPAC
+CALL CREDITOSOCIAL(07)              ! CREDITO SOCIAL
+CALL SUBSIDIO.FOSFEC(07)            ! FOSFEC SAPCORE
+CALL GRABBOT(07)                    ! ESCALONADO ABBOT
+CALL PRECIO.TECHO(07)               ! PRECIO TECHO
+CALL GRMIMEI(07)                    ! CAPTURA IMEI CELULAR
+CALL PROMOCIONV2(07)                ! MOTOR PROMOCIONE V2
+CALL BRCOMPRAPAGO(07)               ! RECOMPRA FORMA PAGO
+CALL GR.DIA.SINIVA(07)              ! DIA SIN IVA
+CALL GRABJSN(07)                    ! ESCALONADO ABBOT JSON
+CALL Autoriza.Precio(07)            ! CONTROL CAMBIO PRECIO
+CALL BONOS.ELECTRO(07)              ! CONTROL BONO ELECTROFIESTA
+CALL BONOS.KUPI(07)                 ! BONO ELECTRONICO KUPI
+CALL BONOS.ELECTROSUPDRG(07)        ! BONOS SUPER Y DROGUERIA
+CALL BONODEVPAGO(07)                ! Bono nota devolucion 
+CALL NOTASCREDITOPOS(07)            ! NOTAS CREDITO
+
+!CALL REDEPREMIOLEAL(07)             ! LEALTAD CLIENTES - LEAL
+
+CALL GR.FE.NATURAL(07)              ! FE PERSONAS NATURALES
+
+%INCLUDE UEECR107.U86               ! MODULO TEF REDEBAN
+
+%INCLUDE VERSION.011                ! Version Compilacion terminal
+
+!CLOSE 34
+!CREATE "R::ADX_UDT1:TIQUETE.TXT" AS 34
+
+END FUNCTION
+

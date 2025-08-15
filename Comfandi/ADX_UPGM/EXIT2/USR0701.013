@@ -1,0 +1,89 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0701.012 
+!     Punto de Entrada   =  EAMTSU07.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!    Esta linea se inserta para abrir el archivo
+!    ADX_IDT1:CUPOS.DAT, EMPRE.DAT incluyendo su contenido
+!    en el archivo tipo INCLUDE EAMTSU07.J86
+!-----------------------------------------------------------
+!
+!ON ERROR GOTO ERROROPEN
+! Se adiciona el control de HEADER en la impresion en el caso
+! de que se instalen impresoras modelo 3/4
+! desarrollado por Oscar Valencia 11 julio 2.003
+
+!  IF PRT4610.ENABLE <> 0 THEN \
+!     TO.HEADERLINE1$ = CHR$(1BH)+CHR$(61H)+CHR$(1)   +    \! Centrado
+!                       CHR$(1DH)+CHR$(2FH)+CHR$(0)+CHR$(3)\! Imprime Logo #3 
+!   ELSE TO.HEADERLINE1$ = CHR$(27)+CHR$(14)+"    COMFANDI"
+
+
+  DIM USR.ITEMS$(500)                      ! Dimension y Reset del arreglo
+  USR.IND1% = 0                            ! Indice para Articulos
+  USR.IND2% = 0                            ! Indice para Linea de Totales
+  LINCR% = 25                              ! Lineas disponibles del CR
+  LINMF% = 25                              ! Lineas disponibles del CR (mf)
+
+  DIM CODVEN%(50)
+  DIM NOMVEN$(50)
+  DIM DSPG$(100)
+  OPEN "R::EAMCUSTA" KEYED RECL 28 AS 38 NOWRITE NODEL  ! Abre Compras Acumul
+! OPEN "R::CUPOS"    KEYED RECL 12 AS 70 NOWRITE NODEL  ! Abre Archivo CUPOS
+  OPEN "R::EMPRE"    KEYED RECL 45 AS 71 NOWRITE NODEL  ! Abre Archivo EMPRESAS
+  FILALM$            = "R::C:\ADXALMA.DAT"              ! Archivo Ctrl Almacen
+  FILVEN$            = "R::C:\ADXVEND.DAT"              ! Archivo Vendedores
+  FILMEN$            = "R::C:\ADXMENS.DAT"              ! Archivo Vendedores
+  FILDES$            = "R::C:\ADXDESC.DAT"              ! Archivo Vendedores
+  OPEN FILALM$        AS 72 BUFFSIZE 128 NOWRITE NODEL  ! Archivo Ctrl Almacen
+  OPEN FILVEN$        AS 73 BUFFSIZE 128 NOWRITE NODEL  ! Archivo de Vendedores
+  OPEN FILMEN$        AS 74 BUFFSIZE 128 NOWRITE NODEL  ! Archivo Mensajes Movibles
+  OPEN FILDES$        AS 75 BUFFSIZE 128 NOWRITE NODEL  ! Archivo Descriptores(MF)
+  READ #72;LINE RALMA$                                  ! Lee Control Almac
+  ALMA$ = RIGHT$(RALMA$,LEN(RALMA$)-12)                 ! Guarda Nombre
+  READ #72;LINE RALMA$                                  ! Lee Control Almac
+  RETPOR  = VAL(LEFT$(RALMA$,4)) / 10000                ! Guarda % Retefuente
+  RETVAL% = VAL(MID$(RALMA$,5,8))                       ! Guarda Vr.Tope Ret
+  TIP$ = MID$(RALMA$,78,1)
+  WHILE TIP$ <> "5"
+    READ #72;LINE RALMA$                                ! Lee Control Almac
+    TIP$ = MID$(RALMA$,78,1)
+  WEND
+  DIM MEX.VAT.TAB(4)                                     ! Definicion del Arreglo
+  DIM CNV$(4)                                            ! Definicion del Arreglo
+  CONVE$ = "ABCD*"
+  FOR UE.II% = 1 TO 4
+     CNV$(UE.II%)= MID$(CONVE$,UE.II%,1)+" = "
+     MEX.VAT.TAB(UE.II%) = VAL(MID$(RALMA$,UE.II%*3 - 2,2)) ! Set IVAS
+  NEXT UE.II% 
+  FOR UE.II% = 1 TO 50                                      ! Loop de Lectura
+      READ #73;LINE NOMBV$                                  ! Lee Linea de Vend
+      CODVEN%(UE.II%) = VAL(LEFT$(NOMBV$,6))                ! Toma el codigo
+      NOMVEN$(UE.II%) = RIGHT$(NOMBV$,LEN(NOMBV$)-6)        ! y el Nombre
+      IF CODVEN%(UE.II%) = 999999 THEN UE.II% = 50          ! si es fin
+  NEXT UE.II%                                               ! Cont con Loop
+  FOR UE.II% = 1 TO 50                                      ! Loop de Lectura
+      READ #74;LINE NOMBV$                                  ! Lee Linea de Vend
+      IF LEFT$(NOMBV$,1) = "9" THEN UE.II% = 50            \! si es fin
+      ELSE                                                 \!
+         MENS$ = MENS$ + NOMBV$                             ! Adiciona Mensaje
+  NEXT UE.II%                                               ! Cot con Loop
+  FOR UE.II% = 1 TO 50                                      ! Loop de Lectura
+      READ #75;LINE NOMBV$                                  ! Lee Linea de Vend
+      IS% = VAL(LEFT$(NOMBV$,2))                            ! Busca Indice
+      IF IS% = 99 THEN UE.II% = 50                         \! si es fin
+      ELSE                                                 \!
+         DSPG$(IS%) = RIGHT$(NOMBV$,LEN(NOMBV$)-2)          ! y el Nombre
+  NEXT UE.II%                                               ! Cont con Loop
+  CLOSE 72 : CLOSE 73 : CLOSE 74 : CLOSE 75                 ! Cierre Archivos
+!  WRITE FORM "PIC(###.######) C10";#34;RETPOR,STR$(RETVAL%)
+!ERROROPEN:
+!  IF ERR = "OE" THEN RESUME
+!  OPEN "R::EAMITEMR" KEYED RECL 72 AS 44 NOWRITE NODEL
+!  OPEN "R::CUPOS"    KEYED RECL 55 AS 70 NOWRITE NODEL  ! Abre Archivo CUPOS
+!  OPEN "R::EMPRE"    KEYED RECL 47 AS 71 NOWRITE NODEL  ! Abre Archivo EMPRESAS
+!-------------------------------------------------------------------------------

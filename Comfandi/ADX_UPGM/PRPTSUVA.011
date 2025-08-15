@@ -1,0 +1,21 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : PRPTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio de 2006                    *
+!Observaciones : Modulo Recaudo de propinas       *
+!**************************************************
+!
+
+String    Global GR.PROP.MOT$,    \! Tecla motora dialogo propinas
+                 GR.PROP.ITM$,    \! Item de Recaudo
+                 GR.PROP.ID$,     \! Id del auxiliar
+                 GR.PROP.NAME$,   \! Nombre del auxiliar
+                 GR.PROP.VLR$      ! Valor recaudado
+                 
+Integer*1 Global GR.PROP.ACT%,    \! Control Activacion Modulo
+                 GR.PROP.GUD%,    \! Indicador grabacion User Data
+                 GR.PROP.ITM%      ! Control Registro Item
+
+Integer*4 Global Asc.Tmp.Apun%     ! Apuntador String trx

@@ -1,0 +1,16 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : BONTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Inicializacion de variables      *
+!**************************************************
+IF UE.PROYECTO(UE.COMF.BONOS%) THEN BEGIN										! Proyecto activo
+   UE.COMF.NCHQ% = 0
+   DIM UE.COMF.CHEQ$(100,2)
+   UE.COMF.NCHQ$ = ""
+   UE.COMF.VCHQ$ = ""
+   UE.COMF.VCHQ% = 0
+   UE.COMF.STAT% = 0
+ENDIF

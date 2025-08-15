@@ -1,0 +1,16 @@
+!************************************************** 
+!Programa      : DONATSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Donacion y ajuste al cambio      *
+!**************************************************
+
+SUB DONATS07.011 EXTERNAL               ! 
+END SUB                                 !
+
+SUB DONATS30.011 EXTERNAL               ! 
+END SUB                                 !
+                                        !
+SUB DONATS20.011 EXTERNAL               ! 
+END SUB                                 !
+                                        !

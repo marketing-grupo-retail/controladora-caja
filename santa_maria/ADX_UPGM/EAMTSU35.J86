@@ -1,0 +1,9 @@
+! USER EXIT CALLED AT STANDALONE EXIT
+! Al salir del modo autonomo
+FUNCTION TSUPEC35 PUBLIC
+
+   ! Facturas MSM
+   call MSMTFACT35
+
+END FUNCTION
+

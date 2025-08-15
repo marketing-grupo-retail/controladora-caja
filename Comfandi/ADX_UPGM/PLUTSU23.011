@@ -1,0 +1,18 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda         `      *
+!Programa      : PLUTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Total en Visores Clientes        *
+!**************************************************
+
+If TS.LINETYPE = 1 AND TS.LINEDATA = 0 Then Begin
+   Call FORMAT.AMOUNT(TS.XPRICE)
+   TS.TEMP2$ = TS.TEMP1$
+   !Call FORMAT.AMOUNT(TS.TOTALS(0,0,0)+TS.XPRICE)
+   TS.TEMP1$ = STR$(TS.TOTALS(0,0,0)+TS.XPRICE)
+   TS2.DISP2$ = Left$("<"+TS.TEMP1$+">"+"          ",10) + \
+                Right$("         "+TS.TEMP2$,10)
+   TS.DISP2$ = TS2.DISP2$
+EndIf

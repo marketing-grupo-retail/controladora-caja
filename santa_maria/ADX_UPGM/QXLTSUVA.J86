@@ -1,0 +1,3 @@
+STRING    PrtLine
+INTEGER*1 Training.Exit          !971015    !IR36947
+INTEGER*2 i

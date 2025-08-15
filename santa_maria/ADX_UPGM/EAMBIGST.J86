@@ -1,0 +1,109 @@
+
+\/**********************************************************************/
+\/*                                                                    */
+\/*   Module Name: EAMBIGST.J86                                        */
+\/*                                                                    */
+\/*   Full title: Long string handling assembler routines              */
+\/*                                                                    */
+\/*   COPYRIGHT:                                                       */
+\/*  5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"             */
+\/*  (C) COPYRIGHT IBM CORP 1986, 2003 ALL RIGHTS RESERVED             */
+\/*  LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT           */
+\/*  INSTRUCTIONS FORM NUMBER G120-2083                                */
+\/*                                                                    */
+\/*  Description: This module contains functions to handle big or      */
+\/*               large model BASIC strings longer than 32K:           */
+\/*               BIGLEN, BIGMATCHB, BIGLEFT, BIGMID, and BIGRIGHT.    */
+\/*               With the exception of BIGLEN, these are not for use  */
+\/*               on 4683's because they use 32-bit registers.         */
+\/*                                                                    */
+\/*  Note:        When linked with a terminal app, add beror.obj to    */
+\/*               the link list to resolve the b_eror symbol.          */
+\/*                                                                    */
+\/*  Change History:                                                   */
+\/*                                                                    */
+\/*  IR51904 - Initial Version                                         */
+\/*            ABS IBM 02Sep03                                         */
+\/*                                                                    */
+\/*                                                                    */
+\/* END-OF-SPECIFICATIONS **********************************************/
+
+!*********************************************************************
+!
+! BIGLEFT
+!
+! The equivalent of LEFT$ except the 2nd argument is a 4-byte integer.
+! Not for use on 4683's because it uses 32-bit registers
+!
+!*********************************************************************
+
+ FUNCTION BIGLEFT(A$,P1) EXTERNAL
+  STRING    BIGLEFT
+  STRING    A$
+  INTEGER*4 P1
+ END FUNCTION
+
+!*********************************************************************
+!
+! BIGMID
+!
+! The equivalent of MID$ except the numeric arguments are 4-byte
+!  integers.
+! Not for use on 4683's because it uses 32-bit registers
+!
+!*********************************************************************
+
+ FUNCTION BIGMID(A$,P1,P2) EXTERNAL
+  STRING    BIGMID
+  STRING    A$
+  INTEGER*4 P1,P2
+ END FUNCTION
+
+!*********************************************************************
+!
+! BIGRIGHT
+!
+! The equivalent of RIGHT$ except the 2nd argument is a 4-byte integer
+! Not for use on 4683's because it uses 32-bit registers
+!
+!*********************************************************************
+
+ FUNCTION BIGRIGHT(A$,P1) EXTERNAL
+  STRING    BIGRIGHT
+  STRING    A$
+  INTEGER*4 P1
+ END FUNCTION
+
+!*********************************************************************
+!
+! BIGMATCHB
+!
+! This routine is the equivalent of MATCHB except the third argument
+! is a 4-byte integer and it returns a 4-byte integer, enabling it to
+! handle offsets and strings up to 64K in length.
+! Not for use on 4683's because it uses 32-bit registers
+!
+!*********************************************************************
+
+ FUNCTION BIGMATCHB(P1$,P2$,P3) EXTERNAL
+  INTEGER*4 BIGMATCHB
+  STRING    P1$,P2$
+  INTEGER*4 P3
+ END FUNCTION
+
+
+!*********************************************************************
+!
+! BIGLEN
+!
+! This routine returns the length of the string argument.  It can
+! handle a string up to 64K in length.
+!
+!**********************************************************************
+
+ FUNCTION BIGLEN(A$) EXTERNAL
+  INTEGER*4 BIGLEN
+  STRING A$
+ END FUNCTION
+
+

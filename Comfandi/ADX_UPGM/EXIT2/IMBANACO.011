@@ -1,0 +1,16 @@
+Function ASIC.DATOS$(UMSG1$,UMSG2$) External   						! Captura de datos
+String UMSG1$, UMSG2$, ASIC.DATOS$     							! Definicion de variables
+End Function
+!--- Fin Asic.Datos
+
+!Sub ERRORIOP EXTERNAL                                !
+!End Sub                                              !
+
+!Sub VERIDATA EXTERNAL                                !
+!End SUB                                              !
+
+!Sub FIN.LOOP External                                !
+!End Sub                                              !
+    
+SUB TOMA.DIAGNOS External                            !
+End Sub                                              !

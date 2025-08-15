@@ -1,0 +1,39 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda - Colombia     *
+!Programa      : RVETSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+If Ue.Pin.Recup% = 0 Then Begin
+  %INCLUDE PINTSU01.011										! Inicializacion de variables
+  Ue.Pin.Recup% = -1 
+Endif 
+
+IF Unpack$(LEFT$(SL.STR.ENTRY$,1)) = "99" THEN BEGIN   	    	              ! Si DATA/ENTRY
+
+ IF Unpack$(MID$(SL.STR.ENTRY$,3,4)) = "20060722" THEN BEGIN                ! Recarga en Linea
+	  Ue.Pin.Apun% = 3																												! Apuntador String
+    TS.TEMP1$ = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	   				  	 		  ! Numero del proyecto
+    Ue.Pin.Phones$ = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	  	  	 		  ! Telefono almacenado
+    Ue.Pin.Vlr$    = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	  	  	 		  ! Valor recarga
+    Ue.Pin.Oper$   = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	  	  	 		  ! Operador
+    Ue.Pin.AnulItm%  = 0 
+    Call Asigna.Telefono
+    Ue.Pin.Capturadas% = -1 
+    Ue.Pin.Imp% = -1
+ Endif
+
+  If Unpack$(MID$(SL.STR.ENTRY$,3,4)) = "20060723" THEN BEGIN               ! Recarga en Linea
+	  Ue.Pin.Apun% = 3																												! Apuntador String
+    TS.TEMP1$ = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	   				  	 		  ! Numero del proyecto
+    TS.TEMP1$ = PIN.GETUNPK(SL.STR.ENTRY$,Ue.Pin.Apun%)	   				  	 		  ! Posicion a Anular   
+    Ue.Pin.Numeros$(Val(TS.TEMP1$),5) = "ANULADO"		   									    ! Anula movimiento
+    Ue.Pin.Numeros$(Val(TS.TEMP1$),2) = "0"                							    ! Valor a recargar
+    Ue.Pin.AnulItm% = -1                                                    ! Anulacion de items
+  EndIf 
+
+Endif	         
+

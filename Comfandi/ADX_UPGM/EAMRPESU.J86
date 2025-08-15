@@ -1,0 +1,93 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMRPUSU.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR39435  Routine ?PCT$ may cause a DZ error if the value passed
+!           for the denominator is a zero.  This change will return
+!           a "***.*%" as the string, to indicate the division by zero
+!           and avoid the runtime error.
+!           RSH MGVA 18Dec98
+!
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER SUBROUTINES                             **
+!!*******************************************************************
+
+%INCLUDE EAMASMCT.J86          ! Assembler routine definitions
+
+FUNCTION MMCFEC06$(P1,P2,P3) EXTERNAL
+  INTEGER*2 P2,P3
+  INTEGER*4 P1
+END FUNCTION
+
+FUNCTION ADXERROR (TERM,MSGGRP,MSGNUM,SEVERITY,EVENT,UNIQUE$) \
+ EXTERNAL
+ INTEGER*2      TERM,MSGNUM
+ INTEGER*1      SEVERITY,MSGGRP,EVENT
+ STRING         UNIQUE$
+END FUNCTION
+
+FUNCTION ERRNHEX$                      ! Error logging routine
+ STRING ERRNHEX$,A$
+ A$ = "1234"
+ CALL PUTN4(A$,0,ERRN)
+ ERRNHEX$ = MID$(A$,4,1) + MID$(A$,3,1) + MID$(A$,2,1) + MID$(A$,1,1)
+END FUNCTION
+
+!!********************************************************************
+!!**  THIS FUNCTION COMPUTES A PERCENTAGE AS A 6 CHAR STRING XXX.X% **
+!!********************************************************************
+FUNCTION ?PCT$(TOP%,BOT%)
+  INTEGER*4 TOP%, BOT%
+  STRING ?PCT$
+  REAL RTOP, RBOT, RNET
+
+!AIR39435
+  IF (BOT% = 0) THEN BEGIN                ! If the denominator is zero
+    ?PCT$ = "***.*%"                      ! Return overflow
+    EXIT FUNCTION                         ! Avoid DZ error
+  ENDIF                                   ! Denominator zero
+!EIR39435
+
+  RTOP = TOP% : RBOT = BOT%               ! MOVE INPUT TO REALS
+  RNET = (RTOP * 1000) / RBOT             ! COMPUTE PERCENTAGE
+  WORK4% = RNET : RTOP = WORK4%           ! TRUNCATE AS INTEGER AND REAL
+  RBOT = (RNET - RTOP) * 10               ! FIND REMAINDER
+  IF RBOT GE 5 THEN WORK4% = WORK4% + 1   ! ROUND UP IF NEEDED
+  WORK2$ = RIGHT$("   " + STR$(WORK4%),4) ! FORMAT PERCENTAGE
+  ?PCT$ = LEFT$(WORK2$,3) + "."           \  TO 6 CHARACTERS
+        + RIGHT$(WORK2$,1) + "%"          !   AS xxx.x%
+END FUNCTION
+
+!!********************************************************************
+!!**  THIS FUNCTION FORMATS A POINTS AMOUNT AS A 10 CHARACTER STRING**
+!!********************************************************************
+FUNCTION ?PTS$(IN%)
+  INTEGER*4 IN%
+  STRING ?PTS$
+
+  IF OP.PPAMT = OP.AMTPP THEN BEGIN       ! POINTS ARE CENTS
+    WORK2$ = MMCFEC06$(IN%,-1,-1)         ! FORMAT AS MONEY
+    IF OP.WHOLE.PTS THEN BEGIN            ! SHOW ONLY WHOLE POINTS
+      IF LEN(WORK2$) > 4 THEN BEGIN       ! WHOLE POINTS AVAILABLE
+        WORK2$ = LEFT$(WORK2$,LEN(WORK2$)-4) ! STRIP ".XX "-
+      ENDIF ELSE BEGIN
+        WORK2$ = "0"                      ! SHOW 0 POINTS
+      ENDIF
+    ENDIF
+  ENDIF ELSE BEGIN                        ! NOT MONEY
+    WORK2$ = MMCFEC06$(IN%,0,-1)          ! FORMAT WITHOUT DECIMAL
+  ENDIF
+  IF RIGHT$(WORK2$,1) = " " THEN          \ DELETE TRAILING BLANK
+    WORK2$ = LEFT$(WORK2$,LEN(WORK2$)-1)
+! IF LEN(WORK2$) > 8 THEN BEGIN
+!   ?PTS$ = RIGHT$(" " + WORK2$,10)       ! ASSURE 10 CHARS
+! ENDIF ELSE BEGIN
+!   ?PTS$ = " " + WORK2$                  ! ASSURE LEADING BLANK
+! ENDIF
+  ?PTS$ = RIGHT$("         " + WORK2$,10) ! ASSURE 10 CHARS
+END FUNCTION

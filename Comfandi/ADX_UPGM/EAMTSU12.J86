@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC12 PUBLIC                                                        
+! TSUPEC12 - AFTER TL READ                                                      
+END FUNCTION                                                                    
+                                                                                

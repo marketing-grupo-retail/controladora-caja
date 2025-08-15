@@ -1,0 +1,71 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS14.012                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+! Modificaciones:
+
+
+ IF (TS.IO.KEYS(5) = 61) AND (TS.IO.STATE = 20) THEN BEGIN
+	IF (VAL(TS.IO.DATA$(5)) = 2) OR \
+	   (VAL(TS.IO.DATA$(5)) = 3) OR \
+	   (VAL(TS.IO.DATA$(5)) = 7) OR \
+	   (VAL(TS.IO.DATA$(5)) = 6) OR \
+	   (VAL(TS.IO.DATA$(5)) = 4) THEN BEGIN
+	    IF Asc.Pay.Cambio% = 2 THEN BEGIN
+         TS.IO.MOTORKEY = 0
+         DIM TS.IO.KEYS(10)
+         DIM TS.IO.DATA$(10)
+         TS.GUIDANCE = 1094     ! Msg Procedimiento no valido
+         EXIT SUB	    
+	    ENDIF 
+   	    
+ENDIF
+ENDIF
+
+IF (TS.IO.MOTORKEY = 250) AND NOT(TS.INTRX) AND                                 \! Si tecla otros pago y
+    Asc.Pay.Cambio% = 0  THEN BEGIN                                             ! no hay venta
+    IF TS.TRAINING THEN Begin                                           
+      CALL TSHIECET 																														 !
+      CALL VISORES4690(1,"PROCESO NO VALIDO EN","ENTRENAMIENTO",1500,"L")          !
+      DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                                   ! Init vectores entrada
+      TS.IO.MOTORKEY = 0                                                         ! cancela proceso
+      EXIT SUB
+    ENDIF     
+    DIM TS.IO.KEYS(10)                                               			      !
+    DIM TS.IO.DATA$(10)                                                         !
+	  CALL VISORES4690(1,"PAGO DE SUBSIDIO","ELECTRONICO",1200,"C")               !
+    TO.MGRKEY      = 0                                                          ! Simula Cambio de bono
+    TS.IO.DATA$(5) = "1"                                                        ! por efectivo
+    TS.IO.KEYS(5)  = 61                                                         !
+    TS.IO.MOTORKEY = 61                                                         !
+    TS.IO.STATE    = 10                                                         !
+    Asc.Pay.Cambio% = 2
+ENDIF
+
+IF TS.IO.MOTORKEY = 250 AND Asc.Pay.Cambio% = 2  THEN BEGIN  						! Si pago electronico no recogida
+   IF (TS.IO.PREV.KEYS(2) NE 81) AND  \                                 ! Si no presiono Total
+      (TS.IO.PREV.KEYS(2) NE 0)  THEN BEGIN                              ! Si no presiono Total
+      TS.IO.MOTORKEY = 0
+      DIM TS.IO.KEYS(10)
+      DIM TS.IO.DATA$(10)
+      TS.GUIDANCE = 1020     ! Msg presione total
+      EXIT SUB
+  ENDIF
+  ENTRADA.ELECTRONICO:
+    TS.TEMP1$ = ASIC.DATOS$("DIGITE O ESCANEE   ","NUMERO DE CREDENCIAL")		     ! Captura credencial
+    IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     					     ! No se capturo dato
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)																	 ! Init vectores de aplicacion
+       TS.IO.MOTORKEY = 0 
+       Asc.Pay.Cambio% = 0
+       Exit Sub 																																 ! Sale de la rutina
+    ENDIF 																																			 ! 
+    Asc.Pay.NtCap% = -1																													 ! 
+    Asc.Pay.NumNota$ = TS.TEMP1$                                                 !
+    Call Validacion.Compra.Pago.Electronico("02")                                !
+    Asc.Pay.Cambio% = 0
+ENDIF
+

@@ -1,0 +1,44 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\ REM!!****************************************************************!!
+\ REM!!   READ A RECORD FROM THE OPERATOR AUTHORIZATION FILE           !!
+\ REM!!   INCLUDES FIELDS FOR THE EXPANDED OPERATOR AUTHORIZATION      !!
+\ REM!!   FEATURE.  THIS MODULE REPLACES EAMAURD1.J86 IF THE RECORD    !!
+\ REM!!   LENGTH OF EAMOPERA.DAT IS FOUND TO BE 168 BYTES.             !!
+\ REM!!****************************************************************!!
+\
+        READ FORM "T6,C4,C1,2I2,16I1,I2,C20,C20,2I1,5I4,C20,C42,C12";  \
+            #49 KEY OA.OPERATOR$;     \                           UPD 5
+                OA.PASSWORD$,         \ OPERATOR PASSWORD         UPD 4
+                OA.OPTIONSK$,         \ KEY TO OPTIONS USAGE      UPD 1
+                OA.INDICAT0,          \ TERMINAL SALES AUTH       INT 2
+                OA.INDICAT1,          \ TERMINAL NON-SALES AUTH   INT 2
+                OA.INDICAT2,          \                           INT 1
+                OA.INDICAT3,          \                           INT 1
+                OA.INDICAT4,          \                           INT 1
+                OA.INDICAT5,          \                           INT 1
+                OA.INDICAT6,          \                           INT 1
+                OA.INDICAT7,          \                           INT 1
+                OA.INDICAT8,          \                           INT 1
+                OA.INDICAT9,          \                           INT 1
+                OA.INDICAT10,         \                           INT 1
+                OA.INDICAT11,         \                           INT 1
+                OA.INDICAT12,         \                           INT 1
+                OA.INDICAT13,         \                           INT 1
+                OA.INDICAT14,         \                           INT 1
+                OA.INDICAT15,         \                           INT 1
+                OA.INDICAT16,         \                           INT 1
+                OA.INDICAT17,         \                           INT 1
+                OA.RESERVED,          \                           INT 2
+                OA.OPERNAME$,         \ OPERATOR NAME            ASC 20
+                OA.USEREXIT$,         \ RESERVED FOR USER DATA   ASC 20
+                USERFLAG1,            \ ENH02
+                USERFLAG2,            \ ENH02
+                USERFIELD1,           \ ENH02
+                USERFIELD2,           \ ENH02
+                USERFIELD3,           \ ENH02
+                USERFIELD4,           \ ENH02
+                USERFIELD5,           \ ENH02
+                USERFIELD6$,          \ ENH02
+                PWDEXPIR$,            \ ENH02
+                OA.RESERVED2$         ! ENH02

@@ -1,0 +1,13 @@
+!USER EXIT CALLED BEFORE WRITING A TRANSACTION SUMMARY LOG RECORD
+! Antes de escribir al archivo de transacciones
+FUNCTION TSUPEC18 PUBLIC
+
+!call traceNUO( "UE18 TS.RECOVERY=[" + str$(TS.RECOVERY) + "]" )
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC18
+
+   !Facturacion MSM
+   !call MSMTFACT18
+
+END FUNCTION

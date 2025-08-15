@@ -1,0 +1,41 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+SUB RECATS01.011 EXTERNAL     
+END SUB                       
+                              
+SUB RECATS02.011 EXTERNAL     
+END SUB                       
+                              
+SUB RECATS07.011 EXTERNAL     
+END SUB                       
+                              
+SUB RECATS08.011 EXTERNAL     
+END SUB                       
+                              
+SUB RECATS14.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS20.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS43.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS53.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS56.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS60.011 EXTERNAL     
+END SUB                       
+
+SUB RECATS66.011(X.Callparm) EXTERNAL     
+END SUB                       

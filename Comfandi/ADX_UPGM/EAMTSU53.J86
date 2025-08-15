@@ -1,0 +1,43 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+FUNCTION TSUPEC53 PUBLIC
+! TSUPEC53 - At transaction recovery
+
+%INCLUDE EAMTSE53.J86               ! EMS PRPQ
+CALL QXL.TSUPEC53                   ! EJ V2
+CALL PROMOCIONV2(53)                ! MOTOR PROMOCIONE V2
+CALL COMFTS53.011		                ! COMFANDI - CISA
+CALL COLMTS53.011                   ! RECAUDO COLEGIOS
+CALL EDUMTS53.011                   ! RECAUDO SIEMPRE EDUCANDO
+!CALL EPAYMS53.011                   ! PAGO ELECTRONICO
+
+CALL DOMIMS53.011                   ! MODULO DOMICILIOS
+CALL RECATS53.011                   ! RECARGAS ONLINE
+CALL PEFMTS53.011                   ! PAGO ELECTRONICO - FONEDE
+CALL RECASRV(53,0)	 	              ! PAGO SERVICIOS PUBLICOS
+CALL LIBLINE(53,1)                  ! CONTROL IMPRESION DE IVAS
+CALL EPSMTS53.011                   ! Modulo Convenios
+
+CALL IVATSU53.011                   ! IMPRESION DE IVAS
+!CALL MKTPTS53.011                   ! MODULO PROMOCIONES
+
+CALL PROPINA(53)                    ! Modulo propinas
+CALL LCFTSU53.011                   ! Modulo Lealtad Clientes Online
+CALL GRMOVRMS(53)                   ! Remisiones de mercancia
+CALL GRMBONOS(53)                   ! Modulo Bonos Lealtad
+CALL GRPFIZER(53)                   ! DSCTO ESCALONADO PFIZER
+CALL CFTSU53.011                    ! Modulo de ofertas
+CALL GRFAMILIAS(53)                 ! FAMILIAS EN ACCION 
+CALL CRDEMPRESAS(53)                ! CREDITO EMPRESARIAL
+CALL CREDITOSOCIAL(53)              ! CREDITO SOCIAL
+CALL SUBSIDIO.SAPCORE(53)           ! SAP-CORE
+CALL GRABBOT(53)                    ! ESCALONADO ABBOT
+CALL PRECIO.TECHO(53)               ! PRECIO TECHO
+CALL GRMIMEI(53)                    ! CAPTURA IMEI CELULAR
+CALL FISMTS53.011                   ! MODULO FISCAL 
+CALL BONODEVPAGO(53)                ! Bono nota devolucion 
+
+%INCLUDE UEECR153.U86               ! MODULO TEF REDEBAN
+
+END FUNCTION
+

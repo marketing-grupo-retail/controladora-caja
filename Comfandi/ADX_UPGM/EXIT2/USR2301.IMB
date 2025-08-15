@@ -1,0 +1,21 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2301.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para INFORMAR   
+!     que no se ha capturado medico ni diagnostico imbanaco  
+!-----------------------------------------------------------
+
+
+IF IMBA% = 1 THEN BEGIN
+WRITE FORM "C40";#30;"DIGITE EL No DEL     MEDICO... !!"          ! del Flag de
+WAIT ; 1500                                   ! Y Continua
+IMBA% = 0
+ENDIF 
+!------------------------------------------------------------
+

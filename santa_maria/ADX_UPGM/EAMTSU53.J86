@@ -1,0 +1,48 @@
+!USER EXIT CALLED AT TRANSACTION RECOVERY BEFORE PROCESSING A RECOVERED STRING
+! Antes de procesar un string recuperado
+FUNCTION TSUPEC53 PUBLIC
+
+!call traceNUO( "UE53 TS.RETV.IN.PROGRESS=" + str$(TS.RETV.IN.PROGRESS) + " TS.RECOVERY=" + str$(TS.RECOVERY) )
+!call traceNUO( "UE53 [" + str$(TS.TEMP1I2) + "]" )
+!call traceNUO( cadenahex$( left$(SL.STR.ENTRY$, 16) ) )
+
+   !JOURNAL ELECTRONICO
+   CALL QXL.TSUPEC53
+
+   ! Facturas MSM
+   if TS.TEMP1I2 = 1 then call MSMTFACT53
+
+   ! Credito Institucional
+   call MSMTINST53
+
+   ! Tarjeta Regalo
+   call MSMTGIFT53
+
+   ! Tarjetas Bancarias
+   call MSMTTARB53
+
+   ! Recargas Electronicas
+   call MSMTREC53
+
+   ! Clientes y Fidelidad
+   call MSMTCLIE53
+
+   ! Retencion
+   call MSMTRETE53
+
+   ! Nota de Credito
+   call MSMTNCRE53
+
+   ! Inventario
+   call MSMTINVE53
+   
+   !Deliverys
+   CALL GRDOMICILIOS(53)
+
+   !Pago Deuna
+   CALL PAGO.DEUNA(53)
+
+   !Pago Rappi
+   CALL PAGO.RAPPI(53)
+
+END FUNCTION

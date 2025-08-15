@@ -1,0 +1,51 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU30.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+
+TS.TEMP1I4 = TS.BALDUE(0)
+If (TS.BALDUE(0) <= 0) AND (TS.TOTALS(0,0,0) > 0) AND (UE.EPSS.ON = -1) Then Begin
+ If UE.EPS.GRABAString% = -1 Then Begin
+  Call VISOR.AND.BORRAR("INSERTE COPIA DE LA FORMULA     BORR")
+  Call SALVAR.VARIABLES
+	TS.PRT.PARM = 1000H
+	TS.LINETYPE = 9
+	TS.LINEDATA = 12
+	If UE.EPS.CAPITACION$ = "0" Then \
+     TO.FRANK.TXT$(12,01) = "**     PAGOS CONVENIOS  E.P.S       **" Else \
+     TO.FRANK.TXT$(12,01) = " "
+	A$ = UE.EPSS.DAT(6)
+	If UE.EPSS.IPS$ = "" Then UE.EPSS.IPS$ = "NO INGRESADO"
+	If UE.EPSS.MEDICO$ = "" Then UE.EPSS.MEDICO$ = "NO INGRESADO"
+	TO.FRANK.TXT$(12,02) = "----    IDENTIFICACION DEL CONVENIO    ----"
+	TO.FRANK.TXT$(12,03) = "Nombre Convenio   : "+UE.EPS.NCONVE$
+	TO.FRANK.TXT$(12,04) = "No. del Plan      : "+STR$(VAL(UNPACK$(UE.EPS.CCOD$)))
+	TO.FRANK.TXT$(12,05) = "Nombre del Plan   : "+UE.EPS.CNOMB$
+ 	TO.FRANK.TXT$(12,06) = "Nombre  I.P.S     : "+UE.EPSS.INOMB$
+ 	TO.FRANK.TXT$(12,07) = "Medico  I.P.S     : "+UE.EPSS.MNOMB$
+	TO.FRANK.TXT$(12,08) = String$(38,"-")
+	TO.FRANK.TXT$(12,09) = "Cedula Benefic.   : "+STR$(VAL(UNPACK$(Right$(UE.EPS.BCOD$,7))))
+	TO.FRANK.TXT$(12,10) = "Nombre Benefic.   : "+UE.EPS.BNOMB$
+	CALL FORMAT.AMOUNT(TS.TOTALS(0,0,0))
+	If UE.EPS.CAPITACION$ = "0" Then \
+ 	   TO.FRANK.TXT$(12,11) = "VALOR DOCUMENTO   $ "+TS.TEMP1$ Else \
+ 	   TO.FRANK.TXT$(12,11) = " "
+	TO.FRANK.TXT$(12,12) = String$(38,"-")
+	TO.FRANK.TXT$(12,13) = "@g"
+
+!	TO.FRANK.TXT$(12,12) = "VALOR ASUME E.P.S $ "+STR$(TS.TENDVAMT(UE.EPS.POSPAGO%)) ! UE.EPS.VLRCOPAGO$	
+	
+  UE.OLD.BENEF$  = UE.EPSS.DAT(3)			! Beneficiario
+  UE.OLD.MEDICO$ = UE.EPSS.MEDICO$		! Medico
+  UE.OLD.IPS$    = UE.EPSS.IPS$                   ! Codigo IPS
+	Call TSPREC01
+  Call RESTAURA.VARIABLES
+	UE.EPSS.ON = 2
+ EndIf	
+EndIf
+

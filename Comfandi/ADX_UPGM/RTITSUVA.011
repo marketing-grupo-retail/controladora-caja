@@ -1,0 +1,62 @@
+\------------------------------------------------------------------------------
+\                   NOMBRE DEL MODULO : RTITSUVA.011      
+\          Modulo de Definici¢n de Variables - Retencion en la Fuente IVA
+\  
+\               VERSION : General Consolidada Marzo 2001
+\
+\       Primer Revision : Indata Ltda
+\  
+\    Resumen de Cambios : 
+\ 
+!------------------------------------------------------------------------------
+!             Variables para Retencion de IVA Pagos electronicos
+!------------------------------------------------------------------------------
+REAL      GLOBAL   KIV1,  KIV2,  KIV3,  KIV4, FRACRTIV !
+INTEGER*1 GLOBAL   KOPC%, KHAYVOU%, RTI.ITEM           !
+INTEGER*2 GLOBAL   KIVA%, FIS.RET, KUE1%,  KUE2%,  RR% !
+INTEGER*4 GLOBAL   TVRTTOT%,   TVRTEXE%,   TVRTGRA%,  \!
+                   TVRTPAG%,   VRPLANA%,   TVRTIVT%,  \!
+                   TVRTIV1%,   TVRTIV2%,   TVRTIV3%,  \!
+                   TVRTIV4%,   TVRTIVP%,   NORETEN%,  \!
+                   IPOAA%,     IPOBB%,     TIVADEC%,  \!
+                   TVRTDUE%,   IPOTAA%,    IPOTBB%,   \!
+                   IPOTCC%,                RTI.VRU%,  \!
+                   TVRTIMX%                            !
+INTEGER*4 GLOBAL                                      \!
+          TOTIMPC%,        FIS.VOREF%,                \!
+          FIS.NTRA                                     ! 
+
+INTEGER*2                                             \!
+          FIS.DIR%,      FIS.D%,          FUNC,       \!
+          PARM1,                                      \!
+          FIS.FLAG,      FIS.STYPE,       FIS.SLA%,   \!
+          FIS.INDICAT1,  FIS.ITIPO,       RTI.FIV%,   \!
+          FIS.COUP                                     !
+
+STRING    GLOBAL                                      \!
+          FINLIN$,                                    \!
+          FORT$,         PRTN$,           DEFI$,      \!
+          FIS.PLU$,      FIS.PRF$,        FIS.DEPA$,  \!
+          C1$,           C2$,             C3$,  C4$,  \!
+          RTI.IT1$,      RTI.IT2$,        RTI.IT3$,   \!
+          RTI.IT4$,      RTI.IT5$,        RTI.IT6$,   \!
+          RTI.IT7$,      RTI.IT8$,        RTI.NET$,   \!
+          ALTETROP$,     EOF$,            KTIVAR$,    \!
+          KNUMTAR$,      RTI.AUX$,        FIS.AL$,    \!
+          FIS.TER$,      FIS.OFF$,        FIS.RET$,   \!
+          FIS.MAT$,      PF1$,            RTI.DL$      !
+
+!------------------------------------------------------------------------------
+
+STRING    GLOBAL                                      \!
+          M$,                                         \!
+               PARM2$,          FIS.X$,     \!
+          FIS.TRLOG$,    KFH$,            FIS.TRTYPE$,\!
+          FIS.IT1$,      FIS.IT2$,        FIS.IT3$,   \!
+          FIS.IT4$,      FIS.IT5$,        FIS.IT6$,   \!
+          FIS.IT7$,      FIS.IT8$,                    \!
+          KEY$,                                       \!
+          RAZON$,        NITR$                         !
+!------------------------------------------------------------------------------
+
+

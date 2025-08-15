@@ -1,0 +1,86 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSUSU.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+ 
+!!***** CODE FOR COUP. MULT. LIMIT *****
+!!***** CODE FOR FREE COUPON PROMPT*****
+!!*******************************************************************
+!!** DEFINE BASE ROUTINE TO REFORMAT THE PRICE OF A COUPON         **
+!!*******************************************************************
+! FUNCTION FORMAT.AMOUNT (AMT1) EXTERNAL
+! INTEGER*4 AMT1
+! END FUNCTION
+ 
+%INCLUDE EAMTSXHC.J86        ! Extended Memory Subroutines
+ 
+!!***** CODE FOR UPC E STORE COUPONS ***
+!!*****************************************************************
+!!** CONVERT ALTERED UPCS BACK TO INPUT UPCS FOR LOG OR DISPLAY  **
+!!*****************************************************************
+FUNCTION RESTORE.UPC(IN$) EXTERNAL                               !
+         STRING RESTORE.UPC,IN$                                  !
+END FUNCTION                                                     !
+ 
+!!***** CODE FOR COUP. MULT. LIMIT *****
+!!*****************************************************************
+!!** CALCULATE DAY OF WEEK FROM DATE  (0 = SUNDAY, 1 = MONDAY...)**
+!!*****************************************************************
+FUNCTION ?DOW EXTERNAL
+  STRING ?DOW
+END FUNCTION
+ 
+!!***** CODE FOR TRANSACTION LIMIT *****
+!!*******************************************************************
+!!** COUNT NUMBER OF LIKE COUPONS IN THE TRANSACTION               **
+!!*******************************************************************
+FUNCTION CNT.CPNS(UPC$) EXTERNAL
+ INTEGER CNT.CPNS
+ STRING UPC$
+END FUNCTION
+ 
+!!*******************************************************************
+!!** SEE IF IR.ITEMCODE$ CONTAINS A VALID MFR NUMBER FOR VALIDATION**
+!!*******************************************************************
+FUNCTION MFR.IN.UPC EXTERNAL
+ INTEGER MFR.IN.UPC
+END FUNCTION
+ 
+!!*******************************************************************
+!!** CODE MOVED TO EAMTSFBZ.BAS TO FREE SPACE IN EAMTSUPC.BAS      **
+!!*******************************************************************
+SUB TSU07.CPN EXTERNAL           ! CODE FOR EXIT 07
+END SUB
+ 
+SUB TSU08.CPN EXTERNAL           ! CODE FOR EXIT 08
+END SUB
+ 
+SUB TSU14.CPN EXTERNAL           ! CODE FOR EXIT 14
+END SUB
+ 
+SUB TSU18.CPN EXTERNAL           ! CODE FOR EXIT 18
+END SUB
+ 
+SUB TSU20.CPN EXTERNAL           ! CODE FOR EXIT 20
+END SUB
+ 
+SUB TSU21.CPN EXTERNAL           ! CODE FOR EXIT 21
+END SUB
+ 
+SUB TSU23.CPN EXTERNAL           ! CODE FOR EXIT 23
+END SUB
+ 
+SUB TSU39.CPN EXTERNAL           ! CODE FOR EXIT 39
+END SUB
+ 
+SUB TSU42.CPN EXTERNAL           ! CODE FOR EXIT 42
+END SUB
+ 
+SUB TSU43.CPN EXTERNAL           ! CODE FOR EXIT 43
+END SUB
+ 

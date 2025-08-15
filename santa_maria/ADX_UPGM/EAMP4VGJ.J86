@@ -1,0 +1,137 @@
+\/* TIME STAMP BLOCK ***********************************************/
+\/* END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMP4VGJ                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME:  VARIABLE DEFINITIONS FOR GENERIC       */
+\/*                         FEATURE EXIT MODULES.                  */
+\/*                                                                */
+\/*      CHANGE ACTIVITY:                                          */
+\/*                                                                */
+\/*     IR33229 - Created on June 18, 1996 - Matra - ADW           */
+\/*     IR34334 - Changed SIZE.OF.CR.BUFFER to 4 bytes - Matra ADW */
+\/*               12/11/97 Matra ADW                               */
+\/*     IR51720 - Check Image variables added Co-Req IR51721       */
+\/*               07/16/03 IBM CRM                                 */
+\/*     IO00464 - Add support for WIC EBT.                         */
+\/*               11/16/04 IBM LTG                                 */
+\/* END-OF-SPECIFICATIONS ******************************************/
+\/******************************************************************/
+
+!********************************************************************
+!*        Enhanced Printing Options (Duplicate receipt printing)    *
+!********************************************************************
+
+INTEGER*2 GLOBAL                 \!
+   EP.ETO.DUPLICATE.NUMBER,      \! Number of duplicates to print
+   EP.ETO.DUPLICATE.AUTOPRINT    !! Automatically print dupicates
+
+!********************************************************************
+!*        Enhanced Printing Options (MICR Options)                  *
+!********************************************************************
+
+INTEGER*2 GLOBAL                 \!
+   EP.ETO.MICR.PAUSE,            \! Pause after MICR read
+   EP.ETO.MICR.PRINT.FACE        !! Print check face after franking
+
+!********************************************************************
+!*        Enhanced Printing Options (Error Handling)                *
+!********************************************************************
+
+INTEGER*2 GLOBAL                 \!
+   EP.ETO.OVERRIDE.PAPER.ERROR,  \! Override out-of-paper error
+   EP.ETO.OVERRIDE.INK.ERROR     !! Override out-of-ink error
+
+!********************************************************************
+!*        Enhanced Printing Options (Post Transaction Printing)     *
+!********************************************************************
+INTEGER*2 GLOBAL                 \!
+   EP.ETO.PRINT.POST.TRANS,      \! Print post transaction receipt
+   EP.ETO.GROUP.BY.ITEMS,        \! Group item sales by item code
+   EP.ETO.GROUP.BY.DEPT,         \! Group items sales by department
+   EP.ETO.REMOVE.ITEM.VOIDS,     \! Remove item voids from receipt
+   EP.ETO.GROUP.SALES.RETURNS,   \! Group sales and returns on receipt
+   EP.ETO.SALES.RETURNS.HEADERS  !! Print sales/returns headers
+
+STRING GLOBAL                    \!
+   EP.ETO.SALES.HEADER1$,        \! Sales header 1
+   EP.ETO.SALES.HEADER2$,        \! Sales header 2
+   EP.ETO.SALES.HEADER3$,        \! Sales header 3
+   EP.ETO.RETURNS.HEADER1$,      \! Returns header 1
+   EP.ETO.RETURNS.HEADER2$,      \! Returns header 2
+   EP.ETO.RETURNS.HEADER3$       !! Returns header 3
+
+!********************************************************************
+!*        IBM 4610 Printer Options                                  *
+!********************************************************************
+
+INTEGER*2 GLOBAL                 \!
+   EP.ETO.DEFAULT.CR.WIDTH,      \! Default customer receipt width
+   EP.ETO.DEFAULT.DI.WIDTH       !! Default document insert width
+
+!********************************************************************
+!*        Multiwidth Printing (multiple characters-per-line choices)*
+!********************************************************************
+
+STRING GLOBAL                    \!
+   EP.WIDE.PRTBUF$               !! Wide Print buffer (used for
+                                 !! multiple width settings)
+
+!********************************************************************
+!*        Enhanced Printing (multiple receipt, post printing)       *
+!********************************************************************
+
+STRING GLOBAL                    \!
+   CR.PRINT.BUFFER$(1)            !! Print buffer (used for multiple
+                                 !! receipt and post printing)
+
+INTEGER*2 GLOBAL                 \!
+   SORT.BUFFER(1),               \! Array used to sort print buffer
+\!AIR34334 - Changed SIZE.OF.CR.BUFFER to 4 bytes (moved below)
+\! SIZE.OF.CR.BUFFER,            \! Max size of print buffer
+\!EIR34334
+   CR.BUFFER.POINTER%,           \! Points to current pos in buffer
+   BUFFER.RECEIPT,               \! Buffer the line being printed
+   SORT.REQUESTED,               \! Flags sort option set
+   CR.TENDER,                    \! Indicates a partial tender
+   LAST.ITEM%                    !! Last sales item
+
+INTEGER*2 GLOBAL                 \!
+   SESS.NUM.4610.CR,             \! Session number assigned to 4610
+   SESS.NUM.4610.DI              !!
+
+
+!AIR34334 - Changed SIZE.OF.CR.BUFFER to 4 bytes (moved from above)
+INTEGER*4 GLOBAL                 \!
+   SIZE.OF.CR.BUFFER             !! Max size of print buffer
+!EIR34334
+! IR51720 Array of tender types and varieties to image
+INTEGER*1 GLOBAL  P4.MANDATORY.TENDERS.TO.IMAGE(1) !IR51720 
+
+!AIO00464
+!These variables were added to support the WIC EBT feature.  
+ 
+!This new flag is used to allow printing of feature print lines without adding 
+!the lines to the print buffer.  It should only be set true by the user and it's 
+!up to the user to make sure it's reset.  It is used to prevent method 
+!HOLD.BUFFERING from resetting the BUFFER.RECEIPT flag even though the user had 
+!called method DISABLE.BUFFERING.  The base 4610 code only resets it during 
+!initialization and then never accesses it again. 
+INTEGER*1 GLOBAL                  \
+   FLAG.4610.NO.BUFFERING         ! flag to force no buffering of print lines
+
+!This flag is used by features to collect a print buffer/Tlog entry association. 
+!Setting this to true dims an association array which marks the tlog entry of 
+!every print line added to the print buffer array CR.PRINT.BUFFER$.  The base
+!4610 code only resets it during initialization and then never accesses it again.
+INTEGER*1 GLOBAL                  \
+   FLAG.4610.TLOG.CR.ASC          ! flag if keeping Tlog/Print buff association
+
+!This array contains the Tlog/Print buffer association.  Each Tlog entry is 
+!marked with the print buffer array index.  This array is not dimmed or accessed 
+!until flag FLAG.4610.TLOG.CR.ASC is set. 
+INTEGER*2 GLOBAL                  \
+   TLOG.CR.4610.INDEX(1)          ! Array to hold Tlog/Print buffer association
+
+!EIO00464

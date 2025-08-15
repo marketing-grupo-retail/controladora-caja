@@ -1,0 +1,489 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+!*  IR39145  Add new variable SO.EXPANDED.PERF, flag indicating
+!*           whether additional performance file records are to
+!*           be stored to contain data for reporting 20 additional
+!*           subtotal groupings.
+!*RSH MGVA 12Nov98
+!*
+!*  IR39147  Added variables to support reporting Mfr Coupons
+!*           by variety based on store options.
+!*           RSH MGVA 12Nov98
+!*
+!*  IR48940  Added minutes field to restricted sales period option and
+!*           provided a flag to allow reversal of the meaning of the
+!*           restricted time period.
+!*           KHG IBM 19Aug02
+!*
+!*  IO08252  Added Flexible Spending Account variables.
+!*           These are the FSA QHP and Rx byte and bit offsets.
+!*           JTG IBM 18Jan2008
+!*
+!*END-OF-SPECIFICATIONS**********************************************
+!********************************************************************
+!*                                                                  *
+!*   THIS MODULE CONTAINS VARIABLE DEFINITIONS FOR THE FIELDS READ  *
+!*   FROM THE STORE OPTIONS RECORDS. THIS MODULE SHOULD BE INCLUDED *
+!*   IN ANY PROGRAM NEEDING ACCESS TO THE STORE OPTIONS. THESE      *
+!*   VARIABLES ARE INITIALISED BY READING THE STORE OPTIONS RECORDS *
+!*   USING INCLUDE MODULES EAMSORDX.                                *
+!*                                                                  *
+!*   IN THE FIELD DESCRIPTIONS BELOW, (Y/N) INDICATES A FLAG WHICH  *
+!*   CAN TAKE THE VALUE OF 0 (=NO) OR -1 (=YES)                     *
+!*                                                                  *
+!********************************************************************
+
+!********************************************************************
+!*        ACCOUNTABILITY TYPES MAINTAINED                           *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+          SO.ACCTTYPE         !    ACCOUNTABILITY TYPE 1 = O, 2 = T, 3 = M
+                              !    IR90981, corrected comment above
+
+!********************************************************************
+!*        RESTRICTIVE START AND END PERIODS                         *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.RESTSTART(1),    \    RESTRICTIVE SALES PERIOD START/END
+          SO.RESTEND(1)       !    (1) = SUNDAY  (7) = SATURDAY
+
+!AIR48940
+INTEGER*1 GLOBAL               \
+                               \
+          SO.REST.REVERSE,     \    restrictive period reversal flag
+          SO.RESTSTART.MIN(1), \    RESTRICTIVE SALES PERIOD START/END MINUTES
+          SO.RESTEND.MIN(1)    !    (1) = SUNDAY  (7) = SATURDAY
+!EIR48940
+
+!********************************************************************
+!*        DEPARTMENT SUBTOTAL GROUPINGS                             *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          SO.DEPTNUM(1)       \    DEPARTMENT NUMBERS IN DEPT ANALYSIS REPORT
+                              \    1 - 999, 1000 = SUB-TOTAL, 0 = IGNORE
+                              \    ENTRIES 1 - 220: DEPARTMENT NUMBERS
+                              \    !IR74368  MAKE ENTRIES 1221, 1222
+                              \    ENTRY 1221:       NUMBER OF ACTIVE ENTRIES
+                              !    ENTRY 1222:       SUB TOTAL COUNT
+
+!********************************************************************
+!*        MISCELLANEOUS TRANSACTION SUBTOTAL GROUPING               *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          SO.MISCNUM(1)       \    MISCELLANEOUS TRX NOS REPORTED
+                              \    1 - 999, 1000 = SUB-TOTAL, 0 = IGNORE
+                              \    ENTRIES 1 - 120: MISC TRX NUMBERS
+                              \    ENTRY 121:       NUMBER OF ACTIVE ENTRIES
+                              !    ENTRY 122:       SUB TOTAL COUNT
+
+!********************************************************************
+!*        UPC COUPON VALUES                                         *
+!********************************************************************
+
+!AIR91749 Make array SO.UPCCOUNT more data space efficient in terminal.
+!         An INTEGER*1 will satisfy the item count needs.
+!INTEGER*2 GLOBAL              \
+!                              \
+!          SO.UPCVALUE(1),     \    COUPON VALUE FOR EACH COUPON CODE
+!          SO.UPCCOUNT(1)      !    ITEM COUNT FOR EACH COUPON CODE
+
+INTEGER*2 GLOBAL              \
+          SO.UPCVALUE(1)      !    COUPON VALUE FOR EACH COUPON CODE
+
+INTEGER*1 GLOBAL              \
+          SO.UPCCOUNT(1)      !    ITEM COUNT FOR EACH COUPON CODE
+
+!EIR91749
+
+!********************************************************************
+!*        MISCELLANEOUS STORE OPTIONS                               *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          SO.MAXCOIN,         \    MAXIMUM COIN DISPENSER AMOUNT
+          SO.FEE.ACCOUNT      !    MISC TRX ACCOUNT NO FOR CHECK FEES
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.VRFYFORM,        \    VERIFY FILE FORMAT (1 = LONG 2 = SHORT)
+          SO.FSNOTAX,         \    FOOD STAMP ITEMS TAX FREE    (Y/N)
+          SO.STOREACCT,       \    STORE ACCOUNTING ACTIVE      (Y/N)
+          SO.PERFRPRT,        \    PERFORMANCE REPORTS REQUIRED (Y/N)
+          SO.EFTTIMEOUT,      \    EFT REQUEST TIMEOUT (0-99 SECONDS)
+          SO.CHKLONG,         \    LONG CHECK VERIFY FORMAT     (Y/N)
+          SO.CLOSECHECK,      \    SYSTEM MUST BE IDLE AT CLOSE (Y/N)
+          SO.ENCRYPT.PSWD     !    OPERATOR PASSWORDS ENCRYPTED (Y/N)
+
+!AIO08252
+INTEGER*2 GLOBAL              \    FSA Item record byte locations
+          SO.FSA.QHPBYTE,     \    QHP
+          SO.FSA.RXBYTE       !    Rx
+
+INTEGER*1 GLOBAL              \    FSA Item record bit locations within the byte
+                              \    Values right to left.  1=01H to 8=80H
+          SO.FSA.QHPBIT,      \    QHP
+          SO.FSA.RXBIT        !    Rx
+!EIO08252
+
+!********************************************************************
+!*        OPERATIONAL AND PERFORMANCE OPTIONS                       *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.SAVETLOG,        \    SAVE PREVIOUS PERIOD LOG FILE(Y/N)
+          SO.CPPERIOD,        \    CHECKPOINT PERIOD (1-24 HOURS)
+          SO.CLOSETLOG,       \    CLOSE TRANSACTION LOG AT     (Y/N)
+                              \    DATA SYNC CHECKPOINT
+          SO.OPERPERF,        \    KEEP OPERATOR PERFORMANCE    (Y/N)
+          SO.RINGTNDR,        \    COLLECT RING/TENDER TIME     (Y/N)
+          SO.TERMPROD,        \    KEEP TERMINAL PRODUCTIVITY   (Y/N)
+          SO.EXPANDED.PERF,   \    Store additional IR39145
+                              \     20 dept sub grps  (Y/N)
+          SO.IMBUFFERED       !    I.M. BUFFERED IN MEMORY      (Y/N)
+
+
+INTEGER*2 GLOBAL              \    SUSPEND/RETRIEVE TYPE - IR90981
+          SO.SR.TYPE          \    0=> NO SUSPENDS IS ALLOWED
+                              \    1=> 1 PER TERMINAL, MUST RETRIEVE
+                              \        TO THE SAME TERMINAL
+                              !    N=> MAX NO. OF SUSPENDS PER TERM.
+
+INTEGER*1 GLOBAL              \    Y/N to stop a close if there are
+          SO.SR.CLOSE         !    unretrieved transactions - IR90981
+
+INTEGER*1 GLOBAL              \    Y/N to collect totals by variety
+          SO.CTBV(1)          !    CTBV
+
+!********************************************************************
+!*        AUTO REPORT PROCEDURE OPTIONS                             *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.SELREPORT(1)     \    PERIOD SELECT BY REPORT
+                              !    0 = DEST  1-14 = PERIOD FOR EACH REPORT
+
+STRING    GLOBAL              \
+                              \
+          SO.REPORTNAME$      !    REPORT NAME OF CURRENT REPORT READ
+
+!********************************************************************
+!*        CLOSE PERIOD PROCEDURES                                   *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.CLOSE.INUSE,     \    PROCEDURE IN USE             (Y/N)
+          SO.SELCLOSE(1)      \    CLOSE AND OLD PERIOD OPTIONS
+                              \    1 - 9   = CLOSE OPTION FOR EACH FILE
+                              !    10 - 18 = OLD PERIOD PROCESSING OPTIONS
+
+STRING    GLOBAL              \
+                              \
+          SO.CLOSENAME$       !    REPORT NAME OF CURRENT REPORT READ
+
+!********************************************************************
+!*        TERMINALS EXCLUDED FROM TERMINAL PRODUCTIVITY REPORT      *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          SO.TMPRODEXCL(1)    \    TERMINALS EXCLUDED FROM
+                              !    TERMINAL PRODUCTIVITY REPORT
+
+!********************************************************************
+!*        TENDER OPTIONS                                            *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.TNDRLIST(1),     \    TENDER LISTING ACTIVE        (Y/N)
+          SO.COLLECT(1)       !    COLLECT CUSTOMER STATUS INFO (Y/N)
+
+INTEGER*4 GLOBAL              \
+          SO.COLLECT.TBV(1)   !    COLLECT TOTALS BY VARIETY    (Y/N)
+
+INTEGER*4 GLOBAL              \
+                              \
+          SO.CASF.SIZE        \    CUSTOMER ACCOUNT STATUS FILE SIZE
+                              !    (NUMBER OF RECORDS)
+
+!********************************************************************
+!*        USER DEFINED OPTION FLAGS                                 *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.USEROPTS(1),     \    USER DEFINED OPTION FLAGS    (Y/N)
+          SO.USEREXIT(1)      !    USER EXIT ACTIVE FLAGS       (Y/N)
+
+!********************************************************************
+!*        SHELF EDGE LABEL FORMAT DEFINITIONS                       *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.LFR.ID,          \    NUMBER OF CURRENT LABEL FORMAT RECORD
+          SO.LFR.HEIGHT,      \    LABEL HEIGHT (1 = 1 INCH, 2 = 1.25 INCHES)
+          SO.LFR.LENGTHI,     \    LABEL LENGTH (1.0 - 5.0 INCHES)
+          SO.LFR.LENGTHM,     \    LABEL LENGTH (25 - 125 MM)
+                              \
+          SO.LFR.HOFFSET(1),  \    HORIZONTAL OFFSET BY FIELD
+          SO.LFR.VOFFSET(1),  \    VERTICAL OFFSET BY FIELD
+          SO.LFR.CHRLENG(1),  \    CHARACTER LENGTH
+          SO.LFR.FONTSIZE(1), \    CHARACTER FONT SIZE
+          SO.LFR.FIELDNO(1)   !    ITEM RECORD FIELD NUMBER
+
+STRING    GLOBAL              \
+                              \
+          SO.LFR.FLDDESC$(1)  !    LABEL FIELD DESCRIPTOR
+
+!********************************************************************
+!*        SHELF EDGE LABEL STOCK DEFINITIONS                        *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          SO.LST.YN(1),       \    LABEL STOCK IN USE FLAG
+                              \
+          SO.LST.STARTT(1),   \    START POSITION FROM TOP
+          SO.LST.STARTS(1),   \    START POSITION FROM SIDE
+                              \
+          SO.LST.HCOUNT(1),   \    HORIZONTAL COUNT PER PAGE
+          SO.LST.HSPACE(1),   \    HORIZONTAL SPACES PER LABEL
+                              \
+          SO.LST.VCOUNT(1),   \    VERTICAL COUNT PER PAGE
+          SO.LST.VSPACE(1)    !    VERTICAL SPACES PER LABEL
+
+STRING    GLOBAL              \
+          SO.LST.ID$(1)       !    LABEL STOCK IDENTIFIER
+
+!********************************************************************
+!*        SYSTEM GLOBAL CONSTANTS                                   *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          GC.ZF.TEND(1),      \ print if zero flags for tenders
+          GC.ZF.CASH(1),      \ print if zero flags for cash report
+          GC.ZF.PERF(1),      \ print if zero flags for perf report
+                              \
+          GC.MAXTERMS,        \ maximum number of terminals
+          GC.MAXOPERS,        \ maximum number of operators
+                              \
+          GC.PRINTER,         \ flag if system contains a printer
+          GC.AUTO.BAL,        \ auto sub-total time period
+          GC.FRANK.TOUT,      \ timeout for removal of franked tender
+          GC.PC.SIZE,         \ size of price change array
+          GC.SL.SIZE,         \ transaction data buffer size
+          GC.SL.WARN,         \ warning threshold for buffer nearly full
+          GC.RD.TIMEOUT,      \ timeout waiting for read of log
+          GC.BACKLOG,         \ max backlog before warning to OCF
+          GC.IM.FLUSH         ! no of normal read timeouts before IM flushed
+
+STRING    GLOBAL              \
+                              \
+          GC.DEFAULT.OP$,     \ default operator number
+          GC.ETONE.HZ$,       \ error tone frequency
+          GC.ETONE.LEN$       ! error tone length
+
+INTEGER*2 GLOBAL              \
+                              \
+          GC.TP.MAXDAYS,      \ max days of data in terminal productivity file
+          GC.APPLYTEST,       \ used by DDM timer task to decide what
+          GC.DELTEST          ! range of batches to apply/delete (max 28
+
+!********************************************************************
+!*        EFTS HIDDEN CONSTANTS                                     *
+!********************************************************************
+
+ INTEGER*2 GLOBAL             \
+                              \
+          GC.LINKTYPE         ! EFT LINK TYPE - 1=SNA,2=BSC,3=ASYN
+
+ INTEGER*2 GLOBAL             \
+                              \
+          GC.DLC.RETRY,       \ SERIAL LINK RETRY COUNT ON ERROR
+          GC.DLC.TMOUT,       \ SERIAL LINK TIMEOUT ON ERROR
+          GC.DISP.TMOUT,      \ TIMEOUT ON CUSTOMER DISP. BEFORE DISPLAY
+                              \   CHANGES TO 'ENTER AC# OR CLEAR'
+          GC.REPL.MSGNUM      ! ID OF MSG TO DISP ON MSR/PINPAD WHEN THE
+                              !   RESPONSE MESSAGE IS TO BE CHANGED
+
+ STRING    GLOBAL             \
+                              \
+          GC.VF.CODETBL$(1)   ! message code lookup table ("AA","NC",etc)
+                              !
+ INTEGER*2 GLOBAL             \
+                              \
+         GC.VF.CODEACT(2)     ! actions corr. with each
+                              ! message code:
+                              !  array(x, 1) = flag indicating whether to
+                              !    replace the display message in the auth
+                              !    response with the message text defined by
+                              !    gc.repl.msgnum above. Default = no.
+                              !  array(x, 2) = 100-109 : id of message to
+                              !    be displayed at the register, or
+                              !              = -1 :  display message text from
+                              !    auth response at the register
+                              !    Default value = 100
+
+!AIR73993
+INTEGER*2 GLOBAL              \
+          GC.UPC2.TYPE        !  0 - UPC 2 has a price check digit
+                              ! -1 - No price check digit, 6 digit code
+!EIR73993
+!AIR74425
+INTEGER*2 GLOBAL              \
+          GC.NET.ST.COUPON    !  0 - Store coupons included in dept net
+                              ! -1 - Not included in dept net
+!EIR74425
+
+!AIR75193
+INTEGER*2 GLOBAL              \
+          GC.MAX.XLOG16       !  max number of x'16' records in xlog
+                              !  default value = 200
+!EIR75193
+!AIR77437
+  INTEGER*2 GLOBAL            \
+          GC.MCPN.TDR,        \ 0 = reduce foodstamp total for mfgr
+                              \ coupons tendered, -1 = give cash back
+                              \ for foodstamps tendered
+          GC.CPN.FSTX         \ 0 = no tax for coupons presented for
+                              \ foodstampable items, -1 = amounts for
+                              \ coupons presented are taxable.
+!EIR77437
+
+!AIR77861
+!********************************************************************
+!*   GO-FASTER HIDDEN STORE OPTION SET ONLY FOR HIGH-PERF. STORES   *
+!********************************************************************
+
+ STRING GLOBAL          \ This flag is set only for high-performance
+                        \ stores. When set greater buffering is done
+                        \ by C.S. of file updates. e.g. Acctg/Oper perf.
+          GC.GOFASTER   ! "0" = no gofaster, "non-zero" = go-faster
+
+
+ INTEGER GLOBAL         \ This flag is set only for high-performance
+                        \ stores. When set greater buffering is done
+                        \ by C.S. of file updates. e.g. Acctg/Oper perf.
+                        \ This is the integer equivalent of the string
+                        \ above and is used to provide a faster test.
+          GOFASTER      !  0  = no gofaster, non-zero = gofaster
+
+!EIR77861
+STRING    GLOBAL              \
+          GC.C.DISK.FREE,     \  C DISK SPACE AT CLOSE PERIOD
+          GC.D.DISK.FREE,     \  D DISK SPACE AT CLOSE PERIOD
+          GC.TXABLE.FS.ADJ    !  TAX AMOUNT REDUCED FOR FS PAID AMT
+!AIR78327
+STRING    GLOBAL              \
+          GC.EFT.CTL.ID       !  "0AA" = destination is Master Controller
+!EIR78327                     !  "0BB" = destination is local controller
+
+!AIR78845
+INTEGER*2 GLOBAL              \
+          GC.PRICE.CHK        ! 0= PRICE CHK DIGIT OF 0 NO PR VALIDATION
+                              !-1= PRICE CHK DIGIT OF 0 PRICE VAL. DONE
+!EIR78845
+
+!AIR79515
+INTEGER*2 GLOBAL              \
+          GC.PRE.FRANKING.LF  ! Number of LF prior to franking
+!EIR79515
+
+!AIR88033
+INTEGER*2 GLOBAL              \Bypass checking of trx. log string to
+          GC.COUPON.VAL       ! determine if item prev. has been sold
+                              ! -1 = Bypass summary log string processing
+                              !  0 = Normal processing of coupons
+!EIR88033
+
+!AIR89353
+INTEGER*2 GLOBAL              \ Count & Print "Total # Items Sold" On CR
+          GC.PRINT.TOTAL.SOLD ! -1 = Count & Print the message on CR
+                              !  0 = Don't Count & Print message on CR
+!EIR89353
+
+!AIR28521
+INTEGER*2 GLOBAL              \
+          GC.DONOT.RESET.TRANS.NUM ! FLAG FOR CONTROLLING RESET OF TRANS
+                              !  NUMBERS @ CLOSE
+!EIR28521
+
+!AIR29311
+STRING    GLOBAL              \
+          GC.TAX.LIMIT        !  tax limit per tax plan
+                              !  "0" or "" = no tax limit
+!EIR29311
+!********************************************************************
+!*                RESERVED FOR FUTURE USE                           *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+          GC.RESERV15,        \
+          GC.RESERV16,        \
+          GC.RESERV17,        \
+          GC.RESERV18,        \
+          GC.RESERV19,        \
+          GC.RESERV20,        \
+          GC.RESERV21,        \
+          GC.RESERV22,        \
+          GC.RESERV23,        \
+          GC.RESERV24,        \
+          GC.RESERV25,        \
+          GC.RESERV26,        \
+          GC.RESERV27,        \
+          GC.RESERV28,        \
+          GC.RESERV29,        \
+          GC.RESERV30,        \
+          GC.RESERV31,        \
+          GC.RESERV32,        \
+          GC.RESERV33,        \
+          GC.RESERV34,        \
+          GC.RESERV35,        \
+          GC.RESERV36,        \
+          GC.RESERV37         !
+
+
+!********************************************************************
+!*        VARIABLES USED FOR READING STORE OPTIONS                  *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \    DEFINE INTEGER VARIABLES
+                              \
+          SO.I,SO.J,          \    WORK VARIABLES
+          SO.K,SO.L,          \    WORK VARIABLES
+          SO.AUTO.REPNUM,     \    AUTOMATIC REPORT PROCEDURE
+          SO.AUTO.CLSNUM,     \    AUTOMATIC CLOSE PROCEDURE
+          SO.LFR.NUMBER       !    SHELF EDGE LABEL FORMAT RECORD
+
+STRING    GLOBAL              \    DEFINE STRING VARIABLES
+                              \
+          SO.OPTION$,         \    STRING TO READ ENTIRE OPTIONS RECORD
+          SO.OPTFLD$          !    STRING FOR EXTRACTING SINGLE OPTION FIELD
+!AIR39147
+INTEGER*1 GLOBAL              \
+          SO.MFR.DFLT.VAR,    \    Default variety for MFR coupons
+          SO.MFR.EAN99.VAR,   \    Variety for EAN99 coupons
+          SO.MFR.NUMSYS5.VAR, \    Variety for Number System 5 coupons
+          SO.MFR.DEPTKEY.VAR, \    Variety for Department Keyed Coupons
+          SO.MFR.CPN.VARIETY(1) !  Variety for Mfr Cpn Ranges
+
+STRING    GLOBAL                \
+          SO.MFR.CPN.RANGES$(2) !  UPC ranges for MFR Coupon Varieties
+                                !  The data contained in index 2 is as
+                                !  follows:
+                                !     1) Low UPC
+                                !     2) High UPC
+!EIR39147

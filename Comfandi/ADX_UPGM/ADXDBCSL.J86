@@ -1,0 +1,32 @@
+!!! /* TIME STAMP BLOCK **********************************************
+!!! ** END OF TIME STAMP BLOCK **************************************/
+!!!
+!!!   File name: ADXDBCSL.J86
+!!!
+!!!   Description: Declare 3 external Functions CLEFT$, CRIGHT$, CMID$.
+!!!                All BASIC source files which will call the 3 Functions
+!!!                should be included the ADXDBCSL.J86 file.
+!!!
+!!!   Person Responsible: John Xu
+!!!
+!!!   FLAG  REASON  VERS  DATE  WHO   DESCRIPTION
+!!!   ---- -------- ---- ------ ---   -----------
+!!!        P005900B V3R1 010321 JXU   DBCS run-time(CRIGHT$, CLEFT$, CMID$) 
+!!!                                   library support
+!!! 
+
+FUNCTION CLEFT$(DATA$,N%) EXTERNAL
+  STRING CLEFT$,DATA$
+  INTEGER*2 N%
+END FUNCTION
+
+FUNCTION CRIGHT$(DATA$,N%) EXTERNAL
+  STRING CRIGHT$,DATA$
+  INTEGER*2 N%
+END FUNCTION
+
+FUNCTION CMID$(DATA$,N1%,N2%) EXTERNAL
+  STRING CMID$,DATA$
+  INTEGER*2 N1%,N2%
+END FUNCTION
+

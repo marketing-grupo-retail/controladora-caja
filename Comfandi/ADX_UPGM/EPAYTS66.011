@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS66.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+If X.Callparm = -1 Then Begin     																					! Si ingreso autorizacion OK
+   Asc.Pay.InDevol% = 0           																					! Proceso autorizado correctamente
+EndIf Else begin 
+   Asc.Pay.InDevol% = 2           																					! Proceso autorizado correctamente
+EndIf
+

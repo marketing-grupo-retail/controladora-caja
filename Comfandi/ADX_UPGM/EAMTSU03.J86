@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC03 PUBLIC                                                        
+! TSUPEC03 - TIMEOUT BETWEEN TRANSACTIONS                                       
+%INCLUDE EAMTSE03.J86        ! EMS PRPQ
+END FUNCTION                                                                    
+                                                                                

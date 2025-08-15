@@ -1,0 +1,40 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+
+IF Asc.Pef.Impr% = 2 THEN BEGIN           ! Si anulacion total de la transaccion
+   Call Reversa.Anul.Total.Pef            ! Reversa todos los pagos registrados
+ENDIF ELSE BEGIN
+   Call Confirmacion.Movimientos.Pef      ! Confirma la operacion
+ENDIF 
+
+Asc.Pef.Impr%    = 0											! Init de variable control de franqueo
+Asc.Pef.InCambio% = 0                     ! Control intercambio medios de cambio
+Asc.Pef.NotaNul$ = ""                     ! Init de variable control de anulaciones
+Asc.Pef.NtCap%   = 0                      ! Control de notas capturadas
+Asc.Pef.Cambio%  = 0                      ! Intercambio medios de pago
+Asc.Pef.InDevol% = 0                      ! Control de autorizaciones por devolucion y pago
+Asc.Pef.NumNota$ = ""                     ! Temporal
+Asc.Pef.VlrDev$  = ""                     ! 
+Asc.Pef.NroBon%  = 0                      ! Nro bonos capturados
+DIM Asc.Pef.Vtabono$(60,4)                ! Init vector control bonos
+DIM Asc.Pef.Vtabono2$(60,2)                ! Init vector control bonos
+Asc.Pef.Recup% = 0                        ! Control recuperaciones
+Asc.Pef.Cambio% = 0                       ! Intercambios
+Asc.Pef.AutPay% = 0                       ! Control autorizacion de pagos
+Asc.Pef.Tipo%   = 0
+Asc.Pef.Vari%   = 0
+Asc.Pef.SlEnd%  = 0
+Asc.Pef.IMPMSG% = 0
+Asc.Pef.VlrCompra$ = "0"
+FN.PES% = 0
+Dim FN.JAVA$(50,4)
+Dim FN.PES$(50,4)
+Asc.Pef.Bug% = 0
+Asc.Pef.Operacion% = 0                    ! Tipo de operacion 
+Asc.Pef.DataPos% = 0 

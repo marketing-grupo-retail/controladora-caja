@@ -1,0 +1,9 @@
+!---------------------------------------------------------------------
+! Antes de escribir un registro al archivo de movimiento de articulos
+!---------------------------------------------------------------------
+!User exit called before writing item movement record
+FUNCTION CSUPEC09(P1) PUBLIC
+   INTEGER*1 P1
+
+
+END FUNCTION

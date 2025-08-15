@@ -1,0 +1,19 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+If UE.EPS.ERROR$= "SUPERAVALOR" Then Begin
+		TS.DISP1$ = "SUPERA EL VALOR  "
+		TS.DISP2$ = "MAXIMO AUTORIZADO"
+		UE.EPS.ERROR$ = ""
+EndIf
+If UE.EPS.ERROR$= "ITEM NO VALIDO" Then Begin
+		TS.DISP1$ = "ARTICULO NO TIENE CO"
+		TS.DISP2$ = "BERTURA EN ESTE PLAN"
+		UE.EPS.ERROR$ = ""
+EndIf

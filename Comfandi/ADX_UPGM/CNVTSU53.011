@@ -1,0 +1,62 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+
+If UNPACK$(Left$(SL.STR.ENTRY$,1)) = "99" Then Begin
+
+   B$ = UNPACK$(Mid$(SL.STR.ENTRY$,3,4))
+   If UNPACK$(Mid$(SL.STR.ENTRY$,3,4)) = "20060508" Then	\
+	   Begin
+	   UE.EPSS.ON       = -1
+	   UE.EPS.CCOD$     = Mid$(SL.STR.ENTRY$,9,8)
+	   UE.EPS.MCOD$     = Mid$(SL.STR.ENTRY$,18,6)
+	   UE.EPS.ICOD$     = Mid$(SL.STR.ENTRY$,25,2)
+	   UE.EPSS.FORMULA$ = UNPACK$(Mid$(SL.STR.ENTRY$,28,6))
+	   UE.EPS.BCOD$     = UE.EPS.CCOD$+Mid$(SL.STR.ENTRY$,35,6)
+     UE.EPSS.NoDIAG$  = UNPACK$(Mid$(SL.STR.ENTRY$,42,6))
+     UE.EPS.BESTRATO$ = UNPACK$(Mid$(SL.STR.ENTRY$,49,1))
+
+Read Form "C8 C40 2C3 C5 C4 4C1 4C3 C5 3C1 4C3 3C1";#UE.OPEN.CONVENIO% KEY UE.EPS.CCOD$;	\
+	UE.EPS.CCOD$,UE.EPS.CNOMB$,UE.EPS.CFECHI$,UE.EPS.CFECHF$,	\
+	UE.EPS.CTOT$,UE.EPS.CMAX$,UE.EPS.CVMED$,UE.EPS.CVMERCA$,	\
+	UE.EPS.CVIPS$,UE.EPS.CCALCULO$,UE.EPS.CMP$(1),UE.EPS.CMP$(2),	\
+	UE.EPS.CMP$(3),UE.EPS.CMP$(4),UE.EPS.CNIT$, UE.EPS.CVDIAGNOS$,	\
+	UE.EPS.NRMLoCATAL$,UE.EPS.COPAGOLESS$,				\
+	UE.EPS.DSCTLESS$(1), UE.EPS.DSCTLESS$(2),			\
+	UE.EPS.DSCTLESS$(3), UE.EPS.DSCTLESS$(4),			\
+	UE.EPS.DSCTOTRX$, UE.EPS.VALFAC$, UE.EPS.VALBEN$, UE.EPS.CAPITACION$
+If VAL(UNPACK$(UE.EPS.CMAX$)) = 0 Then UE.EPS.CMAX$ = PACK$("99999999")
+If UE.EPS.VALBEN$  <> "0" Then Begin 
+   Read Form "C15 C1 C6 C40 C6 3C1 2C6 C1 C12 C2 C1 C2";#UE.OPEN.BENEFIC% KEY UE.EPS.BCOD$;	\
+	UE.EPS.BCOD$,UE.EPS.BTIPO$,UE.EPS.BCONVENIO$,UE.EPS.BNOMB$,	\
+	UE.EPS.BFECHN$,UE.EPS.BCOTIZ$,UE.EPS.BPAREN$,UE.EPS.BESTRATO$,	\
+	UE.EPS.BFECHI$,UE.EPS.BFECHF$,UE.EPS.BPLAN$,UE.EPS.BEMPRESA$,	\
+	UE.EPS.BESTADO$,UE.EPS.BPREST$,UE.EPS.BCODPREST$                
+ EndIf ELSE Begin
+   UE.EPS.BNOMB$ = "BENEFICIARIO GENERICO"
+EndIf
+  Read Form "C6 C40 C12";#UE.OPEN.MEDICO% KEY UE.EPS.MCOD$;	\
+	UE.EPS.MCOD$,UE.EPSS.MNOMB$, UE.EPS.CODALT$
+  Read Form "C2 C40 C12";#UE.OPEN.IPS% KEY UE.EPS.ICOD$;	\
+	UE.EPS.ICOD$,UE.EPSS.INOMB$,UE.EPS.CODALT$
+  Call U.Imprime(String$(38,"*"),6100H)
+  Call U.Imprime("**  IDENTIFICACION DEL CONVENIO    **",6100H)
+  Call U.Imprime("Nombre Convenio: "+Left$(UE.EPS.NCONVE$,21),6100H)
+  Call U.Imprime("Codigo del Plan: "+UNPACK$(UE.EPS.CCOD$),6100H)
+  Call U.Imprime("Nombre del Plan: "+Left$(UE.EPS.CNOMB$,21),6100H)
+  Call U.Imprime("Beneficiario   : "+Left$(UE.EPS.BNOMB$,21),6100H)
+  Call U.Imprime("Codigo / C.C.  : "+Right$(UNPACK$(UE.EPS.BCOD$),14),6100H)
+  Call U.Imprime("Numero Formula : "+Right$(UE.EPSS.FORMULA$,12),6100H)
+  Call U.Imprime("Codigo Medico  : "+Right$(UE.EPSS.MEDICO$,12),6100H)
+  Call U.Imprime("Codigo I.P.S   : "+Right$(UE.EPSS.IPS$,12),6100H)
+  Call U.Imprime("Categoria      : "+UE.EPS.BESTRATO$,6100H)
+  Call U.Imprime(String$(38,"*"),6100H)
+ 	DIM UE.EPS.PARR(500)
+	EndIf
+EndIf

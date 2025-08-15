@@ -1,0 +1,37 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK ***************************************/
+
+FUNCTION TSUPEC56 PUBLIC
+! TSUPEC56 - Before a "write" to the sequential file at suspension time
+
+CALL IVATSU56.011                  ! IMPRESION DE IVAS
+CALL EPSEANTS56                    ! MEDICAMENTOS 
+CALL COMFTS56.011                  !
+!CALL EPAYMS56.011                  ! PAGO ELECTRONICO
+
+CALL RTITSU02.011                  ! Consulta ivas
+CALL EPSEANTS02                    ! ENTREGA MEDICA.
+CALL LIBLINE(56,1)                 ! Para Reset de Memoria Transacciones de CR
+CALL LIBLINE(56,2)                 ! Para Imprimir NIT Empresa en Summary Journal
+CALL FISMTS56.011		               ! Modulo Fiscal
+CALL COMFTS02.011                  ! COMFANDI - CISA
+CALL COLMTS02.011                  ! RECAUDO COLEGIOS
+CALL EDUMTS02.011                  ! RECAUDO SIEMPRE EDUCANDO
+CALL DOMIMS56.011                  ! MODULO DOMICILIOS
+CALL RECATS56.011                  ! RECARGAS ONLINE
+CALL PEFMTS56.011                  ! PAGO ELECTRONICO - FONEDE
+CALL RECASRV(56,0)	   	           ! PAGO SERVICIOS PUBLICOS
+!CALL MKTPTS56.011                  ! MODULO PROMOCIONES
+
+CALL PROPINA(56)                   ! Modulo propinas
+CALL LCFTSU56.011                  ! Modulo Lealtad Clientes Online
+CALL GRMOVRMS(56)                  ! Remisiones de mercancia
+CALL ESCALONADO(56)                ! DESCUENTOS ESCALONADOS
+CALL GRMBONOS(56)                  ! Modulo Bonos Lealtad
+CALL GRPFIZER(56)                  ! DSCTO ESCALONADO PFIZER
+CALL GRFAMILIAS(56)                ! FAMILIAS EN ACCION 
+CALL GRABBOT(56)                   ! ESCALONADO ABBOT
+CALL GRMIMEI(56)                   ! CAPTURA IMEI CELULAR
+
+END FUNCTION
+

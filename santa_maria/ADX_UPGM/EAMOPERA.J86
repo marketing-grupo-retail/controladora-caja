@@ -1,0 +1,224 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING DEFINES THE AUTHORIZATION FILE. FIELDS ARE      !!
+\ REM!! DEFINED IN THE SEQUENCE IN WHICH THEY APPEAR IN THE LOGICAL   !!
+\ REM!! RECORD.                                                       !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL               \
+          OA.OPERATOR$,        \ OPERATOR NUMBER                 UPD 5
+          OA.PASSWORD$,        \ OPERATOR PASSWORD               UPD 4
+          OA.OPTIONSK$         ! KEY TO THE RECORD IN THE OPTIONS
+                               ! AUTHORIZATION FILE WHICH CONTROLS
+                               ! THIS OPERATOR'S ABILITY TO ALTER
+                               ! THE PROGRAM PRODUCT OPTIONS.    UPD 1
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING INDICATORS CONTROL TRANSACTIONS AND PROCEDURES  !!
+\ REM!! WHICH CAN BE RUN AT THE TERMINAL.                             !!
+\ REM!!***************************************************************!!
+
+INTEGER*2 GLOBAL               \
+                               \
+          OA.INDICAT0,         \ BIT 0 - CHECKOUT TRANSACTION ALLOWED
+                               \ BIT 1 - TENDER CASHING ALLOWED
+                               \ BIT 2 - TENDER EXCHANGE ALLOWED
+                               \ BIT 3 - LOAN TRANSACTION ALLOWED
+                               \ BIT 4 - PICKUP TRANSACTION ALLOWED
+                               \ BIT 5 - TENDER LISTING ALLOWED
+                               \ BIT 6 - PRICE VERIFICATION ALLOWED
+                               \ BIT 7 - OPERATOR TRAINING ALLOWED
+                               \ BIT 8 - TERMINAL TRANSFER ALLOWED
+                               \ BIT 9 - TERMINAL MONITER ALLOWED
+                               \ BIT10 - TENDER COUNT ALLOWED
+                               \ BIT11 - 13 RESERVED
+                               \ BIT14 - USER NON-SALES 1 ALLOWED
+                               \ BIT15 - USER NON-SALES 2 ALLOWED
+                               \
+          OA.INDICAT1          ! BIT 0 - NO-SALE OPEN CASH DRAWER ALLOWED
+                               \ BIT 1 - NO-SALE TENDER REMOVAL ALLOWED
+                               \ BIT 2 - NO-SALE TILL EXCHANGE ALLOWED
+                               \ BIT 3 - NO SALE TENDER VERIFY ALLOWED
+                               \ BIT 4 - NO-SALE TILL REPORT ALLOWED
+                               \ BIT 5 - REFUNDS ALLOWED
+                               \ BIT 6 - DISCOUNTS ALLOWED
+                               \ BIT 7 - MISC. ITEM PAYOUTS ALLOWED
+                               \ BIT 8 - IMMEDIATE PRICE CHANGES ALLOWED
+                               \ BIT 9 - DELAYED PRICE CHANGES ALLOWED
+                               \ BIT 10-13 RESERVED
+                               \ BIT14 - USER FUNCTION 1 ALLOWED
+                               ! BIT15 - USER FUNCTION 2 ALLOWED
+
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING INDICATORS CONTROL PROCEDURES                   !!
+\ REM!! WHICH CAN BE RUN AT THE CONTROLLER.                           !!
+\ REM!!***************************************************************!!
+
+INTEGER*1 GLOBAL               \
+                               \ MAIN MENU
+          OA.INDICAT2,         \ BIT 0 - ACCOUNTING SUPPORT
+                               \ BIT 1 - REPORTS
+                               \ BIT 2 - DELAYED MAINTENANCE
+                               \ BIT 3 - DATA MAINTENANCE
+                               \ BIT 4 - SHELF LABEL PRINTING
+                               \ BIT 5 - PERSONALIZATION
+                               \ BIT 6 - TERMINAL MONITER
+                               \ BIT 7 - USER PROCEDURE
+                               \
+                               \ ACCOUNTING
+          OA.INDICAT3,         \ BIT 0 - LOANS
+                               \ BIT 1 - PICKUPS
+                               \ BIT 2 - TENDER COUNT
+                               \ BIT 3 - TRANSFER TENDER
+                               \ BIT 4 - CARRY FORWARD OFFICE TENDER
+                               \ BIT 5 - MISCELLANEOUS TRANSACTIONS
+                               \ BIT 6 - CLOSE REPORTING TOTALS
+                               \ BIT 7 - START/STOP EFT
+                               \
+                               \ REPORTS
+          OA.INDICAT4,         \ BIT 0 - AUTOMATIC REPORT PROCEDURE
+                               \ BIT 1 - CASH REPORT
+                               \ BIT 2 - OPERATOR SALES REPORT
+                               \ BIT 3 - RECAP REPORT
+                               \ BIT 4 - OPERATOR PERFORMANCE REPORT
+                               \ BIT 5 - OVER/SHORT REPORT
+                               \ BIT 6 - CASH DRAWER POSITION REPORT
+                               \ BIT 7 - TENDER LISTING REPORT
+                               \
+          OA.INDICAT5,         \ BIT 0 - DEPARTMENT ANALYSIS REPORT
+                               \ BIT 1 - ITEM MOVEMENT REPORT
+                               \ BIT 2 - MISC. TRANS. RECAP REPORT
+                               \ BIT 3 - TERMINAL PRODUCTIVITY REPORT
+                               \ BIT 4 - OPERATOR LISTING REPORT
+                               \ BIT 5 - SYSTEM STATUS REPORT
+                               \ BIT 6 - PRINT FILED REPORTS
+                               \ BIT 7 - USER REPORTS
+                               \
+          OA.INDICAT6,         \ BIT 0 - MANAGER'S AUDIT REPORT
+                               \ BIT 1 - XLOG REPORT            !IR89058
+                               \ BIT 2 - TLOG REPORT            !IR89061
+                               \ BIT 3 - 7 RESERVED
+                               \
+          OA.INDICAT7,         \ BIT 0 - USER REPORT 1
+                               \ BIT 1 - USER REPORT 2
+                               \ BIT 2 - USER REPORT 3
+                               \ BIT 3 - USER REPORT 4
+                               \ BIT 4 - USER REPORT 5
+                               \ BIT 5 - USER REPORT 6
+                               \ BIT 6 - USER REPORT 7
+                               \ BIT 7 - USER REPORT 8
+                               \
+                               \ DELAYED MAINTENANCE
+          OA.INDICAT8,         \ BIT 0 - INITIATE OPERATOR MAINTENANCE
+                               \ BIT 1 - DISPLAY MAINTENANCE IN PROGRESS
+                               \ BIT 2 - DISPLAY ERROR LOG
+                               \ BIT 3 - PRINT/DISPLAY MANAGER'S MESSAGES
+                               \ BIT 4 - START IMMEDIATE MAINTENANCE
+                               \ BIT 5 - CREATE A MAINTENANCE BATCH
+                               \ BIT 6 - DISPLAY/CHANGE MAINTENANCE DATA
+                               \ BIT 7 - ERASE ERROR LOG
+          OA.INDICAT9,         \ BIT 0 - SET PRICE REQUIRED FLAG
+                               \ BIT 1 - DISPLAY HOST MESSAGES
+                               \ BIT 2 - ERASE A MAINTENANCE BATCH
+                               \ BIT 3 - MODIFY A MAINTENANCE BATCH
+                               \ BIT 4 - DISPLAY OR PRINT SOURCE DATA
+                               \ BIT 5 - MODIFY SOURCE DATA
+                               \ BIT 6 - ERASE OR ADD SOURCE DATA
+                               \ BIT 7 - RESERVED
+                               \
+                               \ DATA MAINTENANCE
+          OA.INDICAT10,        \ BIT 0 - DISPLAY/PRINT
+                               \ BIT 1 - ADD/CHANGE
+                               \ BIT 2 - DELETE
+                               \ BIT 3 - RESERVED
+                               \ TENDER VERIFICATION DATA
+                               \ BIT 4 - DISPLAY/PRINT
+                               \ BIT 5 - ADD/CHANGE
+                               \ BIT 6 - DELETE
+                               \ BIT 7 - CHANGE ITEM PRICE
+                               \
+                               \ OPERATOR AUTHORIZATION DATA
+          OA.INDICAT11,        \ BIT 0 - DISPLAY/PRINT
+                               \ BIT 1 - ADD/CHANGE
+                               \ BIT 2 - DELETE
+                               \ BIT 3 - OPERATOR PASSWORD ENCRYPTION FLAG
+                               \ ITEM MOVEMENT LISTS
+                               \ BIT 4 - DISPLAY/PRINT
+                               \ BIT 5 - ADD/CHANGE
+                               \ BIT 6 - DELETE
+                               \ BIT 7 - RESET MOVEMENT
+                               \
+                               \ OPTIONS AUTHORIZATION LISTS
+          OA.INDICAT12,        \ BIT 0 - DISPLAY/PRINT
+                               \ BIT 1 - ADD/CHANGE
+                               \ BIT 2 - DELETE
+                               \ BIT 3 - RESERVED
+                               \ MANAGER'S MESSAGES
+                               \ BIT 4 - DISPLAY/PRINT
+                               \ BIT 5 - ADD/CHANGE
+                               \ BIT 6 - DELETE
+                               \ BIT 7 - RESERVED
+                               \
+                               \ SHELF LABEL PRINT
+          OA.INDICAT13,        \ BIT 0 - PRINT SHELF LABELS
+                               \ BIT 1 - CREATE LABELS FROM PRICE CHANGES
+                               \ BIT 2 - ENTER SHELF LABEL DATA
+                               \ BIT 3 - RESERVED
+                               \ BIT 4 - RESERVED
+                               \ BIT 5 - RESERVED
+                               \ BIT 6 - RESERVED
+                               \ BIT 7 - ERASE SHELF LABELS
+                               \
+                               \ PERSONALIZATION
+          OA.INDICAT14,        \ BIT 0 - PERSONALIZE TERMINAL OPTIONS
+                               \ BIT 1 - PERSONALIZE STORE OPTIONS
+                               \ BIT 2 - PERSONALIZE TAX TABLES
+                               \ BIT 3 - PERSONALIZE DESCRIPTORS
+                               \ BIT 4 - PERSONALIZE USER PROCEDURES
+                               \ BIT 5 - RESERVED
+                               \ BIT 6 - RESERVED
+                               \ BIT 7 - RESERVED
+                               \
+                               \ USER PROCEDURES
+          OA.INDICAT15,        \ BIT 0 - USER PROCEDURE 1
+                               \ BIT 1 - USER PROCEDURE 2
+                               \ BIT 2 - USER PROCEDURE 3
+                               \ BIT 3 - USER PROCEDURE 4
+                               \ BIT 4 - USER PROCEDURE 5
+                               \ BIT 5 - USER PROCEDURE 6
+                               \ BIT 6 - USER PROCEDURE 7
+                               \ BIT 7 - USER PROCEDURE 8
+                               \
+                               \ Additional AUTH FLAGS
+          OA.INDICAT16,        \ BIT 0 - MANAGER'S JOURNAL RPT
+                               \ BIT 1 - ELECTRONIC JOURNAL RPT
+                               \ BIT 2 - SEARCH PERSONALIZATION
+                               \ BIT 3 - JOURNAL PERSONALIZATION
+                               \ BIT 4 - EXP IRF PERSONALIZATION
+                               \ BIT 5 - EXP IRF REPORT
+                               \ BIT 6 - EXP IRF REQUEST BUILD
+                               \ BIT 7 - EXP IRF MANAGE FILES
+                               \
+          OA.INDICAT17         \ BIT 0 - USER PROCEDURE 1
+                               \ BIT 1 - USER PROCEDURE 2
+                               \ BIT 2 - USER PROCEDURE 3
+                               \ BIT 3 - USER PROCEDURE 4
+                               \ BIT 4 - USER PROCEDURE 5
+                               \ BIT 5 - USER PROCEDURE 6
+                               \ BIT 6 - USER PROCEDURE 7
+                               ! BIT 7 - USER PROCEDURE 8
+
+INTEGER*2 OA.RESERVED          ! RESERVED
+
+STRING    GLOBAL               \
+          OA.OPERNAME$,        \ OPERATOR NAME                  ASC 20
+          OA.USEREXIT$         ! RESERVED FOR USER              ASC 20
+
+\ REM!!***************************************************************!!
+\ REM!! RECORDS ARE READ USING THE INCLUDE:                           !!
+\ REM!!                                                               !!
+\ REM!!  EAMAURD1 J86  READ OPERATOR AUTHORIZATION RECORD             !!
+\ REM!!***************************************************************!!
+

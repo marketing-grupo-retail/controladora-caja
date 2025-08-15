@@ -1,0 +1,17 @@
+!************************************************** 
+!Empresa       : Comfandi                         *
+!Programa      : FEMTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Rutinas Fondo de Empleados       *
+!**************************************************
+
+IF (TS.IO.MOTORKEY = Com.Fde.Consulta% ) THEN BEGIN                            ! Presiona Tecla de consulta
+	     ! WRITE #34; "FONDECOM  "
+       CALL FDE.CONSULTA                                                         ! Consulta de saldo
+  	   DIM TS.IO.KEYS(10)														                             ! 
+       DIM TS.IO.DATA$(10)                                                       !
+       TS.IO.MOTORKEY = 00														                           !
+ENDIF
+
+

@@ -1,0 +1,29 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSU31.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+!!***** CODE FOR COUPON LOGGING
+!!*******************************************************************
+!!** INSERT EXTRA COUPON LOGGING DATA INTO DATA ENTRY STRING       **
+!!*******************************************************************
+ IF TS.IO.DATA$(10) = "==" THEN BEGIN      !  COUPON MARKER
+   SL.HD.INDICAT1 = SL.HD.INDICAT1 OR 00000010H ! COUPON LOGGING FLAG
+   TS.IO.DATA$(10) = ""                    ! CLEAR MARKER
+   TS.IO.DATA$(6) = ""                     ! CLEAR FIELD 5
+   TS.IO.DATA$(7) = ""                     ! CLEAR FIELD 6
+   TS.IO.DATA$(3) = "=="                   ! UNIQUE DATA MARKER
+   TS.IO.DATA$(4) = STR$(EMSS.LOG.FLAGS)   ! LOG FLAGS
+   TS.IO.DATA$(5) = EMSS.CAMPAIGN.NUM$     !  AND CAMPAIGN NUMBER
+   IF LEFT$(SL.IT.ITEMCODE$,1) = "=" OR    \ MFR IN UPC FROM IR
+      TS.IO.DATA$(2) = "" THEN             \ LOG IS FOR PRIOR ITEM
+     TS.IO.DATA$(6) = EMSS.IR.MFR.NUM$     ! SAVE USED MFR NUMBER
+   TS.IO.DATA$(2) = ""                     ! CLEAR FIELD 1
+   IF EMSS.PROMO.COUP THEN                 \ PROMO VALIDATION
+     TS.IO.DATA$(7) = STR$(IR.USEREXIT1)   ! SAVE USED PROMO NUMBER
+ ENDIF
+ 

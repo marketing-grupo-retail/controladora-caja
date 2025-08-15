@@ -1,0 +1,167 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+!To.USEREXIT(20) = 0 
+!To.USEREXIT(60) = 0 
+
+If UE.EPSS.ON AND UE.EPSS.HEAD Then Begin
+  UE.EPSS.FORMULA$ = UE.EPSS.DAT(2)
+  If PRT4610.ENABLE = 0 Then X.Ajuste% = 38 Else X.Ajuste% = 40
+
+!-- Lineas adicionadas para ajustar NIT  
+  If Asc.Cnv.Epcop$ <> "00" Then Begin 
+     Asc.Cnv.Epcop$ = Right$("0000"+Asc.Cnv.Epcop$,4)
+     TS.ER.RETURN = -1
+     Open "R::CNVPGCTA" KEYED   RECL 56 AS 94
+     If TS.ER.RETURN = -1 Then Begin 										! Apertura Sin errores
+        Read Form "C2 C40 C12 C2";#94 KEY Pack$(Asc.Cnv.Epcop$);	\
+	        TS.TEMP1$, TS.TEMP2$, TS.TEMP3$, TS.TEMP4$
+        If TS.ER.RETURN <> -1 Then Begin 
+          TS.TEMP2$ = "NO DEFINIDO"
+          TS.TEMP3$ = "0000000000000000"
+          TS.TEMP4$ = Pack$("0000")
+        EndIf 
+        Close 94
+     EndIf Else Begin 
+        TS.TEMP2$ = "NO DEFINIDO --"
+        TS.TEMP3$ = "0000000000000000"
+        TS.TEMP4$ = Pack$("0000")
+     EndIf
+     TS.TEMP3$ = Right$("000000000000"+Str$(Val(TS.TEMP3$)),12)    ! Ajusta numero de nit
+     TS.TEMP4$ = Right$("000"+Str$(Val(Unpack$(TS.TEMP4$))),3)     ! Ajusta numero de la sucursal
+     X.Tmp$    = TS.TEMP3$ + TS.TEMP4$                    ! Arma nit para credito
+     Asc.Cnv.NumNit$ = X.Tmp$															! Asigna dato para almacenar
+     X.Str$ = Left$("Nit Entidad    : "+X.Tmp$+String$(X.Ajuste%," "),X.Ajuste%)
+     Call U.Imprime(X.Str$,6100H)     
+     X.Str$ = Left$("Nombre Entidad : "+TS.TEMP2$+String$(X.Ajuste%," "),X.Ajuste%)
+     Call U.Imprime(X.Str$,6100H)          
+  EndIf
+  
+!  Call U.Imprime("--   IDENTIFICACION DEL CONVENIO    --",6100H)
+
+
+  X.Str$ = Str$(Val(unpack$(UE.EPS.CNIT$)))
+  X.Str$ = Left$("Numero NIT     : "+X.Str$+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+
+  X.Str$ = Left$("Razon Social   : "+Left$(UE.EPS.NCONVE$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+
+  X.Str$ = Left$("Codigo del Plan: "+UNPACK$(UE.EPS.CCOD$)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  X.Str$ = Left$("Nombre del Plan: "+Left$(UE.EPS.CNOMB$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+
+!  X.Str$ = Left$("Beneficiario   : "+Left$(UE.EPS.BNOMB$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+ 
+  X.Str$ = Left$("Solicitud Nro  : "+Right$(UE.EPSS.FORMULA$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+
+!-- Linea ajustada 24 Jul 2008
+  If UE.EPS.CAPITACION$ = "0" Then Begin   ! Si no es capitacion 
+     X.Str$ = Left$("Documento  Nro.: "+Right$(UNPACK$(UE.EPS.BCOD$),14)+String$(X.Ajuste%," "),X.Ajuste%)
+     Call U.Imprime(X.Str$,4100H)
+  EndIf 
+
+  If UE.EPS.ValBEN$ = "1" Then Begin       ! Si valida beneficiario
+     X.Str$ = Left$("Beneficiario   : "+Left$(UE.EPS.BNOMB$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+     Call U.Imprime(X.Str$,4100H)
+  EndIf 
+  
+!-- Fin lineas ajustadas
+  
+!  X.Str$ = Left$("Codigo Medico  : "+Right$(UE.EPSS.MEDICO$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+
+  X.Str$ = Left$("Codigo I.P.S   : "+Right$(UE.EPSS.IPS$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  X.Str$ = Left$("Categoria      : "+UE.EPS.BESTRATO$+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6200H)
+  
+ ! Call U.Imprime(String$(X.Ajuste%,"*"),6100H)  
+ 
+ 
+ !--- Lineas adicionadas para el manejo de cuota moderadora
+ !--- cobrandola como un articulo Miscelaneo para el manejo 
+ !--- de Capitacion.   OVS 23 Enero 2006
+
+Ue.Cnv.Fiscal% = 0
+Ue.Cnv.AplicaCopago% = 0 
+If Val(UE.EPS.CAPITACION$) = 1 Then Begin  
+
+!--- Lineas adicionadas para el control de devoluciones
+
+   TO.NEGAMT(1) = 9999999         ! Control devoluciones
+   TO.NEGAMT(2) = 9999999
+   TO.NEGCNT(1) = 999
+   TO.NEGCNT(2) = 999
+   TO.PRCOVRID  = 0               ! Ctrl Price Override
+   
+   Ue.Cnv.Fiscal% = -1  
+   TS.TEMP1I4 = Val(Unpack$(UE.EPS.CMP$(Val(UE.EPS.BESTRATO$)))) ! Toma el Vlr de la cuota moderadora
+   TS.TEMP2I4 = 0
+   Asc.Cnv.CuotaMod$ = Str$(TS.TEMP1I4)
+
+!-- Add OVS 19Abr2007   
+   If Asc.Cnv.EpCop$ <> "00" Then Begin        ! Si convenio asume parte de la cuota moderadora
+    If Val(Asc.Cnv.PtgCuota$) <> 0 Then Begin  ! Si asume algun valor 
+       TS.TEMP2I4 = (TS.TEMP1I4 / 100) * Val(Asc.Cnv.PtgCuota$)
+    EndIf    
+   EndIf 
+   Asc.Cnv.PagoParcial$ = Str$(TS.TEMP2I4)
+   
+   !TS.TEMP1I4 = TS.TEMP1I4 - TS.TEMP2I4        ! Retira el valor que asume el convenio
+   X.Tipo$ = Pack$("00")       								 ! Venta Normal
+      
+  If UE.EPS.DEVO% <> -1 Then Begin      
+   SL.END = SL.END + 1 
+   SL.STR$(SL.END) = PACK$("01")+		  \! En string reservado
+ 			":"+PACK$(Ue.Cnv.ItmCuota$)+	  \! Articulo Miscelaneo 
+ 			":"+PACK$(Str$(TS.TEMP1I4))+	  \! Valor Cuota
+ 			":"+PACK$(Ue.Cnv.Miscelaneo$)+	\! Codigo del Departamento
+ 			":"+PACK$("000000")+	          \! Family Number
+ 			":"+PACK$("04")   +             \! Indicat 1
+ 			":"+X.tipo$       +             \! Indicat 2
+ 			":"+pack$("00")                  ! Articulo Miscelaneo
+ 			
+    TS.BALDUE(0)     = TS.BALDUE(0)     + TS.TEMP1I4   ! Ajusto totales de la 
+    TS.TOTALS(0,0,0) = TS.TOTALS(0,0,0) + TS.TEMP1I4   ! Aplicacion  			
+
+   EndIf Else Begin
+      Asc.Cnv.PagoParcial$ = Str$( Val(Asc.Cnv.PagoParcial$) * -1)
+   EndIf 
+
+!   If UE.EPS.DEVO% = -1 Then Begin
+!      TS.GROSSNEG = TS.TEMP1I4
+! 	    TS.TEMP1I4 = TS.TEMP1I4 * -1
+!      TS.BAL.TAKEN = -1
+!   EndIf
+
+   
+   If TS.TEMP1I4 <> 0 Then Begin
+      Ue.Cnv.Fiscal% = 0   
+      Ue.Cnv.AplicaCopago% = -1 
+   EndIf 
+   
+   If Val(UE.EPS.CAPITACION$) = 1 Then Begin 
+!     TS.TEMP1I4 = Val(Unpack$(UE.EPS.CMP$(Val(UE.EPS.BESTRATO$)))) ! Toma el Vlr de la cuota moderadora
+
+     Call FORMAT.AMOUNT(TS.TEMP1I4)
+     TS.TEMP1$ = Right$("                "+TS.TEMP1$,16)
+     Call U.Imprime("  CUOTA MODERADORA   "+TS.TEMP1$,6100H)   
+  EndIf 
+  
+EndIf 
+   
+   UE.EPSS.HEAD = 0
+EndIf
+
+!To.USEREXIT(20) = -1
+!To.USEREXIT(60) = -1

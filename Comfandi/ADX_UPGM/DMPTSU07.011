@@ -1,0 +1,55 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DMPTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Dialogo Medios de Pago           *
+!**************************************************
+! Modificaciones:
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"ERROR PARAMETROS","DIALOGO MEDIOS PAGO",1500,"L")		! Msg Alerta
+ Call Visores4690(1,"DIALOGO MEDIOS PAGO","NO OPERATIVO",1500,"L")				! Msg Alerta
+ Call U.Imprime("ERROR CARGA DIALOGO MEDIOS PAGO ",2100H)									! Rastro en SJ
+ Asc.Dmp.Line%      = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.DMP.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[DIALOGO PAGOS]" Then Begin			    								  ! Proyecto de Lealtad
+     Call U.Imprime("DIALOGO MEDIO PAGO OK.",2100H)										    ! Mensaje en SJ
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Dmp.Line%     = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+    EndIf
+  Wend
+  UE.DMP.FINAL:
+     CLOSE 94
+     TS.ER.RETURN = -1 
+     XI% = 0 
+     Open "R::ADX_IDT1:BFPARPAG.DAT" AS 94                                ! Apertura parametros medios de pago
+     IF TS.ER.RETURN = -1 THEN BEGIN                                      ! Si apertura OK
+        DIM DMedios$(40,4)                                                ! Vector de parametros
+        If End # 94 Then Cont.Pago             					                  ! Si es fin de archivo secuencial
+        Leer.Pago:																			                  ! Recorre archivo
+          READ #94;XDat1$, XDat2$, XDat3$, XDat4$, XDat5$                 ! Lectura registro
+          XI% = XI% + 1    										                            ! Contador Registros
+          DMedios$(XI%,0) = XDAT1$                                        ! Tipo Variedad
+          DMedios$(XI%,1) = XDAT2$                                        ! Id. Cliente
+          DMedios$(XI%,2) = XDAT3$                                        ! Codigo del Banco
+          DMedios$(XI%,3) = XDAT4$                                        ! Nro Autorizacion/Documento
+          DMedios$(XI%,4) = XDAT5$                                        ! Nro Telefono
+          GoTo Leer.Pago																	                !
+          Cont.Pago:																			                !
+            Close 94                               				                ! Cierre del archivo     
+            EXIT SUB                                                      ! Sale de la rutina
+     ENDIF ELSE BEGIN                                                     ! Error en la apertura
+       Call TSHIECET							  																			! Tono de Alerta       
+       CALL VISORES4690(1,"MOD.DIALOGO MEDIOS","DE PAGO CANCELADO",1200,"L")
+       Call U.Imprime("ERROR APERTURA DIALOGO MEDIOS PAGO ",2100H)	   		! Rastro en SJ
+       ASC.DMP.LINE% = 00                                                 ! Proyecto cancelado
+     ENDIF 
+Endif
+

@@ -1,0 +1,25 @@
+!
+! jguiu04.j86
+!
+!
+
+! javagui key stem validation
+! parms: keyStem     The key stem to interrogate
+!        validFlag   The valid flag
+!
+! Comments:  On entry, the validFlag is set to -1 if the passed
+!            key stem value matches a system defined java key.
+!            When the validFlag is set to zero, the key is not
+!            a valid system defined java key.
+!
+!            The user may use this user exit to facilitate supporting
+!            additional java keys.
+! User java key validation
+!
+!  INTEGER*2                               \
+!             keyStem,                     \ passed key stem
+!             validFlag                    ! validitiy flag
+
+! insert user code here
+!call traceNUO( "JGUIU04" )
+

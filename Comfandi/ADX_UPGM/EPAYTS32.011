@@ -1,0 +1,64 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS32.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+if (TS.IO.DATA$(3) = Right$(Asc.Pay.tpvr$,1)) AND                               \! 
+   (TS.IO.KEYS(7)  = VAL("9"+Left$(Asc.Pay.tpvr$,1)))  THEN BEGIN                !
+
+  If Asc.Pay.Cambio% = 4 Then Begin 
+    Asc.Pay.Trx% = 0 
+    TS.USER.RETURN = 99 
+  EndIf Else Begin 
+      If Asc.Pay.OptTrx$ = "12" Then Begin                                       ! Cobro subsidio no por compra
+
+!-- Lineas cometariadas OVS 22 Mzo 2007 por sugerencia de Fredy Guerrero
+!-- Se retiran comentarios lineas de impresion 25 mayo 2007 sugerencia Lilian Patricia Serrano
+
+         TO.USEREXIT(20) = 0 
+         TO.USEREXIT(60) = 0 
+         Call U.Imprime("CREDENCIAL NRO:"+Asc.Pay.NumNota$,6100H)                ! Imprime nro tarjeta en tiquete    
+         Call Format.Amount(Val(TS.IO.DATA$(7)))         
+         Call U.Imprime("VALOR SUBDIDIO :$"+TS.TEMP1$,6100H)                     ! Imprime nro tarjeta en tiquete
+         Asic.Detalle% = 0 
+         TS.TEMP1$ = Linea.Detalle(38)
+         Call U.Imprime(TS.TEMP1$,6100H)
+         
+         Call U.Imprime("",4500H)
+         Call U.Imprime("",4500H)
+         Call U.CORTACR 
+
+         TO.USEREXIT(20) = -1
+         TO.USEREXIT(60) = -1
+
+      EndIf Else Begin 
+	       Call U.Imprime("CREDENCIAL NRO:"+Asc.Pay.NumNota$,6100H)                  ! Imprime nro tarjeta en tiquete    
+      EndIf  
+			 Asc.Pay.IMPMSG% = -1 
+			 TS.TEMP6$ = Str$(Val(Asc.Pay.NumNota$))
+			 TS.TEMP6$ = RIGHT$("                  "+TS.TEMP6$,18)                     ! ajusta dato capturado
+			 TS.TEMP1$ =    Right$("0000"+TS.STORE$,4)         +                      \! Numero del almacen
+					Right$("000000"+Str$(SL.HD.TERMINAL),6)        + 	                    \! Numero de terminal
+					UnPack$(TS.OPER$)                              +                      \! Codigo del cajero
+					Right$("000000"+Str$(SL.HD.TRANSNUM+1),6)      + 	                    \! Numero de transaccion
+					HORA.MUNDIAL$                                  +                      \! Fecha y Hora de la operacion                      
+					TS.TEMP6$                                                              ! Numero de credencial
+
+			 If TS.IO.KEYS(1)  <> 70 Then Begin                                        ! Si no es anulacion 
+			   Call Busca.Pago.Registrado(Asc.Pay.NumNota$,TS.IO.DATA$(7),TS.TEMP1$)   ! Controla pagos recaudados
+			   TS.TEMP1$ = Asc.Pay.Vtabono$(Asc.Pay.NroBon%,3)                         ! Trama Original 
+			   TS.TEMP1$ = TS.TEMP1$ + ":"+Pack$(TS.IO.DATA$(7))                       ! Valor del bono                      
+			   TS.TEMP1$ = TS.TEMP1$ + ":"+Pack$(Asc.Pay.Tmp$)											   ! Add OVS 14 DIC 2005
+			   TS.TEMP1$ = TS.TEMP1$ + ":"+Asc.Pay.Trama$															 ! Add OVS 05 Sep 2006
+			   Call Grabacion.Cadena.Usuario("01082005",TS.TEMP1$)                     ! Graba String usuario
+			 EndIf
+			 TS.TEMP1$ = PACK$(Right$("00"+STR$(Gr.Epay.Ing%),2))                    ! Forma de ingreso de la credencial
+  		 Call Grabacion.Cadena.Usuario("20101124",TS.TEMP1$)                     ! Graba String usuario
+       Asc.Pay.Slend% = SL.END	+ 2																							 ! Total de strings
+       Asc.Pay.Trx% = 0 
+   EndIf 
+ENDIF 

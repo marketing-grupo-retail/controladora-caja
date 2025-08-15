@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC10 PUBLIC ! AT CHECKING FOR CROSSING A POINTS BOUNDARY
+ 
+! insert user exit code here
+ 
+ END FUNCTION

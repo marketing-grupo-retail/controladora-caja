@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC26 PUBLIC                                                        
+! TSUPEC26 - PEFORE PIPEWRITER                                                  
+END FUNCTION                                                                    
+                                                                                

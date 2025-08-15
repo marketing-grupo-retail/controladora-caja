@@ -1,0 +1,108 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+!********************************************************************
+!*     READ STORE OPTIONS RECORDS 2 AND 3 FROM STORE OPTIONS FILE   *
+!********************************************************************
+\/*          IR74368  6/15/87  999 DEPARTMENTS                      */
+\/*                            IRM DCL  6/15/87                     */
+\/*                                                                 */
+\/*      CHANGE DATE: 06/15/87                                      */
+\/*                                                                 */
+\/*       IR49855   Fix Completion IR49130 NUM.ELTS was calculated  */
+\/*                 incorrectly, causing an extra or missing page.  */
+\/*                 GGK IBM  01Nov2002                              */
+\/*                                                                 */
+\/*******************************************************************/
+
+!AIR74368    - Increase array size for 1000 depts, 200 Subtotals + 2 counts
+!      DIM SO.DEPTNUM(222)             ! dimension array for department numbers
+       DIM SO.DEPTNUM(1222)            ! dimension array for department numbers
+!EIR74368
+
+       SO.K = 1                        ! start at first field in array
+
+       FOR SO.I = 2 TO 3               ! for each options record to be read
+
+          READ #8,SO.I;                \ read entire option record
+               LINE SO.OPTION$         ! into string variable
+
+          SO.J = 1                     ! start at beginning of string
+          SO.L = 1                     ! beginning of current field
+
+          WHILE SO.J <> 0              ! while more fields to process
+
+            SO.J = MATCH(",",SO.OPTION$,SO.J)  ! locate end of current field
+
+            IF SO.J <> 0 THEN          \ while more fields to process
+               SO.DEPTNUM(SO.K) =      \ move data to array entry
+                  INT%(VAL(MID$(SO.OPTION$,SO.L,SO.J-SO.L)))  :\
+               SO.K = SO.K + 1        :\ bump to next entry in array
+               SO.L = SO.J + 1        :\ start position of next field
+               SO.J = SO.L             ! start position for next search
+
+          WEND
+
+       NEXT
+
+!AIR74368    - Save count further up array as they will be overwritten
+!      SO.DEPTNUM(1221) = SO.DEPTNUM(221)  ! recalculated below IR49855
+!      SO.DEPTNUM(1222) = SO.DEPTNUM(222)  ! recalculated below IR49855
+       SO.K = 221                      ! Overwite original place of counts
+       FOR SO.I = 39 TO 47             ! for each new options record to write
+
+          READ #8,SO.I;                \ read entire option record
+               LINE SO.OPTION$         ! into string variable
+
+          SO.J = 1                     ! start at beginning of string
+          SO.L = 1                     ! beginning of current field
+
+          WHILE SO.J <> 0              ! while more fields to process
+
+            SO.J = MATCH(",",SO.OPTION$,SO.J)  ! locate end of current field
+
+            IF SO.J <> 0 THEN          \ while more fields to process
+               SO.DEPTNUM(SO.K) =      \ move data to array entry
+                  INT%(VAL(MID$(SO.OPTION$,SO.L,SO.J-SO.L)))  :\
+               SO.K = SO.K + 1        :\ bump to next entry in array
+               SO.L = SO.J + 1        :\ start position of next field
+               SO.J = SO.L             ! start position for next search
+
+          WEND
+
+       NEXT
+
+!EIR74368
+!AIR49855 EAMSOPTS.DAT contains different values for the 1221 and 1222 numbers
+!         depending upon whether or not IR39143 is installed.  These numbers
+!         are contained as the last two numbers in EAMSOPTS.DAT record 3.
+!
+!         Pre-IR39143, (1221) is the number of departments plus the number of
+!         subtotals, and (1222) is the number of subtotals.
+!
+!         Post-IR39143, the meaning is changed *if* Department Subtotal
+!         Groupings has changed *and* if a Weekly Close has occurred.  The
+!         numbers at the end of record 3 in the file are then equal to the
+!         number of departments and the number of subtotals, respectively.
+!
+!         This change in meaning breaks the code in EAMRPD1C.BAS concerning the
+!         calculation of the maximum number of pages and the total number of
+!         SO.DEPTNUM lines that are scanned when constructing all pages.  To
+!         restore consistency, the block of code below recalculates the (1221)
+!         and (1222) values to always conform to the pre-IR39143 meanings.
+       SO.DEPTNUM(1221) = 0
+       SO.DEPTNUM(1222) = 0
+       FOR SO.I = 1 TO 1220            ! for each reported department and subtotal
+         IF (SO.DEPTNUM(SO.I) > 0) AND \ is this a department?
+            (SO.DEPTNUM(SO.I) < 1000) THEN BEGIN
+           SO.DEPTNUM(1221) = SO.DEPTNUM(1221) + 1 ! one more department
+         ENDIF \
+         ELSE IF (SO.DEPTNUM(SO.I) = 1000) THEN BEGIN ! is this a subtotal?
+           SO.DEPTNUM(1222) = SO.DEPTNUM(1222) + 1 ! one more subtotal
+         ENDIF
+       NEXT SO.I                       ! all reported departments
+! Now add the number of subtotals to the number of departments, so that these
+! numbers are consistent with the behavior of the pre-IR39143 code.
+       SO.DEPTNUM(1221) = SO.DEPTNUM(1221) + SO.DEPTNUM(1222)
+!EIR49855
+
+

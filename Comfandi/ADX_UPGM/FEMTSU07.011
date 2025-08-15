@@ -1,0 +1,40 @@
+!************************************************** 
+!Empresa       : Comfandi                         *
+!Programa      : FEMTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Rutinas Fondo de Empleados       *
+!**************************************************
+
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Fondo Empleados    ",1500,"L")		! Msg Alerta
+ Call Visores4690(1,"Mod. Fondo Empleado","No Operativo",1500,"L")				! Msg Alerta
+ Call U.Imprime("Error Carga Fondo Empleados     ",2100H)									! Rastro en SJ
+ Com.Fde.Line%      = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.FDE.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[FONDO EMPLEADOS]" Then Begin		     									! Proyecto de Fondo de Empleados
+     Call U.Imprime("FONDO EMPLEADOS OK.",2100H)					     						! Mensaje en SJ
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Com.Fde.Line%      = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Com.Fde.Sesion%    = Val(Mid$(TS.TEMP1$,30,2))            				    ! Numero sesion temporal
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Com.Fde.Consulta%  = Val(Mid$(TS.TEMP1$,30,3))            				    ! Tecla sesion de consulta saldo
+     GoTo Ue.Fde.Final																									  ! Sale del ciclo de carga
+   Endif
+ Wend
+ UE.Fde.Final:
+   Close 94																																! Cierra archivo
+   If Com.Fde.Line% = -1 Then                                                \! Proyecto Activo
+      CALL U.IMPRIME("MODULO FONDO EMPLEADO  ON 08/Nov/2013",2100H) Else     \! Msg Proyecto Cargado
+      CALL U.IMPRIME("MODULO FONDO EMPLEADO OFF 08/Nov/2013",2100H)           ! Msg Proyecto Cargado
+
+
+Endif

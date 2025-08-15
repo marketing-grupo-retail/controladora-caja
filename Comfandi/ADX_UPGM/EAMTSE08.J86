@@ -1,0 +1,100 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU08.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+! THIS CODE MUST BE IMPLEMENTED AT THE TOP OF THE USER EXITS FOR THESE
+! EXITS TO PROPERLY IMPACT LINKED COUPONS
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+!
+\/* CHANGE ACTIVITY                                                   !
+\/*                                                                   !
+\/* IR29159 - Fix completion for IR28917 to correct problem of not    !
+\/*           bringing in rain check targeted coupon when no customer !
+\/*           number has been entered.                                !
+\/*           JEO MGVA 4/25/95                                        !
+\/*                                                                   !
+\/* IR29684 - Fix completion for IR29159 to correct problem when      !
+\/*           coupons are kept in memory (EM option 4.6).             !
+\/*           JEO MGVA 6/13/95                                        !
+\/*                                                                   !
+\/* IR32428 - PEIR29684 Coupon buffer was not being used when it      !
+\/*           was needed.                                             !
+\/*           CRM MGVA 6/11/96                                        !
+\/******END-OF-SPECIFICATIONS*****************************************!
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** READ OR SAVE ITEM DATA FOR LINKED PREFERRED CUSTOMER COUPONS  **
+!!*******************************************************************
+IF TS.PROCEDURE < 1 THEN BEGIN                  ! NOT IN PRICE CHANGE
+ EMSS.ALIAS = 0                                 ! Assume no alias
+ A$ = RIGHT$(EMSS.ZERO$ +ITEMCODE.UNPACKED$,12) ! pad to 12 digits
+ IF A$ NE UNPACK$(IR.ITEMCODE$) THEN            \ Alias read
+   EMSS.ALIAS = -1                              ! Flag alias record
+
+ IF EMSS.IR.EXLTH > 0 THEN BEGIN                ! EXCESS DESCRIPTOR
+   IF EMSS.SAVE.ITEMCODE$ NE IR.ITEMCODE$ OR    \ NEW LOOKUP DONE
+     SL.IT.INDICAT3B = 3 THEN BEGIN             ! LINKED ITEM RECORD
+    EMSS.IR.EXTRA$ = RIGHT$(IR.ITEMNAME$,EMSS.IR.EXLTH) ! SAVE EXCESS
+    CALL SUBSTR(IR.ITEMNAME$,OP.IR.DESC.LTH,    \ OVERLAY EXCESS
+                    BLANK$,0,EMSS.IR.EXLTH)     !  WITH BLANKS
+   ENDIF                                        ! NEW LOOKUP DONE
+ ENDIF                                          ! EXCESS DESCRIPTOR
+
+ IF OP.PC.INMEM > 0 THEN BEGIN                  ! PC coupons in memory
+!AIR29159 - don't read from memory until finished with all RC TRG Cpns
+! IF SL.IT.INDICAT3B = 3 AND                    \ LINKED TO
+!    EMSS.PC.COUP > 0 OR                        \ PREFERRED COUPON
+!    EMSS.COUP.REPLAY THEN BEGIN                ! REPLAY
+!AIR29684
+! IF (EMSS.PC.COUP > 0) AND                     \ PREFERRED COUPON
+!    (SL.IT.INDICAT3B = 3 OR                    \ LINKED TO
+!    (EMSS.COUP.REPLAY AND                      \ REPLAY
+!    (TS.TRX.STATUS = 1 OR                      \ AT TOTAL
+!    NOT (EMSS.NP.NEEDED)))) THEN BEGIN         ! NO SALES SINCE TOTAL
+!AIR32428 PEIR29684 Just insure that we only do this for active replays
+!  IF NOT (SL.IT.INDICAT3B = 2) THEN BEGIN       ! Not dept keyed
+!  IF EMSS.PC.COUP > 0 OR                        \ PREFERRED COUPON
+!     (EMSS.COUP.REPLAY AND                      \ REPLAY
+!     (TS.TRX.STATUS = 1 OR                      \ AT TOTAL
+!     NOT (EMSS.NP.NEEDED))) THEN BEGIN          ! NO SALES SINCE TOTAL
+!EIR29684
+!EIR29159
+  IF SL.IT.INDICAT3B = 3 AND                    \ LINKED TO
+     EMSS.PC.COUP > 0 OR                        \ PREFERRED COUPON
+     EMSS.COUP.REPLAY = 51 THEN BEGIN           ! ACTIVE REPLAY
+!EIR32428
+    IF LEFT$(TS.TEMP2$,6) NE ITEMCODE$ THEN BEGIN ! No read yet
+      CALL READ.PC.UPC                          ! Read from memory
+      EMSS.SAVE.ITEMCODE$ = "??"                ! Assure lookup processed
+      IF LEFT$(TS.TEMP2$,6) NE ITEMCODE$ THEN   \ Read failed
+        FAST.EXIT = -1 : EXIT FUNCTION          ! Ignore coupon
+    ENDIF ELSE BEGIN                            ! Good read already
+     IF NOT EMSS.ALIAS THEN BEGIN               ! Not alias record
+      IF (IR.INDICAT1A AND 20H) NE 0 OR         \ Points item
+         IR.ITEMTYPE > 5 THEN                   \ Coupon item
+        CALL SAVE.PC.UPC                        ! Save I.R. in memory
+     ENDIF                                      ! Not alias record
+    ENDIF                                       ! Good read already
+  ENDIF                                         ! PC COUPON
+! ENDIF                                         ! IR29684 IR32428
+ ENDIF                                          ! PC coupons in memory
+ENDIF                                           ! NOT IN PRICE CHANGE
+
+%INCLUDE EAMTSC08.J86      ! COUPON ENHANCEMENT CODE
+
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+! CODE FOR PRPQ 5799-DCB (COUPON ENHANCEMENTS) MUST PRECEDE THIS CODE
+! IF THE PRPQ CODE IS IMPLEMENTED
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+
+CALL TSU08.FB
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

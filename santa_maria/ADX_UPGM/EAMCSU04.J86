@@ -1,0 +1,9 @@
+!----------------------------------------------------------
+! Antes de escribir un registro al archivo de contabilidad
+!----------------------------------------------------------
+!User exit called before writing accounting record
+SUB CSUPEC04(ACCTREC$) PUBLIC
+   STRING ACCTREC$
+
+
+END SUB

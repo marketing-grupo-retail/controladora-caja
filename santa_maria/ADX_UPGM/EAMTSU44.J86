@@ -1,0 +1,8 @@
+!At Discount Computation
+!En el calculo del descuento
+FUNCTION TSUPEC44 PUBLIC
+
+!call traceNUO( "UE44 TOTALS=[" + str$(TS.TOTALS(0,0,0)) + "] BALDUE=[" + str$(TS.BALDUE(0)) + \
+!   "] DISC=[" + str$(TS.DISC.SAVE(0,0)) + "] DI=[" + str$(SL.DI.AMTDISCO) + "]" )
+
+END FUNCTION

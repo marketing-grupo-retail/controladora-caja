@@ -1,0 +1,7 @@
+ EAMACLPL = EAMACLPC,
+            EAMAC2TC,
+            EAMMMCFC [S],
+            EAMMCACC [S],
+            EAMCSASC [S],
+           ADXACRCL.L86 [s],
+           ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

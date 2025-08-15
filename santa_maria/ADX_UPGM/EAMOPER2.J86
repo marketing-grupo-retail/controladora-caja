@@ -1,0 +1,38 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\ REM!!***************************************************************!!
+\ REM!! The following defines the additional authorization fields for !!
+\ REM!! the ENH02 feature Operator Authoriztion file.                 !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL               \
+          USERFIELD6$,         \ User field 6
+          PWDEXPIR$,           \ Used for ENH02 password expiration feature
+          OA.RESERVED2$        ! 12 RESERVED BYTES
+
+INTEGER*1 GLOBAL               \
+          USERFLAG1,           \ BIT 0 - USER FLAG 1
+                               \ BIT 1 - USER FLAG 2
+                               \ BIT 2 - USER FLAG 3
+                               \ BIT 3 - USER FLAG 4
+                               \ BIT 4 - USER FLAG 5
+                               \ BIT 5 - USER FLAG 6
+                               \ BIT 6 - USER FLAG 7
+                               \ BIT 7 - USER FLAG 8
+                               \
+          USERFLAG2            \ BIT 0 - USER FLAG 9
+                               \ BIT 1 - USER FLAG 10
+                               \ BIT 2 - USER FLAG 11
+                               \ BIT 3 - USER FLAG 12
+                               \ BIT 4 - USER FLAG 13
+                               \ BIT 5 - USER FLAG 14
+                               \ BIT 6 - USER FLAG 15
+                               ! BIT 7 - USER FLAG 16
+
+
+INTEGER*4 GLOBAL               \
+          USERFIELD1,          \ User field 1
+          USERFIELD2,          \ User field 2
+          USERFIELD3,          \ User field 3
+          USERFIELD4,          \ User field 4
+          USERFIELD5           ! User field 5

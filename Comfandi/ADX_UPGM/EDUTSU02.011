@@ -1,0 +1,23 @@
+!************************************************** 
+
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+If  Asc.Edu.Impr% = -1 Then Begin         ! Si franqueo de documentos
+    CALL FRANQUEO.BONOS.EDUCANDO  				! Franquea bonos capturados
+EndIf
+
+ Asc.Edu.Impr%      = 0						  			                                   ! Init de variable control de franqueo
+ Asc.Edu.Lista$     = "" 																										 ! Lista de bonos a pagar
+ Asc.Edu.NotaNul$   = "" 																										 ! Lista de Bonos Anulado
+ Asc.Edu.VlrPago1$  = "0"																										 ! Valor del Bono
+ Asc.Edu.VlrPago2$  = "0"																										 ! Valor del Bono
+ Asc.Edu.IndPrice%  = 0																											 !
+ Asc.Edu.Devol%     = 0																											 !
+ Asc.Edu.VlrPago$   = "0"																										 !
+ Asc.Edu.NoRec$     = ""
+ 

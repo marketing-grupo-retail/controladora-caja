@@ -1,0 +1,77 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTS214.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+!IF TS.IO.MOTORKEY = 89 THEN BEGIN																! Tecla cliente capturada
+!   Gr.Lcl.Tmp1$ = Left$(Gr.Lcl.Msg$(1),20)									  ! Toma msg del sistema
+!   Gr.Lcl.Tmp2$ = Right$(Gr.Lcl.Msg$(1),20)                   !
+!   Gr.Lcl.Clte$ = Asic.Datos$(Gr.Lcl.Tmp1$,Gr.Lcl.Tmp2$)     ! Captura tarjeta del cliente
+!   Call Valida.Cliente.Fbact(Gr.Lcl.Clte$)                     ! Valida datos del cliente
+!   If Len(Gr.Lcl.Clte$) > 0 Then Begin                         ! Si clte OK capturado
+!      DIM TS.IO.KEYS(10)															          ! Limpio vectores
+!      DIM TS.IO.DATA$(10)															          ! de entrada     
+!      TS.IO.MOTORKEY  =  80
+!      TS.IO.KEYS(2)   =  80
+!      TS.IO.DATA$(2)  = "??" 
+!      TS.IO.KEYS(3)   =  80
+!      TS.IO.DATA$(3)  = Gr.Lcl.Clte$                            !
+!      CA.CUSTNUM$     = PACK$(RIGHT$("000000000000000000"+Gr.Lcl.Clte$,18))
+!      TS.IO.KEYS(4)   =  100
+!      TS.IO.DATA$(3)  = "0000"                               !      
+!      TS.IO.KEYS(5)   =  0 
+!      TS.IO.DATA$(5)  = "0058"                               !      
+!      TS.IO.KEYS(10)  =  63
+!      TS.IO.MOTORKEY  = 80
+!      TS.IO.DEVICE    = 3
+!      USER.FBACT.READ = -1
+!      CA.CUSTNUM$     = PACK$(RIGHT$("000000000000000000"+Gr.Lcl.Clte$,18))
+!      USER.FBACT.READ = -1
+      
+
+!   TS.GUIDANCE     =  0 
+!   DIM TS.IO.KEYS(10)															          ! Limpio vectores
+!   DIM TS.IO.DATA$(10)															          ! de entrada     
+!   TS.IO.KEYS(2)   =  80
+!   TS.IO.DATA$(2)  = "??" 
+!   TS.IO.KEYS(3)   =  0
+!   TS.IO.DATA$(3)  = Gr.Lcl.Clte$                            !
+!   TS.IO.KEYS(4)   =  100
+!   TS.IO.DATA$(4)  = "0000"                               !      
+!   TS.IO.KEYS(5)   =  0 
+!   TS.IO.DATA$(5)  = "0500"                               !      
+!   TS.IO.KEYS(10)  =  63
+!   TS.IO.MOTORKEY  = 80
+!   TS.IO.DEVICE    = 3
+   
+
+
+
+
+!   Endif Else Begin                                             ! Si dato erroneo
+!      TS.GUIDANCE = 1101
+!      TS.IO.MOTORKEY = 0
+!      DIM TS.IO.KEYS(10)															! Limpio vectores
+!      DIM TS.IO.DATA$(10)															! de entrada      
+!   Endif                                                        ! 
+!ENDIF 
+
+
+!If (USER.FBACT.READ) AND (Gr.Lcl.Ctrl% = -1) THEN BEGIN    		                        ! Si CLF capturado
+!  Gr.Lcl.Tmp1$ = Armar.Trama.Msg(Gr.Lcl.Appl$,"01",Unpack$(CA.CUSTNUM$),             \!
+!                                  "00",Gr.Lcl.Cadena$)                                 ! Armar trama MSG
+!  Gr.Lcl.Tmp2$ = Rutina.Java("appl.ApplManager","kernel", Gr.Lcl.Tmp1$)               ! Ejecuta Requerimiento
+!  Call Valida.Rta.Lealtad								! Valida la respuesta
+!Endif
+
+!IF TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN    				! Anular Transaccion
+!   Gr.Lcl.Ctrl%   = 0									! Cierra proceso
+!ENDIF
+

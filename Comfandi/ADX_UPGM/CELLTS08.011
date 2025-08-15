@@ -1,0 +1,186 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A.                                **
+!   **    User Exit  :  CELLTS08.011                                         **
+!   **    Inclu¡r en :  EAMTSU08.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD RETAIL                      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+TS.TEMP1I1 = 0
+TS.TEMP1I1 = ITEM.CELLSTAR
+
+IF UE.CELL.STAT% = 0 AND TS.TEMP1I1 = -1 THEN BEGIN								! Si proyecto desactivado
+																				! y venta de pin
+   TS.TEMP1I1 = 0																! Cancelo acceso
+   IR.INDICAT0 = IR.INDICAT0 OR 04H												! No permite venta
+ENDIF
+
+IF UE.CELL.CPR% = 0  AND TS.TEMP1I1 = -1 THEN BEGIN     						! Si cambio precio
+   IR.INDICAT0 = IR.INDICAT0 OR 40H		        								! No vende articulo
+   TS.TEMP1I1  = 0																! No valida datos pin
+   DIM TS.IO.KEYS(10)															! Dimenciona vectores
+   DIM TS.IO.DATA$(10)															! Control aplicacion
+   TS.IO.MOTORKEY = 0															! Retorna Borrar
+ENDIF
+
+IF UE.CELL.ANUL% = -1 AND TS.TOTALS(0,0,0) < 0 THEN BEGIN   ! Esta en una devolucion
+   TS.TEMP1I1 = 0			! Cancelo acceso
+   IR.INDICAT0 = IR.INDICAT0 OR 04H	! No permite venta
+   TS.GUIDANCE = 1117              	! Totalice la venta
+   TS.IO.MOTORKEY = 0			!
+ENDIF 
+
+IF (TS.TEMP1I1 = -1) THEN BEGIN ! Si venta de Pin
+  IF (TS.IO.KEYS(1) = 70 OR TS.IO.KEYS(8) = 67 ) AND (UE.CELL.SALE% = 2) THEN BEGIN	! ANULACIONES
+
+!	IF (UE.CELL.ITEM$ <> UNPACK$(IR.ITEMCODE$)) THEN \
+!		IR.DEPARTME$ = PACK$("0000"):EXIT SUB
+!	LOCATE #30;1,1,OFF                            ! Ubica Cursor
+!	WRITE FORM "2C20";#30;"ANULACION  SIN ", \
+!			      " PIN Y AUTORIZ."
+!	CALL TSHIECET
+!	WAIT;1500
+
+        IF UE.PLU.ALT$ = "" THEN  		       \! Si vendio con EAN
+           UE.CELL.ITEM$  = SL.IT.ITEMCODE$ ELSE       \! Asigno EAN
+           UE.CELL.ITEM$  = UE.PLU.ALT$	           	! Asigno alterno
+        UE.CELL.ITEM$ = RIGHT$("000000000000"+UE.CELL.ITEM$,12)
+
+        FOR I% = 1 TO UE.NRO.PINES% ! Hasta pines vendidos
+           IF VAL(UE.CELL.ITEM$) = VAL(UE.VTAPIN$(I%,0)) THEN \
+              TS.TEMP1I1 = 2
+        NEXT I%
+
+        IF TS.TEMP1I1 = 2 THEN TS.TEMP1I1 = -1 ELSE \
+         BEGIN
+  	   LOCATE #30;1,1,OFF                            ! Ubica Cursor
+	   WRITE FORM "2C20";#30;"ANULACION NO   ",\
+                                 "PERMITIDA .... "
+           CALL TSHIECET
+	         WAIT;2000
+           TS.TEMP1I1 = 0			! Cancelo acceso
+           IR.INDICAT0 = IR.INDICAT0 OR 04H	! No permite venta
+           DIM TS.IO.KEYS(10)			! Dimenciona vectores
+           DIM TS.IO.DATA$(10)			! Control aplicacion
+           TS.IO.MOTORKEY = 0			! Retorna Borrar
+           GOTO SIGA.CELL.8
+        ENDIF
+
+  ENDIF ELSE \
+   IF ((TS.IO.KEYS(1) = 70) OR TS.IO.KEYS(8) = 67)  \
+      AND (UE.CELL.SALE% = 0) AND (UE.CELL.ANUL% = 0) THEN BEGIN
+        IF TS.INTRX THEN BEGIN                  ! Esta en medio de una trx
+           DIM TS.IO.KEYS(10)			! Dimenciona vectores
+           DIM TS.IO.DATA$(10)			! Control aplicacion
+           TS.TEMP1I1 = 0			! Cancelo acceso
+           IR.INDICAT0 = IR.INDICAT0 OR 04H	! No permite venta
+           TS.GUIDANCE = 1094              	! Totalice la venta
+           TS.IO.MOTORKEY = 0
+           GOTO SIGA.CELL.8                    
+        ENDIF ELSE BEGIN
+  	  LOCATE #30;1,1,OFF                            ! Ubica Cursor
+	  WRITE FORM "2C20";#30;"ANULACION CON  ",\
+		                "NUMERO SERIAL ....  "
+	  UE.CELL.SALE% = 0
+	  CALL TSHIECET
+	  WAIT;2000
+	  UE.CELL.ON = 0
+	  
+	  IF UE.PLU.ALT$ = "" THEN 		                 \! Si vendio con EAN
+         UE.CELL.ITEM$  = SL.IT.ITEMCODE$ ELSE       \! Asigno EAN
+         UE.CELL.ITEM$  = UE.PLU.ALT$	 	          ! Asigno alterno
+         UE.CELL.ITEM$ = RIGHT$("000000000000"+UE.CELL.ITEM$,12)
+	  
+	  CALL DEVO.CELLSTAR
+	  IF UE.CELL.ERROR2% THEN \
+	 	 IR.DEPARTME$ = PACK$("0000"):EXIT SUB	\
+	  ELSE UE.CELL.ANUL% = -1
+        ENDIF 
+   ENDIF ELSE BEGIN
+      IF ((TS.IO.KEYS(1) <> 70) OR TS.IO.KEYS(8) <> 67) AND UE.CELL.CTRL% = 0 THEN BEGIN 
+          TS.ER.RETURN = 0
+          IF UE.PLU.ALT$ = "" THEN 		       \! Si vendio con EAN
+             UE.CELL.ITEM$  = SL.IT.ITEMCODE$ ELSE       \! Asigno EAN
+             UE.CELL.ITEM$  = UE.PLU.ALT$	 	        ! Asigno alterno
+          UE.CELL.ITEM$ = RIGHT$("000000000000"+UE.CELL.ITEM$,12)
+		  UE.CELL.KEY$ = PACK$(UE.CELL.ITEM$+"0000")
+		  UE.CELL.ERROR% = 0
+		  UE.CELL.MARK$ = "0":UE.CELL.CONT$ = "00":UE.CELL.FIN$ = "00"
+          IF TS.IO.DATA$(6) = "" THEN UE.CELL.TMP% = 1 ELSE \	! Qty digitada
+             UE.CELL.TMP% = VAL(TS.IO.DATA$(6))
+          TS.ER.RETURN = -1
+		  OPEN "R::CELLSTAR" KEYED RECL 55 AS UE.PIN.SES1%						! Apertura de archivo de pines
+          IF TS.ER.RETURN = -1 THEN BEGIN
+		     READ FORM "C8 C2 C2 2C3 C2 C35";#UE.PIN.SES1% KEY UE.CELL.KEY$;   \
+		     UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$,           \
+             UE.CELL.ALM$, UE.CELL.QTY$, F$
+			 IF TS.ER.RETURN <> -1 THEN BEGIN
+			    CLOSE UE.PIN.SES1%
+			    GOTO CONTINUA.PROCESO.PIN			 
+			 ENDIF
+			 CLOSE UE.PIN.SES1%
+			 IF VAL(UE.CELL.ALM$) NE VAL(UE.CELL.ALMACEN$) THEN BEGIN 			!Cambio archivo en caliente
+			    UE.CELL.FIN$ = "0"												!
+                UE.PROYECTO(UE.PIN.CELL%) = 0		          					! Desactivo proyecto
+				LOCATE #30;1,1,OFF                          					! Ubica Cursor
+                WRITE FORM "2C20";#30; "PINES NO VALIDOS    ",                 \! Msg de alerta
+                                       "PARA EL ALMACEN ...."     				!
+                CALL TSHIECET					  								! Tono de alerta
+                WAIT ; 1200                                       				! time espera
+                WRITE FORM "2C20";#30;"PROYECTO PIN VIRTUAL",       		   \! Msg de alerta
+                                      "    DESACTIVADO     "     				!
+                CALL TSHIECET					  								! Tono de alerta
+                WAIT ; 1700                                       				! time espera
+                UE.CELL.STAT% = 0				  								! No vta articulos
+     		    IR.INDICAT0 = IR.INDICAT0 OR 04H
+			 ENDIF
+		  ENDIF ELSE UE.CELL.FIN$ = "0"
+          CONTINUA.PROCESO.PIN:		  
+          IF TS.ER.RETURN <> -1 THEN UE.CELL.CONT$ = UE.CELL.FIN$
+          IF (VAL(UNPACK$(UE.CELL.QTY$))) < UE.CELL.TMP% THEN BEGIN 
+  		     UE.CELL.CONT$ = UE.CELL.FIN$
+          ENDIF
+!          IF (VAL(UNPACK$(UE.CELL.QTY$))) = 0 THEN UE.CELL.CONT$ = UE.CELL.FIN$ 
+!		  IF UE.CELL.CONT$ = UE.CELL.FIN$ THEN BEGIN
+
+          IF (VAL(UNPACK$(UE.CELL.QTY$))) <= 0 THEN BEGIN
+			LOCATE #30;1,1,OFF                            						! Ubica Cursor
+			WRITE FORM "2C20";#30;"NO HAY TARJETAS",\
+  	                              " DISPONIBLES..."
+			UE.CELL.ON   = 0
+            UE.CELL.TMP% = 0
+			CALL TSHIECET
+			WAIT;2000
+  		    IR.INDICAT0 = IR.INDICAT0 OR 04H
+		ENDIF
+!	ENDIF				
+     ENDIF
+   ENDIF
+
+!--- Lineas Comentariadas el 17 sept. 2001 OVS
+!--- Para permitir la venta de mas de un pin
+
+!   IF (UE.CELL.SALE% = -1) THEN	\
+!   BEGIN
+!	IR.INDICAT0 = IR.INDICAT0 OR 04H
+!   ENDIF
+
+ENDIF
+
+GOTO SIGA.CELL.8
+
+!NO.CELL.8:
+!TVISOR$ = ERR:VISOR% = ERRF%
+!UE.CELL.ON = 0
+!UE.CELL.ERROR% = -1
+!RESUME
+
+SIGA.CELL.8:
+
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------

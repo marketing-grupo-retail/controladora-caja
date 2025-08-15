@@ -1,0 +1,17 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2002.011 
+!     Punto de Entrada   =  EAMTSU20.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para dejar 
+!     una linea en blanco despues de la linea de TOTAL       
+!-----------------------------------------------------------
+
+IF TS.LINETYPE = 7 AND                  \  ! Si es linea TOTAL de
+   TS.LINEDATA = 1 THEN                 \  ! la tira del Cliente
+        TS.FORMCR$ = "C38 A2"              ! Se imprime linea Adicional
+!-----------------------------------------------------------

@@ -1,0 +1,52 @@
+\/* TIME STAMP BLOCK *****************************************************
+\** END OF TIME STAMP BLOCK *********************************************/
+!*************************************************************************
+!* THE FOLLOWING DEFINES A READ OF THE OPERATOR AUTHORIZATION FILE WHICH *
+!* IS USED IN DMF AND IN THE ASSOCIATED TRANSLATE ROUTINES.              *
+!* THIS MODULE REPLACES MODULE EAMDMOPR.J86 IF THE RECORD LENGTH OF THE  *
+!* OPERATOR AUTHORIZATION FILE IS FOUND TO BE 168 BYTES DUE TO THE       *
+!* EXPANDED OPERATOR AUTHORIZATION FEATURE.                              *
+!* NOTE:  THE READ IS FROM SESSION NUMBER SESS.IN.                       *
+!*************************************************************************
+!
+
+        READ FORM "C5,C4,C1,2I2,18I1,C20,C20,2I1,5I4,C20,C42,C12";#SESS.IN; \
+                                OA.OPERATOR$,                       \
+                                OA.PASSWORD$,                       \
+                                OA.OPTIONSK$,                       \
+                                OA.INDICAT0,                        \ SMK
+                                OA.INDICAT1,                        \
+                                OA.INDICAT2,                        \ SMK
+                                OA.INDICAT3,                        \
+                                OA.INDICAT4,                        \
+                                OA.INDICAT5,                        \
+                                OA.INDICAT6,                        \
+                                OA.INDICAT7,                        \
+                                OA.INDICAT8,                        \
+                                OA.INDICAT9,                        \
+                                OA.INDICAT10,                       \
+                                OA.INDICAT11,                       \
+                                OA.INDICAT12,                       \
+                                OA.INDICAT13,                       \
+                                OA.INDICAT14,                       \
+                                OA.INDICAT15,                       \
+                                OA.INDICAT16,                       \
+                                OA.INDICAT17,                       \
+                                OA.INDICAT18,                       \
+                                OA.INDICAT19,                       \
+                                OA.OPERNAME$,                       \
+                                OA.USEREXIT$,                       \
+                                USERFLAG1,                          \
+                                USERFLAG2,                          \
+                                USERFIELD1,                         \
+                                USERFIELD2,                         \
+                                USERFIELD3,                         \
+                                USERFIELD4,                         \
+                                USERFIELD5,                         \
+                                USERFIELD6$,                        \
+                                PWDEXPIR$,                          \
+                                OA.RESERVED2$
+
+!*************************************************************************
+!                END OF INCLUDE : EAMDMOA2.J86
+!*************************************************************************

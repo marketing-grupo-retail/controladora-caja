@@ -1,0 +1,63 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+!**********************************************************************         
+!*              CUSTOMER ACCOUNT STATUS FILE                          *         
+!**********************************************************************         
+!* The following defines the store record format for the              *         
+!* customer account status file.  The fields are defined in the       *         
+!* sequence in which they appear in the logical record                *         
+!**********************************************************************         
+! added to patch library to be included on user exit diskette IR70880           
+! CFB 10/24/86                                                                  
+STRING GLOBAL \                                                                 
+        CA.ST.TENDTYPE$,        \ TENDER TYPE = X'99'           UPD 1           
+        CA.ST.CUSTOMER$         ! CUSTOMER ACCOUNT NUMBER = 0   UPD 12          
+INTEGER*4 GLOBAL \                                                              
+        CA.ST.RESTART           ! SYSTEM RESTART FIELD          INT 4           
+STRING GLOBAL \                                                                 
+        CA.ST.DATETIME$         ! DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                ! WHEN CURRENT PERIOD STARTED                   
+                                ! OR OLD PERIOD ENDED                           
+                                                                                
+STRING GLOBAL \                                                                 
+        CA.ST.RESERVED$         ! RESERVED                      ASC 6           
+                                                                                
+!**********************************************************************         
+!* The following defines the customer record format for the           *         
+!* customer account status file.                                      *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        CA.CR.TENDTYPE$,        \ TENDER TYPE DESIGNATION       UPD 1           
+                                \ X"10" INDICATES CASH TENDER                   
+                                \ X"2X" - CHECK TENDER, VARIETY X               
+                                \ X"30" - FOODSTAMP TENDER                      
+                                \ X"4X" - MISCELLANEOUS TENDER 1,               
+                                \         VARIETY X                             
+                                \ X"5X" - MISCELLANEOUS TENDER 2,               
+                                \         VARIETY X                             
+                                \ X"6X" - MISCELLANEOUS TENDER 3,               
+                                \         VARIETY X                             
+\                                                                               
+        CA.CR.CUSTOMER$         ! CUSTOMER ACCOUNT NUMBER       UPD 12          
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        CA.CR.RESTART           ! SYSTEM RESTART FIELD          INT 4           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        CA.CR.AMTTRANS          ! AMOUNT OF TENDERS AGAINST     INT 4           
+                                ! THIS ACCOUNT                                  
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        CA.CR.NUMTRANS          ! NUMBER OF TENDERS AGAINST     INT 2           
+                                ! THIS ACCOUNT                                  
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        CA.CR.USEREXIT          ! USER FIELD FOR USE WITH EXITS INT 4           
+                                                                                
+STRING GLOBAL \                                                                 
+        CA.CR.RESERVED$         ! RESERVED                      ASC 1           
+                                                                                
+!**********************************************************************         
+!* End of declarations for the customer account status file           *         
+!**********************************************************************         

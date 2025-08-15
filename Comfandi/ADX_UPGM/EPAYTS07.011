@@ -1,0 +1,105 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+! Modificaciones:
+
+Asc.Pay.Recup% = 0                                                        ! Control recuperaciones
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"ERROR PARAMETROS","PAGO ELECTRONICO   ",1500,"L")		! Msg Alerta
+ Call Visores4690(1,"PAGO ELECTRONICO   ","No Operativo",1500,"L")				! Msg Alerta
+ Call U.Imprime("ERROR CARGA PAGO ELECTRONICO    ",2100H)									! Rastro en SJ
+ Asc.Pay.Line%      = 00 																									! Proyecto desactivado
+ Asc.Pay.Cadena$    = "0000"  																						! Codigo cadena
+ Asc.Pay.Appl$      = "00"          																			! Codigo de la aplicacion
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.Pay.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[PAGO ELECTRONICO]" Then Begin											  ! Proyecto de Lealtad
+     Call U.Imprime("PAGO ELECTRONICO OK.",2100H)											    ! Mensaje en SJ
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pay.Line%     = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     Asc.Pay.Cadena$    = Mid$(TS.TEMP1$,30,4)				    								! Codigo cadena
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     Asc.Pay.Appl$      = Mid$(TS.TEMP1$,30,2)                   				  ! Codigo de la aplicacion
+     Read #94; TS.TEMP1$     																						  ! Lectura registro
+     Asc.Pay.tpvr$      = Mid$(TS.TEMP1$,30,2)                   				  ! Tipo y variedad 
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pay.Motora%    = Val(Mid$(TS.TEMP1$,30,3))				    						! Proyecto activo
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pay.Miscelaneo$ = Mid$(TS.TEMP1$,30,12)                          ! Articulo Miscelaneo
+     Asc.Pay.Miscelaneo$ = Str$(Val(Asc.Pay.Miscelaneo$))                 !
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Pay.Auditoria% = Val(Mid$(TS.TEMP1$,30,2))				    						! Activa Auditoria
+     
+     
+     Dim Asc.Pay.Errores$(99)                                             ! Vector lista de errores
+     Asc.Pay.Errores$(00) = "TRANSACCION HA SIDO SATISFACTORIA       "    ! 
+     Asc.Pay.Errores$(01) = "NRO CREDENCIAL NO   ENCONTRADA          "    ! 
+     Asc.Pay.Errores$(02) = "NO HAY SUBSIDIO     DISPONIBLE          "    ! 
+     Asc.Pay.Errores$(03) = "CREDENCIAL HA SIDO  CANCELADA           "    ! 
+     Asc.Pay.Errores$(04) = "NUMERO DE CREDENCIALNO VALIDO           "    ! 
+     Asc.Pay.Errores$(05) = "CREDENCIAL PERSONA  A CARGO             "    ! 
+     Asc.Pay.Errores$(06) = "MONTO SUBSIDIO MAYORA MONTO AUTORIZADO  "    ! 
+     Asc.Pay.Errores$(07) = "SUBSIDIO NO DEFINIDOPARA ESTA CREDENCIAL"    ! 
+     Asc.Pay.Errores$(08) = "ERROR EN LA BASE DE DATOS               "    ! 
+     Asc.Pay.Errores$(09) = "TRANSACCION NO      VALIDA              "    ! 
+     Asc.Pay.Errores$(10) = "NO HAY PARAMETROS   DEFINIDOS           "    ! 
+     Asc.Pay.Errores$(11) = "NO SE ENCONTRO      CREDENCIAL A REVERSA"    ! 
+
+     TS.TEMP1I4 = 0                                                       ! Pago Inactivo Default
+     FOR I% = 1 TO TO.NUMTNDR		                                          ! Revisa pagos definidos
+     IF TO.TENDOPTS(I%,0) = VAL(Left$(Asc.Pay.tpvr$,1)) THEN BEGIN        ! Valido Tipo
+      IF (TO.TENDOPTS(I%,1) = VAL(Right$(Asc.Pay.tpvr$,1))) THEN BEGIN    ! Valida variedad
+        TS.TEMP1I4 = 1                                                    ! Pago Activo
+      ENDIF
+     ENDIF
+    NEXT I%
+
+    IF TS.TEMP1I4 = 0 THEN BEGIN																					! Si pago Desactivado
+       Call U.imprime("Modulo Pago Electronico Desactivado",6100H)        ! Mensaje al rollo de
+       Call U.Imprime("Forma de Pago "+Asc.Pay.Tpvr$+" No definida",6100H)! auditoria y al CR
+       Call U.Imprime("En las Terminal Options. ",6100H)                  !
+       Call TSHIECET                                                      ! Tono de Alerta
+       Call Visores4690(1,"PAGO ELECTRONICO NO","OPERATIVO...",1500,"L")  ! Mensaje al Operador
+       Asc.Pay.Line%      = 00 				  																	! Proyecto desactivado
+       Asc.Pay.Cadena$    = "0000"  																			! Codigo cadena
+       Asc.Pay.Appl$      = "00"          																! Codigo de la aplicac
+    ENDIF 
+    GoTo UE.Pay.FINAL																									    ! Sale del ciclo de carga
+   Endif
+ Wend
+ UE.Pay.FINAL:
+ 
+   CALL VISORES4690(1,"SUBIENDO SERVICIOS  ","COMUNICACION V.2.01",0,"L")
+   TS.TEMP1$ = RIGHT$("                  "+"1",18)                        !
+   TS.TEMP2$ = Armar.Trama.Msg("99","90",TS.TEMP1$,"00",Asc.Pay.Cadena$,"123456")
+   Asc.Pef.Contable$ = "20" + Date$                                       ! Ajusta fecha contable con fecha trx 14ago2012
+   TS.TEMP2$ = TS.TEMP2$ + Asc.Pef.Contable$
+   TS.TEMP1$ = DATE$ + ":" +TIME$
+   TS.TEMP3$ = TS.TEMP2$ 
+   TS.TEMP2$ = Rutina.Java("com.appl.ApplKernel","threader", TS.TEMP2$)
+   TS.TEMP4$ = DATE$ + ":"+TIME$
+   Call EPAY.AUDITORIA(TS.TEMP3$,TS.TEMP2$, TS.TEMP1$, TS.TEMP4$)
+   
+   Asc.Pay.NroBon%  = 0                      															! Nro bonos capturados
+   DIM Asc.Pay.Vtabono$(60,5)                															! Init vector control PAGOS
+   Close 94																																! Cierra archivo
+   Gr.Pay.CDLIMIT2% = TO.CDLIMIT2                                         ! VALOR LIMITE CASH DRAWER 
+   
+   If Asc.Pay.Line% = -1 Then                                                   \! Proyecto Activo
+      CALL U.IMPRIME("MODULO PAGO SUBSIDIO   ON 22/Oct/2012",6100H) Else     \! Msg Proyecto Cargado
+      CALL U.IMPRIME("MODULO PAGO SUBSIDIO  OFF 22/Oct/2012",6100H)           ! Msg Proyecto Cargado
+
+
+Endif
+

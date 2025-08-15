@@ -1,0 +1,23 @@
+\/*TIME STAMP BLOCK *************************************************           
+\** END OF TIME STAMP BLOCK ****************************************/           
+!*********************************************************                      
+!                     EAMERRNH                           *                      
+! This function coverts the contents of ERRN to a four   *                      
+! byte hex string.                                       *                      
+! This is accomplished by adding x'30' to each nibble,   *                      
+! building a string, and packing the results.            *                      
+! Example ERRN = 80abcdefh, errnhex$ = 80abcdef          *                      
+!*********************************************************                      
+function errnhex$                                                               
+string errnhex$,errfx$                                                          
+integer*4 hx                                                                    
+integer*2 s,the.sum                                                             
+errfx$ = ""                                                                     
+ hx = errn                                                                      
+for s = 28 to 0 step -4                                                         
+!                                                                               
+   errfx$ = errfx$ + chr$((shift(hx,s) and 000fh) + 48)                         
+next s                                                                          
+   errnhex$ = pack$ (errfx$)                                                    
+end function                                                                    
+!*********************************************************                      

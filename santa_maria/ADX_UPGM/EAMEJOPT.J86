@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+INTEGER*2 GLOBAL    EJ.KEEP.UNCOMPRESSED      !* No. tlog to keep uncompressed
+INTEGER*2 GLOBAL    EJ.KEEP.COMPRESSED        !* No. tlog to keep compressed
+INTEGER*1 GLOBAL    EJ.INDEX                  !* Produce an index file ?
+INTEGER*1 GLOBAL    EJ.MGR.INDEX              !* Produce a manager's index ?
+INTEGER*2 GLOBAL    EJ.session1               !* Session for index file
+INTEGER*2 GLOBAL    EJ.session2               !* Session for manager's index
+STRING    GLOBAL    EJ.REST$                  !* Remainder of options record

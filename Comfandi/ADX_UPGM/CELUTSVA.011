@@ -1,0 +1,78 @@
+!   ***************************************************************************
+!   **    Fecha      :  Julio de 2001                                        **
+!   **    Proyecto   :  casa informatica s.a                                 **
+!   **    User Exit  :  CELUTSVA.011                                         **
+!   **    Inclu¡r en :  EAMTSUVA.J86  -  Definici¢n de Variables 	     **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+!--------------------------------------------------------------------------------
+!   Definicion  de las variables usadas en VENTA DE PINES DE CELULAR EN PREPAGO
+!--------------------------------------------------------------------------------
+
+STRING GLOBAL	\
+	UE.CELL.CAD$,	\
+	UE.CELL.DAT(1),	\
+	UE.CELL.AUX(1),	\
+	UE.CELL.DESC(1),\
+	UE.CELL.CODCAD$,\
+	UE.CELL.CODALM$,\
+	UE.CELL.SERIE$,	\
+	UE.CELL.ITEM$,	\
+	UE.CELL.KEY$,	\
+	UE.CELL.KEY2$,	\
+	UE.CELL.CONT$,	\
+	UE.CELL.FIN$,	\
+	UE.CELL.CODOP$,	\
+	UE.CELL.OPLOGIS$,\
+	UE.CELL.PIN$,	\
+	UE.CELL.FECHA$,	\
+	UE.CELL.MARK$,	\
+	UE.CELL.MSG$(2),\
+	UE.CELL.PINDES$,\
+	UE.CELL.AUTH$,	\
+        UE.CELL.ALM$,   \ ! Codigo del almacen
+        UE.CELL.QTY$,   \ ! Inventario disponible tarjetas
+	UE.CELL.VALOR$, \
+        UE.CELL.TAYLR$
+INTEGER*1 GLOBAL	\
+	UE.CELL.SALE%,	\
+	UE.CELL.ANUL%,	\
+	UE.CELL.ON,	\
+	UE.CELL.SW,	\
+	UE.CELL.OK,	\
+	UE.CELL.OPEN,	\
+	UE.CELL.ASK%,	\
+	UE.CELL.ERROR%,	\
+	UE.CELL.CPR%,	\ ! Control cambio de precio
+	UE.CELL.CTRL%,	\
+	UE.CELL.ERROR2%,\
+        UE.CELL.STAT%,  \ ! Estado del proyecto
+        UE.CELL.RECP%,  \ ! Recuperacion de trx  
+        UE.PIN.CELL%,   \
+	UE.CELL.IMPRIMA%
+INTEGER*4 GLOBAL UE.CELL.TMP%  ! Temporal de trabajo
+STRING    GLOBAL UE.VTAPIN$(2) ! Almacena pines vendidos
+STRING    GLOBAL UE.PLU.ALT$   ! Plu alterno
+INTEGER*2 UE.CELL.NTRJ%	       ! Numero de tarjetas matriculadas
+INTEGER*2 GLOBAL UE.NRO.PINES% ! Contador de pines vendidos
+INTEGER*4 GLOBAL UE.PINES.QTY% ! Temporales de trabajo
+
+!INTEGER GLOBAL UE.CELL.AUX
+!STRING GLOBAL UEDLG.LEIDO$
+STRING GLOBAL UE.CELL.SUP$(1)
+INTEGER*1 GLOBAL UE.PIN.DEVO%, UE.PIN.SES1%, UE.PIN.SES2%
+INTEGER*1 GLOBAL UE.CELL.ANTRX%
+
+!--- DE PRUEBA
+
+INTEGER*4 GLOBAL UE.I4.PIPE%
+INTEGER*4 GLOBAL UE.I4.PIPE2%
+INTEGER*2 GLOBAL UE.I2.PIPE%
+STRING    GLOBAL UE.ST.MSG$
+
+!STRING GLOBAL TVISOR$

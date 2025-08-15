@@ -1,0 +1,38 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+FUNCTION CSUPEC13 PUBLIC
+! insert user exit code here
+
+  %INCLUDE EAMCSE13.J86            ! Electronic Marketing PRPQ
+
+   IF ERR = "OI" THEN BEGIN
+  CALL ADXERROR(VAL(Asc.Err.Ter$),         \    Numero Terminal
+                    ASC("B"),                \    to ocf
+                    003,                     \    msg number
+                      3,                     \    severity level
+                      2,                     \    2 = checkout support
+    Str$(val(Asc.Err.Trx$))+Asc.Err.Proceso$)!    Mensaje rutina Error
+
+    CALL ADXERROR(VAL(Asc.Err.Ter$),         \    Numero Terminal
+                    ASC("B"),                \    to ocf
+                    003,                     \    msg number
+                      3,                     \    severity level
+                      2,                     \    2 = checkout support
+     "TP"+Str$(OVS%)+Asc.Err.Proceso$)       !    Mensaje rutina Error
+
+    CS.RESUME = 0
+   ENDIF 
+
+ IF ERR = "IH" THEN BEGIN
+   CALL ADXERROR(VAL(Asc.Err.Ter$),         \    Numero Terminal
+                    ASC("B"),                \    to ocf
+                    003,                     \    msg number
+                      3,                     \    severity level
+                      2,                     \    2 = checkout support
+    Str$(val(Asc.Err.Trx$))+Asc.Err.Proceso$)!    Mensaje rutina Error
+    CS.RESUME = 0
+ ENDIF 
+
+ 
+END FUNCTION
+ 

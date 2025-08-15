@@ -1,0 +1,21 @@
+\/* TIME STAMP BLOCK **************************************************         
+\** END OF TIME STAMP BLOCK ******************************************/         
+!********************************************************************           
+!        EXTERNAL DEFINITIONS FOR ADX SERVICES                                  
+!********************************************************************           
+! added to patch library to be included on user exit diskette IR70880           
+! CFB 10/24/86                                                                  
+                                                                                
+ FUNCTION ADXERROR (TERM,MSGGRP,MSGNUM,SEVERITY,EVENT,UNIQUE$) \                
+ EXTERNAL                                                                       
+ INTEGER*2 	TERM,MSGNUM                                                         
+ INTEGER*1	SEVERITY,MSGGRP,EVENT                                                
+ STRING		UNIQUE$                                                                
+ END FUNCTION                                                                   
+                                                                                
+ SUB ADXSERVE(RET,FUNC,PARM1,PARM2$) EXTERNAL                                   
+ INTEGER*4	RET                                                                  
+ INTEGER*2	FUNC,PARM1                                                           
+ STRING		PARM2$                                                                 
+ END SUB                                                                        
+                                                                                

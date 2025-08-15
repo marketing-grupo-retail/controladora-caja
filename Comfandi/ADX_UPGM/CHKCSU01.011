@@ -1,0 +1,18 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : CHKCSU01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Captura numero de transaccio     *
+!                Aplicacion CheckOut Support      *
+!**************************************************
+
+FOR X.L% = 1 TO CS.SIZE																																				! Hasta el tamaño del string
+  CALL CSVFEC02(X.L%)									  																											! Tomo tipo de String
+  IF CS.TYPE(X.L%) = 0 Then BEGIN 																														! Si Cabecera
+     ASC.ERR.CAJA$ = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(1)+1,CS.FLD.LEN(1)))                   ! Terminal
+     ASC.ERR.TRX$  = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(2)+1,CS.FLD.LEN(2)))                   ! Transaccion
+  ENDIF 
+Next X.L%
+

@@ -1,0 +1,408 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCACJ.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL FUNCTION PROTOTYPE CALLES      */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Michael Coffman                                   */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*  IR38497 - Bring Module up to coding standards.                */
+\/*            RDG IBM 09Sep98                                     */
+\/*                                                                */
+\/*  IR40902 - Implement design change for MCF Accounting.         */
+\/*            - Use Arrow keys for selecting Currency             */
+\/*            - Present screens/get input similar to TBV          */
+\/*            - Process accounting updates similar to TBV         */
+\/*              (Checkout support updates short EAMFCTR* files)   */
+\/*            RSH MGVA 01Jul99                                    */
+\/*                                                                */
+\/*  IR43709  Add code to support Multiple Currency Feature PRPQ   */
+\/*           for Record Miscellaneous Transaction.                */
+\/*           CMJ MGVA 30Aug2000                                   */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM!!***** External SMKT Multiple Currency Subroutine calls *****
+
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: SCREEN.RESET
+\REM!!
+\REM!!      PURPOSE - Reset Screen
+\REM!!************************************************************************!!
+SUB SCREEN.RESET(PICKUP) EXTERNAL      ! re-display first screen after ENTER
+  INTEGER*2 PICKUP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.FEATURE.STATUS
+\REM!!
+\REM!!      PURPOSE - Get SA Multiple Currency Feature Status
+\REM!!************************************************************************!!
+SUB MC.FEATURE.STATUS(PERIOD) EXTERNAL ! Call to get feature active flag
+  INTEGER*2 PERIOD
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: OPEN.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Open Foreign Currency Tracking Files
+\REM!!************************************************************************!!
+SUB OPEN.FCTRACK(PERIOD) EXTERNAL      ! Call to open foreign currency tracking
+  INTEGER*2 PERIOD
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: CLOSE.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Close Foreign Currency Tracking Files
+\REM!!************************************************************************!!
+SUB CLOSE.FCTRACK EXTERNAL             ! Call to close foreign currency tracking
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: READ.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Read Foreign Currency Tracking Files
+\REM!!************************************************************************!!
+SUB READ.FCTRACK(FC.KEY$) EXTERNAL     ! Call to read foreign cur track file
+  STRING FC.KEY$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: WRITE.FCTRACK
+\REM!!
+\REM!!      PURPOSE - Write Foreign Currency Tracking Files
+\REM!!************************************************************************!!
+SUB WRITE.FCTRACK(FC.KEY$) EXTERNAL    ! Call to write foreign cur track file
+  STRING FC.KEY$
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: UPDATE.FCTLIST
+\REM!!
+\REM!!      PURPOSE - Update Foreign Currency in EAMTLIST
+\REM!!************************************************************************!!
+SUB UPDATE.FCTLIST EXTERNAL            ! Call to put foreign cur. in EAMTLIST
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FC.INPUT
+\REM!!
+\REM!!      PURPOSE - Get Foreign Currency User Input for Loans/Pickups
+\REM!!************************************************************************!!
+SUB GET.FC.INPUT(PICKUP) EXTERNAL      ! Call to get foreign cur. loans/pickups
+  INTEGER*2 PICKUP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FCAR.INPUT
+\REM!!
+\REM!!      PURPOSE - Get Foreign Currency User Input for Auto Reconcile
+\REM!!************************************************************************!!
+SUB GET.FCAR.INPUT EXTERNAL            ! Call to get foreign cur. auto reconcile
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FCOB.INPUT
+\REM!!
+\REM!!      PURPOSE - Get Foreign Currency User Input for Opening Balance
+\REM!!************************************************************************!!
+SUB GET.FCOB.INPUT EXTERNAL            ! Call to get foreign cur. opening balance
+END SUB
+
+!AIR40902
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: GET.TENDER.DESC
+!\REM!!
+!\REM!!      PURPOSE - Get Tender Descriptors
+!\REM!!************************************************************************!!
+!SUB GET.TENDER.DESC(PICKUP) EXTERNAL   ! Call to get tender descriptors from TO
+!  INTEGER*2 PICKUP
+!END SUB
+!EIR40902
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.LP.SCREENS
+\REM!!
+\REM!!      PURPOSE - Build Loan/Pickup Screens used by SA Multiple Currency
+\REM!!                Feature
+\REM!!************************************************************************!!
+SUB FC.LP.SCREENS(PICKUP) EXTERNAL     ! Call to build loan/pickup screens
+  INTEGER*2 PICKUP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.AMT.ENTERED
+\REM!!
+\REM!!      PURPOSE - Test if Foreign Currency Amounts were entered
+\REM!!************************************************************************!!
+SUB FC.AMT.ENTERED(J) EXTERNAL         ! Call to see if FC amounts entered
+  INTEGER*2 J
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: UPDATE.FCLP
+\REM!!
+\REM!!      PURPOSE - Update Loan/Pickup information in "EAMFCTRC"
+\REM!!************************************************************************!!
+SUB UPDATE.FCLP(PICKUP) EXTERNAL       ! Call to update EAMFCTRC loans/pickups
+  INTEGER*2 PICKUP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.NET.TENDERS
+\REM!!
+\REM!!      PURPOSE - Read net field from "EAMFCTRn"
+\REM!!************************************************************************!!
+SUB GET.NET.TENDERS EXTERNAL           ! call to read net field from EAMFCTRn
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.OBAL.TENDERS
+\REM!!
+\REM!!      PURPOSE - Read tender count field from "EAMFCTRP"
+\REM!!************************************************************************!!
+SUB GET.OBAL.TENDERS EXTERNAL          ! call to read tender count field from EAMFCTRP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: GET.FCAR.TENDERS
+\REM!!
+\REM!!      PURPOSE - Read "EAMFCTRn" amounts in Auto Recon.
+\REM!!************************************************************************!!
+SUB GET.FCAR.TENDERS EXTERNAL          ! call to read EAMFCTRn amts in auto recon
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.RESET.TENDERS
+\REM!!
+\REM!!      PURPOSE - Reset Foreign Currency TENDER$(N,N,1)
+\REM!!                LOAN/PICKUP array information
+\REM!!************************************************************************!!
+SUB FC.RESET.TENDERS EXTERNAL          ! reset FC.TENDER$(n,n,1) in loans/picks
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.TRANSFER
+\REM!!
+\REM!!      PURPOSE - Transfer Foreign Currency Tender counts to pickups
+\REM!!************************************************************************!!
+SUB FC.TRANSFER EXTERNAL               ! To transfer foreign cur. tender counts to pickups
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.OPENBAL
+\REM!!
+\REM!!      PURPOSE - Create Opening Balance for Foreign Currency Tenders
+\REM!!************************************************************************!!
+SUB FC.OPENBAL EXTERNAL                ! To create opening bal. for foreign cur. tenders
+END SUB
+
+!AIR40902
+!\REM!!************************************************************************!!
+!\REM!!      ENTRY POINT: FC.DESC83
+!\REM!!
+!\REM!!      PURPOSE - Display "EAMCDESC" 83 SA Multiple Currency Feature
+!\REM!!                Descriptor.
+!\REM!!************************************************************************!!
+!SUB FC.DESC83(PICKUP) EXTERNAL         ! display EAMCDESC #83 on 1st screen DEF213
+!  INTEGER*2 PICKUP
+!END SUB
+!EIR40902
+
+!AIR40902
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: FC.SELECTION
+\REM!!
+\REM!!      PURPOSE - To bump currency up by 1
+\REM!!************************************************************************!!
+SUB FC.SELECTION(DIRECTION) EXTERNAL   ! FC.SELECTION
+   INTEGER*2                           \
+             DIRECTION                 ! Direction of change
+END SUB                                ! FC.SELECTION
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.CENTER.DESC
+\REM!!
+\REM!!      PURPOSE - Center currency descriptors for display
+\REM!!************************************************************************!!
+SUB MC.CENTER.DESC EXTERNAL            ! MC.CENTER.DESC
+END SUB                                ! MC.CENTER.DESC
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.INIT.ACCT
+\REM!!
+\REM!!      PURPOSE -
+\REM!!************************************************************************!!
+SUB MC.INIT.ACCT EXTERNAL              ! MC.INPUT
+END SUB                                ! MC.INPUT
+
+!***************************************************************************
+! SUB MC.END
+!
+! Clean Up before chaining.
+!***************************************************************************
+SUB MC.END EXTERNAL
+END SUB
+
+!***************************************************************************
+! SUB MC.PAD.IN
+!
+! Prepare for entering Pad
+!***************************************************************************
+SUB MC.PAD.IN EXTERNAL                  ! MC.PAD.IN
+END SUB                                 ! MC.PAD.IN
+
+!***************************************************************************
+! SUB MC.PAD.OUT
+!
+! Leave Scratch Pad
+!***************************************************************************
+SUB MC.PAD.OUT EXTERNAL                 ! MC.PAD.OUT
+END SUB                                 ! MC.PAD.OUT
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: UPDATE.FCLP2
+\REM!!
+\REM!!      PURPOSE - Update Loan/Pickup information in "EAMFCTRC"
+\REM!!************************************************************************!!
+SUB UPDATE.FCLP2(PICKUP) EXTERNAL       ! Call to update EAMFCTRC loans/pickups
+  INTEGER*2 PICKUP
+END SUB
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.TLOG.UPDATE
+\REM!!
+\REM!!      PURPOSE - Add strings to tlog for Checkout support update
+\REM!!************************************************************************!!
+SUB MC.TLOG.UPDATE(PICKUP) EXTERNAL     ! MC.TLOG.UPDATE
+  INTEGER*2                             \
+            PICKUP                      ! Pickup Flag
+END SUB                                 ! MC.TLOG.UPDATE
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.UPDATE.FCTPL
+\REM!!
+\REM!!      PURPOSE - Update FC long file (Ln/Pk/TC), OR
+\REM!!                Current Short for Tender Count
+\REM!!************************************************************************!!
+SUB MC.UPDATE.FCTPL(PICKUP) EXTERNAL    ! MC.UPDATE.FCTPL
+  INTEGER*2                             \
+            PICKUP                      ! Pickup Flag
+END SUB                                 ! MC.UPDATE.FCTPL
+
+!***************************************************************************
+! SUB MC.CONSOLIDATED.ARRAYS
+!
+! Consolidate totals from currencies into base arrays.
+!
+!***************************************************************************
+SUB MC.CONSOLIDATED.ARRAYS EXTERNAL     ! MC.CONSOLIDATED.ARRAYS
+END SUB                                 ! MC.CONSOLIDATED.ARRAYS
+
+REM -- CNVRT.TO.BASE -----------------------------------------------------------
+REM
+REM   CONVERT FOREIGN CURRENCY TO BASE
+REM
+REM   This function is passed the Selected Foreign Currency Slot, and a
+REM   foreign currency amount.  It returns the Domestic base amount in a
+REM   4 byte integer, or zero if invalid exchange rate.
+REM
+REM   It accesses the Foreign Currency Exchange Rate Array FCER.ARR$ by slot
+REM   for Exchange Rate and Decimal Format Information.
+REM
+REM   Exchange Rate Processing is preformed per the Selected Foreign
+REM   Currency Processing Method as Defined in the Exchange Rate File.
+REM ---------------------------------------------------------------------------
+
+  FUNCTION CNVRT.TO.BASE(AMT,SEL.FC.SLOT) EXTERNAL RECURSIVE
+
+    INTEGER*1                                    \
+              SEL.FC.SLOT                        ! selected slot
+    INTEGER*4                                    \
+              CNVRT.TO.BASE,                     \ returned value
+              AMT                                ! amount to convert
+
+  END FUNCTION                                   ! end CNVRT.TO.BASE
+
+
+REM -- CNVRT.TO.FOREIGN --------------------------------------------------------
+REM
+REM   CONVERT BASE CURRENCY TO FOREIGN
+REM
+REM   This function is passed the Selected Foreign Currency Slot, and a
+REM   Primary Base currency amount.  It returns the Foreign Currency amount
+REM   in a 4 byte integer, or zero if invalid exchange rate.
+REM
+REM   It accesses the Foreign Currency Exchange Rate Array FCER.ARR$ by slot
+REM   for Exchange Rate and Decimal Format Information.
+REM
+REM   Exchange Rate Processing is preformed per the Selected Foreign
+REM   Currency Processing Method as Defined in the Exchange Rate File.
+REM ---------------------------------------------------------------------------
+
+  FUNCTION CNVRT.TO.FOREIGN(AMT,SEL.FC.SLOT) EXTERNAL RECURSIVE
+
+    INTEGER*1                                    \
+              SEL.FC.SLOT                        ! selected slot
+    INTEGER*4                                    \
+              CNVRT.TO.FOREIGN,                  \ returned value
+              AMT                                ! amount to convert
+
+  END FUNCTION                                   ! End CNVRT.TO.FOREIGN
+
+\REM!!************************************************************************!!
+\REM!!      ENTRY POINT: MC.DISP.OPEN.BALANCE
+\REM!!
+\REM!!      PURPOSE -  To display the opening balance for the currently
+\REM!!                 selected currency.
+\REM!!************************************************************************!!
+SUB MC.DISP.OPEN.BALANCE EXTERNAL                ! MC.DISP.OPEN.BALANCE
+END SUB                                          ! MC.DISP.OPEN.BALANCE
+
+!EIR40902
+
+!AIR43709
+\REM!!************************************************************************!!
+\REM!! SUB MC.INIT.VARS EXTERNAL
+\REM!!
+\REM!!************************************************************************!!
+SUB MC.INIT.VARS EXTERNAL
+END SUB
+
+
+!***************************************************************************
+! SUB DISPLAY.CURRENCY  EXTERNAL
+!
+!
+!***************************************************************************
+SUB MC.DISPLAY.CURRENCY(MC.SLOT) EXTERNAL
+   INTEGER*2 MC.SLOT
+   STRING    CURR$
+END SUB
+
+!***************************************************************************
+! FUNCTION MC.CONVERT.CURR  EXTERNAL
+!
+!
+!***************************************************************************
+FUNCTION MC.CONVERT.CURR(AMT) EXTERNAL
+   INTEGER*4 MC.CONVERT.CURR, AMT
+END FUNCTION
+
+!EIR43709
+\/******************************************************************/
+\/* END OF EAMMCACJ.J86                                            */
+\/******************************************************************/

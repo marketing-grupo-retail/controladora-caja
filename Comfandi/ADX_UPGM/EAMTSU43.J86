@@ -1,0 +1,33 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC43 PUBLIC
+! TSUPEC43 - PRICE COMPUTATION
+INTEGER*1 TSUPEC43                        ! define variable !IR89474
+
+!CALL EPAYMS43.011                    ! PAGO ELECTRONICO
+
+CALL EPSMTS43.011                    ! Modulo Convenios
+
+%INCLUDE EAMTSE43.J86                ! EMS PRPQ
+CALL COLMTS43.011 		               ! RECAUDO COLEGIOS
+CALL EDUMTS43.011                    ! RECAUDO SIEMPRE EDUCANDO
+CALL RECASRV(43,0)		               ! PAGO SERVICIOS PUBLICOS
+CALL LIBLINE(43,1)                   ! Acumula descuento cupon
+CALL LIBLINE(43,2)                   ! Calculo Imp.Consumo por CANTIDAD
+CALL LIBLINE(43,3)                   ! RIFAS Y EVENTOS
+CALL RECATS43.011                    ! RECARGAS ONLINE
+
+!CALL MKTPTS43.011                    ! MODULO PROMOCIONES
+
+CALL PROPINA(43)                     ! Modulo propinas
+CALL GRABBOT(43)                     ! ESCALONADO ABBOT
+CALL GRABJSN(43)                     ! ESCALONADO ABBOT JSON
+CALL PRECIO.TECHO(43)                ! PRECIO TECHO
+CALL Autoriza.Precio(43)             ! CONTROL CAMBIO PRECIO
+CALL NOTASCREDITOPOS(43)     				 ! NOTAS CREDITO
+
+%INCLUDE UEECR143.U86                ! MODULO TEF REDEBAN
+
+END FUNCTION
+

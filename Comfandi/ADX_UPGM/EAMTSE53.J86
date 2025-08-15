@@ -1,0 +1,274 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** INCLUDE IN EAMTSU53.J86 ************************************!!
+! TITLE: ELECTRONIC MARKETING SUPPORT
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (C) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/* CHANGE ACTIVITY                                                 */
+\/*                                                                 */
+\/* IR97036 - WITH BOTH ELECTRONIC MARKETING AND SUSPEND/RETRIEVE   */
+\/*           INSTALLED THERE ARE PRINTING PROBLEMS DURING RETRIEVAL*/
+\/*           SPECIFICALLY THE EM COUPON DESCRIPTORS DON'T REPRINT. */
+\/*           PCE J03 5/01/92                                       */
+\/*                                                                 */
+\/* IR36962 - WITH BOTH ELECTRONIC MARKETING AND SUSPEND/RETRIEVE   */
+\/*           INSTALLED, THE CUSTOMER NUMBER DOES NOT PRINT ON A    */
+\/*           RETRIEVAL.                                            */
+\/*           RSH MGVA 10DEC97                                      */
+\/*                                                                 */
+\/* IR41494   WHEN RETRIEVING AN ORDER WHERE THE CUSTOMER NUMBER    */
+\/*           HAS BEEN ENTERED PRIOR TO SUSPENDING AND A ITEM LINKS */
+\/*           TO A COUPON HAVING A COUPON VALUE OF 985.00           */
+\/*           PROVIDING A 50% DISCOUNT ON THE ENTIRE ORDER, THE     */
+\/*           COUPON IS REPLAYED UPON RETRIEVAL.                    */
+\/*           JAM MGVA 18OCT99                                      */
+\/*                                                                 */
+\/* IR46523   WHEN VOIDING (OR SELLING) AN ITEM AFTER IPL, THE      */
+\/*           TARGETED COUPON ASSOCIATED TO IT IS NOT RETURNED (OR  */
+\/*           ISSUED).                                              */
+\/*           LLU MGVA 06SEP2001                                    */
+\/*                                                                 */
+\/* IR47420   AE IR46523 CORRECT PROBLEM FOUND WITH THIS APAR       */
+\/*           WHICH CAUSES A LOOP TO BE EXITED PREMATURELY          */
+\/*           NOT ALLOWING ALL TARGETED COUPONS TO BE FOUND.        */
+\/*           CMJ MGVA 16JAN2002                                    */
+\/*                                                                 */
+\/* IR52584   PE IR46523.  TARGETED COUPONS NO LONGER APPLY AFTER A */
+\/*           SUSPEND-RETRIEVE OR APPLICATION RESTART, UNLESS THE   */
+\/*           PREFERRED CUSTOMER CARD IS RESCANNED.                 */
+\/*           GGK IBM 21NOV03                                       */
+\/*                                                                 */
+\/* IR53115   AFTER A RETRIEVE, TARGETED COUPONS ARE NOT SET UP     */
+\/*           UNTIL A REPLAY IS PERFORMED. THIS CODE PERFORMS THE   */
+\/*           TARGETED COUPON SETUP WHEN A CARD IS SEEN DURING A    */
+\/*           RETRIEVAL.                                            */
+\/*           CRM/RM IBM 12FEB04                                    */
+\/*                                                                 */
+\/* IO03900   If using an expanded EAMITEMR, a KF error can cause   */
+\/*           IRRF.RECL to be incorrectly set back to 46.           */
+\/*           GGK IBM 13Mar2006                                     */
+\/*                                                                 */
+\/*END-OF-SPECIFICATIONS*********************************************/
+
+ IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** RECOVER CUSTOMER NUMBER ENTRY FROM TRANSACTION LOG            **
+!!*******************************************************************
+   IF TS.TEMP1I2 = 11 THEN BEGIN                ! DATA ENTRY STRING
+     IF MID$(SL.STR.ENTRY$,3,1) = CHR$(255) THEN BEGIN ! CUSTOMER NUMBER
+       J% = MATCH(":",SL.STR.ENTRY$,5)          ! LOCATE END OF FIELD
+       J% = J% - 5                              ! DETERMINE FIELD LENGTH
+       IF J% THEN BEGIN                         ! VALID DATA FOUND
+         A$ = UNPACK$(MID$(SL.STR.ENTRY$,5,J%)) ! SAVE CUSTOMER NUMBER
+         CA.CUSTNUM$ = PACK$(RIGHT$(EMSS.ZERO$ + A$,18))
+         CALL READ.FBACT                        ! READ ACTIVITY FILE
+         TS.IO.DATA$(2) = "??"                  ! PANELIST TRANSACTION
+         TS.IO.DATA$(3) = A$                    ! PANELIST NUMBER
+         EMSS.PANEL.TRANS = 0                   ! RESET PANEL TRANS. FLAG
+         CALL TSU31.FB                          ! CODE FOR EXIT 31
+!AIR53115
+!!*********************************************************************
+!!** CODE ADDED TO EAMTSE53.J86 AT THE RECOVERY OF A CUSTOMER CARD   **
+!!** DURING A TRANSACTION RECOVERY TO COMPLETE THE JOB OF SAVING     **
+!!** INFORMATION ON TARGETED COUPONS.  THIS IS NEEDED SO A TARGETED  **
+!!** COUPON CAN BE AUTO VOIDED AT THE VOID OF THE MATCHING SALE, AND **
+!!** SO A TARGETED COUPON IN A LINKED CHAIN THAT WAS AWARDED PRIOR   **
+!!** TO THE RECOVERY CAN BE RECOGNIZED AS TARGETED AFTERWARDS.       **
+!!*********************************************************************
+
+!!*******************************************************************
+!!** IF REPLAY OF TARGETED COUPONS STARTED BY X31 WILL BE STOPPED  **
+!!*******************************************************************
+         EMSS.TG.LKS = 0                              ! FLAG NO SAVED LINKS
+         IF EMSS.PANEL.TRANS NE 0 AND                 \ NOW CARD ORDER
+           (CA.OPTIONS AND 04H) = 0 AND               \ AUTO COUPONS ALLOWED
+           EMSS.TG.CPN.CNT > 0 THEN BEGIN            ! WITH TARGETED COUPONS
+           DIM EMSS.TG.LNK(99,1)                       ! CLEAR SAVED LINKS
+           IF EMSS.REPLAY.SAVE > 0 AND                 \ SAVED FOR REPLAY
+             EMSS.COUP.REPLAY NE 0 THEN BEGIN         ! REPLAY STARTED
+
+!!*******************************************************************
+!!** READ EACH TARGETED COUPON ITEM RECORD AND PARSE VARIABLES     **
+!!*******************************************************************
+!AIO03900 Use initialization value for record length of EAMITEMR
+\            IF IRRF.RECL = 0 THEN IRRF.RECL = 46       ! DEFAULT RECORD LTH
+             IF IRRF.RECL = 0 THEN IRRF.RECL = EM.IRRF.RECL ! value at initialization
+!EIO03900
+             EMSS.KEYED.IRCPN = 0                       ! COUPON IS AUTOMATIC
+             SL.IT.INDICAT3B = 3                        ! COUPON IS AUTOMATIC
+             FOR K% = 1 TO EMSS.TG.CPN.CNT              ! FOR ALL TARGETED
+               IF (EMSS.TG.CPN(K%,0) AND 10000H) = 0 THEN BEGIN ! NOT DONE YET
+                 J% = EMSS.TG.CPN(K%,0) AND 0FFFFH        ! GET 4 DIGIT UPC
+                 A$ = RIGHT$(EMSS.ZERO$ + STR$(J%),4)     ! FORMAT 4 DIGIT UPC
+                 ITEMCODE$ = OP.LINK.AP$ + PACK$(A$)      ! ADD APPEND OPTION
+                 IR.ITEMCODE$ = ITEMCODE$                 ! SAVE ITEMCODE
+                 TS.ER.RETURN = -1                        ! PREPARE FOR ERROR
+                 TS.TEMP2$ = ""                           ! LET EXIT 27 WORK
+                 I.FM$ = "C" + STR$(IRRF.RECL)            ! IR FORMAT STRING
+                 READ FORM I.FM$; #4 KEY ITEMCODE$; TS.TEMP1$ ! READ REC
+                 IF TS.ER.RETURN THEN BEGIN               ! GOOD READ
+                   IF TS.TEMP2$ = "" THEN TS.TEMP2$ = TS.TEMP1$ ! EXIT 27
+                   EMSS.IRSAVE$ = TS.TEMP2$                ! SAVE ITEM DATA
+                   CALL READ.PC.UPC       !(CALL HITS I%)  ! READ FROM MEMORY
+
+!!*******************************************************************
+!!** ASSURE TARGETED COUPON IS RETRIED AT TOTAL AFTER SALES        **
+!!*******************************************************************
+                   IF IR.ITEMTYPE > 5 AND                  \ COUPON ITEM RECORD
+                     IR.ITEMCODE$ = ITEMCODE$ AND          \ GOOD READ DATA
+                     (IR.INDICAT0 AND 04H) = 0 THEN BEGIN  ! SALE ALLOWED
+                     EMSS.TG.CPN(K%,0) = EMSS.TG.CPN(K%,0) \ FLAG RETRY
+                     OR 200000H         ! AT TOTAL TIME
+
+!!*******************************************************************
+!!** IF TARGETED COUPON LINKS ON, SAVE LINKED COUPON NUMBERS       **
+!!*******************************************************************
+                     IF IR.LINKEDTO$ NE EMSS.NOLINK$ THEN BEGIN ! LINKED RECORD
+                       C$ = IR.LINKEDTO$ : TS.TEMP5I2 = 0    ! START LINK CHAIN
+                       WHILE C$ NE EMSS.NOLINK$              \ LINK CONTINUES
+                         AND TS.TEMP5I2 < 10                 \ WITHIN REASON
+                         AND TS.ER.RETURN = -1               ! AND NO READ ERROR
+                         TS.TEMP5I2 = TS.TEMP5I2 + 1         ! LIMIT LINK CHAIN
+                         A$ = OP.LINK.AP$ + C$               ! NEW ITEMCODE
+                         C$ = EMSS.NOLINK$ : B$ = ""         ! CLEAR INPUT
+                         READ FORM I.FM$; #4 KEY A$; B$      ! READ RECORD
+                         IF TS.ER.RETURN THEN BEGIN          ! GOOD READ
+                           C$ = MID$(B$,23,2)                ! GET NEXT LINK
+                           L% = PACKBIN2(A$,4,2)             ! GET LINK UPC
+                           I% = 0                            ! START AT BEGINNING
+                           WHILE I% < 99 AND                 \ NOT END OF LIST
+                             EMSS.TG.LNK(I%,0) > 0           ! NOT EMPTY SLOT
+                             IF EMSS.TG.LNK(I%,0) = J% AND   \ SAME TARGET UPC
+                               EMSS.TG.LNK(I%,1) = L% THEN   \ SAME LINK UPC
+                               I% = 98                       ! THEN NO UPDATE
+                             I% = I% +1                      ! NEXT ENTRY
+                           WEND                              ! CONTINUE
+                           IF I% < 99 AND                    \ UPDATE NEEDED
+                             EMSS.TG.LNK(I%,0) = 0 THEN BEGIN  ! EMPTY SLOT
+                             EMSS.TG.LNK(I%,0) = J%          ! SAVE TARGET UPC
+                             EMSS.TG.LNK(I%,1) = L%          ! SAVE LINK UPC
+                             EMSS.TG.LKS = -1                ! FLAG SAVED LINKS
+                           ENDIF                             ! EMPTY SLOT
+                         ENDIF                               ! GOOD READ
+                       WEND                                  ! LINK CONTINUES
+                     ENDIF                                   ! LINKED RECORD
+
+!!*******************************************************************
+!!** CAPTURE VENDOR NUMBER FOR VALIDATION FROM ITEM RECORD         **
+!!*******************************************************************
+                     A$ = UNPACK$(IR.SALEPRIC$)             ! UNPACK PRICE DATA
+                     EMSS.IR.MFR.NUM$ = LEFT$(A$,5)         ! CAPTURE MFR NUMBER
+                     B$ = LEFT$(EMSS.ZERO$,5)               ! ZERO MFR NUMBER
+                     IF EMSS.IR.MFR.NUM$ NE B$ THEN BEGIN   ! MFR FROM RECORD
+                       A$ = UNPACK$(IR.ITEMCODE$)           ! UNPACK ITEM CODE
+                       A$ = "=" + MID$(A$,2,1)              \ REBUILD ITEM CODE
+                       + EMSS.IR.MFR.NUM$ + RIGHT$(A$,5) !   FOR VALIDATION
+                       IR.ITEMCODE$ = PACK$(A$)             ! USE REBUILT ITEMCODE
+                     ENDIF                                  ! MFR FROM RECORD
+
+!!*******************************************************************
+!!** CAPTURE VALIDATION DATA TO BE USED FOR FUTURE SALES MATCHING  **
+!!*******************************************************************
+                     IF EMSS.TG.CPN(K%,1) = 0 THEN BEGIN  ! NO VALIDATION DATA YET
+                       EMSS.IR.DEPT.VAL = 0               ! NO VALD BY DEPT
+                       IF IR.USEREXIT2 > 0 AND            \ MINIMUM GIVEN
+                         (IR.INDICAT1 AND 20H) NE 0 THEN  \ TAXC FLAG ON
+                         EMSS.IR.DEPT.VAL = -1            ! VAL BY DEPT
+                       CALL GET.VAL.TYPE    !(CALL HITS I%) ! GET VALIDATION TYPE
+                       IF EMSS.CPNVAL.TYPE > 1 THEN BEGIN   ! ITEM LEVEL VALIDATION
+                         X% = 0                             ! ASSUME NO VALIDATION
+                         IF EMSS.CPNVAL.TYPE = 5  THEN BEGIN ! BY PROMO CODE
+                           X% = 50000000 + IR.USEREXIT1     ! SAVE PROMO WITH MARKER
+                           EMSS.TG.MATCH = EMSS.TG.MATCH OR 1 ! FLAG PROMO VALIDATION
+                         ENDIF ELSE BEGIN                   ! NOT BY PROMO CODE
+                           IF EMSS.CPNVAL.TYPE = 2 THEN BEGIN ! BY DEPT AND FAMILY
+                             X% = PACKBIN4(IR.DEPARTME$,0,2)  ! GET DEPARTMENT
+                             X% = 20000000 +(1000 * X%) +IR.FAMILYNU1 ! SAVE WITH FAMILY
+                             EMSS.TG.MATCH = EMSS.TG.MATCH OR 2 ! FLAG DEPT/FAM VALIDATION
+                           ENDIF ELSE BEGIN                   ! BY MFR AND FAMILY
+                             X% = VAL(EMSS.IR.MFR.NUM$)       ! GET MFR NUMBER
+                             IF X% > 0 THEN BEGIN             ! MFR NUMBER SUPPLIED
+                               X% = (1000 * X%) +IR.FAMILYNU1 ! SAVE MFR AND FAMILY
+                               EMSS.TG.MATCH = EMSS.TG.MATCH OR 4 ! FLAG MFR VALIDATION
+                               EMSS.TG.CPN(K%,0)              \ FLAG VALIDATION
+                               = EMSS.TG.CPN(K%,0) OR 20000H  !  BY MFR
+                             ENDIF                        ! MFR NUMBER SUPPLIED
+                           ENDIF                          ! BY MFR AND FAMILY
+                         ENDIF                            ! NOT BY PROMO CODE
+                         IF X% THEN                       \ VALIDATION DATA FOUND
+                           EMSS.TG.CPN(K%,1) = X%         ! SAVE VALIDATION DATA
+                       ENDIF                              ! VALIDATION POSSIBLE
+                     ENDIF                                ! DATA NOT ALREADY PRESENT
+                   ENDIF                                  ! ACTIVE COUPON
+                 ENDIF                                    ! GOOD READ
+               ENDIF                                      ! NOT DONE YET
+             NEXT K%                                      ! NEXT TARGETED
+             ITEMCODE$ = ""                               ! CLEAR ITEMCODE
+             IR.ITEMCODE$ = ""                            ! CLEAR ITEMCODE
+             SL.IT.INDICAT3B = 0                          ! CLEAR AUTOMATIC
+             TS.ER.RETURN = 0                             ! RESTORE ERROR FLAG
+           ENDIF                                          ! READY FOR REPLAY
+         ENDIF                                            ! CARD WITH TARGETED
+!EIR53115
+!AIR36962
+         IF EMSS.PANEL.TRANS THEN BEGIN                   ! IF PANELIST,
+           TS.PRT.PARM = TS.PRNTOPTS(25)                  ! SET PRINT PARM
+           TS.TEMP1$ = ?DEL.ZEROES(UNPACK$(CA.CUSTNUM$))  ! PREP CUSTOMER #
+           TS.LINETYPE = 10                               ! DATA ENTRY
+           TS.LINEDATA = 2                                ! 2ND LINE
+           CALL TSPREC01                                  ! CALL PRINT ROUTINE
+!AIR41494 SET FLAG IF RETRIEVED TRANS(ALSO IPL RECOVERY) CONTAINS A VALID
+!         CUSTOMER NUMBER
+           EMSS.CUSTNUM.IN.RETRV = -1           ! VALID CUST NUM
+!EIR41494                                       !
+         ENDIF                                  ! PANELIST
+!EIR36962
+         EMSS.COUP.REPLAY = 0                   ! STOP REPLAY
+         EMSS.TG.REJ.RPLY = 0                   ! RESET REJECT FLAG
+!AIR46523
+!      EMSS.REPLAY.SAVE = 0                     ! ASSUME ALREADY REPLAYED
+!EIR46523
+!AIR52584 PEIR46523.  THIS FLAG MUST BE ZEROED HERE.
+         EMSS.REPLAY.SAVE = 0                   ! ASSUME ALREADY REPLAYED
+!EIR52584
+         TS.IO.INPUT.READY = 0                  ! NO AUTO KEYING
+         DIM TS.IO.KEYS(10)                     ! CLEAR ANY KEYED DATA
+         DIM TS.IO.DATA$(10)                    ! CLEAR ANY KEYED DATA
+       ENDIF                                    !
+     ENDIF                                      ! CUSTOMER NUMBER
+   ENDIF                                        ! DATA ENTRY STRING
+
+!AIR97036
+!!*******************************************************************
+!!** RECOVER COUPON ITEM CODE FOR PRINTED COUPON DESCRIPTOR        **
+!!*******************************************************************
+   IF TS.TEMP1I2 = 1 THEN BEGIN                 ! ITEM ENTRY STRING
+     A$ = UNPACK$(MID$(SL.STR.ENTRY$,3,6))      ! GET ITEM CODE
+     IF LEFT$(A$,1) = "=" THEN BEGIN            ! ALTERED COUPON UPC
+       A$ = PACK$(RESTORE.UPC(A$))              ! RESTORE UPC
+       SL.STR.ENTRY$ = LEFT$(SL.STR.ENTRY$,2)   \ REPLACE ITEM CODE
+          + A$ + MID$(SL.STR.ENTRY$,9,99)       ! WITH REFORMATTED CODE
+     ENDIF                                      ! ALTERED COUPON UPC
+
+!AIR46523
+     I% = MATCH(":", SL.STR.ENTRY$, 3)
+     IF I% > 3 THEN                             \
+       SL.IT.ITEMCODE$ = UNPACK$(MID$ (SL.STR.ENTRY$, 3, I%-3))
+     I% = VAL(RIGHT$(SL.IT.ITEMCODE$,4))
+     FOR K% = 1 TO EMSS.TG.CPN.CNT              ! FOR ALL TARGETED
+       J% = EMSS.TG.CPN(K%,0) AND 0FFFFH        ! GET UPC
+       IF J% = I% THEN BEGIN                    ! UPC MATCH
+         EMSS.PC.COUP = 10000 + I%              !
+         K% = EMSS.TG.CPN.CNT                   ! EXIT LOOP IR47420
+       ENDIF
+!    K% = EMSS.TG.CPN.CNT                       ! EXIT LOOP IR47420
+     NEXT K%
+!EIR46523
+   ENDIF                                        ! ITEM ENTRY STRING
+!EIR97036
+
+ ENDIF                                          ! EM PROCESSING IS ACTIVE

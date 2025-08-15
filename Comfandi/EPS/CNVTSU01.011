@@ -1,0 +1,71 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+If UE.EPSS.ON AND UE.EPSS.HEAD Then Begin
+  UE.EPSS.FORMULA$ = UE.EPSS.DAT(2)
+  If PRT4610.ENABLE = 0 Then X.Ajuste% = 38 Else X.Ajuste% = 52
+!  Call U.Imprime("--   IDENTIFICACION DEL CONVENIO    --",6100H)
+
+!  X.Str$ = Left$("Nombre Convenio: "+Left$(UE.EPS.NCONVE$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+
+  X.Str$ = Left$("Codigo del Plan: "+UNPACK$(UE.EPS.CCOD$)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  X.Str$ = Left$("Nombre del Plan: "+Left$(UE.EPS.CNOMB$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+
+!  X.Str$ = Left$("Beneficiario   : "+Left$(UE.EPS.BNOMB$,21)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+!  X.Str$ = Left$("Codigo / C.C.  : "+Right$(UNPACK$(UE.EPS.BCOD$),14)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+ 
+  X.Str$ = Left$("Solicitud Nro  : "+Right$(UE.EPSS.FORMULA$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  
+!  X.Str$ = Left$("Codigo Medico  : "+Right$(UE.EPSS.MEDICO$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+!  Call U.Imprime(X.Str$,6100H)
+
+  X.Str$ = Left$("Codigo I.P.S   : "+Right$(UE.EPSS.IPS$,12)+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  X.Str$ = Left$("Categoria      : "+UE.EPS.BESTRATO$+String$(X.Ajuste%," "),X.Ajuste%)
+  Call U.Imprime(X.Str$,6100H)
+  
+ ! Call U.Imprime(String$(X.Ajuste%,"*"),6100H)  
+ 
+ 
+ !--- Lineas adicionadas para el manejo de cuota moderadora
+ !--- cobrandola como un articulo Miscelaneo para el manejo 
+ !--- de Capitacion.   OVS 23 Enero 2006
+ 
+If Val(UE.EPS.CAPITACION$) = 1 Then Begin  
+
+   TS.TEMP1I4 = Val(Unpack$(UE.EPS.CMP$(Val(UE.EPS.BESTRATO$)))) ! Toma el Vlr de la cuota moderadora
+   SL.END = SL.END + 1 
+   SL.STR$(SL.END) = PACK$("01")+		\  ! En string reservado
+ 			":"+PACK$("000000002302")+	  \  ! Articulo Miscelaneo 
+ 			":"+PACK$(Str$(TS.TEMP1I4))+	\  ! Valor Cuota
+ 			":"+":"+PACK$("101")+	        \  ! Dpto Miscelaneo 
+      ":"+PACK$(STR$(3))+	          \  ! 
+ 			":"+":"+PACK$("40")              ! Articulo Miscelaneo
+   TS.BALDUE(0)     = TS.BALDUE(0)     + TS.TEMP1I4   ! Ajusto totales de la 
+   TS.TOTALS(0,0,0) = TS.TOTALS(0,0,0) + TS.TEMP1I4   ! Aplicacion 
+   If TS.TEMP1I4 <> 0 Then Begin 
+      Ue.Cnv.AplicaCopago% = -1 
+   EndIf 
+   
+   If Val(UE.EPS.CAPITACION$) = 1 Then Begin 
+     TS.TEMP1I4 = Val(Unpack$(UE.EPS.CMP$(Val(UE.EPS.BESTRATO$)))) ! Toma el Vlr de la cuota moderadora
+     Call FORMAT.AMOUNT(TS.TEMP1I4)
+     TS.TEMP1$ = Right$("                "+TS.TEMP1$,16)
+     Call U.Imprime("  CUOTA MODERADORA   "+TS.TEMP1$,6100H)   
+  EndIf 
+  
+EndIf    
+   UE.EPSS.HEAD = 0
+EndIf

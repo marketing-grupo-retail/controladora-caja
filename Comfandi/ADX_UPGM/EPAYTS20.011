@@ -1,0 +1,32 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN
+ IF (TS.TOTALS(0,0,0) > 0)  THEN BEGIN
+     Asc.Pay.Slend% = SL.END								! Total de strings
+ EndIf
+EndIf
+
+IF TS.INTRX THEN                                       \! En una trx de venta
+IF MATCH(TS.SDESC$(59),TS.PRTBUF$,1) > 0 THEN BEGIN     ! Si se registro anulacion total
+   Asc.Pay.Impr% = 2                                    ! Indica anulacion total de la transaccion
+ENDIF
+
+IF NOT(TS.INTRX) THEN                                  \! 
+IF MATCH(TS.SDESC$(190),TS.PRTBUF$,1) > 0 THEN BEGIN    ! Si se registro anulacion total
+   Asc.Pay.Bug% = -1
+ENDIF
+
+ If Asc.Pay.OptTrx$ = "12" Then Begin                   ! Cobro subsidio no por compra
+    TS.PRTBUF$ = ""
+    IF PRT4610.ENABLE = 0 THEN \
+       TS.FORMCR$ = "C38 A0" ELSE \
+       TS.FORMCR$ = "C52 A0" 
+ EndIf                   
+

@@ -1,0 +1,24 @@
+!-- Control versiones Aplicacion Terminal
+!Observaciones:
+!TS.TEMP1$ = "COMPILACION jue 20 abr 2023 22:10  af"
+!TS.TEMP1$ = "COMPILACION Mie 27 Sep 2023 18:15  GR"
+!----------------------------------------------------
+! Se libera modulo TEF validacion sockets
+! Se instala modulo delivery              23/Nov/2023
+!----------------------------------------------------
+! Se modifica tef para reporte MID y TID medianet en
+! todas las operaciones TEF
+! Se implementa version nueva credito institucional
+!                                         24/Nov/2023
+!----------------------------------------------------
+! Implementacion modulo forma de pago DEUNA
+! colocacion logs mensajeria independientes a
+! credito institucional y TEF             26/Mzo/2024
+!----------------------------------------------------
+! Implementacion forma de pago Rappi y ajuste 
+! en procesos de captura de domiciliarios para 
+! control de pagos con tarjeta CRI y evitar el pago
+! con tarjetas diferentes a las parametrizadas.
+! Desarrollado por Grupo Retail           07/Ago/2024
+!----------------------------------------------------
+TS.TEMP1$ = "COMPILACION Mie 07 Ago 2024 12:00  GR"

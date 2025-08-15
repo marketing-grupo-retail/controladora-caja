@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC40 PUBLIC                                                        
+! TSUPEC40 - ERROR STACKING EXIT                                                
+%INCLUDE EAMTSE40.J86        ! EMS PRPQ
+END FUNCTION                                                                    
+                                                                                

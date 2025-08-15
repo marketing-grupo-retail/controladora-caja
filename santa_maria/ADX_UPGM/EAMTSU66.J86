@@ -1,0 +1,12 @@
+!After Manager Override Processing / Verification is Complete
+!Despues de la intervencion del jefe de departamento
+FUNCTION TSUPEC66 (CALLPARM) PUBLIC
+   INTEGER*1 CALLPARM  ! -1 at good mgr ovr, 0 at bad mgr ovr
+
+!call traceNUO( "UE66 CALLPARM=" + str$(CALLPARM) + " TS.GUIDANCE=" + str$(TS.GUIDANCE) + \
+!   " TS.TEMP1I4=" + str$(TS.TEMP1I4) + " TS.MMMOD=" + str$(TS.MMMOD))
+
+   !Modulo facturacion
+   call MSMTFACT66(CALLPARM)
+
+END FUNCTION

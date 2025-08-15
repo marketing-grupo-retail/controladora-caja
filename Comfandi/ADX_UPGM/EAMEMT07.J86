@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC07 PUBLIC ! BEFORE CHECKING A COUPON MINIMUM PURCHASE
+ 
+! insert user exit code here
+ 
+ END FUNCTION

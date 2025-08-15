@@ -1,0 +1,51 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMP4ESJ                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: APPLICATION-SPECIFIC PROTOTYPES         */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*                                                                */
+\/*      IR33229 - Created June 18, 1996 - Matra ADW               */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+SUB EP.ERROR.LOG(SEVERITY, EVENT) EXTERNAL
+   INTEGER*1 SEVERITY, EVENT
+END SUB
+
+SUB EP.READ.TERMOPTS EXTERNAL
+END SUB
+
+SUB PROCESS.EOT EXTERNAL
+END SUB
+
+SUB LOAD.CR.MSGS EXTERNAL
+END SUB
+
+SUB SIZE.CR.BUFFER EXTERNAL
+END SUB
+
+SUB CLEAN.RECEIPT(ARRAY.INDEX,VOIDS.TOTAL,QTY,QTY.INDICAT) EXTERNAL
+  INTEGER*2 ARRAY.INDEX, VOIDS.TOTAL, QTY, QTY.INDICAT
+END SUB
+
+SUB EP.LOAD.DESC EXTERNAL
+END SUB
+
+SUB TRC.4610(MSG$) EXTERNAL
+   STRING MSG$
+END SUB
+
+SUB PRT4610.ASYNC.ERROR (RETRYFLAG, OVERLAY$, MSG.NUMBER, STATE) EXTERNAL
+   INTEGER*2 RETRYFLAG, MSG.NUMBER, STATE
+   STRING OVERLAY$
+END SUB

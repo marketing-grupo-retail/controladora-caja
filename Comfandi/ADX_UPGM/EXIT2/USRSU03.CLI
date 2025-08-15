@@ -1,0 +1,228 @@
+!   ***************************************************************************
+!   **    Date       :  Octubre 27 / 97                                      **
+!   **    Responsable:  DEPTO DE SISTEMAS                                    **
+!   **    User Exit  :  USRSU03.011                                          **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SISTEMAS POS                                         **
+!   **                                                                       **
+!   **    Instrucciones  para  franqueo de documentos con el nombre del      **
+!   **    CLIENTE y el nombre de la Empresa para Ventas a Credito.           **
+!   **    Ademas imprime tiquete doble Minifactura.                          **
+!   ***************************************************************************
+
+!---------------- Subrutina de Impresi¢n  ----------------------------- 
+                                                         !
+SUB IMPRIMIR                                             ! Subrut de Vendedor
+!WRITE #38;LIN.CRE$
+      FOR USR.IND1% = 1 TO 499                           ! Loop para vaciar CR
+        IF USR.ITEMS$(USR.IND1%) = "" THEN BEGIN         ! Si no hay mas lineas
+           IF LINMF% > 0 THEN BEGIN                      ! Si faltan lineas
+              FOR UE.II% = LINMF% TO 0 STEP -1              ! completa con blancos
+                  WRITE FORM "C30 C8 A1";#34;" ","    "  ! Avanza un espacio
+              NEXT UE.II%                                   ! Siguiente Loop
+           ENDIF                                         ! Fin de Condic
+           FOR USR.IND1% = 450 TO 489                    ! Loop para vaciar TOT
+               TS.FORMCR$ = "C38 A1"                     ! Cambia Format Impr
+               IF USR.ITEMS$(USR.IND1%) <> "" THEN BEGIN ! Si hay Pagos
+                  WRITE FORM "C38 A1";#34;" " +         \! los Imprime
+                  LEFT$(USR.ITEMS$(USR.IND1%),          \! hasta que se
+                  38-(38-LEN(USR.ITEMS$(USR.IND1%))))    ! agoten
+               ENDIF                                     ! Fin de los Pagos
+           NEXT USR.IND1%                                ! Sig Loop
+           USR.IND1% = 499                               ! Asigna final Loop
+        ENDIF ELSE BEGIN                                 !
+          CAB1$ = "                       " +           \!
+                 MID$(USR.ITEMS$(USR.IND1%),47,3)  +    \! Cantidad
+                 RIGHT$(USR.ITEMS$(USR.IND1%),11)        ! Valor Total
+           TS.FORMCR$ = "C38 A1"                         ! Cambia a Fmto 38
+           WRITE FORM "C38 A1";#34;                     \! Imprime Vr Unit
+                 MID$(USR.ITEMS$(USR.IND1%),5,7)   +    \! Codigo extendido 
+                 MID$(USR.ITEMS$(USR.IND1%),17,17) +    \! Descripcion
+                 MID$(USR.ITEMS$(USR.IND1%),53,12)       ! Cantidad
+           WRITE FORM "C38 A1";#34;CAB1$                 ! Imprime Linea
+           LINMF% = LINMF% - 2                           ! Decrem Cont Linea
+        ENDIF                                            !
+      NEXT USR.IND1%                                     !
+      NOM$ = STRING$(30," ")                             ! Borra Nombre
+!     WRITE FORM "C38 A4";#34;" "                        ! Avanza 1 espacio
+!     WRITE FORM "C38 A1";#34;"  "+STRING$(34,"-")       !  
+!     WRITE FORM "C38 A1";#34;                          \!
+!                "      Firma Usuario del Servicio"      !
+!     WRITE FORM "C13 PIC(###,###,###) A4";#34;         \!
+!                "      C‚dula:",VAL(CEDU$)              !
+!     WRITE FORM "C38 A1";#34;"  "+STRING$(34,"-")       !  
+!     WRITE FORM "C38 A1";#34;                          \!
+!                "      Firma Responsable COMFANDI"      !
+
+  RAYA$  = STRING$(30,"-")                          ! Rayas
+  CABE$  = "   Cod    Descripci¢n    Vr Uni."       ! Rayas
+  CABE1$ = "                       Cant   Vr Tot."  ! Rayas
+  FCORT$ = CHR$(27)+CHR$(80)                        ! Guillotina
+  FCH12$ = CHR$(27)+CHR$(12)                        ! Salta P gina Channel 12
+  FCIZQ$ = CHR$(27)+CHR$(76)                        ! Posic. Cabeza a la Izqui
+  FONPH$ = CHR$(27)+CHR$(69)                        ! Letra Emphasized
+  FON75$ = CHR$(27)+CHR$(14)                        ! Letra 7.5 CPI (19 y 43)
+  FON7D$ = CHR$(27)+CHR$(23)                        ! Letra 7.5 CPI (19 y 43) 2H
+  FON12$ = CHR$(27)+CHR$(58)                        ! Letra 12 CPI  (30 y 68)
+  FON15$ = CHR$(27)+CHR$(59)                        ! Letra 15 CPI  (38 y 86)
+                                                    ! 
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+RAYA$                                      ! Rayas
+         WRITE FORM "C18 PIC(###,###,###) C5 A1";#34; \! Muestra Afiliado
+               " ** No. CREDITO :",VAL(FAC$)           ! en Tira Cliente
+         IF LEN(CEDU$) > 9 THEN CEDU$=RIGHT$(CEDU$,9)  ! Controla Edicion
+         WRITE FORM "C18 PIC(###,###,###) A1";#34;    \! Muestra Usuario CR
+               " ** cc Comprador:",VAL(CEDU$)          ! en Tira Cliente
+         WRITE FORM "C6 C5 C27 A2";#34;               \! Muestra Vendedor
+               "Vend: ",RIGHT$("0000"+NO.VEN$,4),     \!
+                NOMBV$                                 ! en Tira Cliente
+  FRA.AA$  = LEFT$(DATE$,2)                         ! Arma ano
+  FRA.MM$  = MID$(DATE$,3,2)                        ! Arma mes
+  FRA.DD$  = RIGHT$(DATE$,2)                        ! Arma dia
+  FRA.FAC$ = FRA.AA$+"/"+FRA.MM$+"/"+FRA.DD$        ! Arma Linea Franq
+                                                    !
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  WRITE FORM "C38 A8";#34;TS.PRTBUF$                ! Impr blancos y salta
+                                                    !
+  TS.FORMCR$ = "C19 A1"                             ! Formato de DI 19 Char
+  WRITE FORM "C19 A1";#34;                         \! Impr segun formato
+  FON75$+TO.FRANK.TXT$(6,1)                         ! 1er Linea de Franq
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI
+  WRITE FORM "C30 A2";#34;                         \! Impr segun formato
+  FON12$+TO.FRANK.TXT$(6,2)                         ! 2a Linea de Franq
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+TO.FRANK.TXT$(6,3)                         ! 3a Linea de Franq
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+LISVAR$                                    ! Variedad del Cr 
+  NO.CUO$ = ""                                      ! Reset de Cuota %EPS
+                                                    !
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  WRITE FORM "C38 A2";#34;                         \! Impr segun formato
+  FON15$+"    Num.: "+FAC$+"  Fecha: "+FRA.FAC$     ! Factura y Fecha
+                                                    !
+  WRITE FORM "C2 A0";#34;FCORT$                     ! Corta el Papel
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+"Emp: "+NOEM$                              ! Entidad Afiliada
+                                                    !
+  IF LEN(NITW$) < 7 THEN BEGIN                      ! Nit tiene menos de 7 dig
+     NITW$ = RIGHT$("      " + NITW$,6)             ! lo deja en 6 Posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-3) + "."  +    \! Hace la compaginacion
+             RIGHT$(NITW$,3)                        ! de 3 en 3 con .
+  ENDIF ELSE BEGIN                                  ! de lo contrario
+     IF DIGW$ = " "  THEN BEGIN                     ! Si trae Minifac Barras
+        DIGW$ = "-" + RIGHT$(NITW$,3)               ! Separa parte Dig/Ctrl
+        NITW$ = LEFT$(NITW$,LEN(NITW$)-3)           ! y ajusta NIT
+     ENDIF                                          ! Fin de ajuste
+     POSIC% = LEN(NITW$) - 6                        ! toma el resto de posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-6) + "."  +    \! y compagina parte Izq
+             MID$(NITW$,POSIC%+1,3)    + "."  +    \! con punto y de 3 en 3
+             RIGHT$(NITW$,3)                        ! con puntos
+  ENDIF                                             ! fin de Long del NIT
+  NITW$ = NITW$ + DIGW$                             ! Agrega Dig de Ctrl
+  DIGW$ = " "                                       ! Borra Dig de Ctrl
+  
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+"Nit:    " + NITW$                         ! Nit y Fecha Rem
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+RAYA$                                      ! Rayas
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C21 PIC($####,###-) A1";#34;         \! Impr segun formato
+  FON12$+" Cupo Autorizado: ",VAL(NO.CUP$)          ! Valor Autorizado CR
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C21 PIC($####,###-) A1";#34;         \! Impr segun formato
+  FON12$+" Vr.del Cr‚dito : ",VAL(VRCRE$)           ! Valor Utilizado CR
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C21 PIC($####,###-) A1";#34;         \! Impr segun formato
+  FON12$+" Cuota Moderador:",VAL(CTAMOD$)           ! Cuota Moderadora
+  ! CTAMOD$ = ""                                      !
+
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  IF LEN(CEDU$) > 9 THEN CEDU$=RIGHT$(CEDU$,9)         ! Controla Edicion
+  WRITE FORM "C21 PIC(###,###,###) A1";#34;        \! Muestra Usuario CR
+  FON12$+" #cc Comprador  :",VAL(CEDU$)             ! Cuota Moderadora
+!  CEDU$ = ""                                        !
+
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+" Beneficiario   :  " + BENE$                 ! Almacen donde se
+
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+"Almac‚n: " + STR$(VAL(TS.STORE$)) +      \! Almacen donde se
+          " " + ALMA$                               ! registro el Credito
+                                                    !
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C38 A2";#34;FON15$ + VENDIO$          ! Impr segun formato
+
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  WRITE FORM "C38 A1";#34;                         \! Impr segun formato
+  FON15$+CABE$                                      ! Direcc y Fecha Ven
+                                                    !
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  WRITE FORM "C38 A1";#34;                         \! Impr segun formato
+  FON15$+CABE1$                                     ! Direcc y Fecha Ven
+                                                    !
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  WRITE FORM "C30 A1";#34;                         \! Impr segun formato
+  FON12$+RAYA$                                      ! Direcc y Fecha Ven
+
+  LINCR% = 25                                       ! Inicia Cont Lin
+  LINMF% = 25                                       ! Inicia Cont Lin (mf)
+
+      FOR USR.IND1% = 1 TO 499                           ! Loop para vaciar CR
+        IF USR.ITEMS$(USR.IND1%) = "" THEN BEGIN         ! Si no hay mas lineas
+           IF LINMF% > 0 THEN BEGIN                      ! Si faltan lineas
+              FOR UE.II% = LINMF% TO 0 STEP -1              ! completa con blancos
+                  WRITE FORM "C30 C8 A1";#34;" ","    "  ! Avanza un espacio
+              NEXT UE.II%                                   ! Siguiente Loop
+           ENDIF                                         ! Fin de Condic
+           FOR USR.IND1% = 450 TO 489                    ! Loop para vaciar TOT
+               TS.FORMCR$ = "C38 A1"                     ! Cambia Format Impr
+               IF USR.ITEMS$(USR.IND1%) <> "" THEN BEGIN ! Si hay Pagos
+                  WRITE FORM "C38 A1";#34;" " +         \! los Imprime
+                  LEFT$(USR.ITEMS$(USR.IND1%),          \! hasta que se
+                  38-(38-LEN(USR.ITEMS$(USR.IND1%))))    ! agoten
+               ENDIF                                     ! Fin de los Pagos
+           NEXT USR.IND1%                                ! Sig Loop
+           USR.IND1% = 499                               ! Asigna final Loop
+        ENDIF ELSE BEGIN                                 !
+          CAB1$ = "                       " +           \!
+                 MID$(USR.ITEMS$(USR.IND1%),47,3)  +    \! Cantidad
+                 RIGHT$(USR.ITEMS$(USR.IND1%),11)        ! Valor Total
+           TS.FORMCR$ = "C38 A1"                         ! Cambia a Fmto 38
+           WRITE FORM "C38 A1";#34;                     \! Imprime Vr Unit
+                 MID$(USR.ITEMS$(USR.IND1%),5,7)   +    \! Codigo extendido 
+                 MID$(USR.ITEMS$(USR.IND1%),17,17) +    \! Descripcion
+                 MID$(USR.ITEMS$(USR.IND1%),53,12)       ! Cantidad
+           WRITE FORM "C38 A1";#34;CAB1$                 ! Imprime Linea
+           LINMF% = LINMF% - 2                           ! Decrem Cont Linea
+        ENDIF                                            !
+      NEXT USR.IND1%                                     !
+      NOM$ = STRING$(30," ")                             ! Borra Nombre
+      IF NOEM$ <> STRING$(30," ") THEN NOE$=NOEM$        ! Trae Nombre Empr 
+      NOEM$     = STRING$(30," ")                        ! Borre Nombre Emp
+      VRCRE$    = STRING$(12," ")                        ! Borre Nombre Emp
+      FAC$      = ""                                     ! Reset No Factura
+      CEDU$     = ""                                     ! Reset No Factura
+      CTAMOD$   = ""                                     ! Reset Cuota Moderador
+      RATA$     = STRING$(8," ")                         ! Borre Nom Porcentaje
+!      DIM USR.ITEMS$(500)                                ! Dim/Reset Array
+!      USR.IND1% = 0                                      ! 
+!      USR.IND2% = 0                                      !   
+       LINMF%    = 25                                     !
+END SUB                                                  ! Fin Subrutina
+!----------------------------------------------------------------------------

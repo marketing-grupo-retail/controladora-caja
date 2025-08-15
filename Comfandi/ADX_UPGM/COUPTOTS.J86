@@ -1,0 +1,429 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** COUPTOTS.J86 ***********************************************!!
+!!  TITLE: Accumulate additional performance totals for coupons
+!!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.
+!!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1993 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!!
+Accumulate additional performance totals for coupons (COUPTOTS)
+ 
+This module provides user installable exit code which can be used to
+enhance the electronic marketing package by adding to it an optional
+function provided with the Coupon Processing PRPQ.  It is suggested
+that this code be added only if the user had installed the similar
+function from the Coupon Processing PRPQ and does not wish to lose it.
+ 
+This set of user exit code accumulates the following additional totals:
+   Doubled vendor coupons
+   Doubled store coupons
+   Validated vendor coupons
+   Non-validated vendor coupons
+   Validated store coupons
+   Non-validated store coupons
+A count and amount is kept for each of these 6 totals in the operator
+performance file and this information is presented in the operator
+performance reports.  These new totals are accumulated in the section of
+the operator performance record reserved for user exit totals, so you
+must insure that these exit totals are not already used by other user
+exit functions before installing this function.  The new totals use the
+last 36 bytes in operator performace record as follows:
+ 
+                        Operator Performance Record Usage
+   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+   ³ Field Name,       Type,Length,Offset   Description                      ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³                      .                                .                 ³
+   ³                      .   See Programming Guide        .                 ³
+   ³                      .                                .                 ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÂÄÄÄÄÂÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   USERINTS   ³ INT³ 24 ³ 448 ³ Six 4-byte integers for use with exits   ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   DBLMFRCNT  ³ INT³  2 ³ 472 ³ Count of doubled vendor coupons          ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   DBLMFRAMT  ³ INT³  4 ³ 474 ³ Amount of doubled vendor coupons         ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   DBLSTRCNT  ³ INT³  2 ³ 478 ³ Count of doubled store coupons           ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   DBLSTRAMT  ³ INT³  4 ³ 480 ³ Amount of doubled store coupons          ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   VALMFRCNT  ³ INT³  2 ³ 484 ³ Count of validated vendor coupons        ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   VALMFRAMT  ³ INT³  4 ³ 486 ³ Amount of validated vendor coupons       ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   KEYMFRCNT  ³ INT³  2 ³ 490 ³ Count of keyed vendor coupons            ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   KEYMFRAMT  ³ INT³  4 ³ 492 ³ Amount of keyed vendor coupons           ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   VALSTRCNT  ³ INT³  2 ³ 496 ³ Count of validated store coupons         ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   VALSTRAMT  ³ INT³  4 ³ 498 ³ Amount of validated store coupons        ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   KEYSTRCNT  ³ INT³  2 ³ 502 ³ Count of keyed store coupons             ³
+   ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÅÄÄÄÄÅÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+   ³   KEYSTRAMT  ³ INT³  4 ³ 504 ³ Amount of keyed store coupons            ³
+   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÁÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ 
+ 
+These new totals are shown in the current and previous period operator
+performance reports through 4 new print lines that might look like the
+following:
+ 
+                MANUFACTURER COUPONS   STORE COUPONS         TOTAL COUPONS
+  VALIDATED        22/14.53   75.8%       3/  .70   27.2%      25/15.23   62.5%
+  COUPON KEY        7/ 3.65   24.2%       8/ 1.95   72.8%      15/ 5.60   37.5%
+  ** TOTAL **      29/18.18              11/ 2.65              40/20.83
+  DOUBLED          10/ 3.38   34.4%       2/  .50   18.1%      12/ 3.88   30.0%
+ 
+Because these totals are kept in exit fields that are not accumulated in
+the weekly totals files, these lines are not shown on the weekly reports.
+ 
+The breakdown of store and vendor coupons by whether or not they are
+validated is presented by operator to allow for auditing of operators
+for proper coupon entering techniques.  Based on how the coupon was
+entered into the system, there may not have been actual validation that
+an item matching the coupon was sold.  Any coupon which is keyed in
+using a coupon key and an item code or a department key is not validated
+since the system cannot actually verify that an item matching the coupon
+has been sold.  Any coupon entered through a velocity code which has no
+associated manufacturer number will not actually be validated, but since
+the customer has control over whether his store coupon item records have
+associated manufacturer numbers, this exit code assumes that they do.
+All scanned category 5 coupons are considered to be validated regardless
+of whether the outcome of this validation required an override.
+ 
+ 
+The following code should be added to the end of EAMCSUVA.J86:
+!***** EAMCSUVA.J86 ..... 02/20/89 ........ Robert Meares ****!!
+! TITLE: Accumulate additional accounting totals for coupons
+!
+ INTEGER USR.LAST.CPN             ! LAST CPN TYPE  0 = MFR, 1 = STR
+ 
+ 
+The following code should be added to the end of EAMCSU03.J86:
+!***** EAMCSU03.J86 ..... 02/20/89 ........ Robert Meares ****!!
+! TITLE: Accumulate additional performance totals for coupons
+!
+!!*******************************************************************
+!!** ISOLATE COUPONS AND SAVE UPDATE QUANTITY AND AMOUNT           **
+!!*******************************************************************
+ IF SL.IT.INDICAT3A = 6 OR                     \ MFR COUPON
+    SL.IT.INDICAT3A = 7 THEN BEGIN             !   OR STORE COUPON
+   WORK4I4 = SL.IT.XPRICE                      ! AMOUNT     RM-3/89
+   WORK4I2 = 1                                 ! QUANTITY   RM-3/89
+   IF SL.IT.INDICAT2 AND 0080H THEN            \ Cancel     RM-3/89
+     WORK4I2 = -1                              ! QUANTITY   RM-3/89
+ 
+!!*******************************************************************
+!!** SAVE ADDITIONAL PERFORMANCE DATA ON MULTIPLIED COUPONS        **
+!!*******************************************************************
+   IF ((SL.IT.INDICAT2 AND 0400H) NE 0) AND    \ MULTIPLIED COUPON
+      SL.IT.INDICAT3A = 7 THEN BEGIN           !  STORE COUPON
+     I% = 472 + (6 * USR.LAST.CPN)             ! OFFSET IN PERF FILE
+     CALL ADDIN2(CS.OPOP$,I%,WORK4I2)          ! UPDATE DBL CPN QTY
+     I% = I% + 2                               ! BUMP TO AMOUNT
+     CALL ADDIN4(CS.OPOP$,I%,WORK4I4)          ! UPDATE DBL CPN AMT
+   ENDIF ELSE BEGIN                            ! NOT MULTIPLIED COUPON
+ 
+!!*******************************************************************
+!!** SAVE ADDITIONAL VALIDATION DATA ON COUPONS                    **
+!!*******************************************************************
+     J% = 0                                    ! ASSUME VALIDATED
+     USR.LAST.CPN = SL.IT.INDICAT3A - 6        ! SAVE LAST COUPON TYPE
+     IF SL.IT.INDICAT2 AND 0030H THEN J% = 1   ! COUPON KEY PRESSED
+     I% = 484 + (12 * USR.LAST.CPN) + (6 * J%) ! OFFSET IN PERF FILE
+     CALL ADDIN2(CS.OPOP$,I%,WORK4I2)          ! UPDATE CPN QTY
+     I% = I% + 2                               ! BUMP TO AMOUNT
+     CALL ADDIN4(CS.OPOP$,I%,WORK4I4)          ! UPDATE CPN AMT
+   ENDIF                                       ! NOT MULTIPLIED COUPON
+ ENDIF                                         ! COUPON
+ 
+! Controller user exit 3 which is called before processing each item is
+! used to isolate and determine the type and validation level of coupons
+! and to update performance totals accordingly.
+ 
+ 
+The following code should be added to the end of EAMRPEVA.J86:
+!***** EAMRPUVA.J86 ..... 02/20/89 ........ Robert Meares ****!!
+! TITLE: Report additional performance totals for coupons
+!
+INTEGER*4 USER.CNT(1),              \ 12 Counts (6 Saved, 6 computed)
+          USER.AMT(1),              \ 12 Amounts (6 Saved, 6 computed)
+          USER.PCT(1)               ! 9 Computed Percents
+INTEGER*4 XX%                       ! Work variable
+ 
+ 
+The following code should be added to the end of EAMPFE01.J86:
+!***** EAMRPU01.J86 ..... 02/20/89 ........ Robert Meares ****!!
+! TITLE: Report additional performance totals for coupons
+!
+IF LINE.NO > 21 THEN                      \ Avoid excess lines
+  IF DESTINATION = DISPLAY THEN EXIT SUB  ! due to new additions
+GOTO EUSER.START
+ 
+EGET.COUPON.DATA:
+  IF LEN(OP.OP.RESERVED$) = 92  THEN BEGIN     ! Record data found
+ 
+!!********************************************************************
+!!**  GET SAVED DATA FROM PERFORMANCE RECORD                        **
+!!********************************************************************
+    DIM USER.CNT(12)                           ! Space for counts
+    DIM USER.AMT(12)                           ! Space for amounts
+ 
+    WORK = GETN2(OP.OP.RESERVED$,56)           ! Get DBL MFR CPN count
+    USER.CNT(10) = WORK
+    WORK = GETN2(OP.OP.RESERVED$,62)           ! Get DBL STR CPN count
+    USER.CNT(11) = WORK
+    WORK = GETN2(OP.OP.RESERVED$,68)           ! Get VAL MFR CPN count
+    USER.CNT(01) = WORK
+    WORK = GETN2(OP.OP.RESERVED$,74)           ! Get KEY MFR CPN count
+    USER.CNT(04) = WORK
+    WORK = GETN2(OP.OP.RESERVED$,80)           ! Get VAL STR CPN count
+    USER.CNT(02) = WORK
+    WORK = GETN2(OP.OP.RESERVED$,86)           ! Get KEY STR CPN count
+    USER.CNT(05) = WORK
+ 
+    USER.AMT(10) = GETN4(OP.OP.RESERVED$,58)   ! Get DBL MFR CPN amount
+    USER.AMT(11) = GETN4(OP.OP.RESERVED$,64)   ! Get DBL STR CPN amount
+    USER.AMT(01) = GETN4(OP.OP.RESERVED$,70)   ! Get VAL MFR CPN amount
+    USER.AMT(04) = GETN4(OP.OP.RESERVED$,76)   ! Get KEY MFR CPN amount
+    USER.AMT(02) = GETN4(OP.OP.RESERVED$,82)   ! Get VAL STR CPN amount
+    USER.AMT(05) = GETN4(OP.OP.RESERVED$,88)   ! Get KEY STR CPN amount
+  ENDIF
+RETURN
+ 
+ECOMPUTE.TOTALS:
+!!********************************************************************
+!!**  COMPUTE TOTALS FROM SAVED PERFORMANCE DATA                    **
+!!********************************************************************
+  USER.CNT(03) = USER.CNT(01) + USER.CNT(02) ! Get TOT VAL CPN count
+  USER.CNT(06) = USER.CNT(04) + USER.CNT(05) ! Get TOT KEY CPN count
+  USER.CNT(07) = USER.CNT(01) + USER.CNT(04) ! Get TOT MFR CPN count
+  USER.CNT(08) = USER.CNT(02) + USER.CNT(05) ! Get TOT STR CPN count
+  USER.CNT(09) = USER.CNT(03) + USER.CNT(06) ! Get TOT NDB CPN count
+  USER.CNT(12) = USER.CNT(10) + USER.CNT(11) ! Get TOT DBL CPN count
+ 
+  USER.AMT(03) = USER.AMT(01) + USER.AMT(02) ! Get TOT VAL CPN amount
+  USER.AMT(06) = USER.AMT(04) + USER.AMT(05) ! Get TOT KEY CPN amount
+  USER.AMT(07) = USER.AMT(01) + USER.AMT(04) ! Get TOT MFR CPN amount
+  USER.AMT(08) = USER.AMT(02) + USER.AMT(05) ! Get TOT STR CPN amount
+  USER.AMT(09) = USER.AMT(03) + USER.AMT(06) ! Get TOT NDB CPN amount
+  USER.AMT(12) = USER.AMT(10) + USER.AMT(11) ! Get TOT DBL CPN amount
+ 
+  DIM USER.PCT(12)                           ! Space for percents
+  FOR WORK = 1 TO 12
+    USER.PCT(WORK) = -1                      ! Default = no percents
+  NEXT WORK
+ 
+  XX% = 1000
+  IF USER.CNT(7) THEN BEGIN                  ! Non-zero MFR CPN totals
+    USER.PCT(01) = (USER.CNT(01) * XX%) / USER.CNT(07) ! Get MFR VAL pct
+    USER.PCT(04) = XX% - USER.PCT(01)                  ! Get MFR KEY pct
+    USER.PCT(10) = (USER.CNT(10) * XX%) / USER.CNT(07) ! Get DBL MFR pct
+  ENDIF
+  IF USER.CNT(8) THEN BEGIN                  ! Non-zero STR CPN totals
+    USER.PCT(02) = (USER.CNT(02) * XX%) / USER.CNT(08) ! Get STR VAL pct
+    USER.PCT(05) = XX% - USER.PCT(02)                  ! Get STR KEY pct
+    USER.PCT(11) = (USER.CNT(11) * XX%) / USER.CNT(08) ! Get DBL STR pct
+  ENDIF
+  IF USER.CNT(9) THEN BEGIN                  ! Non-zero TOT CPN totals
+    USER.PCT(03) = (USER.CNT(03) * XX%) / USER.CNT(09) ! Get TOT VAL pct
+    USER.PCT(06) = XX% - USER.PCT(03)                  ! Get TOT KEY pct
+    USER.PCT(12) = (USER.CNT(12) * XX%) / USER.CNT(09) ! Get TOT DBL pct
+  ENDIF
+RETURN
+ 
+EADDUP.RECAP.TOTS:
+!!********************************************************************
+!!**  ADD SAVED DATA FROM PERFORMANCE FILE FOR RECAP TOTALS         **
+!!********************************************************************
+  USER.PCT(01) = USER.PCT(01) + USER.CNT(01)
+  USER.PCT(02) = USER.PCT(02) + USER.CNT(02)
+  USER.PCT(03) = USER.PCT(03) + USER.CNT(04)
+  USER.PCT(04) = USER.PCT(04) + USER.CNT(05)
+  USER.PCT(05) = USER.PCT(05) + USER.CNT(10)
+  USER.PCT(06) = USER.PCT(06) + USER.CNT(11)
+  USER.PCT(07) = USER.PCT(07) + USER.AMT(01)
+  USER.PCT(08) = USER.PCT(08) + USER.AMT(02)
+  USER.PCT(09) = USER.PCT(09) + USER.AMT(04)
+  USER.PCT(10) = USER.PCT(10) + USER.AMT(05)
+  USER.PCT(11) = USER.PCT(11) + USER.AMT(10)
+  USER.PCT(12) = USER.PCT(12) + USER.AMT(11)
+RETURN
+ 
+EMOVE.RECAP.TOTS:
+!!********************************************************************
+!!**  MOVE RECAP SUMS TO LOOK LIKE SINGLE RECORD                    **
+!!********************************************************************
+  DIM USER.CNT(12)                           ! Space for counts
+  DIM USER.AMT(12)                           ! Space for amounts
+  USER.CNT(01) = USER.PCT(01)
+  USER.CNT(02) = USER.PCT(02)
+  USER.CNT(04) = USER.PCT(03)
+  USER.CNT(05) = USER.PCT(04)
+  USER.CNT(10) = USER.PCT(05)
+  USER.CNT(11) = USER.PCT(06)
+  USER.AMT(01) = USER.PCT(07)
+  USER.AMT(02) = USER.PCT(08)
+  USER.AMT(04) = USER.PCT(09)
+  USER.AMT(05) = USER.PCT(10)
+  USER.AMT(10) = USER.PCT(11)
+  USER.AMT(11) = USER.PCT(12)
+RETURN
+ 
+EGET.RECAP.DATA:
+!!********************************************************************
+!!**  Sum up data from performance file for recap report            **
+!!********************************************************************
+  IF PERIOD = 1 THEN BEGIN
+    OPEN "EAMPERFC" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    XX% = SIZE("EAMPERFC")/512 - 1               ! Determine file size
+  ENDIF
+  IF PERIOD = 2 THEN BEGIN
+    OPEN "EAMPERFP" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+    XX% = SIZE("EAMPERFP")/512 - 1               ! Determine file size
+  ENDIF
+!!IF PERIOD = 3 THEN BEGIN
+!!  OPEN "EAMPERCL" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+!!  XX% = SIZE("EAMPERCL")/512 - 1               ! Determine file size
+!!ENDIF
+!!IF PERIOD = 4 THEN BEGIN
+!!  OPEN "EAMPERPL" AS 55 BUFFSIZE 4096 NOWRITE NODEL  ! Open input file
+!!  XX% = SIZE("EAMPERPL")/512 - 1               ! Determine file size
+!!ENDIF
+  READ FORM "C512"; #55; WORK$                   ! Read header sector
+  DIM USER.PCT(12)                               ! Clear recap data
+ 
+  IF END #55 THEN CONTINUE.LOOP                  ! Don't stop till done
+  WHILE XX%                                      ! While more data
+    READ FORM "C4096"; #55; WORK$                ! Read next block
+ECONTINUE.LOOP:
+    XX% = XX% - 8                                ! Dec sectors left
+    IF XX% < 0 THEN BEGIN                        ! Overshot end
+      WORK  = (8 + XX%) * 512                    ! Compute data
+      WORK2 = (0 - XX%) * 512                    ! Compute junk
+      WORK$ = LEFT$(WORK$,WORK)                  \ Keep data
+            + STRING$(WORK2,CHR$(0))             !  appended with zeroes
+    ENDIF
+    IF XX% < 1 THEN XX% = 0                      ! No more work
+ 
+    FOR I% = 0 TO 3584 STEP 512                  ! For records in block
+      IF MID$(WORK$,I%+5,1) = "2" THEN BEGIN     ! If data record
+        OP.OP.RESERVED$ = MID$(WORK$,I%+421,92)  ! Get reserved data
+        GOSUB EGET.COUPON.DATA                   ! Get coupon variables
+        GOSUB EADDUP.RECAP.TOTS                  ! Add to recap data
+      ENDIF
+    NEXT I%                                      ! Next record
+  WEND                                           ! next block read
+  CLOSE 55                                       ! Close file
+  GOSUB EMOVE.RECAP.TOTS                         ! Move totals
+RETURN
+ 
+EFORMAT.LINE:
+!!********************************************************************
+!!**  Format each of 5 coupon totals lines based on WORK variable   **
+!!********************************************************************
+  IF WORK = 0 THEN BEGIN
+    USER$ = "              "                  \ 14 blanks
+          + " VENDER COUPONS       "          \ 22 header
+          + " STORE COUPONS        "          \ 22 header
+          + " TOTAL COUPONS        "          ! 22 header
+    RETURN
+  ENDIF
+  IF WORK = 1 THEN USER$ = " VALIDATED    "   ! Start with header = 14
+  IF WORK = 2 THEN USER$ = " COUPON KEY   "
+  IF WORK = 3 THEN USER$ = " ** TOTAL **  "
+  IF WORK = 4 THEN USER$ = " DOUBLED      "
+  WORK2$ = MMCFEC06$(USER.AMT(9),-1,-1)           ! Format largest amt  t
+  WORK2 = LEN(WORK2$)                             !  and save length
+  FOR I% = WORK * 3 - 2 TO WORK * 3
+    WORK$  = RIGHT$("    " +STR$(USER.CNT(I%)),5) ! Format count = 5
+    WORK2$ = MMCFEC06$(USER.AMT(I%),-1,-1)        ! Format amount
+    WORK2$ = RIGHT$("      " + WORK2$,WORK2)      !  with constant "."
+    IF WORK2 < 9 THEN WORK2$ = WORK2$ + " "       !   to max of 9 chars
+    WORK$  = WORK$ + "/" + WORK2$                 ! Append amt
+    IF USER.PCT(I%) > 0 THEN BEGIN                ! Percent present
+      WORK2$ = RIGHT$("   " +STR$(USER.PCT(I%)),4) ! Format percent = 4
+      WORK$  = WORK$ + LEFT$(WORK2$,3) + "."      \ Append percent
+             + RIGHT$(WORK2$,1) + "%       "
+    ENDIF ELSE BEGIN
+      WORK$  = WORK$ + "             "            ! Append blanks
+    ENDIF
+    USER$ = USER$ + LEFT$(WORK$,22)               ! Add to output line
+  NEXT I%
+RETURN
+ 
+EWRITE.LINE:
+!!********************************************************************
+!!**  Write line to display, printer, or file                       **
+!!********************************************************************
+  IF DESTINATION = DISPLAY THEN BEGIN        ! Display needed
+    IF LINE.NO > 21 THEN RETURN              ! Don't overflow display
+    CALL MMCFEC05(POSF(LINE.NO),"CF3")       ! position cursor
+    CALL MMCFEC05(PUTF(USER$),"CF7")         ! display string
+  ENDIF ELSE BEGIN                           ! write to printer/file
+    FORMAT$ = "C" + STR$(LEN(USER$)) + ",C2" ! get format string
+    WRITE FORM FORMAT$;#1;USER$,SKIP$        ! write string
+  ENDIF
+  LINE.NO = LINE.NO + 1                      ! bump line number
+RETURN
+ 
+EUSER.START:
+!!********************************************************************
+!!**  Main path to decide when and then to add new report totals    **
+!!********************************************************************
+!IF MID$(LINE$,13,3) = "***" THEN BEGIN    ! Final report line
+IF PERIOD < 3 THEN BEGIN                   ! No weekly totals
+ IF MATCH(" *** ",LINE$,5) THEN BEGIN      ! Final report line
+   USER$ = LINE$                           ! Move final line
+   GOSUB EWRITE.LINE                       ! Output final line
+   IF RECAP.REPORT THEN BEGIN              ! Recap report
+     GOSUB EGET.RECAP.DATA                 !  so get recap data
+   ENDIF ELSE BEGIN                        ! single report
+     GOSUB EGET.COUPON.DATA                !  so get operator data
+   ENDIF
+   GOSUB ECOMPUTE.TOTALS                   ! compute new totals
+ 
+   USER$ = NULL$                           ! Blank line
+   GOSUB EWRITE.LINE                       ! Output blank line
+   IF USER.CNT(9) = 0 THEN BEGIN           ! No coupon totals
+     USER$ = "NO COUPON TOTALS ARE PRESENT"
+     GOSUB EWRITE.LINE                     ! Output blank line
+   ENDIF ELSE BEGIN
+     IF DESTINATION NE 1 OR                \ Destination = print/file
+        LINE.NO < 20 THEN BEGIN            ! Display at least 3 lines
+       FOR WORK = 0 TO 4                   ! For each of 5 lines
+         GOSUB EFORMAT.LINE                ! Format next line
+         GOSUB EWRITE.LINE                 ! Output line
+       NEXT WORK
+     ENDIF
+   ENDIF
+   EXIT SUB                                ! Avoid reprint of input
+ ENDIF
+ENDIF                                      ! No weekly totals
+ 
+! The three reports exit includes are used here to cause 5 new lines of
+! coupon data to be added to the performance report.  This code captures
+! the new totals from the performance variables in memory using the
+! assembler language subroutines and then builds new report lines from
+! this data.  For the summary report, this code must read through the
+! performance file and add up the new coupon totals.  The lines are added
+! to the report following the last line.  If there is not enough room on
+! the display, then none or not all of the lines will be displayed.
+ 
+Once the changes listed in this document have beem made, then the
+impacted modules are rebuilt through the same process used to install
+electronic marketing.  The additional coupon totals change requires the
+modules for checkout support (EAMCSMLL), and the performace report
+(EAMRPPFL) to be rebuilt.  Because the module EAMPFE01.J86 is also used
+to rebuild the recap report (EAMRPSTL), the new code for this function
+can be included into the recap report.  This function will have no impact
+on the recap report unless one of the recap report descriptors is altered
+to include the key string " *** " that is used to identify the line after
+which to add the new totals.  If you want the new coupon totals included
+in the recap report, then you should alter report descriptor 1163 from
+"TOTALS :" to "TOTALS:  *** ".

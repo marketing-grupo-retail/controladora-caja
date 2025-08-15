@@ -1,0 +1,177 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+!**********************************************************************         
+!*               TERMINAL STATUS FILE                                 *         
+!**********************************************************************         
+!* The following defines the store record format for the              *         
+!* terminal status file.  The fields are defined in the sequence      *         
+!* in which they appear in the logical record                         *         
+!* For array dimensions see file EAMTSDIM                             *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.ST.TERMINAL$         ! TERMINAL NUMBER = 0           UPD 2           
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.ST.SLOGNAME$         ! NAME OF TRANSACTION SUMMARY   ASC 8           
+                                ! LOG CURRENTLY IN USE BY TRMS                  
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        TE.ST.NUMCLOSE          ! NUMBER OF 'CLOSE' RECORDS     INT 2           
+                                ! YET PROCESSED BY SALES SUPPORT                
+                                                                                
+INTEGER*1 GLOBAL \                                                              
+        TE.ST.CLOSEFLG          ! TRUE = CLOSE OF REPORTING     INT 1           
+                                ! PERIOD IS PENDING BUT NOT YET                 
+                                ! COMPLETED BY SALES SUPPORT                    
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.ST.DATETIME$,        \ DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                \ FROM LAST CLOSE RECORD TO BE                  
+                                \ PROCESSED                                     
+                                \                                               
+        TE.ST.MONITOR$          \ NUMBER OF LAST MONITORING     UPD 2           
+                                ! TERMINAL                                      
+!AIR76961                                                                       
+INTEGER*2 GLOBAL                \                                               
+        TE.ST.CLSECNTL,         \ STORE WIDE FLAGS CONTROLLING  INT 2           
+                                \ ACCESS TO STORE CLOSE FUNCTIONS               
+                                \                                               
+        TE.ST.INDICAT0,         \ CLOSE TYPE FLAGS FROM PENDING INT2            
+                                \ CLOSE REQUEST - BYTE 0                        
+        TE.ST.INDICAT1          \ CLOSE TYPE FLAGS FROM PENDING INT2            
+                                ! CLOSE REQUEST - BYTE 1                        
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.ST.RESERVED$         ! RESERVED FOR FUTURE USE       ASC 46          
+!EIR76961                                                                       
+                                                                                
+!**********************************************************************         
+!* The following defines the terminal record format for the           *         
+!* terminal status file.  The fields are defined in the sequence      *         
+!* in which they appear in the logical record                         *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.TR.TERMINAL$,        \ TERMINAL NUMBER               UPD 2           
+        TE.TR.OPERATOR$,        \ OPERATOR NUMBER OF CURRENT    UPD 5           
+                                \ OR MOST RECENT USER OF THIS                   
+                                \ TERMINAL                                      
+        TE.TR.TRANSNUM$,        \ TRANSACTION NUMBER OF CURRENT UPD 2           
+                                \ OR MOST RECENT TRANSACTION                    
+        TE.TR.USERHT$           ! USER HARD TOTALS AREA         STR 10          
+                                !                                               
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        TE.TR.NUMLOANS          ! NUMBER OF LOANS TO THIS TILL  INT 2           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        TE.TR.AMTLOANS          ! AMOUNT OF LOANS TO THIS TILL  INT 4           
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        TE.TR.NUMPKUPS          ! NUMBER OF PICKUPS FROM TILL   INT 2           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        TE.TR.AMTPKUPS          ! AMOUNT OF PICKUPS FROM TILL   INT 4           
+                                                                                
+!**********************************************************************         
+!* the following represent the net totals for this sign-on session    *         
+!**********************************************************************         
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        TE.TR.GROSSPOS,         \ GROSS POSITIVE - ACCUMULATION INT 4           
+                                \ OF THE POSITIVE SALES ENTRIES.                
+                                \ INCLUDES STAND-ALONE TOTALS BUT NO            
+                                \ TOTALS FROM VOIDED OR TRAINING                
+                                \ TRANSACTIONS. (SALES + DEPOSITS +             
+                                \ TAXES + TENDER FEES)                          
+\                                                                               
+        TE.TR.GROSSNEG,         \ GROSS NEGATIVE - ACCUMULATION INT 4           
+                                \ OF THE NEGATIVE SALES ENTRIES.                
+                                \ INCLUDES STAND-ALONE  BUT NO                  
+                                \ TOTALS FROM VOIDED OR TRAINING                
+                                \ TRANSACTIONS. NOTE THIS IS A                  
+                                \ POSITIVE AMOUNT.                              
+                                \ ITEM REFUNDS, TAX REFUNDS,                    
+                                \ CANCELS OF SALES, DEPOSITS,                   
+                                \ DEPOSIT RETURNS AND TENDER FEES               
+\                                                                               
+        TE.TR.AMTMISCS          ! AMOUNT OF MISCELLANEOUS ITEM  INT 4           
+                                ! RECORD ENTRIES                                
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        TE.TR.NUMTRANS          ! NUMBER OF SALES TRANSACTION   INT 2           
+                                                                                
+                                                                                
+!**********************************************************************         
+!* The following represent the till contents as of the end of the     *         
+!* last session                                                       *         
+!**********************************************************************         
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        TE.TR.AMT(1)            \ ENTERED TENDER 1-CASH         INT 4           
+                                \ 2-CHECKS                      INT 4           
+                                \ 3-FOOD STAMPS                 INT 4           
+                                \ 4-MISCELLANEOUS TENDER 1      INT 4           
+                                \ 5-MISCELLANEOUS TENDER 2      INT 4           
+                                \ 6-MISCELLANEOUS TENDER 3      INT 4           
+                                \ 7-MANUFACTURER COUPONS        INT 4           
+                                ! 8-STORE COUPONS               INT 4           
+                                                                                
+!**********************************************************************         
+!* the following represent status indicators                          *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TE.TR.TRANTYPE$         ! TRANSACTION TYPE IN PROCESS   UPD 1           
+                                ! '00' INDICATES CHECKOUT TRANSACTION           
+                                ! '01' - TENDER CASHING                         
+                                ! '02' - TENDER EXCHANGE                        
+                                ! '03' - CASHIER LOAN                           
+                                ! '04' - CASHIER PICKUP                         
+                                ! '05' - TENDER LISTING                         
+                                ! '06' - PRICE VERIFY/CHANGE                    
+                                ! '07' - TRAINING SESSION                       
+                                ! '08' - TERMINAL TRANSFER                      
+                                ! '09' - TERMINAL MONITOR                       
+                                ! '99' - NO TRANSACTION IN PROCESS              
+                                                                                
+INTEGER*2 GLOBAL \                                              INT 2           
+        TE.TR.STATUS            ! X'8000' RESERVED                              
+                                ! X'4000' FORCE SIGN-OFF WHEN                   
+                                !         NEXT NOT IN PROCESS                   
+                                ! X'2000' RE-OPEN SUMMARY LOG                   
+                                !         AT NEXT OPPORTUNITY                   
+                                ! X'1000' RE-OPEN SUMMARY LOG                   
+                                !         AT NEXT TRANSACTION                   
+                                !         START AND FORCE A                     
+                                !         TILL EXCHANGE                         
+                                ! X'0800' RELOAD OPTIONS                        
+                                ! X'0400' PROHIBIT SIGN-ON                      
+                                ! X'0200' PROHIBIT SIGN-OFF                     
+                                ! X'0100' PROHIBIT TRANSACTION                  
+                                !         START                                 
+                                ! X'0080' PROHIBIT TRANSACTION                  
+                                !         END                                   
+                                ! X'0040' TERMINAL IS BEING                     
+                                !         MONITORED                             
+                                ! X'0020' TERMINAL HAS BEEN                     
+                                !         TRANSFERRED                           
+                                ! X'0010' TERMINAL IS IN                        
+                                !         SPECIAL SIGN-OFF                      
+                                ! X'0008' TERMINAL                              
+                                !         ACCOUNTABILITY                        
+                                ! X'0004' OPERATOR SIGNED-ON TO                 
+                                !         TERMINAL                              
+                                ! X'0002' OUT-OF-STORE                          
+                                !         VERIFICATION OF                       
+                                !         TENDERS IS ACTIVE                     
+                                ! X'0001' RESERVED                              
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        TE.TR.USEREXIT          ! USER FIELD FOR USE WITH EXITS INT 2           
+                                                                                
+                                                                                
+!**********************************************************************         
+!* End of file declarations                                           *         
+!**********************************************************************         

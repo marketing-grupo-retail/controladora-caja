@@ -1,0 +1,9 @@
+! Before a "write" to the sequential file at suspension time
+! Antes de "escribir" en el archivo secuencial en el momento de la suspensión
+FUNCTION TSUPEC56 PUBLIC
+
+   !Deliverys
+   CALL GRDOMICILIOS(56)
+
+END FUNCTION
+

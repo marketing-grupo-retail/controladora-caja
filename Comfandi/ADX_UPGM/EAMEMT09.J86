@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC09 PUBLIC ! AFTER SAVING A COUPON FOR TOTAL TIME
+ 
+! insert user exit code here
+ 
+ END FUNCTION

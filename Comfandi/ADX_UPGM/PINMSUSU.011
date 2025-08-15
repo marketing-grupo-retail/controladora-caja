@@ -1,0 +1,40 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINMSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio de 2006                    *
+!Observaciones : Rutinas Genericas Aplicaciones   *
+!**************************************************
+
+Sub MSG.VISOR(X.MSG$) External                                ! Mensajes Aplicacion
+  String X.MSG$
+End Sub
+
+Function Pin.Datos$(Umsg1$,Umsg2$) External     							! Captura De Datos
+String   Pin.Datos$, Umsg1$, Umsg2$
+End Function
+
+Sub PIN.IMPRIME(UE.STRING$,UE.STATION) External					      ! Rutina de Impresion
+String UE.STRING$											                        
+Integer*2 UE.STATION								                          
+End Sub
+
+Sub PIN.EXPLUSADI External  							                    ! Expulsa papel DI
+End Sub
+
+Sub PIN.CORTACR External								                      ! Corta Papel CR
+End Sub
+
+Function PIN.Detalle  External                                ! Imprime Detalle De La Operacion
+String PIN.Detalle
+End  Function
+
+Sub Pin.Cadena.Usuario(X.Clave$,X.Datos$) External
+String X.Clave$, X.Datos$
+End Sub
+
+Function Pin.Getunpk(X.B$,X.J%) External
+Integer*2 X.J%
+String    X.B$, Pin.Getunpk
+End Function

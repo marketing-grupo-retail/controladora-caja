@@ -1,0 +1,18 @@
+!
+! jguiu02.j86
+!
+!
+
+! javagui call 
+! subroutine javaGuiUserExit
+!
+! Parms: eventNum  - number of the event (application or user)
+!        eventData - data associated with the event
+! event number
+! INTEGER*2 eventnum
+! return data
+! STRING    eventData
+
+! insert user code here
+!call traceNUO( "JGUIU02" )
+!call traceNUO( "GUI02 event=" + str$(eventNum) + " eventData=[" + eventData + "]" )

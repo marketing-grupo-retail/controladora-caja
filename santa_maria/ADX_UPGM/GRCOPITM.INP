@@ -1,0 +1,5 @@
+GRCOPITM.286= GRCOPITM.OBJ ,
+              ADX_UPGM:BASROUT.OBJ,
+              ADX_UPGM:ADXACRCL.L86,
+              ADX_UPGM:EAMCSASC.OBJ,
+              ADXADMBL.L86[STACK[MAX[FFE]]

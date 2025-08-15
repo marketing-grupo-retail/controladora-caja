@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*                  REPORTS USER EXIT                                     
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE PROVIDES A PLACE TO PUT EXTERNAL REFERENCES         
+\ REM!!*  WHICH ARE NEEDED BY USER EXIT CODE IN EAMRPU01.  SEE EAMRPU01         
+\ REM!!*  FOR MORE INFORMATION ON REPORTS USER EXITS.                           
+\ REM!!*                                                                        
+\ REM!!*  CODE PLACED IN THIS FILE IS INSERTED INTO THE REPORT                  
+\ REM!!*  COMMON FUNCTIONS MODULE EAMRPCFC.  THIS CODE IS INSERTED              
+\ REM!!*  INSERTED JUST ABOVE THE START OF THE ROUTINE RPCFEC01.                
+\ REM!!*  BECAUSE IT IS INSERTED BETWEEN SUBROUTINES, EXTERNALLY                
+\ REM!!*  REFERENCED SUBROUTINES AND FUNCTIONS CAN BE DEFINED IN                
+\ REM!!*  THIS INCLUDE FILE.                                                    
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  INSERT USER EXIT CODE HERE:                                           
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+!         START OF USER EXIT CODE                                               
+                                                                                
+!         END OF USER EXIT CODE                                                 
+\ REM!!****************************************************************         

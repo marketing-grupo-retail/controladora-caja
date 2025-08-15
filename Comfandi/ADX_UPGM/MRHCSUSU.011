@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MRHCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Generacion Movimientos Reservas  *
+!**************************************************
+!*
+
+Sub MRVCSU01.011 External
+End Sub 
+
+Sub MRVCSU12.011 External
+End Sub 

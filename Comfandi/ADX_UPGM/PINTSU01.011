@@ -1,0 +1,21 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINTSU01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+Ue.Pin.Capturadas% = 0           ! Numero telefonos capturados
+Ue.Pin.Tmp%  = 0                 ! Variable Temporal          
+Ue.Pin.Phones$ = ""              ! Telefono recargado
+Ue.Pin.Tmp$  = ""                ! Variable Temporal          
+Ue.Pin.InPrice% = 0              ! Control indicador de precio
+Ue.Pin.IrPrice% = 0   				   ! Cambio de precio
+Ue.Pin.Slend% = 0                ! Reporte movimientos
+Ue.Pin.TotIng% = 0               ! Total numeros ingresados
+Dim Ue.Pin.Numeros$(100,5)       ! Telefonos para recarga
+Ue.Pin.Ok% = 0                   ! Total movimiento
+Ue.Pin.AutAnul% = 0              ! Control Anulacion total
+Ue.Pin.AnulItm% = 0              ! Anulacion de items

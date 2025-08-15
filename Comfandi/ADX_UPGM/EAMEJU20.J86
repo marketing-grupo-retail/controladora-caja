@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC20 PUBLIC
+INTEGER*1 TSUPEC20
+END FUNCTION
+

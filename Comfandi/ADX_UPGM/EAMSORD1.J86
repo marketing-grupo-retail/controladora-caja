@@ -1,0 +1,201 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+!*
+!*  IR39145  Added support for new variable SO.EXPANDED.PERF which
+!*           is a flag indicating whether or not the user has
+!*           selected to report on the first 40 department
+!*           subtotal groups on the performance report.
+!*           RSH MGVA 12Nov98
+!*
+!*  IR48940  Added minutes field to retricted sales period option and
+!*           provided a flag to allow reversal of the meaning of the
+!*           restricted time period.
+!*           KHG IBM 5Sep02
+!*END-OF-SPECIFICATIONS**********************************************
+!********************************************************************
+!*     READ STORE OPTIONS RECORD 1                                  *
+!********************************************************************
+
+       DIM SO.RESTSTART(7)          ! DIMENSION ARRAY FOR REST SALES START
+       DIM SO.RESTEND(7)            ! DIMENSION ARRAY FOR REST SALES END
+!AIR48940
+       DIM SO.RESTSTART.MIN(7)      ! DIMENSION ARRAY FOR REST SALES START
+       DIM SO.RESTEND.MIN(7)        ! DIMENSION ARRAY FOR REST SALES END
+!EIR48940
+       DIM SO.TMPRODEXCL(30)        ! DIMENSION ARRAY FOR TPR REPORT
+       DIM SO.USEROPTS(10)          ! DIMENSION ARRAY FOR USER OPTIONS
+       DIM SO.TNDRLIST(6)           ! DIMENSION ARRAY FOR TENDER LISTING
+       DIM SO.COLLECT(6)            ! DIMENSION ARRAY FOR TENDER COLLECT
+       DIM SO.COLLECT.TBV(6)        ! DIMENSION ARRAY FOR TOTALS BY VARIETY
+       DIM SO.USEREXIT(30)          ! DIMENSION ARRAY FOR USER EXITS
+
+       READ  #8, 1;                 \ SESSION AND RECORD NUMBER
+                                    \
+             SO.VRFYFORM,           \  1  VERIFY FILE FORMAT
+             SO.MAXCOIN,            \  2  MAXIMUM DISPENSER AMOUNT
+                                    \
+             SO.RESTSTART(1),       \  3  RESTRICTIVE START - DAY 1
+             SO.RESTSTART(2),       \  4  RESTRICTIVE START - DAY 2
+             SO.RESTSTART(3),       \  5  RESTRICTIVE START - DAY 3
+             SO.RESTSTART(4),       \  6  RESTRICTIVE START - DAY 4
+             SO.RESTSTART(5),       \  7  RESTRICTIVE START - DAY 5
+             SO.RESTSTART(6),       \  8  RESTRICTIVE START - DAY 6
+             SO.RESTSTART(7),       \  9  RESTRICTIVE START - DAY 7
+                                    \
+             SO.RESTEND(1),         \ 10  RESTRICTIVE END - DAY 1
+             SO.RESTEND(2),         \ 11  RESTRICTIVE END - DAY 2
+             SO.RESTEND(3),         \ 12  RESTRICTIVE END - DAY 3
+             SO.RESTEND(4),         \ 13  RESTRICTIVE END - DAY 4
+             SO.RESTEND(5),         \ 14  RESTRICTIVE END - DAY 5
+             SO.RESTEND(6),         \ 15  RESTRICTIVE END - DAY 6
+             SO.RESTEND(7),         \ 16  RESTRICTIVE END - DAY 7
+                                    \
+             SO.EFTTIMEOUT,         \ 17  EFT REQUEST TIMEOUT
+             SO.CPPERIOD,           \ 18  FILE CHECKPOINT PERIOD
+             SO.FSNOTAX,            \ 19  FOOD STAMP ITEMS TAXABLE
+             SO.STOREACCT,          \ 20  STORE ACCOUNTING ACTIVE
+             SO.PERFRPRT,           \ 21  PERFORMANCE REPORTS REQUIRED
+             SO.CLOSECHECK,         \ 22  SYSTEM MUST BE IDLE AT CLOSE
+             SO.SAVETLOG,           \ 23  SAVE PREVIOUS PERIOD LOG FILE
+             SO.CLOSETLOG,          \ 24  CLOSE TRANSACTION LOG AT
+                                    \     DATA SYNC CHECKPOINT
+             SO.OPERPERF,           \ 25  KEEP OPERATOR PERFORMANCE
+             SO.RINGTNDR,           \ 26  COLLECT RING/TENDER TIME
+             SO.TERMPROD,           \ 27  KEEP TERMINAL PRODUCTIVITY
+                                    \
+             SO.USEROPTS(1),        \ 28  USER DEFINED OPTION FLAG 1
+             SO.USEROPTS(2),        \ 29  USER DEFINED OPTION FLAG 2
+             SO.USEROPTS(3),        \ 20  USER DEFINED OPTION FLAG 3
+             SO.USEROPTS(4),        \ 31  USER DEFINED OPTION FLAG 4
+             SO.USEROPTS(5),        \ 32  USER DEFINED OPTION FLAG 5
+             SO.USEROPTS(6),        \ 33  USER DEFINED OPTION FLAG 6
+             SO.USEROPTS(7),        \ 34  USER DEFINED OPTION FLAG 7
+             SO.USEROPTS(8),        \ 35  USER DEFINED OPTION FLAG 8
+             SO.USEROPTS(9),        \ 36  USER DEFINED OPTION FLAG 9
+             SO.USEROPTS(10),       \ 37  USER DEFINED OPTION FLAG 10
+                                    \
+             SO.TMPRODEXCL(1),      \ 38  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(2),      \ 39  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(3),      \ 40  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(4),      \ 41  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(5),      \ 42  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(6),      \ 43  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(7),      \ 44  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(8),      \ 45  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(9),      \ 46  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(10),     \ 47  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(11),     \ 48  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(12),     \ 49  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(13),     \ 50  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(14),     \ 51  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(15),     \ 52  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(16),     \ 53  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(17),     \ 54  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(18),     \ 55  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(19),     \ 56  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(20),     \ 57  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(21),     \ 58  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(22),     \ 59  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(23),     \ 60  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(24),     \ 61  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(25),     \ 62  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(26),     \ 63  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(27),     \ 64  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(28),     \ 65  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(29),     \ 66  TERMINALS NOT IN TPR REPORT
+             SO.TMPRODEXCL(30),     \ 67  TERMINALS NOT IN TPR REPORT
+                                    \
+             SO.CASF.SIZE,          \ 68  CUSTOMER ACCOUNT STATUS FILE SIZE
+                                    \
+             SO.TNDRLIST(1),        \ 69  TENDER LISTING - CASH
+             SO.TNDRLIST(2),        \ 70  TENDER LISTING - CHECK
+             SO.TNDRLIST(3),        \ 71  TENDER LISTING - FOOD STAMPS
+             SO.TNDRLIST(4),        \ 72  TENDER LISTING - MISCELLANEOUS 1
+             SO.TNDRLIST(5),        \ 73  TENDER LISTING - MISCELLANEOUS 2
+             SO.TNDRLIST(6),        \ 74  TENDER LISTING - MISCELLANEOUS 3
+                                    \
+             SO.COLLECT(1),         \ 75  COLLECT - CASH
+             SO.COLLECT(2),         \ 76  COLLECT - CHECK
+             SO.COLLECT(3),         \ 77  COLLECT - FOOD STAMPS
+             SO.COLLECT(4),         \ 78  COLLECT - MISCELLANEOUS 1
+             SO.COLLECT(5),         \ 79  COLLECT - MISCELLANEOUS 2
+             SO.COLLECT(6),         \ 80  COLLECT - MISCELLANEOUS 3
+                                    \
+             SO.ACCTTYPE,           \ 81  ACCOUNTABILITY 1 = T, 2 = O, 3 = M
+                                    \
+             SO.USEREXIT(1),        \ 82  USER EXIT ACTIVE FLAG 1
+             SO.USEREXIT(2),        \ 83  USER EXIT ACTIVE FLAG 2
+             SO.USEREXIT(3),        \ 84  USER EXIT ACTIVE FLAG 3
+             SO.USEREXIT(4),        \ 85  USER EXIT ACTIVE FLAG 4
+             SO.USEREXIT(5),        \ 86  USER EXIT ACTIVE FLAG 5
+             SO.USEREXIT(6),        \ 87  USER EXIT ACTIVE FLAG 6
+             SO.USEREXIT(7),        \ 88  USER EXIT ACTIVE FLAG 7
+             SO.USEREXIT(8),        \ 89  USER EXIT ACTIVE FLAG 8
+             SO.USEREXIT(9),        \ 90  USER EXIT ACTIVE FLAG 9
+             SO.USEREXIT(10),       \ 91  USER EXIT ACTIVE FLAG 10
+             SO.USEREXIT(11),       \ 92  USER EXIT ACTIVE FLAG 11
+             SO.USEREXIT(12),       \ 93  USER EXIT ACTIVE FLAG 12
+             SO.USEREXIT(13),       \ 94  USER EXIT ACTIVE FLAG 13
+             SO.USEREXIT(14),       \ 95  USER EXIT ACTIVE FLAG 14
+             SO.USEREXIT(15),       \ 96  USER EXIT ACTIVE FLAG 15
+             SO.USEREXIT(16),       \ 97  USER EXIT ACTIVE FLAG 16
+             SO.USEREXIT(17),       \ 98  USER EXIT ACTIVE FLAG 17
+             SO.USEREXIT(18),       \ 99  USER EXIT ACTIVE FLAG 18
+             SO.USEREXIT(19),       \ 100 USER EXIT ACTIVE FLAG 19
+             SO.USEREXIT(20),       \ 101 USER EXIT ACTIVE FLAG 20
+             SO.USEREXIT(21),       \ 102 USER EXIT ACTIVE FLAG 21
+             SO.USEREXIT(22),       \ 103 USER EXIT ACTIVE FLAG 22
+             SO.USEREXIT(23),       \ 104 USER EXIT ACTIVE FLAG 23
+             SO.USEREXIT(24),       \ 105 USER EXIT ACTIVE FLAG 24
+             SO.USEREXIT(25),       \ 106 USER EXIT ACTIVE FLAG 25
+             SO.USEREXIT(26),       \ 107 USER EXIT ACTIVE FLAG 26
+             SO.USEREXIT(27),       \ 108 USER EXIT ACTIVE FLAG 27
+             SO.USEREXIT(28),       \ 109 USER EXIT ACTIVE FLAG 28
+             SO.USEREXIT(29),       \ 110 USER EXIT ACTIVE FLAG 29
+             SO.USEREXIT(30),       \ 111 USER EXIT ACTIVE FLAG 30
+                                    \
+             SO.FEE.ACCOUNT,        \ 112 MISC TRX ACCT NO FOR CHECK FEES
+             SO.COLLECT.TBV(1),     \ 113 SKIP OVER ! AIRENH01
+             SO.COLLECT.TBV(1),     \ 114 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 115 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 116 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 117 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 118 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 119 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 120 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 121 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 122 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 123 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 124 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 125 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 126 SKIP OVER
+             SO.COLLECT.TBV(1),     \ 127 COLLECT TOTALS BY VARIETY CASH
+             SO.COLLECT.TBV(2),     \ 128 COLLECT TOTALS BY VARIETY CHECK
+             SO.COLLECT.TBV(3),     \ 129 COLLECT TOTALS BY VARIETY FOODSTAMP
+             SO.COLLECT.TBV(4),     \ 130 COLLECT TOTALS BY VARIETY MISC1
+             SO.COLLECT.TBV(5),     \ 131 COLLECT TOTALS BY VARIETY MISC2
+\!AIR39145
+\!            SO.COLLECT.TBV(6)      ! 132 COLLECT TOTALS BY VARIETY MISC3
+             SO.COLLECT.TBV(6),     \ 132 COLLECT TOTALS BY VARIETY MISC3
+\!AIR48940
+\!             SO.EXPANDED.PERF       ! 133 Expanded performance file
+\!!EIRENH01
+\!EIR39145
+             SO.EXPANDED.PERF,      \ 133 Expanded performance file
+             SO.RESTSTART.MIN(1),   \ 134  RESTRICTIVE START MIN - DAY 1
+             SO.RESTSTART.MIN(2),   \ 135  RESTRICTIVE START MIN - DAY 2
+             SO.RESTSTART.MIN(3),   \ 136  RESTRICTIVE START MIN - DAY 3
+             SO.RESTSTART.MIN(4),   \ 137  RESTRICTIVE START MIN - DAY 4
+             SO.RESTSTART.MIN(5),   \ 138  RESTRICTIVE START MIN - DAY 5
+             SO.RESTSTART.MIN(6),   \ 139  RESTRICTIVE START MIN - DAY 6
+             SO.RESTSTART.MIN(7),   \ 140  RESTRICTIVE START MIN - DAY 7
+                                    \
+             SO.RESTEND.MIN(1),     \ 141  RESTRICTIVE END MIN - DAY 1
+             SO.RESTEND.MIN(2),     \ 142  RESTRICTIVE END MIN - DAY 2
+             SO.RESTEND.MIN(3),     \ 143  RESTRICTIVE END MIN - DAY 3
+             SO.RESTEND.MIN(4),     \ 144  RESTRICTIVE END MIN - DAY 4
+             SO.RESTEND.MIN(5),     \ 145  RESTRICTIVE END MIN - DAY 5
+             SO.RESTEND.MIN(6),     \ 146  RESTRICTIVE END MIN - DAY 6
+             SO.RESTEND.MIN(7),     \ 147  RESTRICTIVE END MIN - DAY 7
+             SO.REST.REVERSE        ! 148  restrictive period reversal flag
+!EIR48940

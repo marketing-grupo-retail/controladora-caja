@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+!IF TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN    				! Anular Transaccion
+!   Gr.Lcl.Ctrl%   = 0									! Cierra proceso
+!ENDIF

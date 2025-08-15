@@ -1,0 +1,8 @@
+!At Sign-on Validation
+!En la validacion de la conexion del operador
+FUNCTION TSUPEC28 PUBLIC
+
+   ! Seguridad cambio de password de cajero
+   CALL MSMTSEGU28
+
+END FUNCTION

@@ -1,0 +1,17 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit after writing a message to the        */
+\/*          external verification pipe.                         */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+FUNCTION TSUPEC65 (CALLPARM) PUBLIC
+   INTEGER*4 CALLPARM
+
+   ! Insert User Exit Code here
+
+END FUNCTION
+

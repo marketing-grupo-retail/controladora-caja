@@ -1,0 +1,22 @@
+!              USER EXIT =  USR0202.011 
+!              **PROYECTO COMFANDI**
+!---------------------------------------------------------
+! Estas lineas se insertan en la USER EXIT 02 para        
+! imprimir el Nit de Comfandi  en la  Tira  de            
+! Auditoria, al comienzo de cada Transaccion.
+!---------------------------------------------------------
+
+!CALL SAVE.PRINT
+  PRTFIS = " " 
+  CALL QXL.TSUPEC21(PRTFIS)
+
+!  WRITE #34;CHR$(1BH)+CHR$(61H)+CHR$(1)            ! Centrado
+ ! WRITE #34;CHR$(1DH)+CHR$(2FH)+CHR$(0)+CHR$(3)    !Imprime Logo 
+  
+!WRITE #36;" "                                     ! Imprime Linea
+  PRTFIS =  "  * COMFANDI < NIT 890.303.208-5 > *" ! Imprime Nit
+  CALL QXL.TSUPEC21(PRTFIS)
+!WRITE #36;"  * COMFANDI < NIT 890.303.208-5 > *"  ! Imprime Nit
+!CALL RESTORE.PRINT
+
+!----------------------------------------------------------

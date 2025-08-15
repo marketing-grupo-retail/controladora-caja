@@ -1,0 +1,42 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : AJUSTS20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Ajuste al cambio                 *
+!**************************************************
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Ajuste al Cambio   ",1500,"L")		! Msg Alerta
+ Call Visores4690(1,"Ajuste al Cambio   ","No Operativo",1500,"L")				! Msg Alerta
+ Call U.Imprime("Error Carga Ajuste al Cambio    ",2100H)									! Rastro en SJ
+ Gr.Ajuste.Proy% = 0																											! Proyecto cancelado
+EndIf Else Begin		
+ IF END #94 THEN UE.AJU.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[AJUSTE AL CAMBIO]" Then Begin						   					! Proyecto de Lealtad
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Gr.Ajuste.Proy%      = Val(Mid$(TS.TEMP1$,30,2))          				    ! Proyecto activo
+     Read #94; TS.TEMP1$																									! Lectura registro
+     UE.AJUS.REDO%      = Val(Mid$(TS.TEMP1$,30,2))            				    ! Valor base ajuste
+     Read #94; TS.TEMP1$																									! Lectura registro
+     UE.MNTO.DPT$       = Str$(Val(Mid$(TS.TEMP1$,30,2)))				          ! Grupo de Descuento
+     UE.MNTO.DPT$       = Right$("00"+UE.MNTO.DPT$,2)                     ! Ajuste numero dpto
+     Read #94; TS.TEMP1$																									! Lectura registro
+	   UE.MNTO.DESC$      = Mid$(TS.TEMP1$,30,20)									          ! Descriptor
+	   UE.MNTO.DESC$ = LEFT$(UE.MNTO.DESC$+STRING$(20," "),20)              ! Ajusta descriptor
+     GoTo UE.AJU.FINAL																									  ! Sale del ciclo de cargau
+   Endif
+ Wend
+ UE.AJU.FINAL:
+   Close 94
+   If Gr.Ajuste.Proy% = -1 Then                                           \! Proyecto Activo
+   Call U.IMPRIME("MOD. AJUSTE AL CAMBIO  ON 24/Abr/2012",6100H) Else     \! Msg Proyecto Cargado
+   Call U.IMPRIME("MOD. AJUSTE AL CAMBIO OFF 24/Abr/2012",6100H)           ! Msg Proyecto Cargado
+																																! Cierra archivo
+Endif

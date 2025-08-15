@@ -1,0 +1,33 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : ESCTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio de 2006                    *
+!Observaciones : Modulo Descuentos Escalonados    *
+!                Definicion de variables          *
+!**************************************************
+!
+
+Integer*1 Global GR.ESCL.ACT%,         \! Control de proyecto
+                 Gr.Escl.Nitm%,        \! Numero Items Vendidos
+                 Gr.Escl.NumEscl%,     \! Numero de escala aplicada
+                 Gr.Escl.CtlImp%,      \! Control de actualizacion en linea
+                 Gr.Escl.Registro%      ! Registro Item Escalonado
+
+String    Global Gr.Lcl.Clte$           ! Cliente Capturado
+String    Global SL.IT.ITEMCODE$        ! Codigo del Item
+String    Global Gr.Escl.Descrip$       ! Descriptor descuento
+String    Global Gr.Escl.PricItm$       ! Precio Maestro Item
+String    Global Gr.Escl.ItmVta$(2)     ! Items vendidos Dscto Escalonado
+String    Global Gr.Escl.tipoClte$      ! Tipo de Cliente a Validar
+String    Global Gr.Lcl.TipClte$        ! Tipificaciones Clientes
+Integer*4 Global Gr.Escl.ItmVl%         ! Valor del Item Escalonado
+Integer*4 Global IR.PRICE1, IR.PRICE2   ! Precios producto
+Integer*4 Global Gr.Escl.TotEscal%      ! Total descuentos escalonados
+Integer*4 Global Gr.Escl.ConItm%        ! Consecutivo venta item trx
+Integer*4 Global Gr.Escl.Tasa%          ! Tasa dscto aplicar
+Integer*4 Global Asc.Tmp.Apun%          ! Control recorrido UD
+Integer   Global SL.END                 ! Apuntador Strings trx
+Integer*1 Global UE.TRX.ANUL%           ! Control Anul Trx
+String    Global SL.HD.DATETIME$        ! DATE AND TIME FOR THIS TRX   UPD 5

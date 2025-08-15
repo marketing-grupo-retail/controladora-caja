@@ -1,0 +1,26 @@
+
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2305.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  julio de 2002
+!     Unidad Responsable =  T‚cnicos de Sistemas POS(jorge losada)
+!-----------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Exit para desplegar Datos en el Visor del Operador
+!
+!     Algoritmo:                                                 
+!               Despliega dato al cliente ganador promocion cheque
+!
+!     Variables:                                                 
+!              TS.LINETYPE:  Tipo de display.  6 ==> Prompt de Ventas
+!              TS.DISP1$:    Primera linea de despliegue                  
+!------------------------------------------------------------------------
+   IF GANSUB% = 1    AND                      \! Si gana cheque
+      MUEST%  = 1    THEN BEGIN                !
+      CALL VISORES4690(1,"ACABAS DE GANAR","BONO POR :"+ VALOCH$,4000,"C")
+      TS.IO.MOTORKEY = 0                       !
+      MUEST%   = 0                             !
+   ENDIF                                       !
+!------------------------------------------------------------------------

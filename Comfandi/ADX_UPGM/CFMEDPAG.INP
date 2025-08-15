@@ -1,0 +1,7 @@
+CFMEDPAG.286 = CFMEDPAG.OBJ,
+               BASROUT.OBJ,
+               intrxtdc.obj,
+               ADXACRCL.L86,
+               EAMCSASC.OBJ,
+               ADXADMBL.L86[STACK[MAX[FFE]]
+               

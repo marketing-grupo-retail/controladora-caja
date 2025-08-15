@@ -1,0 +1,59 @@
+
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR14VE.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  FEBRERO DE 2005
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertaran en el archivo EAMTSU14.J86
+! a manera de INCLUDE para OBLIGAR A IMPRIMIR el 
+! codigo y nombre del vendedor de medicamentos que despacha la formula
+! Lee el archivo de OPERADORES para por tanto los vendedores deben estar 
+! matriculados. como operadores del pos perfil 3       
+!-----------------------------------------------------------
+! Mod 22 Ago 2018
+! Se ajusta validacion de teclas motoras adicionando la 176 211 250 96 238 201
+! y la inicialización de los vectores de entrada de datos 
+! de la aplicación, se mueve la ejecucion de esta UE a ser la 
+! primera de ejecucion antes del motor de promociones
+! Desarrollado por Grupo Retail - OVS
+!--------------------------------------------------------------------
+
+IF  TO.USEROPTS(5) <> 0  and                         \!  opcion encendida
+   TS.IO.STATE        = 10 AND                       \! Si esta en MAIN y se
+   TS.BALDUE(0)       > 0  AND                       \! digita codigo de variedad,
+   NOM.OPER$ =          "" AND                       \! digita codigo de variedad,
+   (TS.IO.KEYS(7)     = 91   OR                      \! a EFECTIVO con o sin Factura, o
+    TS.IO.KEYS(7)     = 92   OR                      \! CHEQUE con o sin Factura, se
+    TS.IO.KEYS(7)     = 93   OR                      \! OTROS PAGOS 
+    TS.IO.KEYS(7)     = 96   OR                      \! CREDITOS COMFANDI
+    TS.IO.MOTORKEY    = 255  OR                      \! CONVENIOS
+    TS.IO.MOTORKEY    = 250  OR                      \! SAP CORE
+    TS.IO.MOTORKEY    = 176  OR                      \! TEF
+    TS.IO.MOTORKEY    = 211  OR                      \! CREDITO SOCIAL
+    TS.IO.MOTORKEY    = 221  OR                      \! CREDITO EMPRESAS
+    TS.IO.MOTORKEY    = 238  OR                      \! ?????
+    TS.IO.MOTORKEY    = 201  OR                      \! ?????
+    TS.IO.KEYS(7)     = 94   OR                      \! T.CREDITO  o sin Factura, se
+    TS.IO.KEYS(7)     = 95)   THEN BEGIN              ! T. DEBITO  o sin Factura, se
+    AVISO$ = " NO OLVIDE DIGITAR  "  +               \! Aviso
+             " EL VENDEDOR        "
+    Call VISOR.AND.BORRAR(AVISO$)							        ! Msg Alerta Cajero
+    TS.IO.MOTORKEY = 73                               ! Simula borrar
+    Dim TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)
+ENDIF                                                 !
+
+
+IF  TO.USEROPTS(5) <> 0  and                         \!  opcion encendida
+   TS.IO.STATE        = 10 AND                       \! Si esta en MAIN y se
+   NOM.OPER$ =          "" AND                       \! digita codigo de variedad,
+    TS.IO.MOTORKEY    = 255  then begin              \! CONVENIOS
+    AVISO$ = " NO OLVIDE DIGITAR  "  +               \! Aviso
+             " EL VENDEDOR        "
+    Call VISOR.AND.BORRAR(AVISO$)                     ! Msg Alerta cajero
+    TS.IO.MOTORKEY = 73																! Tecla Borrar
+    Dim TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)
+ENDIF                                                 !

@@ -1,0 +1,62 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+
+!****************************************************************************!
+!                                                                            !
+! Function E2.GET.OA.RECL opens the operator authorization file, EAMOPERA,   !
+! as a direct file and then reads the record length.  This is to determine   !
+! whether the keyed file is to be opened using the original record length of !
+! 72 bytes or if the file is to be opened using the expanded operator auth-  !
+! orization record size of 168 bytes due to the Supermarket Enhancement Two  !
+! feature.                                                                   !
+!                                                                            !
+!****************************************************************************!
+
+
+FUNCTION E2.GET.OA.RECL
+
+   INTEGER*2 E2.GET.OA.RECL,  \ Function
+             HOLD.RECL,       \
+             SN
+
+   INTEGER*1 FILE.NOT.OPEN
+
+   INTEGER*4 OPA.ERRN
+
+   STRING E2.HOLD$,           \ Holds read data
+          OPA.ERR$
+
+   ON ERROR GOTO E2.OARECL.ERR
+
+   SN = 64
+   FILE.NOT.OPEN = -1
+
+   WHILE FILE.NOT.OPEN
+     FILE.NOT.OPEN = 0
+     OPEN "$AMOPERA" DIRECT RECL 512 AS SN NOWRITE NODEL
+   WEND
+
+   READ FORM " T47 I2 C464 "; #SN, 1; HOLD.RECL, E2.HOLD$
+
+   CLOSE SN                   ! Close direct file
+
+   E2.GET.OA.RECL = HOLD.RECL
+
+EXIT.E2.FUNCTION:
+EXIT FUNCTION
+
+E2.OARECL.ERR:
+
+   OPA.ERR$ = ERR
+   OPA.ERRN = ERRN
+
+   IF OPA.ERR$ = "DF" THEN BEGIN    ! session number is already used
+     SN = SN - 1                    ! try another session number
+     FILE.NOT.OPEN = -1             ! retry the open
+     RESUME
+   ENDIF
+
+   RESUME EXIT.E2.FUNCTION
+
+END FUNCTION
+!***************************** END FUNCTION **********************************

@@ -1,0 +1,16 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+! Modificaciones:
+
+If Asc.Edu.IndPrice% = -1 Then Begin     													! Miscelaneo
+   Asc.Edu.IndPrice% = 0																					! Init indicador de precio
+   SL.IT.XPRICE = Val(Asc.Edu.VlrPago$)             						  ! Valor por positivo
+   Asc.Edu.Devol% = 0      																				! Init de la variable
+   TS.REPEAT.COUNT = TO.MAXREPEAT
+Endif

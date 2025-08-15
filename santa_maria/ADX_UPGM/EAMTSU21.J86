@@ -1,0 +1,21 @@
+!USER EXIT CALLED BEFORE WRITING A LINE TO THE SUMMARY JOURNAL
+! Antes de escribir una linea al rollo de auditoria
+FUNCTION TSUPEC21 PUBLIC
+
+!JOURNAL ELECTRONICO DEFINE VARIABLES
+%INCLUDE QXLTSUVA.J86
+
+!CALL SUBSTR(TS.SJDATA$,16,"EC21",0,4)
+
+!   ! Se cambia el "@" para cantidad y peso en la boleta por el "X"
+!   if ( (TS.LINETYPE = 1 and TS.LINEDATA = 1) or (TS.LINETYPE = 5) ) then \
+!      TS.PRTBUF$ = translate$( TS.PRTBUF$, "@", "X" )
+
+!   ! Se cambia el string "BAL" de balance de terminal por "SUB TOTAL"
+!   if (TS.LINETYPE = 7 and TS.LINEDATA = 1) then \
+!         TS.PRTBUF$ = string$(17," ")+"SUB TOTAL"+mid$(TS.PRTBUF$,27,12)
+
+!JOURNAL ELECTRONICO RUTINA
+%INCLUDE QXLTSU21.J86
+
+END FUNCTION

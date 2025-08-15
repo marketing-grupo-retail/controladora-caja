@@ -1,0 +1,56 @@
+!**************************************************
+!Empresa       : COMFANDI                         *
+!Programa      : QXLEXITS.BAS                     *
+!Observaciones : Rutinas Manejo Electronic Journal*
+!**************************************************
+
+FUNCTION QXL.TSUPEC01 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC02 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC04 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC05 EXTERNAL
+FEND
+
+FUNCTION U.JOURNAL EXTERNAL
+FEND
+
+!*********************************************************************
+!
+!   The session number specified here will be used by then IBM
+!   Electronic Journal Feature.
+!   Make sure that it is not in conflict with any other session numbers
+!   It will be used to access disk files on the controller
+!
+!*********************************************************************
+FUNCTION QXL.SESS.NO PUBLIC
+   INTEGER*2 QXL.SESS.NO
+   QXL.SESS.NO = 98               ! Session Number to use for personalization
+FEND
+
+FUNCTION QXL.TSUPEC07 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC14 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC18 EXTERNAL
+FEND
+
+FUNCTION JOURNAL(PRTLINE) EXTERNAL
+  STRING JOURNAL,PRTLINE
+FEND
+
+FUNCTION QXL.TSUPEC21(PRTLINE) EXTERNAL
+  STRING QXL.TSUPEC21,PRTLINE
+FEND
+
+FUNCTION QXL.TSUPEC53 EXTERNAL
+FEND
+
+FUNCTION QXL.TSUPEC54 EXTERNAL
+FEND

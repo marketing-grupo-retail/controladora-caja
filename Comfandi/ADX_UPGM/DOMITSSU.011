@@ -1,0 +1,26 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DOMITSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Enero 04 de 2.006                *
+!Observaciones : Definicion de Subrutinas         *
+!**************************************************
+
+Sub DOMIMS02.011  External
+End Sub
+
+Sub DOMIMS07.011  External
+End Sub
+
+Sub DOMIMS14.011  External
+End Sub
+
+Sub DOMIMS20.011  External
+End Sub
+
+Sub DOMIMS53.011  External
+End Sub
+
+Sub DOMIMS56.011  External
+End Sub

@@ -1,0 +1,13 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : PROTSU56.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Jilio 8 de 2.003                 *
+!Observaciones : Suspencion de la transaccion     *
+!**************************************************
+IF UE.PROYECTO(UE.COMF.PROMO%) THEN BEGIN										! Proyecto activo
+   UE.COMF.VQTY% = 0														    ! Init de variables
+   UE.COMF.VVLR% = 0	                                                        ! Init de variables
+   UE.COMF.INDIMP% = -1															! Indicador de impresion
+ENDIF

@@ -1,0 +1,469 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+!**********************************************************************         
+!*                      EXCEPTION LOG                                 *         
+!**********************************************************************         
+!* The following defines the exception log file.                      *         
+!* The fields are mostly defined in the logical record sequence       *         
+!* Comments are included wherever fields are consolidated for         *         
+!* storage reasons.                                                   *         
+!* (The first five fields are common to all records; the records for  *         
+!*  entry types 1-8,11-16, and 19 reference terminals and             *         
+!*  entry types 20-27 reference steamboats)                           *         
+!**********************************************************************         
+                                                                                
+!**********************************************************************         
+!* HEADER FIELDS                                                                
+!**********************************************************************         
+STRING GLOBAL \                                                                 
+        XL.CODE$,               \ TYPE OF EXCEPTION LOG ENTRY   UPD 1           
+        XL.TERMINAL$,           \ TERMINAL NUMBER                               
+        XL.OPERATOR$,           \ OPERATOR NUMBER                               
+        XL.TRANSNUM$,           \ TRANSACTION NUMBER                            
+        XL.DATETIME$,           \ DATE AND TIME                                 
+\                                                                               
+\ The following indicators are used in several records and have                 
+\ different meanings dependant on the record                                    
+\                                                                               
+        XL.INDICAT0$,           \ FIRST FLAG FIELD              UPD/ASC         
+        XL.INDICAT1$,           \ SECOND FLAG FIELD             UPD/ASC         
+\                                                                               
+\ The following fields are the trailing fields for most log entries             
+\                                                                               
+        XL.OVERRIDE$,          \ OVERRIDE NUMBER               UPD V4           
+        XL.REASON$,             \ OVERRIDE REASON               UPD V1          
+        XL.USEREXIT$            ! USER FIELD FOR USE WITH EXITS ASC V?          
+!* END OF RECORD ******************************************************         
+                                                                                
+                                                                                
+!**********************************************************************         
+!* ITEM ENTRY EXCEPTION - 01                                                    
+!**********************************************************************         
+!* An item entry exception record is written for every item for which *         
+!* a price is entered when it is not required, an override is         *         
+!* required to sell the item, a log limit is exceeded for the item    *         
+!* type, or the item record designates all sales of the item to be    *         
+!* logged.                                                            *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        XL.IT.ITEMCODE$,        \ ITEM CODE                     UPD V6          
+        XL.IT.FILEDEAL$,        \ item deal                     UPD V6          
+        XL.IT.FILEPRIC$         ! ITEM price                    UPD V6          
+                                                                                
+!                                                                               
+!  INDICAT0 is in the header section                                            
+!                                                                               
+! (PACKED STRING REP. OF 1-BYTE INTEGER)                                        
+! BIT 0 - 2     RESERVED                                                        
+!     3 - X'10' ALL SALES LOGGED                                                
+!     4 - X'08' PRICE OVERRIDE                                                  
+!     5 - X'04' OVERRIDE ENTERED                                                
+!     6 - X'02' LOG LIMIT EXCEEDED                                              
+!     7 - X'01' WEIGHT ITEM                                                     
+!                                                                               
+!  INDICAT1 is in the header section                                            
+!                                                                               
+!         '0' - NORMAL ITEM SALE                                                
+!         '1' - DEPOSIT                                                         
+!         '2' - REFUND                                                          
+!         '3' - DEPOSIT RETURN                                                  
+!         '4' - MISC TRANS RECEIPT (SALE)                                       
+!         '5' - MISC TRANS PAYOUT (REFUND)                                      
+!         '6' - MANUFACTURER COUPON                                             
+!         '7' - STORE COUPON                                                    
+!         '8' - ITEM SALE CANCEL                                                
+!         '9' - DEPOSIT CANCEL                                                  
+!                                                                               
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+                                                                                
+!**********************************************************************         
+!* TRANSACTION DISCOUNT/TAX EXEMPTION - 02                                      
+!**********************************************************************         
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+                                                                                
+!**********************************************************************         
+!* TENDER OVERRIDE/EXCEPTION - 03                                               
+!**********************************************************************         
+!* The tender override or exception entry is written                  *         
+!* whenever a tender correction or tender override occurs or a        *         
+!* transaction ends with a negative balance due.  A tender override   *         
+!* can occur because verification status is overridden, a tender      *         
+!* processing fee is forgiven, a tender limit is overridden, or a     *         
+!* change limit is overridden.                                        *         
+!**********************************************************************         
+STRING GLOBAL \                                                                 
+        XL.TO.TENDTYPE$,        \ TENDER TYPE                   ASC 1           
+                                \ '1' CASH TENDER                               
+                                \ '2' CHECK TENDER                              
+                                \ '3' FOODSTAMP TENDER                          
+                                \ '4' MISCELLANEOUS TENDER 1                    
+                                \ '5' MISCELLANEOUS TENDER 2                    
+                                \ '6' MISCELLANEOUS TENDER 3                    
+\                                                                               
+        XL.TO.TENDVAR$,         \ TENDER VARIETY (NUMERIC)      ASC 1           
+\                                                                               
+        XL.TO.ACCOUNT$,         \ CUSTOMER ACCOUNT NUMBER       UPD V10         
+\                                                                               
+        XL.TO.AMTTENDE$,        \ TENDER AMOUNT ASC V8                          
+\                                                                               
+        XL.TO.AMTBALAN$         ! BALANCE DUE WHEN TENDER WAS   ASC V8          
+                                ! ENTERED (FINAL BALANCE LESS                   
+                                ! EARLIER TENDERS                               
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* VOID TRANSACTION - 04                                                        
+!**********************************************************************         
+STRING GLOBAL \                                                                 
+        XL.VO.AMTVOID$          ! NET SALES FOR THE VOIDED      ASC V8          
+                                ! TRANSACTION                                   
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+                                                                                
+!**********************************************************************         
+!* NO-SALE, TENDER EXCHANGE - 05                                                
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 and INDICAT1 are in header section                                  
+!                                                                               
+! INDICATORS FOR THE 'FROM' AND 'TO' TENDER TYPES                               
+! '1' CASH TENDER                                                               
+! '2' CHECK TENDER                                                              
+! '3' FOODSTAMP TENDER                                                          
+! '4' MISCELLANEOUS TENDER 1                                                    
+! '5' MISCELLANEOUS TENDER 2                                                    
+! '6' MISCELLANEOUS TENDER 3                                                    
+! '7' MANUFACTURER COUPON TENDER                                                
+! '8' STORE COUPON TENDER                                                       
+!                                                                               
+STRING GLOBAL \                                                                 
+        XL.TE.AMTTENDE$         ! TENDER AMOUNT                 ASC V8          
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* NO-SALE, CASH DRAWER OPEN - 06                                               
+!**********************************************************************         
+!**********************************************************************         
+!* The following completes the record written every time a no-sale    *         
+!* procedure is used to open the cash drawer or to perform a check    *         
+!* removal, till exchange, special sign-off, or special sign-on       *         
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' - CASH DRAWER OPEN ONLY                                                   
+! '2' - CHECK REMOVAL                                                           
+! '3' - TILL EXCHANGE                                                           
+! '4' - SPECIAL SIGN-OFF                                                        
+! '5' - SPECIAL SIGN-ON                                                         
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* STANDALONE EXIT - 07                                                         
+!**********************************************************************         
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* ITEM SALE REJECT - 08                                                        
+!**********************************************************************         
+!**********************************************************************         
+!* The following completes the record written every time that an item *         
+!* sale is rejected because the item is not on file, is not for sale, *         
+!* or the item record contains invalid data.                          *         
+!**********************************************************************         
+STRING GLOBAL \                                                                 
+        XL.IN.ITEMCODE$         ! ITEM CODE                                     
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' - NOT AUTHORIZED FOR SALE ASC 1                                           
+! '2' - ITEM NOT ON FILE                                                        
+! '3' - INVALID RECORD DATA                                                     
+! '4' - ITEM NOT ON FILE AND THIS IS                                            
+!       NOT FIRST OCCURENCE                                                     
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* TERMINAL PRICE CHANGE                                                        
+!**********************************************************************         
+!**********************************************************************         
+!* The following completes the record written every time that a price *         
+!* change is made from a terminal as a immediate or delayed change.   *         
+!**********************************************************************         
+!                                                                               
+!  INDICAT1$ is in header section                                               
+!                                                                               
+! BIT 1 - x'40' Immediate update mode                                           
+! BIT 2 - x'20' Reserved                                                        
+! BIT 3 - x'10' Reserved                                                        
+! BIT 4 - x'08' Item record added                                               
+! BIT 5 - x'04' Weight status changed                                           
+! BIT 6 - x'02' Tax status changed                                              
+! BIT 7 - x'01' Foodstamp status changed                                        
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* OPERATOR SIGN ON/OFF - 11                                                    
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' - OPERATOR SIGN-ON                                                        
+! '2' - OPERATOR SIGN-OFF                                                       
+! '3' - OPERATOR SIGN ON REJECTED                                               
+!                                                                               
+STRING GLOBAL \                                                                 
+        XL.SN.RJCTRSN$,         \ SIGN-ON REJECTION REASON      ASC V2          
+        XL.SN.PASSWORD$,        \ OPERATOR PASSWORD             ASC V6          
+        XL.SN.NEWPASSWORD$      ! OPERATOR PASSWORD             ASC V6          
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see main declaration                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* NON-SALES TRANSACTION - 12                                                   
+!**********************************************************************         
+!* The following completes the record written whenever a training     *         
+!* transaction, terminal transfer transaction, terminal monitor       *         
+!* transaction, or price verification/change transaction occurs.      *         
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' - TRAINING SESSION        ASC 1                                           
+! '2' - TERMINAL TRANSFER TRANSACTION                                           
+! '3' - TERMINAL MONITOR TRANSACTION                                            
+! '4' -  PRICE CHANGE TRANSACTION                                               
+!                                                                               
+STRING GLOBAL \                                                                 
+        XL.NN.TRANSDATA$        ! NUMBER OF TRAINING            ASC V6          
+                                ! TRANSACTIONS OR TERMINAL NUMBER OF            
+                                ! TRANSFERRED/MONITORED TERMINAL OR             
+                                ! BATCH IDENTIFIER FOR PRICE CHANGES            
+!                                                                               
+!  For USEREXIT$ see main section                                               
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* CASHIER LOAN/PICKUP - 13/14                                                  
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' INDICATES CURRENT PERIOD OPERATOR ACCTY                                   
+! '2' INDICATES CURRENT PERIOD TERMINAL ACCTY                                   
+!                                                                               
+!  For tender fields see header section                                         
+!                                                                               
+!  For OVERRIDE, REASON and USEREXIT$ see header section                        
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* CLOSE CHECKOUT TOTALS - 15                                                   
+!**********************************************************************         
+!                                                                               
+!* INDICAT0 is in header section                                                
+!                                                                               
+! '0' NO ACCOUNTING OR DEPARTMENT TOTALS CLOSED                                 
+! '1' SHORT REPORTING PERIOD CLOSED                                             
+! '2' LONG REPORTING PERIOD CLOSED                                              
+! '3' DEPARTMENT TOTALS CLOSED SHORT                                            
+!                                                                               
+!  INDICAT1 is in header section                                                
+!                                                                               
+! (PACKED STRING REP OF 1-BYTE INTEGER)                                         
+! BIT 0 - 2     RESERVED                                                        
+! BIT 3 - X'10' TENDER LISTING LOG CLOSED                                       
+! BIT 4 - X'08' TERMINAL PRODUCTIVITY LOG CLOSED                                
+! BIT 5 - X'04' EXCEPTION LOG CLOSED                                            
+! BIT 6 - X'02' ITEM MOVEMENT TOTALS CLOSED                                     
+! BIT 7 - X'01' CUSTOMER ACCOUNT TOTALS CLOSED                                  
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* MISSING/FOUND/DUPLICATE TRANSACTION - 16                                     
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' INDICATES MISSING TRANSACTION                                             
+! '2' INDICATES FOUND TRANSACTION                                               
+! '3' INDICATES DUPLICATE TRANSACTION                                           
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* TERMINAL HARDWARE FAILURE - 17                                               
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' STANDALONE TRANSACTIONS OCCURRED                                          
+! '2' TERMINAL APPLICATION INITIALIZED                                          
+! '3' ABNORMAL END OF TERMINAL APPLICATION                                      
+! '4' TERMINAL SWITCHED CONTROLLERS                                             
+! '5' HARD TOTALS FAILURE                                                       
+!     FILE ACCESS FAILURE -                                                     
+!     'A' - ITEM RECORD                                                         
+!     'B' - OPERATOR AUTHORIZATION                                              
+!     'C' - TENDER VERIFICATION                                                 
+!     'D' - OPERATOR STATUS                                                     
+!     'E' - TERMINAL STATUS                                                     
+!     'F' - TOTALS SAVE                                                         
+!     'G' - SUMMARY LOG                                                         
+!     'H' - TRANSACTION LOSS DUE TO PLD AND HARD TOTALS OR TOTALS               
+!           SAVE FAILURE                                                        
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* USER DATA ENTRY LOG - 19                                                     
+!**********************************************************************         
+!* The following completes the record written by the sales support              
+!* application whenever the data entry user exit returns a non-null             
+!* string.  This exit is called to process data entry strings in the            
+!* transaction summary log.                                                     
+!**********************************************************************         
+!                                                                               
+!  For USEREXIT$ see main declaration                                           
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* The following declarations pertain to the steamboat rather than    *         
+!* the terminal                                                       *         
+!* For these the first five fields represent:                         *         
+!*      TERMINAL        STEAMBOAT ID NUMBER                           *         
+!*      TRANSNUM        TRANSACTION NUMBER = 0                        *         
+!*      DATETIME        DATE AND TIME YYMMDDHHMM                      *         
+!*      CODE            TYPE OF EXCEPTION LOG ENTRY                   *         
+!*      OPERATOR        STEAMBOAT OPERATOR                            *         
+!**********************************************************************         
+                                                                                
+!**********************************************************************         
+!* STEAMBOAT CASHIER LOAN/PICKUP - 20/21                                        
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+!  '1' INDICATES CURRENT  PERIOD OPERATOR ACCTY                                 
+!  '2' INDICATES CURRENT  PERIOD TERMINAL ACCTY                                 
+!  '3' INDICATES PREVIOUS PERIOD OPERATOR ACCTY                                 
+!  '4' INDICATES PREVIOUS PERIOD TERMINAL ACCTY                                 
+!                                                                               
+!  For tender fields see header definition                                      
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* MISCELLANEOUS TRANSACTION - 22                                               
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '1' CURRENT  PERIOD OPERATOR ACCTY                                            
+! '2' CURRENT  PERIOD TERMINAL ACCTY                                            
+! '3' PREVIOUS PERIOD OPERATOR ACCTY                                            
+! '4' PREVIOUS PERIOD TERMINAL ACCTY                                            
+! '5' CURRENT  PERIOD OFFICE                                                    
+! '6' PREVIOUS PERIOD OFFICE                                                    
+!                                                                               
+!* END OF RECORD ******************************************************         
+                                                                                
+                                                                                
+!**********************************************************************         
+!* UDBM LOG ENTRIES  23-26                                                      
+!**********************************************************************         
+!* For steamboat change item record,                   CODE='23'                
+!* For steamboat change operator authorization record, CODE='24'                
+!* For steamboat change tender verification record,    CODE='25'                
+!* For steamboat change manager's message file,        CODE='26'                
+!**********************************************************************         
+!* END OF RECORD ******************************************************         
+                                                                                
+!**********************************************************************         
+!* REQUEST CLOSE STORE TOTALS - 27                                              
+!**********************************************************************         
+!* The following completes the record written every time that a                 
+!* request is made to close store totals.  Note that record '15'                
+!* signifies that the close is complete                                         
+!**********************************************************************         
+!                                                                               
+!  INDICAT0 is in header section                                                
+!                                                                               
+! '0' NO ACCOUNTING OR DEPARTMENT TOTALS CLOSED                                 
+! '1' SHORT REPORTING PERIOD CLOSED                                             
+! '2' LONG REPORTING PERIOD CLOSED                                              
+! '3' DEPARTMENT TOTALS CLOSED SHORT                                            
+!                                                                               
+!                                                                               
+!  INDICAT1 is in header section                                                
+!                                                                               
+! (PACKED STRING REP. OF 1 BYTE INTEGER)                                        
+! BIT 0-2       RESERVED                                                        
+!     3 - X'10' TENDER LISTING LOG CLOSED                                       
+!     4 - X'08' TERMINAL PRODUCTIVITY LOG CLOSED                                
+!     5 - X'04' EXCEPTION LOG CLOSED                                            
+!     6 - X'02' ITEM MOVEMENT TOTALS CLOSED                                     
+!     7 - X'01' CUSTOMER ACCOUNT TOTALS CLOSED                                  
+!* END OF RECORD ******************************************************         
+                                                                                
+!AIR70231                                                                       
+!**********************************************************************         
+!* BAD SUMMARY LOG DATA - 51                                                    
+!**********************************************************************         
+!* The following defines the record logged by checkout support whenever         
+!* invalid data is encountered in the transaction summary log. The log          
+!* record contains the name of the log and the offset from the start of         
+!* the file to the bad data.                                                    
+!**********************************************************************         
+!                                                                               
+STRING GLOBAL \                                                                 
+        XL.BD.LOGNAME$,         \ SUMMARY LOG NAME              ASC 8           
+        XL.BD.OFFSET$           ! OFFSET                        ASC V10         
+!* END OF RECORD ******************************************************         
+!EIR70231                                                                       
+                                                                                
+!**********************************************************************         
+!* End of declarations                                                          
+!**********************************************************************         

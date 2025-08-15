@@ -1,0 +1,26 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+If UE.EPS.ERROR$= "SUPERAVALOR" Then Begin
+		TS.DISP1$ = "SUPERA EL VALOR  "
+		TS.DISP2$ = "MAXIMO AUTORIZADO"
+		UE.EPS.ERROR$ = ""
+EndIf
+If UE.EPS.ERROR$= "ITEM NO VALIDO" Then Begin
+		TS.DISP1$ = "ARTICULO NO TIENE CO"
+		TS.DISP2$ = "BERTURA EN ESTE PLAN"
+		UE.EPS.ERROR$ = ""
+EndIf
+
+If Left$(TS.DISP1$,4) = "B067" Then Begin         													! Proceso de Autorizacion reintegro articulo
+  If Asc.Cnv.ApplCobro% = -1 Then Begin                                     ! Aplicando reverso cuota moderadora
+     Asc.Cnv.ApplCobro% = -2 
+  EndIf 
+
+Endif

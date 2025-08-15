@@ -1,0 +1,55 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2000                                        **
+!   **    Proyecto   :  GLOBAL DATATEL COLOMBIA *                            **
+!   **    User Exit  :  GLOBTS30.011                                         **
+!   **    Inclu¡r en :  EAMTSU30.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **                                                                       **
+!   **    Restaura valor de variables al Inicio de Transaccion               **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+If (TS.PROCEDURE < 1) AND (TS.IO.MOTORKEY < 97) AND	\
+   (TS.IO.MOTORKEY > 90) AND UE.MNTO.DSCT% Then Begin
+   UE.MNTO.MONTOF% = 0
+   UE.MNTO.REDOF% = 0
+   UE.MNTO.MONTO1% = 0
+   If TS.IO.MOTORKEY <> 91 Then Begin
+	    UE.MNTO.PREPAGO% = VAL(TS.IO.DATA$(7))
+   EndIf Else Begin
+	    If TS.IO.DATA$(7) = "" Then UE.MNTO.PREPAGO% = TS.TOTALS(0,0,0) - TS.TENDERED(0) \
+	     Else UE.MNTO.PREPAGO% = Val(TS.IO.DATA$(7))
+   EndIf
+   UE.MNTO.PRECAMBIO% = UE.MNTO.PREPAGO% - (TS.TOTALS(0,0,0)-TS.TENDERED(0))   ! Vueltas totales 
+   
+   If UE.MNTO.PRECAMBIO% > 0 Then Begin
+      UE.MNTO.DSCT% = 0
+      UE.MNTO.MONTO1% = MOD(UE.MNTO.PRECAMBIO%,UE.MNTO.REDO1%)
+	    UE.MNTO.MONTOF% = UE.MNTO.MONTO1%
+	    UE.MNTO.REDOF%  = UE.MNTO.REDO1%
+	    Call DISVISOR(UE.MNTO.MSG1$ + UE.MNTO.MSG2$)
+	    Wait;1200
+      UE.ERROR% = 0
+	    UE.MNTO.OTRO% = 0
+	    TS.TEMP1$ = Entra.DATOS$("1. Dona Parc.:$"+STR$(UE.MNTO.MONTOF%),\
+		                           "9. Dona Total:$"+STR$(UE.MNTO.PRECAMBIO%))
+			                   
+      If TS.TEMP1$ <> "E" Then Begin 
+          UE.MNTO.LEIDO% = Val(TS.TEMP1$)
+          If (Val(TS.TEMP1$) = 1 OR Val(TS.TEMP1$) = 9) Then Begin 
+             Call DONACION(UE.MNTO.LEIDO%)
+          EndIf Else Begin 
+             Call DONACION(0)
+          EndIf 
+      EndIf
+   EndIf 
+   
+EndIf
+
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------
+

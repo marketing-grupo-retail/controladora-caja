@@ -1,0 +1,18 @@
+!   ***************************************************************************
+!   **    Empresa    :  Casa Informatica S.A.                                **
+!   **    Fecha      :  Febrero 23 del 2.000                                 **
+!   **    User Exit..:  EAMCSU16.J86                                         **
+!   **    Program....:  EAMCSUPC.BAS                                         **
+!   **    Executable.:  EAMCSMLL.286                                         **
+!   **    Resposable :  Oscar Valencia Sarmiento                             **
+!   **                  Soporte P.O.S 					                             **
+!   ***************************************************************************
+!-----------------------------------------------------------------------------!
+! Proposito 	: * Iniciar Tarea de background generaci¢n archivos planos    !
+!		    venta tarjetas virtuales       			      !
+!-----------------------------------------------------------------------------!
+
+WORK1I2 = ADXSTART("C:\PROGRAM\BKINVENT.286","","")
+WAIT;1000
+WORK1I2 = ADXSTART("C:\PROGRAM\BKVENTAS.286","","")
+

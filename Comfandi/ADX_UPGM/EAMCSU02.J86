@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC02 PUBLIC
+ integer*4 PP
+ Asc.Err.Proceso$ = "EAMCSU02" 
+! insert user exit code here
+
+CALL TRXCSU02.011                ! MODULO TRANSACCIONES ONLINE
+
+!CALL MNPCSU01.011                ! MODULO REMISIONES MERCANCIA
+
+ END FUNCTION

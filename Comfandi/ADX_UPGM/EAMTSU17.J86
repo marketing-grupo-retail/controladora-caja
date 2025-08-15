@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC17 PUBLIC                                                        
+! TSUPEC17 - BEFORE HT WRITE                                                    
+END FUNCTION                                                                    
+                                                                                

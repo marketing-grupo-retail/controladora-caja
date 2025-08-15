@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC17 PUBLIC
+! insert user exit code here
+Asc.Err.Proceso$ = "CSE17"
+%INCLUDE EAMCSE17.J86            ! Electronic Marketing PRPQ
+Asc.Err.Proceso$ = "CSU17"
+ 
+ END FUNCTION

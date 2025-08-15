@@ -1,0 +1,39 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** CS16DSU3.J86 ******************************************!!
+! TITLE: Date of last sale updates with staging of item movement
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.
+!
+\/* CHANGE ACTIVITY                                                 */
+\/* IR23184 - Checkout support user exits for Date Of Last Sale     */
+\/*           function incorrectly pointing to EAMUDOLS.286 in      */
+\/*           ADX_UPGM instead of ADX_IPGM                          */
+\/*           BAH MGV-A 07Jul93                                     */
+\/*                                                                 */
+
+
+WORK2I2 = PACKBIN2(CS.INPUT$,CS.FLD.POS(3),CS.FLD.LEN(3))
+                                    ! Get close indicator from string
+IF (WORK2I2 AND 02H) THEN BEGIN     ! Item movement file closed
+
+!AIR23184
+! WORK1$ = "ADX_UPGM:EAMUDOLS.286"  ! DOLS UPDATE PROGRAM NAME
+  WORK1$ = "ADX_IPGM:EAMUDOLS.286"  ! DOLS UPDATE PROGRAM NAME
+!EIR23184
+
+  WORK2$ = "EAMIMOVO,1,EAMIMOV1"    ! PARAMETERS - DOLS UPDATE AND STAGE
+  OPEN "EAMRDESC" RECL 49 AS 6 NOWRITE NODEL
+  READ #6, 4359; WORK3$                      ! READ IN DESCRIPTOR
+  CLOSE 6
+! WORK3$ = "UPDATE DOLS WHILE STAGING ITEM MOVEMENT" ! Background display
+
+  WORK1I2 = ADXSTART(WORK1$,WORK2$,WORK3$)  ! Start Staging program
+  IF WORK1I2 NE 0 THEN BEGIN                ! Error occurred
+    WORK3$ = "DOLS" +                       \ Log PROGRAM NAME
+              "," + STR$(WORK1I2)           ! and error code
+    CALL ADXERROR (0,ASC("U"),0,1,9,WORK3$) ! Log the error
+  ENDIF
+ENDIF
+

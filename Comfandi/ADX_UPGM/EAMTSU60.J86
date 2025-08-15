@@ -1,0 +1,43 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit after writing to the customer         */
+\/*          receipt.                                            */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+FUNCTION TSUPEC60 PUBLIC
+
+   ! Insert User Exit Code here
+   
+!CALL PRMFPAGO(60)              ! PROMOCION FORMAS DE PAGO
+
+CALL GR.DIA.SINIVA(60)         ! DIA SIN IVA
+CALL PTOMTS60.011              ! PUNTOS ADICIONALES 
+CALL RECASRV(60,0)	           ! PAGO SERVICIOS PUBLICOS 
+CALL RECATS60.011              ! RECARGAS ONLINE
+CALL ESCALONADO(60)            ! DESCUENTOS ESCALONADOS
+!CALL MKTPTS60.011              ! MODULO PROMOCIONES
+
+CALL PROPINA(60)               ! Modulo propinas
+CALL EPSMTS60.011              ! Modulo Convenios
+
+CALL GRMBONOS(60)              ! Modulo Bonos Lealtad
+
+%INCLUDE UEECR160.U86          ! MODULO TEF REDEBAN
+
+CALL CRDEMPRESAS(60)           ! CREDITO EMPRESARIAL - Ultima UE Siempre aqui
+CALL CREDITOSOCIAL(60)         ! CREDITO SOCIAL
+CALL SUBSIDIO.SAPCORE(60)      ! SAP-CORE
+CALL GRABBOT(60)               ! ESCALONADO ABBOT
+CALL GRABJSN(60)               ! ESCALONADO ABBOT JSON
+CALL GRMIMEI(60)               ! CAPTURA IMEI CELULAR
+CALL SUBSIDIO.FOSFEC(60)       ! FOSFEC BONO ALIMENTO
+CALL BRCOMPRAPAGO(60)          ! RECOMPRA FORMA PAGO
+CALL BONODEVPAGO(60)           ! Bono nota devolucion 
+CALL NOTASCREDITOPOS(60)       ! NOTAS CREDITO
+
+END FUNCTION
+

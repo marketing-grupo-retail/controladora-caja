@@ -1,0 +1,418 @@
+\/* TIME STAMP BLOCK *************************************************
+\** END OF TIME STAMP BLOCK *****************************************/
+\\----------------------------------------------------------------------
+\\ :H1 ADXAFSIN.J86: START OF SPECIFICATIONS
+\\----------------------------------------------------------------------
+\\ Module Name: ADXAFSIN J86
+\\
+\\ Description: Full Screen Utility, prototypes for CBASIC applications.
+\\
+\\ Product Classification:
+\\     Licenced Materials - Property of IBM
+\\     5799-PQZ   COPYRIGHT: IBM CORP. 1992
+\\
+\\ Status: OS Changed
+\\
+\\ Initial Authors: Brian Subject, Chet Orton
+\\
+\\ Function:
+\\     This module contains the function prototypes necessary
+\\     for CBASIC applications to access the Full Screen Utility
+\\     library routines.
+\\
+\\ Notes:
+\\     Users upgrading from the original version of the utility
+\\     will need to recompile with this new prototype file because
+\\     all subprograms have been converted to functions
+\\     (FUNCTIONS have different calling conventions than SUBPROGRAMS).
+\\
+\\ Dependencies: None.
+\\
+\\ Restrictions: None.
+\\
+\\ Compiler: IBM 4680 Basic
+\\
+\\ Change Activity -----------------------------------------------------
+\\
+\\ $MOD(ADXAFSIN) COMP(AFS) PROD(OS): Full Screen Utility
+\\
+\\ FLAG  REASON  VERS  DATE  WHO   DESCRIPTION
+\\ ---- -------- ---- ------ ---   -----------
+\\ $D0= IR98765  V2R1 921031 CEO : Initial development.
+\\                    930129 CEO : Corrected ?fs.setbuff() prototype.
+\\                    930408 CEO : Finished fixing ?fs.setbuff() proto.
+\\                    930503 CEO : Added prototypes for ?fs.amtsw and
+\\                                   ?fs.dispfw.
+\\
+\\ !!! ALWAYS UPDATE EMBEDDED VERSION IDENTIFIER IN ADXAFSHC.HIC !!!
+\\
+\\ END-OF-SPECIFICATIONS -----------------------------------------------
+
+function ?fs.init%(numwin, maxline) external
+  integer*2 ?fs.init%
+  integer*2 numwin, maxline
+end function
+
+function ?fs.open% (source$, dest$, sdid%, win, vidid%, tempid%) external
+  integer*2 ?fs.open%
+  integer*2 win, rc
+  integer*2 sdid%, vidid%, tempid%
+  string source$, dest$
+end function
+
+function ?fs.ropen% (sfile, dfile, fileid, win, vidid) external
+  integer*2 ?fs.ropen%
+  integer*2 win, fileid, vidid
+  string sfile, dfile
+end function
+
+function ?fs.share (swin, dwin) external
+  integer*2 ?fs.share
+  integer*2 swin, dwin
+end function
+
+function ?fs.close (windno) external
+  integer*2 ?fs.close
+  integer*2 windno
+end function
+
+function ?fs.actwin%(win) external
+  integer*2 ?fs.actwin%
+  integer*2 win
+end function
+
+function ?fs.dispw(win, scrno)  external
+  integer*2 ?fs.dispw
+  integer*2 win, scrno
+end function
+
+function ?fs.clearw(win) external
+  integer*2 ?fs.clearw
+  integer*2 win
+end function
+
+function ?fs.blankw(win) external
+  integer*2 ?fs.blankw
+  integer*2 win
+end function
+
+function ?fs.free.win(win) external
+  integer*2 ?fs.free.win
+  integer*2 win
+end function
+
+function ?fs.removew(win) external
+  integer*2 ?fs.removew
+  integer*2 win
+end function
+
+function ?fs.coord%(scol, srow, ecol, erow, win) external
+  integer*2 ?fs.coord%
+  integer*2 scol, srow, ecol, erow
+  integer*2 win
+end function
+
+function ?fs.rcoord%(scol, srow, ecol, erow, win) external
+  integer*2 ?fs.rcoord%
+  integer*2 scol, srow, ecol, erow
+  integer*2 win
+end function
+
+function ?fs.curscr%(win) external
+  integer*2 ?fs.curscr%
+  integer*2 win
+end function
+
+function ?fs.curwin%  external
+  integer*2 ?fs.curwin%
+end function
+
+function ?fs.set.att$(attr$, win) external
+  integer*2 ?fs.set.att$
+  string attr$
+  integer*2 win
+end function
+
+function ?fs.set.natt$(attr$, win) external
+  integer*2 ?fs.set.natt$
+  string attr$
+  integer*2 win
+end function
+
+function ?fs.ret.att$(win) external
+  string ?fs.ret.att$
+  integer*2 win
+end function
+
+function ?fs.ret.natt$(win) external
+  string ?fs.ret.natt$
+  integer*2 win
+end function
+
+function ?fs.mask.att(attr$) external
+  integer*2 ?fs.mask.att
+  string attr$
+end function
+
+function ?fs.flip.att(attr$) external
+  integer*2 ?fs.flip.att
+  string attr$
+end function
+
+function ?fs.setborder(borderflag, winnum) external
+  integer*2 ?fs.setborder
+  integer*1 borderflag
+  integer*2 winnum
+end function
+
+function ?fs.disps (scrno) external
+  integer*2 ?fs.disps
+  integer*2 scrno
+end function
+
+function ?fs.reads (scrno) external
+  integer*2 ?fs.reads
+  integer*2 scrno
+end function
+
+function ?fs.dispps (scrno) external
+  integer*2 ?fs.dispps
+  integer*2 scrno
+end function
+
+function ?fs.dispns (scrno) external
+  integer*2 ?fs.dispns
+  integer*2 scrno
+end function
+
+function ?fs.scrollup (scrno, functionst$) external
+  integer*2 ?fs.scrollup
+  integer*2 scrno
+  string functionst$
+end function
+
+function ?fs.displ (linenum, attr$) external
+  integer*2 ?fs.displ
+  integer*2 linenum
+  string attr$
+end function
+
+function ?fs.insertl (linenum, insline$) external
+  integer*2 ?fs.insertl
+  integer*2 linenum
+  string insline$
+end function
+
+function ?fs.removel (linenum) external
+  integer*2 ?fs.removel
+  integer*2 linenum
+end function
+
+function ?fs.putl$ (linenum, putline$) external
+  integer*2 ?fs.putl$
+  integer*2 linenum
+  string putline$
+end function
+
+function ?fs.getl$ (linenum) external
+  string ?fs.getl$
+  integer*2 linenum
+end function
+
+function ?fs.refgf (fldtype$, fillchar$, attr$) external
+  integer*2 ?fs.refgf
+  string fldtype$, fillchar$, attr$
+end function
+
+function ?fs.currentf$ external
+  string ?fs.currentf$
+end function
+
+function ?fs.nextf$ external
+  string ?fs.nextf$
+end function
+
+function ?fs.firstf$ external
+  string ?fs.firstf$
+end function
+
+function ?fs.lastf$ external
+  string ?fs.lastf$
+end function
+
+function ?fs.putfw$ (win, putstr$, fieldnum, rjflag) external
+  integer*2 ?fs.putfw$
+  integer*2 win
+  integer*2 rjflag
+  integer*2 fieldnum
+  string putstr$
+end function
+
+function ?fs.putf$ (putstr$, fieldnum, rjflag) external
+  integer*2 ?fs.putf$
+  integer*2 rjflag
+  integer*2 fieldnum
+  string putstr$
+end function
+
+function ?fs.amts (amount, fldnum, rjflag) external
+  integer*2 ?fs.amts
+  integer*2 fldnum
+  integer*1 rjflag
+  integer*4 amount
+end function
+
+function ?fs.amtsw (win, amount, fldnum, rjflag) external
+  integer*2 ?fs.amtsw
+  integer*2 win
+  integer*4 amount
+  integer*2 fldnum
+  integer*1 rjflag
+end function
+
+function ?fs.getfw$ (win, fieldnum) external
+  string ?fs.getfw$
+  integer*2 win, fieldnum
+end function
+
+function ?fs.getf$ (fieldnum) external
+  string ?fs.getf$
+  integer*2 fieldnum
+end function
+
+function ?fs.dispfs (fldnum, dispstr$) external
+  integer*2 ?fs.dispfs
+  integer*2 fldnum
+  string dispstr$
+end function
+
+function ?fs.dispfw (win, fldnum, dispstr$) external
+  integer*2 ?fs.dispfw
+  integer*2 win
+  integer*2 fldnum
+  string dispstr$
+end function
+
+function ?fs.posfs (fieldnum, posinfield, attr$, visbflag) external
+  integer*2 ?fs.posfs
+  integer*2 fieldnum
+  integer*2 posinfield, visbflag
+  string attr$
+end function
+
+function ?fs.posnf (posinfield, attr$, visbflag) external
+  integer*2 ?fs.posnf
+  integer*2 posinfield, visbflag
+  string attr$
+end function
+
+function ?fs.posff (posinfield, attr$, visbflag) external
+  integer*2 ?fs.posff
+  integer*2 posinfield, visbflag
+  string attr$
+end function
+
+function ?fs.poslf (posinfield, attr$, visbflag) external
+  integer*2 ?fs.poslf
+  integer*2 posinfield, visbflag
+  string attr$
+end function
+
+function ?fs.putdfs (putstr$, fieldnum, rjflag, attr$) external
+  integer*2 ?fs.putdfs
+  integer*2 fieldnum
+  integer*2 rjflag
+  string putstr$, attr$
+end function
+
+function ?fs.putdas (amount, fieldnum, rjflag, attr$) external
+  integer*2 ?fs.putdas
+  integer*2 fieldnum
+  integer*1 rjflag
+  integer*4 amount
+  string attr$
+end function
+
+function ?fs.putdfw (win, putstr$, fieldnum, rjflag, attr$) external
+  integer*2 ?fs.putdfw
+  integer*2 fieldnum, win
+  integer*2 rjflag
+  string attr$, putstr$
+end function
+
+function ?fs.putdaw (win, amount, fieldnum, rjflag, attr$) external
+  integer*2 ?fs.putdaw
+  integer*2 fieldnum, win
+  integer*2 rjflag
+  integer*4 amount
+  string attr$
+end function
+
+function ?fs.save.buff (bufid$, winnum, scrnum) external
+  integer*2 ?fs.save.buff
+  string bufid$
+  integer*2 winnum, scrnum
+end function
+
+function ?fs.rest.buff (bufid$) external
+  integer*2 ?fs.rest.buff
+  string bufid$
+end function
+
+function ?fs.setbuff(bufcount) external
+  integer*2 ?fs.setbuff
+  integer*2 bufcount
+end function
+
+function ?fs.fld.line% (fldnum) external
+  integer*2 ?fs.fld.line%, fldnum
+end function
+
+function ?fs.fld.fld% (fldnum) external
+  integer*2 ?fs.fld.fld%, fldnum
+end function
+
+function ?fs.fld.typ$ (fldnum) external
+  string ?fs.fld.typ$
+  integer*2 fldnum
+end function
+
+function ?fs.fld.col% (fldnum) external
+  integer*2 ?fs.fld.col%, fldnum
+end function
+
+function ?fs.fld.len% (fldnum) external
+  integer*2 ?fs.fld.len%, fldnum
+end function
+
+function ?fs.fld.att$ (fldnum) external
+  string ?fs.fld.att$
+  integer*2 fldnum
+end function
+
+function ?fs.for.att% (fldnum) external
+  integer*2 ?fs.for.att%, fldnum
+end function
+
+function ?fs.bac.att% (fldnum) external
+  integer*2 ?fs.bac.att%, fldnum
+end function
+
+function ?fs.forma$ (?i4%,?i%,?rj%) external
+  string ?fs.forma$
+  integer*4 ?i4%
+  integer*2 ?i%, ?rj%
+end function
+
+function ?fs.setwin% (?i%,?f%) external
+  integer*2 ?fs.setwin%
+  integer*2 ?i%, ?f%
+end function
+
+function int2hex$(int2hex,length) external
+  string int2hex$
+  integer*4 int2hex
+  integer*2 length
+end function
+
+

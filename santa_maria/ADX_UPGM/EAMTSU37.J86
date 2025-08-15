@@ -1,0 +1,16 @@
+!At Error Guidance Processing
+!En el control de errores
+FUNCTION TSUPEC37 PUBLIC
+
+!call traceNUO( "UE37 LT=" + str$(TS.LINETYPE) + " LD=" + str$(TS.LINEDATA) )
+!TS.DISP1$ Top line of the display
+!TS.DISP2$ Bottom line of the display
+
+   ! Recargas Electronicas
+   call MSMTREC37
+
+   ! Cheques
+   call MSMTCHEQ37
+
+!call traceNUO( "UE37 TS.USER.RETURN=" + str$(TS.USER.RETURN) )
+END FUNCTION

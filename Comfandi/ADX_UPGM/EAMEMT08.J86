@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC08 PUBLIC ! AFTER COMPUTING THE POINTS VALUE OF AN ORDER
+ 
+! insert user exit code here
+ 
+ END FUNCTION

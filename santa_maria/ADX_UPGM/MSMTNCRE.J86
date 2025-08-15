@@ -1,0 +1,26 @@
+!-----------------------------------------------------------------------------
+! Modulo: MSMTNCRE.BAS Modulo NC como medio de pago
+! Fecha : 9 de Noviembre de 2021
+! Autor : Carlos Calderon
+!------------------------------------------------------------------------------
+
+SUB MSMTNCRE02 EXTERNAL
+END SUB
+
+SUB MSMTNCRE07 EXTERNAL
+END SUB
+
+SUB MSMTNCRE14 EXTERNAL
+END SUB
+
+SUB MSMTNCRE22 EXTERNAL
+END SUB
+
+SUB MSMTNCRE30 EXTERNAL
+END SUB
+
+SUB MSMTNCRE53 EXTERNAL
+END SUB
+
+SUB MSMTNCRE62 EXTERNAL
+END SUB

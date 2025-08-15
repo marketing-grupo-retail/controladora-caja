@@ -1,0 +1,184 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2201.011
+!     Punto de Entrada   =  EAMTSU22.J86
+!     Fecha de Revisi¢n  =  Nov. 01 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Instrucciones  para  franqueo de documentos con el nombre del CLIENTE y
+! el nombre de la Empresa para Ventas a Credito. Se incluye la elaboracion
+! Adicional de una Factura en Formato especial.
+!-------------------------------------------------------------------------
+
+!INTEGER*1                                             \!
+!          NO.LIN.FRAN%                                 ! N de Lineas en Franqueo
+!-----------------------------------------------------------
+
+IF TS.LINETYPE = 9   AND                              \! Si es linea de Franqueo y
+  (TS.LINEDATA = 5   OR                               \! Formato 5, Credito Comfandi
+   TS.LINEDATA = 7)  THEN BEGIN                        ! Formato 5, Credito Comfandi
+    NO.LIN.FRAN% = NO.LIN.FRAN% + 1                    ! Incrementa lineas impresas
+ENDIF                                                  !
+
+IF TS.LINETYPE = 9   AND                              \! Si es linea de Franqueo y
+  (TS.LINEDATA = 5   OR                               \! Formato 5, Credito Comfandi
+   TS.LINEDATA = 7)  AND                              \! Formato 5, Credito Comfandi
+   NO.LIN.FRAN% = 3 THEN BEGIN                         ! Si es la segunda linea
+   IF VRDAD$ = "61" THEN                              \! variedad 1 Credito
+      LF$="CR Med/Emp. " + RATA$ +                    \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$             :                  \! Arma Linea de Franqueo 
+      ELSE                                            \!
+   IF VRDAD$ = "62"  THEN                             \! variedad 2 Credito
+      LF$="CR Tem/Esc. " + RATA$ +                    \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$             :                  \! Arma Linea de Franqueo 
+      ELSE                                            \!
+   IF VRDAD$ = "63"  THEN                             \! variedad 3 Credito
+      LF$="CR Interno " + RATA$ +                     \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$             :                  \! Arma Linea de Franqueo 
+      ELSE                                            \!
+   IF VRDAD$ = "64"     THEN                          \! variedad 4 Credito
+      LF$="CR Espec.  " + RATA$ +                     \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$                                \! Arma Linea de Franqueo 
+      ELSE                                            \!
+   IF VRDAD$ = "65"     THEN                          \! variedad 5 Credito
+      LF$="Cr‚dito C.V.C. 60% "+                      \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$                                \! Arma Linea de Franqueo 
+      ELSE                                            \!
+   IF VRDAD$ = "66"     THEN                          \! variedad 6 Credito 50%
+      LF$="CR Sin Fac." + RATA$ +                     \!
+          RIGHT$(TS.PRTBUF$,18)    :                  \! Cambia parte Izq.de Franq
+      TS.PRTBUF$ = LF$                                 ! Arma Linea de Franqueo 
+ENDIF    
+
+
+IF TS.LINETYPE = 9   AND                              \! Si linea Franq y
+   TS.LINEDATA = 5   AND                              \! Formato=5, Credito
+   (VRDAD$ = "61"    OR                               \! vrdad 1 Medicam
+    VRDAD$ = "65"    OR                               \! vrdad 5 de CVC 60%
+    VRDAD$ = "66")   THEN BEGIN                        ! vrdad 6 CR Sin Factura
+   IF NO.LIN.FRAN% > 6 THEN BEGIN                      ! Si lin impr > 6
+      IF NOEMP1$ <> STRING$(30," ") THEN              \!
+         NOE$=NOEMP1$                                  ! Trae Nombre Empr 1
+      IF NOEMP2$ <> STRING$(30," ") THEN              \!
+         NOE$=NOEMP2$                                  ! Trae Nombre Empr 2
+      IF NOEM$   <> STRING$(30," ") THEN              \!
+         NOE$=NOEM$                                    ! Trae Nombre Empr 3
+      NOEMP1$ = STRING$(30," ")                        ! Borra Nombre Emp1
+      NOEMP2$ = STRING$(30," ")                        ! Borre Nombre Emp2
+      NOEM$   = STRING$(30," ")                        ! Borre Nombre Emp3
+      WRITE FORM "C38 A12";#35;" "                     ! Avanza 12 espacios
+      TS.FORMCR$ = "C86 A1"                            !
+      WRITE FORM "2C1 A0";#35;CHR$(27),CHR$(76)        ! Mover Cabeza a Izq.
+      WRITE FORM "C7 C34 C20 C2 C23 A3";#35;          \! Impr segun formato
+      STR$(VAL(FAC$)),NOE$,ALMA$," ",FRA.FAC$          ! Escribe Emp Fec y Alm
+      FAC$   = ""                                      ! Reset No Factura
+      RATA$  = STRING$(8," ")                          ! Borre Nombre % EPS
+      NOE$   = STRING$(30," ")                         ! Borre Nombre Emp 
+
+      FOR USR.IND1% = 1 TO 499                         ! Loop para vaciar CR
+        IF USR.ITEMS$(USR.IND1%) = "" THEN BEGIN       ! Si es Lin en Blanco
+           FOR USR.IND1% = 450 TO 489                  ! Loop para Vaciar TOTs
+               TS.FORMCR$ = "C38 A1"                   ! Formato Impresion
+               IF USR.ITEMS$(USR.IND1%)<>"" THEN BEGIN ! Si hay Subtotales
+                  WRITE FORM "C38 A1";#35;            \! Imprime todos
+                  LEFT$(USR.ITEMS$(USR.IND1%),        \! los pagos del
+                  38-(38-LEN(USR.ITEMS$(USR.IND1%))))  ! CR hasta ese momento
+                  LINCR% = LINCR% - 1                  ! Decrem Lineas Disp
+               ENDIF                                   ! Fin de Lin TOTs
+               NO.CUO$ = ""                            ! Reset de %EPS
+               NO.MOD$ = ""                            ! Reset de CTAMOD
+           NEXT USR.IND1%                              ! Sig Loop
+           USR.IND1% = 499                             ! Asigna final Loop
+        ENDIF ELSE BEGIN                               !
+           TS.FORMCR$ = "C86 A1"                       ! Cambia a Fmto 86
+           WRITE FORM "2C1 A0";#35;CHR$(27),CHR$(76)   ! Desplaza Cabz Izq
+           WRITE FORM "C86 A1";#35;                   \! Imprime Linea
+                 LEFT$(USR.ITEMS$(USR.IND1%),         \! de Articulo Extend
+                 86-(86-LEN(USR.ITEMS$(USR.IND1%))))   ! en 86 Posic
+           LINCR% = LINCR% - 1                         ! Decrem Cont Linea
+           IF LINCR% = 0 THEN BEGIN                    ! Si se acaba Forma
+              WRITE FORM "2C1 A0";#35;CHR$(27),CHR$(12)! Retira el Doc Val
+              WRITE FORM "C1 A10";#35;" "              ! Avanza 10 espacios
+              LINCR% = 40                              ! 
+           ENDIF                                       !
+        ENDIF                                          !
+      NEXT USR.IND1%                                   !
+      NOM$ = STRING$(30," ")                           ! Borra Nombre
+      FOR USR.IND1% = 1 TO LINCR%                      ! Posiciona Total 
+        WRITE FORM "C8  A1";#35;" "                    ! Avanza 1 espacio
+      NEXT USR.IND1%                                   ! Sigue en Loop
+      WRITE FORM "C38 A2";#35;RIGHT$(USR.ITEMS$(490), \! Escribe Total
+                  38-(38-LEN(USR.ITEMS$(490))))        !  
+      WRITE FORM "C38 A1";#35;VENDIO$                  ! Escribe Vendedor
+      WRITE FORM "C21 PIC($###,###) A1";#35;          \! Escribe Cupo
+            " Cupo Autorizado : ",VAL(NO.CUP$)         !
+      WRITE FORM "C21 PIC($###,###) A1";#35;          \! Escribe Vr.Cr‚dito
+            " Valor Cr‚dito   : ",VAL(VRCRE$)          !
+      WRITE FORM "C21 PIC($###,###) A1";#35;          \! Escribe Vr.Copago          
+            " Cuota Moderadora: ",VAL(CTAMOD$)         !
+      CTAMOD$  = STRING$(8," ")                        ! Borre Vr.Copago   
+      VRCRE$   = STRING$(12," ")                       ! Borre Vr.Copago   
+      DIM USR.ITEMS$(500)                              ! Dim/Reset Array
+      USR.IND1% = 0                                    ! 
+      USR.IND2% = 0                                    !
+      LINCR%    = 25                                   !
+   ENDIF                                               !
+ENDIF                                                  !
+
+IF TS.LINETYPE = 9   AND                              \! Si es lin Franq y
+   TS.LINEDATA = 4   AND                              \! es Form 4,Credito
+   NO.LIN.FRAN% = 5 THEN BEGIN                         ! y la linea es=5
+   TS.PRTBUF$=LEFT$(TS.PRTBUF$,30)+                   \! Agrega N¦ Cliente
+              STR$(COTRA1%)                            ! Salva  Izq. Franq
+   COTRA1% = 0                                         ! 
+ENDIF                                                  !
+
+IF TS.LINETYPE = 9   AND                              \! Si linea Franqueo y
+  (TS.LINEDATA = 1   OR                               \! Formato = 1,Cheques o
+   TS.LINEDATA = 2)  THEN BEGIN                        ! Formato = 2,Red Mult. o
+   IF TS.BALDUE(0) > 0 AND                            \! Si existe saldo
+      NO.LIN.FRAN% = 5 THEN BEGIN                      ! y linea es=5
+      LF$=LEFT$(TS.PRTBUF$,21)+" SALDO"                ! Salva parte Izq.
+      VR$=RIGHT$(TS.PRTBUF$,11)                        ! Salva parte Der.
+      TS.PRTBUF$ = LF$+VR$                             ! Arma Linea Franqueo 
+  ENDIF     
+ENDIF
+
+IF TS.LINETYPE = 9   AND                              \! Si linea de Franqueo y
+   TS.LINEDATA = 6   AND                              \! Formato = 6,
+  (VRDAD$ = "24"     OR                               \! con CHEQUE Drogue. o
+   VRDAD$ = "26")    AND                              \! con CHEQUE Electr.
+   TS.IO.DATA$(7) = "0"   THEN BEGIN                   ! y el valor es CERO
+   IF NO.LIN.FRAN% = 5    THEN                        \! si linea es = 5
+      TS.PRTBUF$="    "   ELSE                        \! Reeempl Linea Franqueo
+   IF NO.LIN.FRAN% = 6    THEN                        \! si linea es = 6
+      TS.PRTBUF$="     ** PAGO EN CHEQUE **"          \!
+      ELSE                                            \! Reeempl Linea Franqueo
+   IF NO.LIN.FRAN% > 6    THEN                        \! numero de linea es > 6
+      TS.PRTBUF$="    "                                ! Reeempl Linea Franqueo
+ENDIF
+
+IF TS.LINETYPE = 9        AND                         \! Si linea Franqueo y
+   TS.LINEDATA = 6        AND                         \! Formato = 6, Serv/Electr
+   VRDAD$ = "46"          AND                         \! con pago RED MULTIC
+   TS.IO.DATA$(7) = "0"   THEN BEGIN                   ! y el valor es CERO
+   IF NO.LIN.FRAN% = 5    THEN                        \! si linea es = 5
+      TS.PRTBUF$="    "   ELSE                        \! Reeempl Linea Franqueo
+   IF NO.LIN.FRAN% = 6    THEN                        \! si linea es = 6
+      TS.PRTBUF$="   ** PAGO CON RED MULTICOLOR **"   \!
+      ELSE                                            \! Reeempl Linea Franqueo
+   IF NO.LIN.FRAN% > 6    THEN                        \! numero de linea es > 6
+      TS.PRTBUF$="    "                                ! Reeempl Linea Franqueo
+ENDIF
+
+IF NO.LIN.FRAN% > 6 THEN BEGIN                         ! Si termina franqueo,
+   NO.LIN.FRAN% = 0                                    ! Restaura contador
+ENDIF
+!---------------------------------------------------------------------------

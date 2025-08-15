@@ -1,0 +1,11 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!para escribir al log
+FUNCTION ADXERROR(TERM,MSGGRP,MSGNUM,SEVERITY,EVENT,UNIQUE) EXTERNAL
+   INTEGER*2 TERM,MSGNUM
+   INTEGER*1 MSGGRP,SEVERITY,EVENT
+   STRING UNIQUE
+END FUNCTION
+
+

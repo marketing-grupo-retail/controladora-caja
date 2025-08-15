@@ -1,0 +1,5 @@
+EAMSCAPL.286 = EAMSCAPC[S],
+               EAMSCUEC[S],
+               EAMMMCFC[S],
+               ADXACRCL.L86 [s],
+               ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

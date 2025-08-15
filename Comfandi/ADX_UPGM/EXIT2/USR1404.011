@@ -1,0 +1,79 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1404.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Julio de 1996
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***       
+!
+!     Estas lineas se insertan en la USER EXIT 14  para controlar los datos
+!     digitados por el cajero en la modalidad de venta por CONCESION.                        
+!                                                         
+!     El Codigo de la Concesion y el Valor DEBEN digitarse siempre, separados
+!     por la Tecla "/"                
+!
+!     Adicionalmente, coloca un prefijo a los Plu's de FRUVER (Verduras de 
+!     primera Calidad y SEGUNDAS) para reducir el tiempo de Digitaci¢n.
+!----------------------------------------------------------------------------
+
+IF TS.IO.MOTORKEY = 220 THEN BEGIN                      ! Es Key/Dpto 19=CONC.?
+   IF TS.IO.DATA$(3)<> "" THEN BEGIN                    ! y hay No. CONCES ?
+      IF LEN(TS.IO.DATA$(3)) > 3 THEN BEGIN             ! y tiene mas de 3 dig
+         CALL VISORES4690(1,"ERROR CODIGO DE","CONCESION..!",3000,"L")      
+         TS.IO.MOTORKEY=0                               ! Permanece en este
+      ENDIF ELSE BEGIN                                  !
+         AI% = LEN(TS.IO.DATA$(3))                      ! Obtiene Long PLU
+         TS.IO.MOTORKEY = 80                            ! Cambia Motor=ENTER
+         TS.IO.DATA$(2)="0888"+                       \ ! Arma el nuevo PLU
+         RIGHT$("00"          +                       \ !
+         RIGHT$(TS.IO.DATA$(3),AI%),3)                  !
+         IF TS.IO.DATA$(2) = "0888061" THEN BEGIN             !
+           TS.IO.DATA$(10) = "20040510" + RIGHT$("00000000000" \ !GRABA
+           +TS.IO.DATA$(10),11)
+           TS.IO.KEYS(10) = 63       !STR RECAUDO MANUAL
+         ENDIF
+         TS.IO.KEYS(2) = TS.IO.MOTORKEY                 ! Dato Asoc a PLU
+         TS.IO.KEYS(5) = 74                             ! Dat Asoc PRECIO
+         TS.IO.KEYS(3) = 0                              ! Restaura "/"
+         TS.IO.DATA$(3) = ""                            ! Restaura Dato Asoc "/"
+      ENDIF                                             !
+   ENDIF ELSE BEGIN                                     ! Si no hay PLU
+      CALL VISORES4690(1,"FALTA CODIGO DE","CONCESION..!",3000,"L")      
+      TS.IO.MOTORKEY = 0                                ! Permanece en este
+   ENDIF    
+ENDIF
+
+!---------------------------------------------------------------------------
+
+IF TS.PROCEDURE < 1 THEN BEGIN                         ! Si esta en Venta 
+   IF TS.IO.KEYS(6) = 72 THEN BEGIN                    ! y se Digita PESO
+     IF VAL(TS.IO.DATA$(2)) < 999 THEN BEGIN             ! Toma el valor < 999
+      TS.IO.DATA$(2) = RIGHT$("000"+TS.IO.DATA$(2),3)  ! Inserta Ceros
+      TS.IO.DATA$(2) = "88" +  TS.IO.DATA$(2)          ! Inserta Ochos's
+      TS.IO.MOTORKEY = 80                              ! Asigna Tecla ENTER
+      TS.IO.KEYS(2)  = 80                              ! con MOTOR Enter
+      ANUL% = 1                                        ! Reset de Anular
+      IF TS.IO.KEYS(1) = 70 THEN BEGIN                 ! y se Digita VOID
+         ANUL% = -1                                    ! se torna negativo
+      ENDIF     					! Fin de Anular
+     ENDIF	! CORRECCION
+   ENDIF                                               ! Fin de Balanza
+ENDIF                                                  ! Fin Procedm Vta
+
+IF TS.PROCEDURE < 1 THEN BEGIN                         ! Si esta en Venta 
+   IF TS.IO.KEYS(9) = 71 THEN BEGIN                    ! y se Digita TARA
+      TS.IO.KEYS(9) = 0                                ! Borra TARA
+      TS.IO.KEYS(6) = 72                               ! cambia a Balanza
+      TS.IO.DATA$(2) = RIGHT$("000"+TS.IO.DATA$(2),3)  ! Inserta Ceros
+      TS.IO.DATA$(2) = "89" +  TS.IO.DATA$(2)         ! Inserta Nueves's
+      TS.IO.MOTORKEY = 80                              ! Asigna Tecla ENTER
+      TS.IO.KEYS(2)  = 80                              ! con MOTOR Enter
+      ANUL% = 1                                        ! Reset de Anular
+      IF TS.IO.KEYS(1) = 70 THEN BEGIN                 ! y se Digita VOID
+         ANUL% = -1                                    ! se torna negativo
+      ENDIF                                            ! Fin de Anular
+   ENDIF                                               ! Fin de Tara
+ENDIF                                                  ! Fin Procedm Vta
+
+!---------------------------------------------------------------------------

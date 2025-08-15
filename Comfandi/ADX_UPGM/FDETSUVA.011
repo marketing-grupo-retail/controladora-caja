@@ -1,0 +1,13 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : FDETSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Rutinas Fondo de Empleados       *
+!**************************************************
+
+INTEGER*1   GLOBAL  Com.Fde.Line%,    \! Control de proyecti
+                    Com.Fde.Sesion%,  \! Numero de sesion 
+                    Com.Fde.Consulta%  ! Procedimiento de consulta  
+
+STRING      GLOBAL  Com.Fde.Socio$     ! Codigo del Empleado

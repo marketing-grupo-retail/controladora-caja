@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC37 PUBLIC
+! TSUPEC37 - ERROR GUIDANCE
+%INCLUDE EAMTSE37.J86        ! EMS PRPQ
+CALL RECASRV(37,0)		       ! PAGO SERVICIOS PUBLICOS
+
+END FUNCTION
+

@@ -1,0 +1,23 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+!--- Lineas adicionadas limpieza variables SMA  GR-OVS 22Dic2011
+TS.GROSSPOS = 0        										! GROSS + FOR THIS TRX
+TS.GROSSNEG = 0        										! GROSS - FOR THIS TRX
+Asc.Pay.VlrBono$ = "0"                    ! Init Valor del pago del Bono 22 Oct 2012 GR-OVS
+
+!TS.MISCTRX.AMT = 0     										! MISC TRX AMOUNT FOR THIS TRX
+!TS.TENDERED(0) = 0                        ! Init para evitar basura pago subsidio
+!SL.HD.GROSSNEG = 0
+!SL.HD.GROSSPOS = 0 
+!TS.GROSSNEG = 0
+!TS.GROSSPOS = 0
+!CALL TSETEC03                             ! Inicializa Totales Trx
+
+

@@ -1,0 +1,37 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A.                                **
+!   **    User Exit  :  CELLTS53.011                                         **
+!   **    Inclu¡r en :  EAMTSU53.J86                                         **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD RETAIL                      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+IF UE.CELL.RECP% = 0 THEN BEGIN				! 1a Vez recuperacion
+   UE.CELL.SALE% = 0					! Controla venta
+   UE.CELL.ON = 0					! Controla venta
+   UE.CELL.ANUL% = 0					! Controla devolucion
+   UE.CELL.ERROR% = 0					! Control de errores
+   UE.CELL.ERROR2% = 0					! Control de errores
+   UE.CELL.TMP% = 0					! Init cont. qty vendida
+   UE.PLU.ALT$ = ""					! Codigo alterno
+   DIM UE.VTAPIN$(60,4)					! Control de pines
+   UE.NRO.PINES% = 0					! Contador de pines
+   UE.CELL.RECP% = -1					! Proceso recuperacion
+   UE.CELL.ANTRX% = 0
+ENDIF
+
+IF UNPACK$(LEFT$(SL.STR.ENTRY$,1)) = "01" THEN BEGIN 		! Si es vta articulo
+   TS.TEMP1I1 = 0						!
+   TS.TEMP1I1 = ITEM.CELLSTAR					! Valida si es un pin
+
+   IF (SL.IT.INDICAT2 AND 80H) OR (SL.IT.INDICAT2 AND 40H) THEN \
+   ELSE TS.IO.DATA$(6) = ""
+
+   TVISOR$ = TS.IO.DATA$(6)
+   IF UE.CELL.SW THEN TS.IO.DATA$(6) = ""			! Limpio TSIODATA
+ENDIF

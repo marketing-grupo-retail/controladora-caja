@@ -1,0 +1,141 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+! Mod29Dic2006
+! Se adiciona manejo de articulos miscelaneos
+! para manejo de capitaciones, desarrollado para 
+! Comfandi, diciembre 29 de 2.006 OVS 
+!--------------------------------------------------
+! Mod29Sept2007
+! Se ajusta modulo para el proceso de lectura y 
+! validacion del PLUCONVE usando la variable
+! SL.IT.ITEMCODE$ y no la IR.ITEMCODE$
+! Grupo Retail OVS
+!----------------------------------------------------
+! Mod14Dic2007
+! Se retira el proceso de validacion de tipo de articulo
+! para realizar una lectura menos sobre la maestra de articulo
+! Grupo Retail OVS
+!----------------------------------------------------
+
+IF (IR.INDICAT0 AND 04H) NE 0   THEN         \! item not for sale
+    Exit Sub 
+
+
+If UE.EPS.COPAGOAPLICADO% = -1 Then Begin   	! Copago aplicado
+   TS.TEMP1I1 = 0	                            ! Cancelo acceso
+   IR.INDICAT0 = IR.INDICAT0 OR 04H	          ! No permite venta
+   TS.GUIDANCE = 1117              	          ! Totalice la venta
+   TS.IO.MOTORKEY = 0			                    !
+   Exit Sub
+EndIf
+
+If UE.EPSS.ON Then Begin                                        ! Si convenios Activo
+  Xtmp$ = Pack$(Right$("000000000000"+SL.IT.ITEMCODE$,12))      ! Ajusta dato busqueda
+  TS.TEMP1I1 = Valida.Tipo.Articulo(Xtmp$)          		        ! Valida tipo de articulo   Retira lectura OVS 14 Dic 2007
+  If TS.TEMP1I1 = -1 Then Begin  				                        ! Si codigo de barras 
+     TS.TEMP1$ = Ue.Eps.Cod5$    				                        ! Asigna codigo correcto 
+  EndIf Else TS.TEMP1$ = Xtmp$              			              ! Si no toma PLU digitado
+  
+	If UE.EPS.CVMERCA$ = "1" Then	\                               ! Si control por producto
+	   XKEY$ = UE.EPS.CCOD$+TS.TEMP1$	\                           ! Arma llave consulta por producto
+	Else \                                                        ! Si control por departamento
+	   XKEY$ = UE.EPS.CCOD$+PACK$(String$(8,"0"))+IR.DEPARTME$    ! Arma llave consulta por departamento
+	TS.ER.RETURN = -1
+	
+   If Asc.Cnv.ApplCobro% = -1 Then Begin			                  ! Aplicando Reverso cuota moderadora
+      UE.EPS.CIPRECIO$ = Pack$(Asc.Cnv.CuotaMod$)
+      SL.IT.XPRICE = Val(Asc.Cnv.CuotaMod$)
+      GoTo APLICANDO.ITEM
+   EndIf
+
+!--- Se ajusta apertura del pluconve dejandolo en la UE7
+!--- 25 mayo 2007 OVS
+
+  TS.ER.RETURN = 0
+
+!  Read Form "C14 C4 C3 C3";#UE.OPEN.PLU% KEY XKEY$;\            ! Busca la lista de precios de este producto
+!           D$,UE.EPS.CIPRECIO$,UE.EPS.CIfECHI$,UE.EPS.CIfECHF$  !
+
+  If TS.ER.RETURN <> -1 Then Begin 				                      ! Error en la lectura
+    TS.ER.RETURN = -1						                                ! Control de errores
+    Call VALIDACION.LINEA.PLU(XKEY$)			                      ! Valida en linea si producto exite
+    If TS.ER.RETURN <> -1 Then Begin 				                    ! Si no encontro producto en linea
+       IR.INDICAT0 = IR.INDICAT0 OR 04H				                  ! No permite venta
+       Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)
+       TS.IO.MOTORKEY = 0   
+       Exit Sub   						! 
+    EndIf 
+    
+!    Call VISORES4690(1,"ARTICULO NO TIENE","COBERTURA EN ESTE PLAN",1200,"L")
+!    IR.INDICAT0 = IR.INDICAT0 OR 04H												                   ! No permite venta
+!    Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)
+!    TS.IO.MOTORKEY = 0   
+!    Call Traduce.Error.Cnv
+!    Call U.IMPRIME("ERROR="+TS.TS11WERR$+" COD="+XERRFX$+" FILE="+\
+!                   Str$(TS.ERRF),2100H)
+!    Call U.IMPRIME("ITEM : "+UNPACK$(XKEY$),2100H)
+!    
+!    Exit Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+
+  EndIf
+	VISOR% = TS.TOTALS(0,0,0)
+	
+	If Val(UE.EPS.ACTFECHA$) >= Val(Unpack$(UE.EPS.CIfECHI$)) AND \
+	   Val(UE.EPS.ACTFECHA$) <= Val(Unpack$(UE.EPS.CIfECHF$)) Then Begin
+		If Val(UE.EPS.NRMLoCATAL$) = 0 Then Begin
+			If Val(UE.EPS.CANT$) > 0 Then Begin
+			    If Val(Unpack$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = Val(Unpack$(UE.EPS.CIPRECIO$))/Val(Unpack$(IR.SALEQUAN$))* Val(UE.EPS.CANT$)	\
+				Else \
+				TS.TEMP1I4 = Val(Unpack$(UE.EPS.CIPRECIO$))*Val(UE.EPS.CANT$)
+			EndIf Else Begin 	
+			    If Val(Unpack$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = Val(Unpack$(UE.EPS.CIPRECIO$))/Val(Unpack$(IR.SALEQUAN$))	\
+				Else \
+				TS.TEMP1I4 = Val(Unpack$(UE.EPS.CIPRECIO$))
+			EndIf
+			
+			If Val(Unpack$(UE.EPS.CMAX$)) > 0 Then \      ! Si Valida monto maximo de factura
+			If ((TS.TOTALS(0,0,0)-TS.MISCTRX.AMT+TS.TEMP1I4) > Val(Unpack$(UE.EPS.CMAX$))) AND  NOT(UE.EPS.DEVO%) Then Begin
+         Call VISORES4690(1,"SUPERA EL VALOR","MAXIMO AUTORIZADO",1200,"L")
+         IR.INDICAT0 = IR.INDICAT0 OR 04H												                   ! No permite venta
+			   Exit Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+			EndIf
+			APLICANDO.ITEM:
+			UE.EPS.PRECIO% = Val(Unpack$(UE.EPS.CIPRECIO$))
+		EndIf Else Begin
+			If Val(UE.EPS.CANT$) > 0 Then Begin
+			    If Val(Unpack$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = Val(Unpack$(IR.SALEPRIC$))/Val(Unpack$(IR.SALEQUAN$))*Val(UE.EPS.CANT$)	\
+				Else \
+				TS.TEMP1I4 = Val(Unpack$(IR.SALEPRIC$))*Val(UE.EPS.CANT$)
+			EndIf Else Begin
+			    If Val(Unpack$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = Val(Unpack$(IR.SALEPRIC$))/Val(Unpack$(IR.SALEQUAN$))	\
+				Else \
+				TS.TEMP1I4 = Val(Unpack$(IR.SALEPRIC$))
+			EndIf
+			
+			If Val(Unpack$(UE.EPS.CMAX$)) > 0 Then \  ! Si Valida monto maximo de factura
+			If ((TS.TOTALS(0,0,0)-TS.MISCTRX.AMT+TS.TEMP1I4) > Val(Unpack$(UE.EPS.CMAX$))) AND  NOT(UE.EPS.DEVO%) Then Begin
+          Call VISORES4690(1,"SUPERA EL VALOR","MAXIMO AUTORIZADO",1200,"L")
+          IR.INDICAT0 = IR.INDICAT0 OR 04H												                   ! No permite venta
+			    Exit Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+			EndIf
+			UE.EPS.PRECIO% = 0
+		EndIf
+		IR.LINKEDTO$ = Pack$("0000")
+	EndIf Else Begin
+		UE.EPS.DEVO% = 0
+		UE.EPS.PRECIO% = 0
+		Call Visores4690(1,"PRECIO ARTICULO","FUERA DE FECHA",1000,"C")
+		IF TS.IO.DATA$(6) = "" Then TS.IO.DATA$(6) = "1"
+		IR.LINKEDTO$ = Pack$("0000")
+	EndIf
+EndIf

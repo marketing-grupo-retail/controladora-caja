@@ -1,0 +1,72 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1966                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR2001.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones para evitar la Linea de Iva de la SMA/4690 en la     **
+!   **    Tira del Cliente (CR)                                              **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   **                                                                       **
+!   ***************************************************************************
+CALL FORMAT.AMOUNT(TS.BALDUE(0))
+!FONPH$ = CHR$(27)+CHR$(69)
+!TS.PRTFRU$  = "**TOTAL DESCUENTOS --->    $  -" + TS.TEMP1$     !bufer imp
+ !          IF TS.COUP.AMT <> 0    AND                          \!     !DCTO CUPON 
+  !           TS.LINETYPE =  7 THEN BEGIN                        ! 
+   !          WRITE FORM "C38  A1";#34;FONPH$+TS.PRTFRU$         !      
+    !       ENDIF
+!-------------------------------------------------------------------------
+
+ajus1% = ajus% * -iv% 
+if ajus1% <> 0  or imprime% = 1 then begin           !
+IF TS.LINETYPE = 7 THEN BEGIN                               
+    VR$ = RIGHT$(TS.PRTBUF$,12)                      ! Toma el Valor Total
+    TS.PRTBUF$="**SUBTOTAL/TOTAL --->  $ "+VR$       ! Arma STRING de nuevo
+        USR.ITEMS$(450) = TS.PRTBUF$                 ! Guarda Subtotal
+ENDIF else begin 
+if ts.linetype = 7 then \
+
+ts.prtbuf$ = " "
+ENDIF 
+endif
+IF LEFT$(TS.PRTBUF$,7) = "   ****" THEN             \!
+TS.PRTBUF$= " " !**SUBTOTAL/TOTAL --->  $ "+ str$(ts.baldue(0)) 
+
+!   write form"c38";#34; str$(ts.io.state) + "  " + str$(ts.io.motorkey)
+
+! Arma STRING de nuevo
+!IF mid$(TS.PRTBUF$,24,3) = "TOT" THEN TS.PRTBUF$ = "HEY"
+!------------------------------------------------------------------------------
+
+IF TO.USEROPTS(4) <> 0 THEN BEGIN                    ! Si Opt Usuario=4 Iva 
+   IF TS.LINETYPE = 18 THEN UE.NIT = 1               ! Si es Header de Inicio
+   IF TS.LINETYPE = 1 OR                            \! Si es Vta Item
+      TS.LINETYPE = 5 THEN BEGIN                     ! 
+         IF UE.NIT = 1 THEN BEGIN                    ! y es Cabecera
+!           WRITE FORM "C38 A1"; #34 ;               ! Escribe Mensaje
+!           "         AGENTE RETENEDOR DE IVA"       !
+!           WRITE FORM "C38 A1"; #34 ;               ! y Nit
+!           "           NIT 123.456.789-0"           !
+            AUX$ = "    FACTURA DE VENTA # "      + \! Letrero de Factura
+            RIGHT$("000"+TS.STORE$,3)             + \! con Num Almac
+            RIGHT$("000"+STR$(SL.HD.TERMINAL),3)  + \! la terminal
+            RIGHT$("0000"+STR$(SL.HD.TRANSNUM+1),3)  ! y la transaccion
+            WRITE FORM "C38 A1"; #34 ; AUX$          ! Y lo Imprime en CR
+            WRITE FORM "C38 A1"; #36 ; AUX$          ! Y lo Imprime en SJ
+            AUX$ = "   FECHA DE EXPEDICION:  "    + \! Letrero de Fecha
+            LEFT$(UNPACK$(SL.HD.DATETIME$),2)+"/" + \! compaginada
+            MID$(UNPACK$(SL.HD.DATETIME$),3,2)+"/"+ \! para mejor
+            MID$(UNPACK$(SL.HD.DATETIME$),5,2)       ! presentacion 
+            WRITE FORM "C38 A2"; #34 ; AUX$          ! y lo Imprime
+            UE.NIT = 0                               ! Reset de Inicio
+         ENDIF                                       ! Fin de Cabecera
+   ENDIF                                             ! Fin de Impresion Plu
+ENDIF                                                !
+
+!----------------------------------------------------------------------------

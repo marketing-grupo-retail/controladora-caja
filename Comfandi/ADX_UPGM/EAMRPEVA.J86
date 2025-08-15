@@ -1,0 +1,189 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMRPUVA.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/*                                                                 */
+\/*  IR24723 - Correct store total recap report store coupon line   */
+\/*            and manufactures coupon line not being displayed     */
+\/*            when these lines are below the item keyed or scanned */
+\/*            line.                                                */
+\/*            MWD  MGVA 21JAN94                                    */
+\/*                                                                 */
+\/*  IR30509 - Tender by variety enhancements caused the electronic */
+\/*            coupon lines to print twice.                         */
+\/*            CRM  MGVA 29AUG95                                    */
+\/*                                                                 */
+\/*  IR32118 - FIX COMPLETION FOR IR31828                           */
+\/*            Insure that FBUY lines print when multiple operators */
+\/*            are on a page.                                       */
+\/*            CRM  MGVA 19APR96                                    */
+\/*                                                                 */
+\/*  IR33158 - Add EM support for the expanded operator             */
+\/*            authorization feature.                               */
+\/*            LTG MGVA 25Sept96                                    */
+\/*                                                                 */
+\/*  IR37892 - Add variable to hold totals descriptor for cash      */
+\/*            report to make the report NLS compliant.             */
+\/*            RSH MGVA 11May98                                     */
+\/*                                                                 */
+\/*  IR39149 - Add variables for enhanced manufacturer coupon       */
+\/*            reporting and accounting.  Co-req IR39147.           */
+\/*            RSH MGVA 12Nov98                                     */
+\/*                                                                 */
+\/*  IR39810 - Add variable for enhanced manufacturer coupon        */
+\/*            reporting and accounting to detect when the F8       */
+\/*            key is pressed.                                      */
+\/*            RSH MGVA 10Feb99                                     */
+\/*                                                                 */
+\/*  IR40876 - The Frequent Buyer additional data lines will print  */
+\/*            twice if the enhancement feature causes the report   */
+\/*            for a single operator to span two pages.             */
+\/*            RSH MGVA 28Jun99                                     */
+\/*                                                                 */
+\/*  IR43230 - Add variable OP.PAPER.CDPR to hold Frequent Buyer    */
+\/*            option 20.3. OP.PAPER.CDPR is used in USEROPRR.J86.  */
+\/*            LLU MGVA 14Jun00                                     */
+\/*                                                                 */
+\/*  IR47791 - CoRequisite APAR for Value Pack 2001 which used      */
+\/*            four (4) bytes of reserved space.  This allows       */
+\/*            Electronic Marketing to be compatable with the       */
+\/*            new product.                                         */
+\/*            CMJ MGVA 21Feb2002                                   */
+\/*                                                                 */
+\/*  IR49952 - A compile error occurs after applying IR48470        */
+\/*            because a string is not defined.                     */
+\/*            GGK IBM  15Nov2002                                   */
+\/*                                                                 */
+!!***END-OF-SPECIFICATIONS*******************************************
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER VARIABLES FROM BASE REPORT              **
+!!*******************************************************************
+STRING    GLOBAL AC.OT.OPERTERM$,   \ Last read key
+                 AC.OT.RESERVED$,   \ Last 172 bytes of acct record
+                 AC.ST.RESERVED$    ! Last 314 bytes of office record
+INTEGER*4 GLOBAL AC.OT.GROSSPOS,    \ Gross plus from acct record
+                 AC.OT.GROSSNEG,    \ Gross minus from acct record
+                 AC.OT.NUMTRANS,    \ Number of trans from acct record
+                 AC.OT.TEAMT(1)     ! Oper/Term On hand
+INTEGER*1 GLOBAL AC.OT.INDICAT0     ! Oper/Term flag
+
+STRING    GLOBAL OP.OP.RESERVED$,   \ Last 92 bytes of perf record      IR24723
+                 PAGE.LINE$(2)      !                                   IR24723
+INTEGER*4 GLOBAL OP.OP.GROSSPOS,    \ Gross plus from perf record
+                 OP.OP.GROSSNEG,    \ Gross minus from perf record
+                 OP.OP.NUMTRANS     ! Number of trans from perf record
+INTEGER   GLOBAL RECAP.REPORT,      \ Flag to signal recap report
+                 OFFICE.REPORT,     \ Flag to signal office cash report IR24723
+                 UNIT               !                                   IR24723
+INTEGER*2 GLOBAL SO.DEPTNUM(1)      ! Department numbers in memory
+INTEGER*1 GLOBAL SO.STOREACCT       ! Flag for store office present
+
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER VARIABLES FOR NEW FILE TOTALS           **
+!!*******************************************************************
+INTEGER*1 GLOBAL EMSS.ALREADY.DONE  !AVOID DUPLICATION IR30509
+INTEGER*1 GLOBAL EMSS.ALREADY.DONE2 !AVOID DUPLICATION IR30509
+INTEGER*4 EMSS.FBUYAMT,             \ Frequent buyer trans amount
+          EMSS.FBUYCNT,             \ Frequent buyer trans count
+          EMSS.COUPAMT,             \ Frequent buyer coupon amount
+          EMSS.COUPCNT,             \ Frequent buyer coupon count
+          EMSS.MFRCOUP,             \ Frequent buyer MFR coupon amount
+          EMSS.STRCOUP,             \ Frequent buyer STR coupon amount
+          EMSS.DBLCOUP              ! Double coupon amount
+
+INTEGER*4 EMSS.ITEMPTS,             \ Frequent buyer item points
+          EMSS.BONSPTS,             \ Frequent buyer bonus points
+          EMSS.REDMPTS              ! Frequent buyer redeemed points
+
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER OPTIONS VARIABLES                       **
+!!*******************************************************************
+STRING    PGM.NAME$                 ! PROGRAM NAME
+STRING    WARN.MORE.THAN.20$        ! IR32118
+STRING    NO.PRINT.SUBTOTAL$        ! IR32118
+INTEGER*1 OP.WHOLE.PTS,             \ SHOW ONLY WHOLE POINTS
+          OP.NO.EM                  ! NO EM PROCESSING
+INTEGER*4 OP.PPAMT, OP.AMTPP        ! POINTS PER AMT, AMT PER POINTS
+INTEGER   OP.DEP.MFR,               \ DEPOSIT AUTO MFR TO MISC TRANS
+          OP.DEP.STR,               \ DEPOSIT AUTO STR TO MISC TRANS
+          OP.DEP.DBL,               \ DEPOSIT AUTO DBL TO MISC TRANS
+          OP.PAPER.CDPR             ! SHOW ONLY PAPER CPN IN CDRAWER IR43230
+
+!!*******************************************************************
+!!** DEFINE FREQUENT BUYER WORK VARIABLES                          **
+!!*******************************************************************
+INTEGER*4 EMSS.TOTLAMT,             \ Total trans amount
+          EMSS.TOTLCNT,             \ Total trans count
+          EMSS.TOTLPTS,             \ Total points (Item + Bonus)
+          EMSS.NOFBAMT,             \ Non frequent buyer trans amount
+          EMSS.NOFBCNT              ! Non frequent buyer trans count
+STRING    EMSS.LAST.OPERTERM        ! Last operator or terminal number IR49952
+
+INTEGER*4 INPT.MFR.ONHAND,          \ On hand MFR coupon amount
+          INPT.STR.ONHAND,          \ On hand STR coupon amount
+          SUMM.TOTALS(1),           \ Summary totals (10 FROM FILE)
+          AUTO.CPN.ADJ(1)           ! Coupon adjustment fields
+                                    ! 1 = PICKED UP AUTO MFR COUPONS
+                                    ! 2 = ON HAND   AUTO MFR COUPONS
+                                    ! 3 = NET       AUTO MFR COUPONS
+                                    ! 4 = PICKED UP AUTO STR COUPONS
+                                    ! 5 = ON HAND   AUTO STR COUPONS
+                                    ! 6 = NET       AUTO STR COUPONS
+                                    ! 7 = PICKED UP DOUBLED  COUPONS
+                                    ! 8 = ON HAND   DOUBLED  COUPONS
+                                    ! 9 = NET       DOUBLED  COUPONS
+
+INTEGER*1 EMSS.FB.PRINTED           ! Frequent Buyer lines printed
+INTEGER*1 EMSS.PRINT.NOW            ! Frequent Buyer lines printed
+INTEGER*1 EMSS.CPN.ALTERED          ! Coupon line altered
+INTEGER*1 EMSS.OPER.OPEN            ! Operator authorization file open
+INTEGER*4 WORK4%,TEMP4%             ! Work variable
+INTEGER*2 I%,J%                     ! Work variable
+INTEGER*2 SV.LEN                    ! Work variable       IR47791
+INTEGER*4 X%                        ! Work variable
+STRING USER$, EMSS.DEF$             ! Work variable
+STRING EMSS.OPER$, EMSS.REC$        ! Operator name and record
+STRING STRCPN.NAME$, MFRCPN.NAME$   ! Tender descriptors
+STRING NOT.RECON$, YES.RECON$       ! Reconciled descriptors
+STRING SUMMARY.DESC$                ! Summary report descriptor
+STRING SAV.OPERTERM$                ! Save last record key
+STRING MSG$(1)                      ! Holds descriptors
+INTEGER ISPOS1, ISPOS2              ! Used in examining "ITEMS SCANNED" desc.
+INTEGER EMSS.READ.DESC              ! Should EM descriptors be read in?
+
+!!INTEGER*2 WORK, WORK2             ! Work variables from base
+!!STRING WORK$, WORK2$              ! Work variables from base
+
+! AIR33158 Add variables for the expanded operator authorization feature.
+ STRING OPA.FMT$,           \ format read of EAMOPERA.DAT
+        UNNEEDED$           ! Unneeded data in read of EAMOPERA.DAT direct
+
+ INTEGER*1 OA.FILE.NOT.OPEN ! Flag for opening EAMOPERA.DAT direct
+
+ INTEGER*2 OA.SN,           \ Session number for opening EAMOPERA.DAT direct
+           OA.RECL          ! Record length of EAMOPERA.DAT
+! EIR33158
+
+STRING TOTALS.DESC$         !IR37892
+
+!AIR39149
+STRING    MFRCPN.VAR$       ! Elec Mfr Coupon Variety Descriptor
+INTEGER*2 EMSS.EMC.VAR      ! Elec Mfr Coupon Variety
+!EIR39149
+
+!AIR39810
+INTEGER*2 GLOBAL F8.PRESSED ! TBV displayed
+!EIR39810
+
+!AIR40876
+STRING                      \
+          TENDTYPE$         ! tender type descriptor
+INTEGER*1                   \
+          ENH01.SPILL       ! Enhancement feature caused multiple
+                            !  pages for 1 operator/terminal flag
+!EIR40876

@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC44 PUBLIC                                                        
+! TSUPEC44                                                                      
+
+CALL PROMOCIONV2(44)                 ! MOTOR PROMOCIONE V2
+
+END FUNCTION                                                                    
+                                                                                

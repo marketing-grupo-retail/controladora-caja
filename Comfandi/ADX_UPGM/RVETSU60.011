@@ -1,0 +1,18 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda - Colombia     *
+!Programa      : RVETSU60.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+If TS.LINETYPE = 1 Then                                                         \! Es un articulo
+If Ue.Pin.Imp% = -1 Then Begin             																			 ! Impresion Telefono
+   Ue.Pin.Imp% = 0 																															 ! Reset Variable
+   If Ue.Pin.Devol% = 0 Then \
+    TS.TEMP1$ = "RECARGA NRO: "+Ue.Pin.Phones$+" POSICION: "+STR$(Ue.Pin.Posimp%) \! Arma str de impresion
+   Else TS.TEMP1$ = "ANULANDO NRO: "+Ue.Pin.Phones$ 														 ! Arma str de impresion
+   Call Pin.Imprime(TS.TEMP1$,6100H)                  													 ! Imprime telefono capturado
+   Ue.Pin.Capturadas% = -1 																											 ! Pin de vendida
+EndIf																																						 !

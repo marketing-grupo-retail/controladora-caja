@@ -1,0 +1,30 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA SA                                  **
+!   **    User Exit  :  CELLTS02.011                                         **
+!   **    Inclu¡r en :  EAMTSU02.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD DE RETAIL            	      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+UE.CELL.SALE% = 0					! Controla venta
+UE.CELL.ON = 0						! Controla venta
+UE.CELL.ANUL% = 0					! Controla devolucion
+UE.CELL.ERROR% = 0				! Control de errores
+UE.CELL.ERROR2% = 0				! Control de errores
+UE.CELL.CTRL% = 0					! Control devoluciones
+UE.CELL.ANTRX% = 0				! Control anul / total
+SL.END  = 0						    ! Control grabacion string
+UE.CELL.CPR% = -1					! Control cambio precio
+UE.PLU.ALT$ = ""					! Codigo alterno
+DIM UE.VTAPIN$(60,4)			! Control de pines
+UE.NRO.PINES% = 0					! Contador de pines
+UE.CELL.TMP% = 0					! Temporal de trabajo
+UE.CELL.RECP% = 0					! Proceso recuperacion
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------

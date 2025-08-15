@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda - Colombia     *
+!Programa      : RVETSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN
+ IF (TS.TOTALS(0,0,0) > 0)  THEN BEGIN
+     Ue.Pin.Slend% = SL.END								! Total de strings
+ EndIf
+EndIf

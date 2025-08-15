@@ -1,0 +1,11 @@
+eamrpmpl=eamrpmpc[LI,S,M], 
+eamwrcfc[m,li,lo], 
+eamrpcfc[s], 
+eamirrcc[s], 
+eamirrfc[s], 
+eamiruec[s], 
+eamcsasc[m,li,lo], 
+eammmcfc[s], 
+sysfunc.l86[s], 
+adxacrcl.l86[s], 
+adxadmbl.l86[s,li,lo,m,stack[max[800]]] 

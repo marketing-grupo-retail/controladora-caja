@@ -1,0 +1,159 @@
+!
+!
+!***************************************************************************
+! This function is for the terminal application.  Use eame2ofc.j86 for
+! the controller applications.
+!
+! Reads the first record of the eame2opt.dat file and returns the value of
+! the calling function's install/enable flag.  Module$ is the xx in the
+! EAMYYxxC that contains the calling module. By convention any new module
+! for the enhancement feature 2 will have an xx starting with 2.  The second
+! letter is defined as the first character of the function name as listed
+! below. The third parameter passed is the doThis$ which is shown below.  This
+! parameter indicates whether this is a get status or change status.  If a
+! change is requested it contains the value that the status will be changed to.
+! The returned value on a change is the value submitted for the change unless
+! there was an error.  "E" is returned for all errors.
+!
+! This function will call ADX.ERROR.LOG for all errors and return
+! "E" to caler.
+!
+!  Function      Function number
+!  --------      ---------------
+!  BBY                1
+!  EIM                2
+!  KVS                3
+!  MIS                4
+!  PWD                5
+!  SIR                6
+!  TDR                7
+!  DEP                8
+!  OPA                9
+!  WIC               10
+!  TRR               11
+!  TRR               11
+!  MIT               12
+!  SRT               13
+!  MCC               14
+!  EEB               15
+!  GUI               16
+!  IML               17
+!
+!
+!  doThis value      Results
+!  ------------      -------
+!    "0"              changes to uninstalled
+!    "1"              changes status to installed
+!    "2"              changes status to enabled
+!    "3"              returns current status
+!***************************************************************************
+
+ FUNCTION E2ReadOptionFlagT$(functionNumber, module$, doThis$)
+ INTEGER*1 functionNumber,             \ see above
+           svfunctionNumber,           \
+           errFlag                     !
+
+ STRING before$,                       \ form for first  part of record
+        after$,                        \ form for last part of record
+        work1$,                        \ variable for first part
+        work2$,                        \ variable for last part
+        module$,                       \ module id of calling function
+        E2ReadOptionFlagT$,            \ variable for desire field
+        flag$,                         \ the part we want, flag value
+        doThis$,                       \ activity requested - see above
+        formForRead$                   ! complete form statement
+
+
+  ON ERROR GOTO functionError
+
+  svfunctionNumber = 0
+
+  if (functionNumber < 1) OR (functionNumber > 17) THEN BEGIN ! not valid range
+    E2ReadOptionFlagT$ = "E"                 ! show error "E"
+    EXIT FUNCTION
+  ENDIF
+
+  IF (val(doThis$) < 0) OR (val(doThis$) > 3) THEN BEGIN
+    E2ReadOptionFlagT$ = "E"                 ! show error "E"
+    EXIT FUNCTION
+  ENDIF
+
+  IF (functionNumber > 10) THEN BEGIN
+    svfunctionNumber = functionNumber
+    functionNumber   = functionNumber - 10
+    before$ = "C" + STR$((functionNumber -1)*4 +3)         ! calculate form size
+    after$  = "C" + STR$(96 - (functionNumber -1)*4)       ! calculate form size
+  ENDIF ELSE BEGIN
+    before$ = "C" + STR$(50 + ((functionNumber - 1)*4) + 3) ! calculate form size
+    after$ = "C" + STR$(46 - ((functionNumber - 1)*4))      ! calculate form size
+  ENDIF
+  formForRead$ = before$ + " C1 " + after$
+
+ errFlag = 0
+
+ IF doThis$ = "3" THEN BEGIN          ! if read only needed
+   OPEN "R::$AME2OPT" DIRECT RECL 100 AS 64 NOWRITE NODEL
+ ENDIF ELSE BEGIN
+   OPEN "R::EAME2OPT" DIRECT RECL 100 AS 64 NODEL
+ ENDIF
+
+ IF errFlag THEN BEGIN
+   E2ReadOptionFlagT$ = "E"              ! show error "E"
+   EXIT FUNCTION
+ ENDIF
+
+ IF doThis$ = "3" THEN BEGIN             ! this is a query
+    IF (svfunctionNumber <> 0) THEN BEGIN
+      READ FORM formForRead$ ; #64,20; work1$, flag$, work2$
+    ENDIF ELSE BEGIN
+      READ FORM formForRead$ ; #64,1; work1$, flag$, work2$
+    ENDIF
+    IF errFlag THEN BEGIN
+       goto errorExit
+    ENDIF
+ ENDIF ELSE BEGIN                       ! this is a modify
+    IF (svfunctionNumber <> 0) THEN BEGIN
+      READ FORM formForRead$ ; #64 AUTOLOCK ,20; work1$, flag$, work2$
+    ENDIF ELSE BEGIN
+      READ FORM formForRead$ ; #64 AUTOLOCK ,1; work1$, flag$, work2$
+    ENDIF
+
+    IF errFlag THEN BEGIN
+       goto errorExit
+    ENDIF
+
+    flag$ = LEFT$(doThis$,1)            ! all we want is one character
+
+    IF (svfunctionNumber <> 0) THEN BEGIN
+      WRITE FORM formForRead$ ; #64 AUTOUNLOCK,20; work1$, flag$, work2$
+    ENDIF ELSE BEGIN
+      WRITE FORM formForRead$ ; #64 AUTOUNLOCK, 1; work1$, flag$, work2$
+    ENDIF
+
+    IF errFlag THEN BEGIN
+       goto errorExit
+    ENDIF
+ ENDIF
+
+goodExit:
+ E2ReadOptionFlagT$ = flag$
+ CLOSE 64
+ EXIT FUNCTION
+
+errorExit:
+ E2ReadOptionFlagT$ = "E"              ! show error "E"
+ CLOSE 64
+ EXIT FUNCTION
+
+!************************************************************************
+! on error routine
+!************************************************************************
+
+ functionError:
+
+   errFlag = -1
+   CALL ADX.ERROR.LOG                 ! call terminal error logging
+
+   RESUME
+
+ END FUNCTION

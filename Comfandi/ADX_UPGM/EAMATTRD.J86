@@ -1,0 +1,24 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+\REM!!****************************************************************!!        
+\REM!!                          EAMATTRD.J86                          !!        
+\REM!!                                                                !!        
+\REM!!     THIS INCLUDE FILE CONTAINS FIELD AND CURSOR ATTRIBUTE      !!        
+\REM!!     VARIABLES AND LOGICAL VARIABLES USED FOR DISPLAY MANAGER   !!        
+\REM!!     ROUTINES.                                                  !!        
+\REM!!                                                                !!        
+\REM!!****************************************************************!!        
+                                                                                
+                                                                                
+  INTEGER*2 GLOBAL \                                                            
+            OFF0, \                                                             
+            ON1                                                                 
+                                                                                
+  STRING GLOBAL \                                                               
+            CURSOR.ON$, \                                                       
+            CURSOR.OFF$, \                                                      
+            VISIBLE$, \                                                         
+            INVISIBLE$, \                                                       
+            REV.VIDEO.ON$, \                                                    
+            REV.VIDEO.OFF$                                                      
+                                                                                

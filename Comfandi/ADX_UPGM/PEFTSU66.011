@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU66.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+If X.Callparm = -1 Then Begin     																					! Si ingreso autorizacion OK
+   Asc.Pef.InDevol% = 0           																					! Proceso autorizado correctamente
+EndIf Else begin 
+   Asc.Pef.InDevol% = 2           																					! Proceso autorizado correctamente
+EndIf
+

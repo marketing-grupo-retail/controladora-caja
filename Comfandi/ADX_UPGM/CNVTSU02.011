@@ -1,0 +1,16 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+ Call COPIA.CLIENTE
+ Call INICIALICE.EPS
+ 	
+!-- Aseguro la inicializacion del String de datos Base del SMA
+!-- OVS 8 Mayo 2007
+ 	
+	Dim SL.STR$(GC.SL.SIZE+10)

@@ -1,0 +1,45 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+!**********************************************************************         
+!*               OPERATOR STATUS FILE                                 *         
+!**********************************************************************         
+!* The following defines the record format for the operator status    *         
+!* file .  The fields are defined in the sequence in which they appear*         
+!* in the logical record                                              *         
+!* For array dimensions see file EAMOSDIM                             *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        OS.OPERATOR$            ! OPERATOR NUMBER & PERIOD      UPD 5           
+                                                                                
+STRING GLOBAL \                                                                 
+        OS.TERMINAL$            ! TERMINAL NUMBER MOST RECENTLY UPD 2           
+                                ! USED BY THIS OPERATOR                         
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        OS.NUMLOANS             ! NUMBER OF LOANS TO THIS TILL  INT 2           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        OS.AMTLOANS             ! AMOUNT OF LOANS FROM TILL     INT 4           
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        OS.NUMPKUPS             ! NUMBER OF PKUPS TO THIS TILL  INT 2           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        OS.AMTPKUPS             ! AMOUNT OF PKUPS FROM TILL     INT 4           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        OS.AMOUNTS(1)           ! ENTERED TENDER 1 - 8          INT 4           
+                                                                                
+!AIR78962 OS.RESERVED (I4) REPLACED BY 3 FIELDS (I1, I1, I2)                    
+!         + CORRESPONDING CHANGES MADE TO READ/WRITE INCLUDES                   
+INTEGER*1 GLOBAL \                                                              
+        OS.STATUS,              \ FLAG IF CURRENTLY SIGNED ON   INT 1           
+        OS.CLOSE,               \ FLAG IF CLOSE PENDING         IR79173         
+        OS.RESERVE1             ! RESERVED FOR FUTURE USE BY IBM                
+                                                                                
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+        OS.RESERVE2             ! RESERVED FOR FUTURE USE BY IBM                
+!EIR78962                                                                       
+                                                                                

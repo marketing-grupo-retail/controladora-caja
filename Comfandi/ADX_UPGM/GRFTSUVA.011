@@ -1,0 +1,90 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : GRFTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variables          *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+Integer*1 Global  Asc.Proy.Fiscal%,   \! Proyecto Lealtad Activado
+                  Gr.Fis.IndFac%,    \! Indicador de Factura
+                  Gr.Fis.FileClte%,  \! Sesion temporal
+                  Gr.Fis.Doc%,       \! 
+                  Gr.Fis.Tikntacr%,  \! control ticket nota crd
+                  Gr.Fis.Fisj%,      \! Apuntador string
+                  Gr.Fis.Anulmov%,   \! Control de las notas credito
+                  Gr.Fis.TipDocFis%, \! Tipo documento fiscal
+                  Gr.Fis.Sesion%      ! Sesion temporal trabajo
+
+Integer*2 Global  Gr.Fis.PtgFte%,    \! Porcentaje de retencion
+		              Gr.Fis.PtgIva%,    \! Porcentaje de retencion Iva
+		              Gr.Fis.PtgIva2%,   \! Porcentaje de retencion Iva Exportadores
+                  Gr.Fis.MotNCrd%,   \! Tecla motora notas credito
+                  Gr.Fis.Cliente%     ! Tecla Motora captura cliente
+                  
+Integer*4 Global  Gr.Fis.FacNum%,    \! Numero de Factura 
+		              Gr.Fis.NotaNum%,   \! Numero de Nota Venta
+		              Gr.Fis.NotaCrd%     ! Numero de Nota Credito
+                  
+String    Global  Gr.Fis.Resol$,     \! Numero de resolucion
+                  Gr.Fis.Autor$,     \! Numero de autorizacion
+                  Gr.Fis.Serial$,    \! Numero serial terminal
+                  Gr.Fis.Fecven$,    \! Fecha de vencimiento  
+                  Gr.Fis.Rango$,     \! Rango de facturacion
+                  Gr.Fis.NtaVta$,    \! Nota de venta 
+                  Gr.Fis.NtaCrd$,    \! Nota de credito
+                  Gr.Fis.RteFte$,    \! Tipo y variedad pago Retefuente
+                  Gr.Fis.RteIva$,    \! Tipo y variedad pago Reteiva
+                  Gr.Fis.LINE$,      \! Linea Store Line
+                  Gr.Fis.Empresa$,   \! Nombre Empresa
+                  Gr.Fis.Nit$         ! Numero de Nit       
+
+String    Global  Gr.Fis.Cliente$,   \! Identificacion del cliente
+                  Gr.Fis.Nombre$,    \! Nombre del cliente
+                  Gr.Fis.Direccion$, \! Direccion del Cliente
+                  Gr.Fis.Telefono$    ! Telefono del cliente
+
+String    Global  Gr.Fis.BARCODE$,   \! Inicio codigo de barras
+                  Gr.Fis.ENDBCODE$,  \! Fin Codigo de barras
+                  Gr.Fis.TEMPORAL$,  \! Uso temporal
+                  Gr.Fis.TMPPREF$ ,  \! Temporal prefijo
+                  Gr.Fis.Pagare$,    \! Control de pagare
+                  Gr.Fis.Documento$, \! Numero documentos fiscal 
+                  Gr.Fis.RteIva2$,   \! Tipo Variedad Rete IVA Exportadores
+                  Gr.Fis.EAN128$      ! Formato EAN-128
+
+Integer   Global  Gr.Fis.Slend%
+
+Integer*4 Global  Gr.Fis.VlrNta%,    \! Valor de la nota credito
+                  Gr.Fis.SalNta%      ! Saldo de la nota
+
+String    Global  Gr.Fis.TermNc$,    \! Numero terminal para act saldo NC
+                  Gr.Fis.TipoNc$,    \! Tipo documento
+                  Gr.Fis.Factura$,   \! Tipo documento
+                  Gr.Fis.Filler,     \! Uso futuro           
+                  Gr.Fis.TvNtaCrd$,  \! Tipo Variedad reporte notas credito
+                  Gr.Fis.ConsNc$      ! Consecutivo
+
+String    Global  Gr.Fis.ChequeSi$,  \! Dato Cliente Cheque Si
+                  Gr.Fis.ClienteSi$   !
+                  
+Integer*1 Global  Gr.Fis.ImpChequeSi% ! Impresion dato cheque si
+
+String     Global  FIS.F16$          ,  \! Formato Grabacion Hard Totals
+                   Gr.Fis.HTNtaVta$ ,  \! Nota de Venta
+                   Gr.Fis.HTFacVta$ ,  \! Factura de Venta
+                   Gr.Fis.HTNtaCred$,  \! Nota de Credito
+                   Gr.Fis.FecTrx$   ,  \! Fecha de Transaccion
+                   Gr.Fis.Almacen1$  ,  \! Almacen de la numeracion
+                   Gr.Fis.Almacen2$  ,  \! Almacen de la numeracion
+                   Gr.Fis.Relleno$      !
+                   
+Integer*4  Global  FIS.H16%, FIS.HTO%
+
+String     Global  Gr.Fis.DatoFiscal$   ! Dato con numeracion fiscal para almacenamiento                   
+Integer*1  Global  Gr.Bon.ActFis%        ! Dato de Actualizacion Numeracion Fiscal Bonos Regalo
+String     Global  Gr.Bon.DatFis$        ! Dato Fiscal Almacenado Bonos Regalo
+

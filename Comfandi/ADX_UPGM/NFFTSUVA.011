@@ -1,0 +1,92 @@
+\------------------------------------------------------------------------------
+\                   NOMBRE DEL MODULO : NFFTSUVA.011      
+\          Modulo de Definici¢n de Variables - Numeraci¢n Fiscal
+\  
+\               VERSION : General Consolidada Julio de 1999
+\
+\       Primer Revision : Global DataTel
+\  
+\    Resumen de Cambios : 
+\ 
+!-----------------------------------------------------------------------------
+INTEGER*1 GLOBAL                                      \! 
+          NFF.INDICAT1,  NFF.VOREF%,      NFF.ITIPO,  \!
+          NFF.ITEM,      NFF.COUP,        NFF.STYPE,  \!
+          NFF.SIGNO,     NFF.LIK%,        NFF.IMP%,   \!
+          NFF.CTR%,      NFF.DIR%,        NFF.ANUL%,  \!
+          NFF.REC%,      NFF.DIS%,        NFF.FON,    \! avisa el error
+          NFF.SOLODV%,   NFF.HAYV%,       NFF.RELEV%   !
+
+INTEGER*2 GLOBAL                                      \! 
+          U.STATION,                                  \!
+          NFF.D%,        NFF.H16%,        NFF.FLAG,   \!
+          NFF.SLA%,      NFF.DUR%,        NFF.HTO%,   \!
+          NFF.PARM1,     NFF.II%,         NFF.FUNC     !
+
+INTEGER*4 GLOBAL                                      \! 
+          FISTCO%,       FISTCD%,         NFF.CADA10%,\!
+          NFF.VRU%,      NFF.NTRA,        NFF.FIV%,   \!
+          NFF.TVTA%,     NFF.FOR%,        FISCON%,    \!
+          FISNEQ%,       FISNZE%,         NFF.RET      !
+
+STRING    GLOBAL                                      \!
+          FONPHN$,       FONLF$,          FONCR$,     \!
+          NFF.S34$,      NFF.CNT$,        NFF.AMT$,   \!
+          NFF.EXE$,      PRTFIS,          PRTLINE,    \!
+          NFF.NET$,      NFF.IT1$,        NFF.IT2$,   \!
+          NFF.IT3$,      NFF.IT4$,        NFF.IT5$,   \!
+          NFF.IT6$,      NFF.IT7$,        NFF.IT8$,   \!
+          NFF.PLU$,      NFF.DEPA$,       NFF.TRTYPE$,\! 
+          NFF.PRF$,      NFF.M$,          NFF.DL$,    \!
+          NFF.F16$,      NFF.F99$,        NFF.X$,     \!
+          FISFUV$,       FISFUN$,                     \!
+          FISUSR$,       NFF.NUT$,        NFF.RAN$,   \!
+          FH$,           NFF.FE$,         HH$,        \!
+          ME$,           UNV$,            FOR1$,      \!
+          TERMINAL$,     N.ACTIVO$,       N.INICIAL$, \!
+          N.FINAL$,      AUTH.DIAN$,      FECHA.AUTH$,\!
+          N.INICIO.DIA$, N.TRX$,          FECHA.TRX$, \!
+          FISNIT$,       FISCAL$,         FISDEP$,    \!
+          FISNOM$,       FISDIR$,         FISSUC$,    \! Llave,Nit,CF,Nom,Dir
+          FISDOM$,       FISPRO$,         FISSOL$,    \!
+          FISLIC$,       FISFRI$,         FISFUM$,    \! Prov,Solic,Licen,RCF
+          FISNCA$,       FISIV1$,         FISIV2$,    \!
+          FISIV3$,       FISIV4$,         FISIV5$,    \!
+          FISFRA$,       FISFRU$,         FISNRA$,    \! Mod por JPM 31 Jul 01
+          FISNRU$,       NFFKEY$,         NFFNRA$,    \! Mod por JPM 31 Jul 01
+          FISIV6$,                                    \!
+          FISFUC$,       FISCIU$,         FISRES$,    \!
+          FISNAU$,       FISPWD$,                     \! Ult/Camb,Rsrv,Cod/Pw 
+          FISKEY$,                        NFF.LINF$,  \! No de Terminal
+          FISACT$,       ACT$,                        \! No Activo
+          FISNIV$,       NIV$,                        \! No Inicial Vigente
+          FISNFV$,       NFV$,                        \! No Final Vigente
+          FISUNV$,                                    \! Ultimo No. Usado
+          FISNIN$,       NIN$,                        \! No Inicial Nuevo
+          FISNFN$,       NFN$,                        \! No Final Nuevo
+          FISFNV$,       FNV$,                        \! Fecha Numerac Vigente
+          FISFNN$,       FNN$,                        \! Fecha Numerac Nueva
+          FISFEQ$,       FEQ$,                        \! Fecha X
+          FISFZE$,       FZE$,                        \! Fecha Z
+          FISAUV$,       AUV$,                        \! Autoriz Vigente
+          FISAUN$,       AUN$,                        \! Autoriz Nueva
+          FISPR1$,       NFF.PF1$,                    \! Prefijo 1
+          FISPR2$,       PF2$,            LEC$,       \!
+          FISACTRT$,     FISNIVRT$,       FISNFVRT$,  \!
+          FISAUTRT$,     PASO$,           FISFAURT$,  \!
+          VARIE$,        FISINIRT$,       FISNTRRT$,  \!
+          FISFTRRT$,     NFF.ERCO$,       NFF.TER$,   \!
+          NFF.RAZON$,    NFF.NITR$,       NFF.AL$,    \!
+          FILLER$,       OPC.TV$,         NFF.IDE$,   \!
+          DESC.VRD$,                      FOR2$,      \!
+          NFF.N4$,       NFF.N5$,         NFF.TRLOG$, \!
+          NFF.MAT$,                                   \!
+          NFF.MPA$,      TI.VA$,                      \!
+          NOALM$,        NFF.PARM2$,      NFF.OFF$,   \!
+          NFF.RET$,                       NFF.A1$,    \!
+          NFF.A2$,       NFF.ECOD$,       NFF.OBSER$, \!
+          NFF.ERRFX$,    NFF.AUX$,        NFF.KEY$,   \!
+          NFF.CAU$                                     !
+!------------------------------------------------------------------------------
+
+

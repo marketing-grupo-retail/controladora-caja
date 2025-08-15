@@ -1,0 +1,19 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : RMSCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Mudulo trx en linea              *
+!                Remisiones mercancia             *
+!**************************************************
+!*
+!Modificaciones:
+
+Sub RMSCSU01.011 External
+End Sub
+
+Sub RMSCSU12.011 External
+End Sub
+
+Sub RMSCSU16.011 External
+End Sub

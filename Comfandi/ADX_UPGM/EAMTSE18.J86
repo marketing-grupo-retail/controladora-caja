@@ -1,0 +1,41 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU18.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/*                                                                  */
+\/* IR99000 - Make sure that an ASC on a Null string is never        */
+\/*           performed by the EM code.                              */
+\/*           DRV MGVA 6 Oct 92                                      */
+\/*                                                                  */
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+%INCLUDE EAMTSC18.J86      ! COUPON ENHANCEMENT CODE
+ 
+!!*******************************************************************
+!!** CHANGE ITEM STRINGS FOR POINTS ONLY ITEMS TO 11 FOR DATA ENTRY**
+!!*******************************************************************
+  IF EMSS.PO.ITEMS THEN BEGIN                ! POINTS ONLY ITEMS
+   IF TS.TRANS.LOG.WRITE THEN BEGIN          ! WRITE AT EOT
+    EMSS.PO.ITEMS = 0                        ! CLEAR FLAG
+    FOR I% = 1 TO SL.END                     ! FOR ALL ENTRIES
+     H$ = READ.SL.STR$(I%)                   ! GET STRING
+     IF (H$ <> "") THEN \                    ! IR99000
+     IF ASC(H$) = 1 THEN BEGIN               ! IF ITEM ENTRY
+       A$ = RIGHT$(H$,1)                     ! GET INDICAT3 INTO A$
+       A$ = RIGHT$(UNPACK$(A$),1)            ! EXTRACT LOW NIBBLE
+       IF VAL(A$) > 7 THEN BEGIN             ! BONUS POINT ITEM
+         H$ = CHR$(11H) + ":" + PACK$("<>")  \ MAKE STRING TYPE = 11
+            + MID$(H$,2,30)                  !  WITH UNIQUE MARKER
+         CALL WRITE.SL.STR(I%,H$)            !  SO IT WILL BE IGNORED
+       ENDIF
+     ENDIF
+    NEXT I%
+   ENDIF                                     ! TLOG VS XLOG
+  ENDIF                                      ! REBUILT UPC IN TRANS
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE

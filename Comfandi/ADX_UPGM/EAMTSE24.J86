@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU24.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+!!*******************************************************************
+!!** SUPPORT DUAL CASH DRAWERS                                     **
+!!*******************************************************************
+ IF OP.DUALCD THEN BEGIN                   ! DUAL CASH DRAWER SUPPORT
+   IF EMSS.RESERVE.CD THEN BEGIN           ! Reserve sign-off
+     TS.USER.RETURN = -1                   ! Don't open any drawer
+   ENDIF ELSE BEGIN
+     IF EMSS.2ND.CD.INUSE THEN BEGIN       ! Using 2nd drawer
+       WRITE FORM "I1"; #25; 2             ! Open cash drawer 2
+       TS.USER.RETURN = -1                 ! Prevent CD 1 open
+     ENDIF
+   ENDIF
+ ENDIF
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE

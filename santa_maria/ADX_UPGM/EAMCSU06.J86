@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+! antes de escribir un  registro al archivo de totales por departamento
+!-----------------------------------------------------------------------
+!User exit called before writing department totals record
+FUNCTION CSUPEC06(P1) PUBLIC
+   INTEGER*4 P1                !IR98338
+
+
+END FUNCTION

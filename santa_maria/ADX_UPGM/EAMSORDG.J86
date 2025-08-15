@@ -1,0 +1,200 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\REM!!****************************************************************
+\REM!!**    READ GLOBAL CONSTANTS RECORD FROM STORE OPTIONS FILE    **
+\REM!!****************************************************************
+
+       DIM GC.ZF.TEND(8)               ! dimension tender line flags
+       DIM GC.ZF.CASH(30)              ! dimension cash report line flags
+       DIM GC.ZF.PERF(26)              ! DIMENSION PERFORMANCE REPORT FLags
+
+       READ #8,27;                     \ read entire option record
+            LINE SO.OPTION$            ! into string variable
+
+       SO.J = 1                        ! start at beginning of string
+       SO.L = 1                        ! beginning of current field
+
+       FOR SO.K = 1 TO 8               ! while more fields to process
+         GOSUB EAMSORDG.1              ! get next field
+         GC.ZF.TEND(SO.K) = SO.I       ! move data to array entry
+       NEXT
+
+       FOR SO.K = 1 TO 30              ! while more fields to process
+         GOSUB EAMSORDG.1              ! get next field
+         GC.ZF.CASH(SO.K) = SO.I       ! move data to array entry
+       NEXT
+
+       FOR SO.K = 1 TO 26              ! WHILE MORE FIELDS TO PROCESS
+         GOSUB EAMSORDG.1              ! get next field
+         GC.ZF.PERF(SO.K) = SO.I       ! move data to array entry
+       NEXT
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.MAXTERMS = SO.I              ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.MAXOPERS = SO.I              ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.PRINTER = SO.I               ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.AUTO.BAL = SO.I              ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.FRANK.TOUT = SO.I            ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.PC.SIZE = SO.I               ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.SL.SIZE = SO.I               ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.SL.WARN = SO.I               ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.RD.TIMEOUT = SO.I            ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.BACKLOG = SO.I               ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.IM.FLUSH = SO.I              ! assign to variable
+
+       GOSUB EAMSORDG.2                ! get next string field
+       GC.DEFAULT.OP$ = SO.OPTFLD$     ! assign to variable
+       GOSUB EAMSORDG.2                ! get next string field
+       GC.ETONE.HZ$ = SO.OPTFLD$       ! assign to variable
+       GOSUB EAMSORDG.2                ! get next string field
+       GC.ETONE.LEN$ = SO.OPTFLD$      ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.TP.MAXDAYS = SO.I            ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.APPLYTEST = SO.I             ! assign to variable
+       GOSUB EAMSORDG.1                ! get next field
+       GC.DELTEST   = SO.I             ! assign to variable
+
+\REM!!****************************************************************
+\REM!!**    NOW GET EFTS HIDDEN CONSTANTS                           **
+\REM!!****************************************************************
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.LINKTYPE  = SO.I             ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.DLC.RETRY = SO.I             ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.DLC.TMOUT = SO.I             ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.DISP.TMOUT = SO.I            ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field
+       GC.REPL.MSGNUM = SO.I           ! assign to variable
+
+       DIM GC.VF.CODETBL$(10)          ! set up array
+       FOR SO.K = 1 TO 10              ! while more fields to process
+         GOSUB EAMSORDG.2              ! get next two-byte response type
+         GC.VF.CODETBL$(SO.K) = SO.OPTFLD$  ! move data to array entry
+       NEXT
+
+       DIM GC.VF.CODEACT(10, 2)        ! set up array
+       FOR SO.K = 1 TO 10              ! while more fields to process
+         GOSUB EAMSORDG.1              ! get next field
+         GC.VF.CODEACT(SO.K, 1) = SO.I ! move data to array entry
+         GOSUB EAMSORDG.1              ! get next field
+         GC.VF.CODEACT(SO.K, 2) = SO.I ! move data to array entry
+       NEXT
+
+!AIR73993
+       GOSUB EAMSORDG.1                ! get next field
+       GC.UPC2.TYPE = SO.I             ! assign to variable
+!EIR73993
+
+!AIR74425
+       GOSUB EAMSORDG.1                ! get next field
+       GC.NET.ST.COUPON = SO.I         ! assign to variable
+!EIR74425
+
+!AIR75193
+       GOSUB EAMSORDG.1                ! get next field
+       GC.MAX.XLOG16 = SO.I            ! assign to variable
+!EIR75193
+
+!AIR77437
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.MCPN.TDR = SO.I              ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.CPN.FSTX = SO.I              ! assign to variable
+!EIR77437
+!start of string reserve variables
+
+!AIR77861Read flag to say whether in high-perf. store or not
+       GOSUB EAMSORDG.2                ! get next field - string
+       GC.GOFASTER = SO.OPTFLD$        ! assign to variable
+       GOFASTER = VAL(GC.GOFASTER)     ! assign to integer variable
+!EIR77861
+
+!AIR76961
+       GOSUB EAMSORDG.2                ! get next field - string
+       GC.C.DISK.FREE = SO.OPTFLD$     ! assign to variable
+       GOSUB EAMSORDG.2                ! get next field - string
+       GC.D.DISK.FREE = SO.OPTFLD$     ! assign to variable
+!EIR76961
+!AIR77985 reduce taxable amount for foodstamp paid items
+       GOSUB EAMSORDG.2                ! get next field - string
+       GC.TXABLE.FS.ADJ = SO.OPTFLD$     ! assign to variable
+!EIR77985
+
+!AIR78845 and eftschgs
+       GOSUB EAMSORDG.2                ! get next field - integer
+       GC.eft.ctl.id = SO.optfld$      ! assign to variable
+
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.price.chk = SO.I             ! assign to variable
+!EIR78845
+
+!AIR79515 - New Hidden option - Number of LF prior to Franking
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.PRE.FRANKING.LF = SO.I       ! assign to variable
+!EIR79515
+
+!AIR88033 - New Hidden option - Bypass Coupon sum.log search
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.COUPON.VAL      = SO.I       ! assign to variable
+!EIR88033
+
+!AIR89353 - New Hidden option - Print "Total Items Sold" on CR
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.PRINT.TOTAL.SOLD = SO.I      ! assign to variable
+!EIR89353
+
+!AIR28521 - New Hidden option - Do not Reset Trans Num at Close
+       GOSUB EAMSORDG.1                ! get next field - integer
+       GC.DONOT.RESET.TRANS.NUM = SO.I ! assign to variable
+!EIR28521
+
+       GOTO EAMSORDG.3                 ! jump to routine exit
+
+\REM!!****************************************************************
+\REM!!**    SUBROUTINE TO EXTRACT NEXT INTEGER FIELD                **
+\REM!!****************************************************************
+
+EAMSORDG.1:
+
+       SO.J = MATCH(",",SO.OPTION$,SO.J)        ! locate end of current field
+       SO.I = INT%(VAL(MID$(SO.OPTION$,SO.L,SO.J-SO.L)))
+       SO.L = SO.J + 1                          ! start position of next field
+       SO.J = SO.L                              ! start position for next search
+
+       RETURN
+
+\REM!!****************************************************************
+\REM!!**    SUBROUTINE TO EXTRACT NEXT STRING FIELD                 **
+\REM!!****************************************************************
+
+EAMSORDG.2:
+
+       SO.J = MATCH(",",SO.OPTION$,SO.J)        ! locate end of current field
+       SO.OPTFLD$ = MID$(SO.OPTION$,SO.L+1,SO.J-SO.L-2)
+       SO.L = SO.J + 1                          ! start position of next field
+       SO.J = SO.L                              ! start position for next search
+
+       RETURN
+
+EAMSORDG.3:                            ! routine exit

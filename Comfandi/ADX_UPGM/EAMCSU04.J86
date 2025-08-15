@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ SUB CSUPEC04(ACCTREC$) PUBLIC
+ STRING ACCTREC$
+ Asc.Err.Proceso$ = "CSE04"
+ ! insert user exit code here
+%INCLUDE EAMCSE04.J86            ! Electronic Marketing PRPQ
+Asc.Err.Proceso$ = "CSU04"
+
+ END SUB

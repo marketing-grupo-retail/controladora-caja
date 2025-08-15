@@ -1,0 +1,929 @@
+! Formato de la version anno.mes.dia.hora-militar.minutos
+! Versión 2008.01.31.16.03
+! Version 2010.06.30.16.49 JBAP Seadicionan finciones de integracion y selfscanning
+! Version 2010.09.24.16.35 JBA se adiciona funcion para trace de teclas
+! Version 2010.12.06.16.35 CMG se adiciona funcion de posicion de mensaje
+! Version 2010.12.09.15.33 IRQ20101209-001 Se adiciona limite para manejo de mensajes asociados a logos JBAP
+!                          IRQ20101210-001 Cambio en la precarga de mensajes a memoria JBAP
+! Version 2011.08.31.11.10 IRQ20110831-001 Bug 1797 grabado de version en archivo
+! Version 2011.09.16.11.15 IRQ20110916-001 Problemas de impresion de Vouchers al generar errores de teclado
+! Version 2012.01.12.12.00 adciona funcion U.GetFielValueFrw para captura de datos del Framework Java - Basic
+! Version 2012.01.20.11.00 modifica funcion U.GetFielValueFrw para captura de datos del Framework Java - Basic bug 2816 En una trx de activación o recarga no esta validando mínimo en el celular
+! Version 2012.02.02.11.00 adicion de U.IODataReset2 con set de instrucciones mas completas
+! Version 2012.03.05       IRQ20120305-001 Bug 1797 grabado de version en archivo
+!-----------------------------------------------------------------------------
+
+
+!********************************************************************************************************
+!* U.ZEROES$  --  Zeroes                                                                                  *
+!*                      Rutina que permite darle formato a la cadena recibida en la variable            *
+!*                      Zeroes.String$ de manera que si tiene ceros a la izquierda la devuelva sin      *
+!*                      dichos ceros                                                                    *
+!*                      Nota: se debe a que str$(val(x)) cuando x es numero de muchos dígitos queda en  *
+!*                      notación científica                                                             *
+!*                      Restricciones: la variable de entrada no debe contener espacios vacios entre    *
+!*                      carácteres normales, de lo contrario serán cambiados por ceros                  *
+!*                                                                                                      *
+!*                                                                                                      *
+     ! FUNCTION ZEROES$(CAD$) PUBLIC	!JGRP
+
+Function U.Zeroes$( Zeroes.String$ ) External						! MGH
+  String										\
+    U.Zeroes$										!
+End Function
+
+
+!Funciion para quitar espacios en blanco
+FUNCTION ALLTRIM(CADENA2) EXTERNAL
+	STRING CADENA2,ALLTRIM
+END FUNCTION
+
+!**********************************************************
+!** Funcion que imprime en la linea 1 y en la linea 2    **
+!** del display, y espera un tiempo X despues de mostrar **
+!** el mensage, ademas solo imprime los 20 primeros      **
+!** caracteres por linea			         **
+!**********************************************************
+FUNCTION U.DISPLAY(U.MESSAGE1$,U.MESSAGE2$,U.WAIT%) EXTERNAL
+	STRING U.MESSAGE1$,U.MESSAGE2$
+	INTEGER*4 U.WAIT%
+END FUNCTION
+
+!**********************************************************
+FUNCTION U.DISPLAY.KEY(U.MESSAGE1$,U.MESSAGE2$,U.KEY) EXTERNAL
+	STRING U.MESSAGE1$,U.MESSAGE2$
+	INTEGER*2 U.KEY
+END FUNCTION
+
+FUNCTION U.DISPLAY2(U.MESSAGE1$,U.MESSAGE2$,U.WAIT%) EXTERNAL
+STRING U.MESSAGE1$,U.MESSAGE2$
+INTEGER*4 U.WAIT%
+Fend
+
+FUNCTION U.DISPLAY12(U.MESSAGE1$,U.MESSAGE2$,U.WAIT%) EXTERNAL
+STRING U.MESSAGE1$,U.MESSAGE2$
+INTEGER*4 U.WAIT%
+Fend
+
+
+!*********************************************************************
+SUB U.GETSTRING$(GETSTRING.STRING$,							\
+		    GETSTRING.CHAR$,GETSTRING.DATA$,GETSTRING.HOME,  			\
+                GETSTRING.END) EXTERNAL
+
+    INTEGER*2 	GETSTRING.HOME,								\
+			GETSTRING.END
+    STRING		GETSTRING.STRING$,						\
+			GETSTRING.CHAR$,						\
+			GETSTRING.DATA$
+END SUB
+!*********************************************************************
+FUNCTION UGETFLAG(UFLAG) EXTERNAL
+	INTEGER*4 UFLAG
+	STRING UGETFLAG
+END FUNCTION
+
+!SUB ADDDE(F1,F2,F3,F4,F5,F6) EXTERNAL
+!	STRING F1,F2,F3,F4,F5,F6
+!END SUB
+
+
+SUB SAVE.PRINT EXTERNAL
+END SUB
+
+SUB RESTORE.PRINT EXTERNAL
+END SUB
+
+SUB SAVE.PRINT2 External !IRQ20110916-001
+END SUB
+
+SUB RESTORE.PRINT2 External !IRQ20110916-001
+END SUB
+
+
+FUNCTION DEPURE.IO EXTERNAL
+
+FEND
+
+Function READ.IO.OK(LINEA1$,LINEA2$) External
+STRING LINEA1$, LINEA2$
+
+FEND
+
+
+!Funcion U.IMPRIMIR
+!Funcion U.IMPRIMIR
+!                4000H  - print on CR
+!                2000H  - print on SJ
+!                1000H  - print on DI
+!                0100H  - number of linefeeds (eg here = 1)
+!                0000H  - Default font
+!		     0010H  - Double High (Only 4610)
+!		     0020H  - Double Wide
+!		     0040H  - Double Wide Double High
+!		     0080H  - Invert (Only 4610)
+!		     0001H  - Bold
+
+SUB U.IMPRIMIR(U.CADENA$,U.STATION) EXTERNAL
+    STRING U.CADENA$
+    INTEGER*2 U.STATION
+END SUB
+
+Sub U.Imprimir2(U.Cadena1$,U.Station) External
+    String U.Cadena$
+    String U.Cadena1$
+    Integer*2 U.Station,U.prn.Index
+End Sub
+
+FUNCTION U.STORELINE EXTERNAL
+	STRING U.STORELINE
+END FUNCTION
+
+
+SUB U.JOURNAL(Print.Line$) EXTERNAL
+	STRING Print.Line$
+END SUB
+
+FUNCTION U.GETDATA$(U.GETDATA.MESSAGE1$,U.GETDATA.MESSAGE2$) EXTERNAL
+	STRING U.GETDATA.MESSAGE1$, U.GETDATA.MESSAGE2$,U.GETDATA$
+END FUNCTION
+
+FUNCTION U.GETDATA1$(U.GETDATA.MESSAGE1$,U.GETDATA.MESSAGE2$) EXTERNAL
+	STRING U.GETDATA.MESSAGE1$, U.GETDATA.MESSAGE2$, U.GETDATA1$
+	INTEGER*2 U.GETDATA.KEY
+END FUNCTION
+
+FUNCTION U.GETDATA2$(U.GETDATA2.MESSAGE1$,U.GETDATA2.MESSAGE2$) EXTERNAL
+	STRING U.GETDATA2.MESSAGE1$, U.GETDATA2.MESSAGE2$,U.GETDATA2$
+END FUNCTION
+
+FUNCTION U.GETDATA3$(U.GETDATA.MESSAGE1$,U.GETDATA.MESSAGE2$) EXTERNAL
+	STRING U.GETDATA.MESSAGE1$, U.GETDATA.MESSAGE2$, U.GETDATA3$
+	INTEGER*2 U.GETDATA.KEY
+END FUNCTION
+
+FUNCTION U.GETDATAH$(U.GETDATAH.MESSAGEH$,U.GETDATAH.MESSAGE2$) EXTERNAL
+	STRING U.GETDATAH.MESSAGE1$, U.GETDATAH.MESSAGE2$,U.GETDATAH$
+END FUNCTION
+
+FUNCTION U.GETDATAHH$(U.GETDATAH.MESSAGEH$,U.GETDATAH.MESSAGE2$) EXTERNAL
+	STRING U.GETDATAH.MESSAGE1$, U.GETDATAH.MESSAGE2$,U.GETDATAHH$
+END FUNCTION
+
+FUNCTION U.GETDATAHM$(U.GETDATA.MESSAGE1$,U.GETDATA.MESSAGE2$) EXTERNAL
+	STRING U.GETDATA.MESSAGE1$, U.GETDATA.MESSAGE2$,U.GETDATAHM$
+END FUNCTION
+
+
+!Centra un texto en un espacio determinado
+FUNCTION U.CENTRATEX$(U.CENTRATEX.TEXT$, U.CENTRATEX.LEN) EXTERNAL
+	STRING	U.CENTRATEX.TEXT$				!Texto a centrar
+	STRING	U.CENTRATEX$				!Retorno de la funcion
+	INTEGER*2	U.CENTRATEX.LEN				!Longuitud del texto a centrar
+END FUNCTION
+
+!DI EJECT
+SUB U.DIEJECT EXTERNAL
+END SUB
+
+!CR CRCUTWHATEVER
+SUB U.CRCUTWHATEVER( IO.Session ) EXTERNAL
+  INTEGER*2 IO.Session
+END SUB
+
+!CR CUT
+SUB U.CRCUT EXTERNAL
+END SUB
+
+
+!Read param. from ADX_IDT1:UFPARparam.INI
+SUB U.READPARAMETERS(U.READPARAMETERS.PARAM$,					\File
+			   U.READPARAMETERS.BLOCK$,					\File Block
+			   U.READPARAMETERS.SESSION) EXTERNAL			!IO Session to be used
+    INTEGER*2 	U.READPARAMETERS.SESSION
+    STRING 		U.READPARAMETERS.BLOCK$,					\
+			U.READPARAMETERS.PARAM$						!Module #
+END SUB
+
+!**********************************************************
+FUNCTION U.DATE2K$(DATE2K.DATE$) EXTERNAL
+    STRING 	DATE2K.DATE$,									\Date to convert
+		U.DATE2K$                         						!Date converted
+END FUNCTION                                                			!
+
+!**********************************************************
+FUNCTION U.CHECKDIG(CHECKDIG.CODE$,CHECKDIG.CODETYPE) EXTERNAL
+    STRING 		CHECKDIG.CODE$								!Code
+    INTEGER*1	CHECKDIG.CODETYPE,							\Code type
+			U.CHECKDIG									!Function var
+
+END FUNCTION
+!*****************************************************************************
+FUNCTION U.ENDTICKET EXTERNAL
+  Integer*1 U.ENDTICKET
+
+fend
+!*****************************************************************************
+FUNCTION U.PIC.NUM$(PIC.NUM.DATA$,PIC.NUM.CHAR$,PIC.NUM.TIME) EXTERNAL
+   INTEGER*1 	PIC.NUM.TIME
+   STRING		U.PIC.NUM$,							\
+			PIC.NUM.DATA$,						\
+			PIC.NUM.CHAR$						!
+!PIC.NUM.DATA$ el numero a formatear
+!PIC.NUM.CHAR$ separador de digitos
+!PIC.NUM.TIME  cada cuantos digitos debe separar
+FEND
+!----------------------------------------------------------------------------------
+!**     Funciones de Comunicaciones para medios de Pago Tarjeta mercanapro       **
+!----------------------------------------------------------------------------------
+!******************************************************
+!** Funcion SENDATA envia una trama de datos que     **
+!** recibe como parametro a traves de un PIPE        **
+!** Devuelve 1:Mensaje, si fue exitosa la transmision**
+!** 0:Mensaje si ocurrio algun error                 **
+!******************************************************
+FUNCTION SENDATA$(TRAMAOUT$,PIPE.CONTROLLER$) EXTERNAL
+  STRING 	TRAMAOUT$,\
+		SENDATA$,\
+		PIPE.CONTROLLER$
+END FUNCTION
+!******************************************************
+!**            FIN FUNCION SENDATA                   **
+!******************************************************
+!----------------------------------------------------------------------------------------------
+!******************************************************
+!** Funcion RECVDATA lee datos de un PIPE.           **
+!** recibe como parametro el # de sesion del PIPE    **
+!** Devuelve 1:Datos  , si fue exitosa la transmision**
+!** 0:Mensaje si ocurrio algun error                 **
+!******************************************************
+FUNCTION RECVDATA$(PIPE.SESSION$) EXTERNAL
+  STRING 	RECVDATA$,\
+		PIPE.SESSION$
+END FUNCTION
+!******************************************************
+!***          FIN FUNCION RECVDATA                  ***
+!******************************************************
+!----------------------------------------------------------------------------------------------
+!**********************************************************************************
+!**  FUNCION QUE SE ENCARGA DE LAS COMUNICACIONES VIA PIPE ENTRE EL PROGRAMA DE  **
+!**  TERMINAL Y EL CLIENTE DE COMUNICACIONES (SERVICIO2). A TRAVES DE ESTA       **
+!**  FUNCION SE ENVIAN LOS REQUERIMIENTOS DE CONSULTA, ACTUALIZACION O CREACION  **
+!**  DE DOCUMENTOS EN EL RESPECTIVO ALMACEN AL CUAL SE HACE LA PETICION          **
+!**********************************************************************************
+FUNCTION  VALIDATCP$(U.TRAMA$,U.PIPE$,U.PIPE.CONTROLLER$ ,U.SESSION$, U.TOUT) EXTERNAL
+	STRING 	VALIDATCP$,       \
+			U.TRAMA$,         \** Trama de Datos
+			U.PIPE$,          \** ID del PIPE
+			U.SESSION$        !** Nuemro de Sesion del PIPE
+	INTEGER*4	U.TOUT		!** Timeout
+
+END FUNCTION
+!*********************************************************************************
+!*******************     FIN FUNCION VALIDATCP    ********************************
+!*********************************************************************************
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Get the field from TLOG String
+Sub U.Get.TLogString ( Dato$ ) External
+  String    Dato$
+End Sub
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Save the fields to TLOG String
+Function U.Save.TLogString$ External
+  String    Dato$, U.Save.TLogString$
+End Function
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Get Item Sign and qty at Item sale
+Function U.Get.Itemsq External
+   Integer*2										\
+   	U.Get.ItemSQ									!Item Qty and Sign
+End Function
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Download a logo to 4610 NVRAM
+Sub U.Logo.DownLoad(Logo.Qty) External
+    Integer*1										\
+     	Logo.Qty									!** Logo Position On memory
+End Sub
+
+!Download a Mess to 4610 NVRAM
+Sub U.Mess.DownLoad(Mess.Qty) External
+    Integer*1										\
+     	Mess.Qty									!** Logo Position On memory
+End Sub
+
+
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Get logo position
+Function U.Logo.GetPosition(GetPosition.Logo) External
+    Integer*1										\
+	GetPosition.Logo,								\Logo file num
+	U.Logo.GetPosition								!Function Var
+FEnd
+
+!Get logo position
+Function U.Message.GetPosition(GetPosition.Mess) External
+    Integer*1										\
+	GetPosition.Mess,								\Logo file num
+	U.Message.GetPosition								!Function Var
+FEnd
+
+Function U.Message.Print(GetPosition.Mess) External
+  Integer*2 GetPosition.Mess,u.Wj%
+  Integer*4 U.lmt
+FEnd
+!--------------------------------------------------------------------------------------------------------------------------
+!Get param data
+Function U.Generic.GetData(GetData.Param$) External
+    Integer*1										\
+	U.Generic.GetData								!
+
+    String										\
+    	GetData.Param$									!Func Param
+FEnd
+!--------------------------------------------------------------------------------------------------------------------------
+
+
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Get param data2
+Function U.Generic.GetData2(GetData.Param$, GetData.Delimiter) External
+
+    Integer*2										\
+	U.Generic.GetData2,								\
+        GetData.Delimiter								!
+
+    String										\
+    	GetData.Param$									!Func Param
+FEnd
+!--------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Converts a Hex String Into a Decimal Number.
+Function U.Hex2Dec(Hex2Dec.Hex$) External
+    Integer*4 										\
+    	U.Hex2Dec
+    String 										\
+    	Hex2Dec.Hex$
+
+End Function
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Validate Date Format YYMMDD
+Function U.ValidFDate(ValidFDate.Date$,ValidFDate.Type) External
+    Integer*1 										\
+    	ValidFDate.Type,								\Date Type
+    	U.ValidFDate									!Function
+
+    String 										\
+    	ValidFDate.Date$								!Date
+
+End Function
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Get Promo Idx
+Function U.GetPromoIdx External
+    Integer*1										\
+    	GetPromoIdx.Promo.Found								!Promo found
+    Integer*2										\
+    	U.GetPromoIdx,									\Function Var
+        GetPromoIdx.i									!Promo Idx
+FEnd
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Trace ASCII
+Sub U.TraceASCII(Trace.Data$) External
+    String    										\
+    	Trace.Data$									!Data$
+
+End Sub
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Take Off Non Printable Car
+Function U.CleanTxt$(CleanTxt.String$) External
+    String 										\
+    	CleanTxt.String$,								\String to be cleaned
+    	U.CleanTxt$									!Function
+End Function
+
+FUNCTION U.OPER.NAME.ACTIVE$ EXTERNAL
+         STRING U.OPER.NAME.ACTIVE$
+END FUNCTION
+
+
+!--------------------------------------------------------------------------------------------------------------------------
+!Take Off Non Printable Car and others than not to be numbers, asterisks and characters
+Function U.CleanTxt2$(CleanTxt.String$) External
+    String 										\
+    	CleanTxt.String$,								\String to be cleaned
+    	U.CleanTxt2$									!Function
+End Function
+
+
+!****************************************************************************************
+!* U.ERRNSTR$ -- Para tratamiento de errores.  Recibe el numero del error en formato    *
+!*             hexadecimal y lo devuelve en formato cadena                              *
+!*                                                                                      *
+!*                                                                                      *
+FUNCTION U.ERRNSTR$( ERRNUM ) EXTERNAL
+  STRING \
+    U.ERRNSTR$
+  INTEGER*4 \
+    ERRNUM
+END FUNCTION
+
+
+!********************************************************************************************************
+!* U.STRINGFORMAT$  --  String Format                                                                   *
+!*                      Rutina que permite darle formato a la cadena recibida en la variable CADENA$,   *
+!*                      el padeo se hace segun la variable LADOPADEO(0=IZQ,1=DER), el numero de veces   *
+!*                      que se repite el caracter de padeo sera lo indicado en FRECUENCIA, el caracter  *
+!*                      de padeo se indica en la variable CARAPADEO$ y si se quiere empaquetar el       *
+!*                      resultado se indicara en la variable APLIPACK (0=NoPack,1=SiPack)               *
+!*                      El retorno se hace mediante la cadena STRFORM.RETURN$                           *
+!*                                                                                                      *
+!*                                                                                                      *
+SUB U.STRINGFORMAT$( STRFORM.RETURN$, CADENA.IN$, LADOPADEO, FRECUENCIA, CARAPADEO$, APLIPACK ) EXTERNAL
+  STRING \
+    CADENA.IN$, \
+    CARAPADEO$, \
+    STRFORM.RETURN$
+  INTEGER*1 \
+    APLIPACK, \
+    LADOPADEO
+  INTEGER*2 \
+    FRECUENCIA
+END SUB
+
+!*********************************************************************
+!  u.isdigit recibe una cadena y determina si ella esta compuesta totalmente por
+!  digitos del 0 al 9.
+!  Devuelve:
+!    -1 para decir que todos si son digitos
+!     0 para decir que no cumple que todos sean dígitos
+!
+!
+FUNCTION U.ISDIGIT( CADENA$ ) EXTERNAL
+  STRING \
+    CADENA$
+  INTEGER*1 \
+    U.ISDIGIT
+END FUNCTION
+
+!*********************************************************************
+!  u.isalpha recibe una cadena y determina si ella esta compuesta totalmente por
+!  caracteres alfabeticos (a-z o A-Z).
+!  Devuelve:
+!    -1 para decir que todos si son alfabeticos
+!     0 para decir que no cumple que todos sean alfabeticos
+!
+!
+FUNCTION U.ISALPHA( CADENA$ ) EXTERNAL
+  STRING \
+    CADENA$
+  INTEGER*1 \
+    U.ISALPHA
+END FUNCTION
+
+!*********************************************************************
+! Funcion utilizada en modulo Ganiexit de CAFAM
+! Esta función permite desplegar un mensaje por pantalla, especificando o no si emite
+! tono de advertencia.
+
+FUNCTION U.VISOR20(U.MESSAGE1$,U.MESSAGE2$,ACT$,DEL%) EXTERNAL
+	STRING U.MESSAGE1$,U.MESSAGE2$, ACT$
+	INTEGER*4 DEL%
+FEND
+
+
+!****************************************************************************************
+!* U.DISPLAY.ERROR -- Para mostrar mensaje de Error al usuario haciendo uso del display *
+!*                    de terminal                                                       *
+!*                                                                                      *
+Sub U.DISPLAY.ERROR External
+
+End Sub
+
+!****************************************************************************************
+!* U.SL.CleanData -- Para reemplazar caracteres que hacen parte de la estructura de     *
+!*                   de datos del summary Log.  La idea del reemplazamiento es que      *
+!*                   los caracteres no alteren dicha estructura                         *
+!*                                                                                      *
+!*                                                                                      *
+Function U.SL.CleanData$(CleanData.Data$) External
+    String 										\
+	U.SL.CleanData$,								\Function Value
+	CleanData.Data$									!Data
+
+FEnd
+
+!****************************************************************************************
+!* U.Display.Key2 -- Rutina para desplegar mensajes en display de usuario.              *
+!*                   La rutina recibe: mensaje a mostrar a usuario, descripcion (en     *
+!*                   letras) de teclas que usuario puede oprimir.                       *
+!*                   Se retorna en  U.Message$  (por referencia) un descriptor numerico *
+!*                   de la tecla oprimida                                               *
+!*                                                                                      *
+!*                                                                                      *
+Sub U.Display.Key2(U.Message$,U.Keys$) External
+
+    String U.Message$, U.Keys$
+
+End sub
+
+
+!****************************************************************************************
+!* U.SIG.WindMessages.  Windows Messages, used in sure vision                           *
+!*                      Rutina para desplegar mensajes en area de usuario que es        *
+!*                      facilitada por la aplicación de supermercados "sure vision"     *
+!*                                                                                      *
+!*                                                                                      *
+Sub U.SIG.WindMessages( WindMessages.Class$, WindMessages.Method$, WindMessages.Data$, 	\
+    WindMessages.Justify, WindMessages.CompType ) External
+  String 										\
+    WindMessages.Class$,								\ Class name
+    WindMessages.Data$,									\ Data is delimited by pipes ie: a|b|c|d||f|
+    WindMessages.Method$								! Method name
+  Integer*1										\
+    WindMessages.CompType,								\ Component type 0=label, 1=text area, 2=text paint
+    WindMessages.Justify								! Data justifying -1 left, 0 center, 1 right
+End Sub
+
+Function U.SIG.SelfScanning(SelfScanning.Class$, SelfScanning.Method$, \
+                            SelfScanning.Data$,SelfScanning.dummy) External
+  String 										\
+    U.SIG.SelfScanning,     \
+    SelfScanning.Class$,								\ Class name
+    SelfScanning.Data$,									\ Data is delimited by pipes ie: a|b|c|d||f|
+    SelfScanning.Exception$,								\ Exception$ content
+    SelfScanning.Method$,								\ Method Name
+    SelfScanning.ReturnString$,         \ Returned Data
+    SelfScanning.Request$ 								! Java excecution request
+  Integer*1 SelfScanning.dummy
+FEnd
+
+!****************************************************************************************
+!* U.VersionShow.  Version Show, used On terminal support development                   *
+!*                 Rutina para desplegar la version de cada uno de los modulos que      *
+!*                 conforman un desarrollo de terminal.                                 *
+!*                 Usa un vector definido como global de máximo 10 posiciones           *
+!*                                                                                      *
+!*                                                                                      *
+Sub U.VersionShow External
+
+End Sub
+
+!*****************************************************************************************
+!* VVS.Initialize.   Vector Version Show Initialize                                      *
+!*                   Rutina para inicializar un vector.                                  *
+!*                                                                                       *
+!*                                                                                       *
+Sub VVS.Initialize External
+
+End Sub
+
+!*****************************************************************************************
+!* U.ExtendedJournal.  User Extended Journal                                             *
+!*                     Rutina para escribir al journal un String menor, igual o mayor a  *
+!*                     38 caracteres                                                     *
+!*                                                                                       *
+!*                                                                                       *
+Sub U.ExtendedJournal( ExtendedJournal.Data$ ) External
+
+  String										\
+    ExtendedJournal.Data$								!Informational data
+
+end sub
+
+
+!*****************************************************************************************
+!* U.GetFielValue.  Get field value                                                      *
+!*                  Rutina para obtener desde display un dato ingresado por usuario      *
+!*                  Hace multiples validaciones y retorna dato o acepta declinacion del  *
+!*                  usuario en la entrada de datos.                                      *
+!*                  Explicacion de parametros:                                           *
+!*                  -  GetFielValue.GoBack, permite devolver a pregunta anterior si el   *
+!*                  invocador de la rutina se encuentra dentro de un ciclo mostrando un  *
+!*                  vector de preguntas.  Si llega a la primera pregunta se considera que*
+!*                  se desistio de continuar con el procedimiento                        *
+!*                  -  GetFielValue.ManaKeyMustOpen, permite hacer verificación de estado*
+!*                  de llave de supervisor.  Util para procedimientos restringidos al    *
+!*                  supervisor                                                           *
+!*                  -  GetFielValue.ANLDataType, permite validar si se quieren datos solo*
+!*                  alfanumericos, numericos o solo letras                               *
+!*                  -  GetFielValue.RestDataLength, permite restringir una entrada de    *
+!*                  datos a cierto tamaño determinado y/o necesario                      *
+!*                                                                                       *
+!*                                                                                       *
+Sub U.GetFielValue( GetFielValue.GoBack, GetFielValue.ManaKeyMustOpen,			\
+    GetFielValue.ANLDataType, GetFielValue.RestDataLength, GetFielValue.PutDataGetData$ ) External
+  String										\
+    GetFielValue.PutDataGetData$							!Put data (to Return), Get data (from Caller)
+  Integer*1										\
+    GetFielValue.ANLDataType,								\Alphanumeric, Numeric or Letter data Type
+    GetFielValue.GoBack,								\Go back in a question, flag
+    GetFielValue.ManaKeyMustOpen,							\Manager key must Open, flag
+    GetFielValue.RestDataLength								!Restrictive data length
+
+End Sub
+
+!*****************************************************************************************************
+!* U.GetHideValue.  Get hide value                                                                   *
+!*                  Rutina para obtener ocultamente desde display un dato ingresado por usuario      *
+!*                  Hace multiples validaciones y retorna dato o acepta declinacion del              *
+!*                  usuario en la entrada de datos.                                                  *
+!*                  Explicacion de parametros:                                                       *
+!*                  -  GetHideValue.GoBack, permite devolver a pregunta anterior si el               *
+!*                  invocador de la rutina se encuentra dentro de un ciclo mostrando un              *
+!*                  vector de preguntas.  Si llega a la primera pregunta se considera que            *
+!*                  se desistio de continuar con el procedimiento                                    *
+!*                  -  GetHideValue.ManaKeyMustOpen, permite hacer verificación de estado            *
+!*                  de llave de supervisor.  Util para procedimientos restringidos al                *
+!*                  supervisor                                                                       *
+!*                  -  GetHideValue.ANLDataType, permite validar si se quieren datos solo            *
+!*                  alfanumericos, numericos o solo letras (ANL)                                     *
+!*                  -  GetHideValue.RestDataLength, permite restringir una entrada de                *
+!*                  datos a cierto tamaño determinado y/o necesario                                  *
+!*                  -  GetHideValue.FlagModeValidate, dato tipo flag que permite saber si el retorno *
+!*                  debe ser de un dato o si se debe retornar una validación de clave de supervisor  *
+!*                                                                                                   *
+Sub U.GetHideValue( GetHideValue.GoBack, GetHideValue.ManaKeyMustOpen,			\
+    GetHideValue.ANLDataType, GetHideValue.RestDataLength, GetHideValue.PutDataGetData$,\
+    GetHideValue.FlagModeValidate ) External
+  String										\
+    GetHideValue.PutDataGetData$							!Put data (to Return), Get data (from Caller)
+  Integer*1										\
+    GetHideValue.ANLDataType,								\Alphanumeric, Numeric or Letter data Type
+    GetHideValue.FlagModeValidate,							\Flag to indicate if manager override or hide data Return
+    GetHideValue.GoBack,								\Go back in a question, flag
+    GetHideValue.ManaKeyMustOpen,							\Manager key must Open, flag
+    GetHideValue.RestDataLength								!Restrictive data length
+
+End Sub
+
+!********************************************************************************************************
+!* U.PlaiTextFileWritLine.  User function plain text file write line                                    *
+!*   Funcion para escribir una linea a un archivo de texto.                                             *
+!*   Explicacion de parametros:                                                                         *
+!*   -  .FileName$, nombre logico del archivo plano donde se va a escribir                              *
+!*   -  .IDFile, sesion del archivo                                                                     *
+!*   -  .FlagDatePrefix, bandera que dice si se debe adicionar al principio de la linea a escribir la   *
+!*        informacion de fecha y de hora.                                                               *
+!*   -  .Line$, es la linea a escribir                                                                  *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.PlaiTextFileWritLine( PlaiTextFileWritLine.FileName$, 			\
+    PlaiTextFileWritLine.IDFile, PlaiTextFileWritLine.FlagDatePrefix, 		\
+    PlaiTextFileWritLine.Line$ ) External
+  String									\
+    PlaiTextFileWritLine.FileName$,						\ Text plain file name
+    PlaiTextFileWritLine.Line$							! Line to Write
+  Integer*1									\
+    PlaiTextFileWritLine.FlagDatePrefix						! Flag date prefix. To say put date and time at the beginning of the write line
+  Integer*2									\
+    PlaiTextFileWritLine.IDFile							! Id file, session
+End Sub
+
+
+!********************************************************************************************************
+!*                                                                                                      *
+!*                                                                                                      *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.VectLetrInicializar External
+
+End Sub
+
+
+!********************************************************************************************************
+!*  Funcion que Busca en un vector un string pasado en un parametro                                     *
+!*  y que devuelve la posicion donde se encuentra dicho string                                          *
+!*                                                                                                      *
+!*                                                                                                      *
+Function U.BuscarLetras(VAR.INDEX) External
+  Integer U.BUSCARLETRAS
+  Integer VAR.INDEX
+End Function
+
+
+!********************************************************************************************************
+!*                                                                                                      *
+!*                                                                                                      *
+!*                                                                                                      *
+!*                                                                                                      *
+Function U.NUMTOLET(VAR.VALOR) External
+  String VAR.VALOR
+  String U.NUMTOLET
+End Function
+
+
+!********************************************************************************************************
+!* U.IODataReset                                                                                        *
+!*   To avoid SMA message of "not available"                                                            *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.IODataReset External
+
+End Sub
+
+!********************************************************************************************************
+!* U.IODataReset2                                                                                       *
+!*   To avoid SMA message of "not available".  Completed versión                                        *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.IODataReset2 External
+
+End Sub
+
+
+!********************************************************************************************************
+!* Set Indicator1                                                                                       *
+!*   Rutina para prender un bit o apagarlo segun se desee.                                              *
+!*   .TurnType dice si prender o apagar el bit.  Use 1 para prender y 0 para apagar                     *
+!*   .BitToTurn dice cual bit se debe operar, las posiciones son 7|6|5|4|3|2|1|0                        *
+!*   .GetRetuValue recibe el valor al cual se le aplica la operacion y devuelve en ella misma el valor  *
+!*   obtenido                                                                                           *
+!*   Restriciones: 1.  el indicat debe ser integer de 1 y se disponen de hasta 7 bits                   *
+!*                 2.  si el parametro .BitToTurn supera el 6to bit entonces se asume que es el 6to     *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.SetIndicator1( SetIndicator1.TurnType, SetIndicator1.BitToTurn, 			\
+    SetIndicator1.GetRetuValue ) External
+  Integer*1										\
+    SetIndicator1.BitToTurn,								\ Bit to turn
+    SetIndicator1.GetRetuValue,								\ Get at call time, return value at return time
+    SetIndicator1.TurnType								! Turn type: 1=ON, 0=OFF
+End Sub
+
+
+!********************************************************************************************************
+!* Set IndicatorX   !! en construccion !!                                                               *
+!*   Rutina para prender un bit o apagarlo segun se desee.                                              *
+!*   .TurnType dice si prender o apagar el bit.  Use 1 para prender y 0 para apagar                     *
+!*   .BitToTurn dice cual bit se debe operar, las posiciones son 15|14|...|7|6|5|4|3|2|1|0              *
+!*   .long Tipo de entero 1,2,4                                                                         *
+!*   .GetRetuValue1 recibe el valor al cual se le aplica la operacion y devuelve en ella misma el valor *
+!*   .GetRetuValue2 recibe el valor al cual se le aplica la operacion y devuelve en ella misma el valor *
+!*   .GetRetuValue4 recibe el valor al cual se le aplica la operacion y devuelve en ella misma el valor *
+!*   obtenido                                                                                           *
+!*   Restriciones: 1.  el indicat debe ser integer de 2 y se disponen de hasta 15 bits                  *
+!*                 2.  si el parametro .BitToTurn supera el 14avo bit entonces se asume que es el 14avo *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.SetIndicatorX( SetIndicatorX.TurnType, SetIndicatorX.BitToTurn, 			\
+    SetIndicatorX.long,SetIndicatorX.GetRetuValue1,SetIndicatorX.GetRetuValue2, \
+    SetIndicatorX.GetRetuValue4 ) External
+  Integer*1										\
+    SetIndicatorX.BitToTurn,								\ Bit to turn
+    SetIndicatorX.StarLeftRightBit,							\ Start left to right bit
+    SetIndicatorX.TurnType,								\ Turn type: 1=ON, 0=OFF
+    SetIndicatorX.long,                   \
+    SetIndicatorX.GetRetuValue1          ! return integer*1
+  Integer*2 SetIndicatorX.GetRetuValue2  ! return integer*2
+  Integer*4										\
+    SetIndicatorX.Auxi,									\ Auxiliar
+    SetIndicatorX.AuxiShifter,								\ Auxiliar shifter
+    SetIndicatorX.GetRetuValue4								! Get at call time, return value at return time
+End Sub
+
+!********************************************************************************************************
+!* U.PlaiTextFileDoThis.  User function plain text file do this                                         *
+!*   Funcion para hacer lo indicado según valor de un parametro en un archivo de texto.                 *
+!*   Explicacion de parametros:                                                                         *
+!*   -  .FileName$, nombre logico del archivo plano donde se va a escribir                              *
+!*   -  .IDFile, sesion del archivo                                                                     *
+!*   -  .FlagDatePrefix, bandera que dice si se debe adicionar al principio de la linea a escribir la   *
+!*        informacion de fecha y de hora.                                                               *
+!*   -  .Data$, es el dato en cuestion (escrito o leido)                                                *
+!*   -  .FlagShowMessages, bandera que dice si se muestra mensaje en display                            *
+!*   -  .CWROhexaIndiValue, es un indicador (indicat) que dice actividad a realizar con el archivo      *
+!*   -  .CWROhexaExecStat, es un indicador (indicat) que dice si la actividad con el archivo fue exitosa*
+!*   -  .Future, variable para uso futuro.                                                              *
+!*                                                                                                      *
+!*                                                                                                      *
+Sub U.PlaiTextFileDoThis( PlaiTextFileDoThis.FileName$, 				\
+    PlaiTextFileDoThis.IDFile, PlaiTextFileDoThis.FlagDatePrefix, 			\
+    PlaiTextFileDoThis.Data$, PlaiTextFileDoThis.FlagShowMessages, 			\
+    PlaiTextFileDoThis.CWROhexaIndiValue, PlaiTextFileDoThis.CWROhexaExecStat,		\
+    PlaiTextFileDoThis.Future ) External
+
+  String										\
+    PlaiTextFileDoThis.FileName$,							\ Text plain file name
+    PlaiTextFileDoThis.Data$								! Activity data
+  Integer*1										\
+    PlaiTextFileDoThis.CWROhexaIndiValue,						\ Close Write Read Open hexadecimal indicator value
+    PlaiTextFileDoThis.CWROhexaExecStat,						\ Close Write Read Open hexadecimal execution status
+    PlaiTextFileDoThis.FlagDatePrefix,							\ Flag date prefix. To say put date and time at the beginning of the write line
+    PlaiTextFileDoThis.FlagShowMessages,						\ Flag show message. To say show message on display
+    PlaiTextFileDoThis.Future								! Future use
+  Integer*2										\
+    PlaiTextFileDoThis.IDFile								! Id file, session
+
+End Sub
+
+!*****************************************************************************************
+!* U.GetFielValue2.  Get field value                                                      *
+!*                  Rutina para obtener desde display un dato ingresado por usuario      *
+!*                  Hace multiples validaciones y retorna dato o acepta declinacion del  *
+!*                  usuario en la entrada de datos.                                      *
+!*                  Explicacion de parametros:                                           *
+!*                  -  GetFielValue.GoBack, permite devolver a pregunta anterior si el   *
+!*                  invocador de la rutina se encuentra dentro de un ciclo mostrando un  *
+!*                  vector de preguntas.  Si llega a la primera pregunta se considera que*
+!*                  se desistio de continuar con el procedimiento                        *
+!*                  -  GetFielValue.ManaKeyMustOpen, permite hacer verificación de estado*
+!*                  de llave de supervisor.  Util para procedimientos restringidos al    *
+!*                  supervisor                                                           *
+!*                  -  GetFielValue.ANLDataType, permite validar si se quieren datos solo*
+!*                  alfanumericos, numericos o solo letras (ANL)                         *
+!*                  -  GetFielValue.RestDataLength, permite restringir una entrada de    *
+!*                  datos a cierto tamaño determinado y/o necesario                      *
+!*                                                                                       *
+!*                                                                                       *
+Sub U.GetFielValue2( GetFielValue.GoBack, GetFielValue.ManaKeyMustOpen,			\
+    GetFielValue.ANLDataType, GetFielValue.RestDataLength, GetFielValue.PutDataGetData$,\
+    GetFielValue.TimeCancel) External
+
+  String										\
+    GetFielValue.PutDataGetData$							!Put data (to Return), Get data (from Caller)
+  Integer*1										\
+    GetFielValue.ANLDataType,								\Alphanumeric, Numeric or Letter data Type
+    GetFielValue.GoBack,								\Go back in a question, flag
+    GetFielValue.ManaKeyMustOpen,							\Manager key must Open, flag
+    GetFielValue.RestDataLength,							\Restrictive data length
+    GetFielValue.TimeCancel                   !Clear times.  User Clear Key User parameter
+End Sub
+
+!*****************************************************************************************
+!* U.Save.Input  Graba el estado de la Input                                             *
+Sub U.Save.Input External
+End Sub
+
+
+!*****************************************************************************************
+!* U.Restore.Input  Restaura el estado de la Input                                             *
+Sub U.Restore.Input External
+End Sub
+
+Function U.Trace2(U.Archivo$,U.Msg$) External
+  String U.Msg$,U.Archivo$
+FEnd
+
+Function Reset.Iodata2 External
+FEnd
+
+Function U.traceKeys(u.Archivo$,u.lugar$) External
+  String u.lugar$,U.Archivo$
+  Integer*1 uk%
+End Function
+
+Function U.Almacen$ External
+  String U.reg$,U.Almacen$
+FEnd
+
+Function U.WriteFile(U.Msg$) External !2011.08.31
+  String U.Msg$,U.Archivo$
+FEnd
+
+Sub U.GetFielValueFrw( GetFielValueFrw.GoBack, GetFielValueFrw.ManaKeyMustOpen,			\
+    GetFielValueFrw.ANLDataType,GetFielValueFrw.RestDataLenMin, GetFielValueFrw.RestDataLength, GetFielValueFrw.PutDataGetData$,\
+    GetFielValue.display2$,GetFielValue.device,GetFielValueFrw.TimeCancel) External
+  String										\
+    GetFielValueFrw.Auxiliar$,								\Auxiliar
+    GetFielValueFrw.Auxi2$,								\Auxiliar2
+    GetFielValueFrw.B$,									\B
+    GetFielValueFrw.BData$,								\BData, take off 1st character
+    GetFielValueFrw.C$,									\C
+    GetFielValueFrw.D$,									\D
+    GetFielValueFrw.E$,									\E
+    GetFielValueFrw.F$,									\F
+    GetFielValueFrw.G$,									\G
+    GetFielValueFrw.H$,									\H
+    GetFielValueFrw.I$,									\I
+    GetFielValueFrw.IopData$,								\I/O processor data
+    GetFielValueFrw.J$,									\J
+    GetFielValueFrw.K$,									\K
+    GetFielValueFrw.KData$,								\KData, take off 1st character
+    GetFielValueFrw.LastCodeReceived$,							\Last code received On keyboard
+    GetFielValueFrw.PutDataGetData$,							\ Put data (to Return), Get data (from Caller)
+    GetFielValue.display2$
+  Integer*1										\
+    GetFielValueFrw.ANLDataType,								\Alphanumeric, Numeric or Letter data Type
+    GetFielValueFrw.CleaTimes,								\Clear times.  User Clear Key
+    GetFielValueFrw.TimeCancel,								\Clear times.  User Clear Key User parameter
+    GetFielValueFrw.DataReady,								\Data ready, flag
+    GetFielValueFrw.GoBack,								\Go back in a question, flag
+    GetFielValueFrw.ManaKeyMustOpen,							\Manager key must Open, flag
+    GetFielValueFrw.RestDataLength,GetFielValueFrw.RestDataLenMin,							\ Restrictive data length
+    GetFielValue.device,GetFielValue.lenError
+  Integer*2										\
+    GetFielValueFrw.Iosn									!Input output session number
+End Sub

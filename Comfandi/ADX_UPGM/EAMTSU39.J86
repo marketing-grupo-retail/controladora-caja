@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC39 PUBLIC
+! TSUPEC39 - ERROR STACKING EXIT
+INTEGER*1 TSUPEC39                        ! define variable !IR89474
+%INCLUDE EAMTSE39.J86        ! EMS PRPQ
+
+END FUNCTION
+

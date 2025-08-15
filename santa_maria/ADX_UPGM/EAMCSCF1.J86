@@ -1,0 +1,166 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!**********************************************************************
+!*             CHECKOUT SUPPORT CONTROL FILE                          *
+!**********************************************************************
+!* The following defines the store record format for the Checkout     *
+!* support control file. the fields are defined in the sequence       *
+!* in which they appear in the logical record.                        *
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.ST.TERMINAL$ ! TERMINAL NUMBER = 0                   UPD 2
+
+INTEGER*4 GLOBAL \
+        CS.ST.LOGPOINT, \ POINTER TO THE RECORD IN              INT 4
+                        \ PROCESS OR NEXT TO BE PROCESSED BY
+                        \ SALES SUPPORT. (RESTART POINT)
+\
+        CS.ST.RESTART,  \ NUMBER OF TRANSACTIONS                INT 4
+                        \ PROCESSED BY SALES SUPPORT. THIS
+                        \ FIELD IS NEVER RESET AND IS USED TO
+                        \ AVOID DUPLICATE UPDATE ON A RESTART.
+\
+        CS.ST.IMUPDATE, \ POINTER TO THE RECORD TO              INT 4
+                        \ START PROCESSING TO RECOVER ITEM
+                        \ MOVEMENT DATA IN MEMORY.
+\
+        CS.ST.IMRESTART ! NUMBER OF TRANSACTIONS                INT 4
+                        ! PROCESSED SINCE ITEM MOVEMENT DATA
+                        ! WAS WRITTEN FROM MEMORY TO DISK
+INTEGER*2 GLOBAL \
+        CS.ST.NUMXLOG,  \ NUMBER OF ENTRIES WRITTEN             INT 2
+                        \ TO THE EXCEPTION LOG FOR THE
+                        \ TRANSACTION IN PROCESS.  ALSO USED
+                        \ TO CHECKPOINT THE STORE CLOSING
+                        \ PROCESS.
+\
+        CS.ST.NUMTLIST  ! NUMBER OF ENTRIES WRITTEN             INT 2
+                        ! TO THE TENDER LISTING LOG FOR THE
+                        ! TRANSACTION IN PROCESS.
+STRING GLOBAL \
+        CS.ST.DATETIME$,\ DATE AND TIME - YYMMDDHHMM            UPD 5
+                        \ FROM LAST RECORD PROCESSED BY
+                        \ SALES SUPPORT
+\
+        CS.ST.RESERVED$ ! RESERVED                              ASC 1
+
+!AIR77861  Added two extra pointers for restart processing
+INTEGER*4 GLOBAL \
+        CS.ST.EXPOINT,  \ POINTER TO THE END OF THE LAST        INT 4
+                        \ RECORD PROCESSED BY
+                        \ SALES SUPPORT. (RESTART POINT)
+\
+        CS.ST.TLPOINT   \ PINTER TO THE START OF THE LAST       INT 4
+                        \ RECORD PROCESSED BY SALES SUPPORT.
+                        ! (RESTART POINT)
+
+!EIR77861
+
+!**********************************************************************
+!* The following defines the close record format                      *
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.CR.TERMINAL$,\ TERMINAL NUMBER = 9999                UPD 2
+\
+        CS.CR.SLOGNAME$,\ NAME OF THE TRANSACTION               ASC 8
+                        \ SUMMARY LOG CURRENTLY BEING
+                        \ PROCESSED BY SALES SUPPORT
+\
+        CS.CR.OSLOGNAME$! NAME OF THE TRANSACTION               ASC 8
+                        ! SUMMARY LOG PREVIOUSLY IN USE
+                        ! BY THE TERMINALS
+
+INTEGER*4 GLOBAL \
+        CS.CR.CLOSEPNT  ! POINTER TO THE "CLOSE" RECORD         INT 4
+                        ! IN THE PREVIOUSLY USED SUMMARY LOG
+
+STRING GLOBAL \
+        CS.CR.DATETIME$,\ DATE AND TIME - YYMMDDHHMM            UPD 5
+                        \ OF THE MOST RECENT CLOSE OR DATA
+                        \ SYNC OF THE SUMMARY LOG
+                        \
+        CS.CR.BACKUP$,  \ LAST HOUR FILES BACKED UP  HH         UPD 1
+                        \ ADDED BY IR89068 CRITICAL FILE BACKUP
+        CS.CR.RESERVED$ ! RESERVED                              ASC 8
+
+
+!**********************************************************************
+!* The following defines the terminal record format                   *
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.TR.TERMINAL$,\ TERMINAL NUMBER                       UPD 2
+        CS.TR.TRANSNUM$ ! TRANSACTION NUMBER FOR THE            UPD 2
+                        ! RECORD MOST RECENTLY PROCESSED BY
+                        ! SALES SUPPORT FOR THIS TERMINAL
+
+INTEGER*4 GLOBAL \
+        CS.TR.LOGPOINT, \ POINTER TO THE TRANSACTION            INT 4
+                        \ RECORD MOST RECENTLY PROCESSED BY
+                        \ SALES SUPPORT FOR THIS TERMINAL
+        CS.TR.RESTART,  \ RESTART VALUE WHEN VERIFYING A      !SA00018
+                        \ TRANS. IS IN SEQUENCE DURING A      !SA00018
+                        \ RESTART. THIS IS ONLY RELEVANT FOR  !SA00018
+                        \ THE GO-FASTER OPTION WHICH BUFFERS  !SA00018
+                        \ THE STORE RECORD BUT NOT THE TERM.  !SA00018
+\
+\**********************************************************************
+\* Data saved for terminal productivity recording                     *
+\**********************************************************************
+\
+        CS.TR.NETSALES  ! NET SALES AMOUNT FOR THE              INT 4
+                        ! ITEMS IN NUMITEMS
+
+INTEGER*2 GLOBAL \
+        CS.TR.NUMITEMS, \ NET NUMBER OF ITEM SALES.             INT 2
+                        \ THIS COUNT INCLUDES SALES LESS
+                        \ REFUNDS AND CANCELS.  IT DOES NOT
+                        \ INCLUDE ITEMS FROM TRAINING,
+                        \ STANDALONE, OR VOIDED TRANSACTIONS.
+\
+        CS.TR.NUMCOUPS, \ NET NUMBER OF STORE AND               INT 2
+                        \ MANUFACTURER COUPONS.  THIS DOES NOT
+                        \ INCLUDE COUPONS FROM TRAINING,
+                        \ VOIDED, OR STANDALONE TRANSACTIONS.
+\
+        CS.TR.NUMTRANS, \ NUMBER OF TRANSACTIONS.               INT 2
+                        \ THIS DOES OT INCLUDE TRAINING,
+                        \ VOIDED, OR STANDALONE TRANSACTIONS
+\
+        CS.TR.RINGTIME, \ TOTAL RING TIME IN SECONDS            INT 2
+                        \ INCLUDES THE TIME FROM THE FIRST ITEM
+                        \ ENTRY UNTIL BALANCE DUE.  ALSO
+                        \ INCLUDES THE TIME FROM THE PREVIOUS
+                        \ TOTAL OR TENDER TO A SUBSEQUENT
+                        \ ITEM SALE.
+\
+        CS.TR.TENDERTI, \ TOTAL TENDER TIME IN SECONDS.         INT 2
+                        \ INCLUDES THE TIME BETWEEN A TOTAL AND
+                        \ A TENDER AND THE TIME BETWEEN TENDERS
+                        \ AND THE TIME BETWEEN THE FINAL TENDER
+                        \ AND THE CLOSE OF THE CASH DRAWER.
+\
+        CS.TR.SPECIAL,  \ TOTAL SPECIAL SIGN OFF TIME           INT 2
+                        \ IN SECONDS.  INCLUDES THE TIME
+                        \ BETWEEN A SPECIAL SIGN OFF AND THE
+                        \ SUBSEQUENT SPECIAL SIGN ON
+\
+        CS.TR.INACTIVE, \ TIME BETWEEN TRANSACTIONS             INT 2
+                        \ IN SECONDS
+\
+        CS.TR.NONSALES  ! TIME IN SECONDS WHEN                  INT 2
+                        ! NON-SALES PROCEDURES ARE BEING RUN.
+                        ! VOIDED, STANDALONE, AND TRAINING
+                        ! TRANSACTIONS ARE INCLUDED IN THIS
+                        ! TIME.
+
+!AIR77861 Needed to pad terminal rec. to same size as store record
+STRING GLOBAL \
+        CS.TR.RESERVED$ ! RESERVED                              ASC 8
+!EIR77861
+
+!**********************************************************************
+!* End of checkout support control file declarations                  *
+!**********************************************************************

@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+FUNCTION TSUPEC54 PUBLIC
+! TSUPEC54 - After "WAIT" on the IOPROC Timeout (one second)
+%INCLUDE EAMTSE54.J86        ! EMS PRPQ
+call QXL.tsupec54
+END FUNCTION
+

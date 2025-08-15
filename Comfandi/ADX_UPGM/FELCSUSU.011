@@ -1,0 +1,19 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : RMSCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo Facturacion Electronica   *
+!                Mini Facturas                    *
+!**************************************************
+!*
+!Modificaciones:
+
+Sub FELCSU01.011 External
+End Sub
+
+Sub FELCSU12.011 External
+End Sub
+
+Sub FELCSU16.011 External
+End Sub

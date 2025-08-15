@@ -1,0 +1,18 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : REMCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Mudulo Remates santa maria       *
+!**************************************************
+!*
+!Modificaciones:
+
+Sub REMCSU01.011 External
+End Sub
+
+Sub REMCSU12.011 External
+End Sub
+
+Sub REMCSU16.011 External
+End Sub

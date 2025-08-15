@@ -1,0 +1,27 @@
+!-----------------------------------------------------------------------------
+! Modulo: NUOTELEC.BAS
+! Fecha : 11 de diciembre de 2020
+! Autor : Alejandro Farre P.
+! Modulo para informacion electoral
+! cabeceras para incluir en otros modulos
+!
+! Fecha      : 17 de junio de 2021
+! Autor      : Alexander Baidal M.
+! Cambio     : Se integra funcionalidad a nueva aplicacion Base NUO
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------
+! Rutina debe llamarse en user 07
+!------------------------------------------------------
+sub NUOTELEC07 external
+end sub
+
+sub NUOTELEC.imprime external
+end sub
+
+!------------------------------------------------------------------------
+! Consulta Informacion electoral
+!------------------------------------------------------------------------
+sub NUOTELEC.consulta( cedula$ ) external
+   string cedula$
+end sub

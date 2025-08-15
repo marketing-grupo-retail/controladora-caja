@@ -1,0 +1,13 @@
+!Before I/O processor Unlock
+!Antes del desbloqueo del procesador de E/S
+FUNCTION TSUPEC51(CALLPARM) PUBLIC
+   INTEGER*2 CALLPARM
+
+   ! Tarjetas Bancarias
+   call MSMTTARB51
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT51
+
+END FUNCTION
+

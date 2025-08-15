@@ -1,0 +1,21 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC32(RISK) PUBLIC                                                  
+INTEGER*1 RISK                                                                  
+! TSUPEC32 - TENDER VALIDATION             
+!CALL EPAYMS32.011                  ! PAGO ELECTRONICO  
+                                   
+
+CALL SUBSIDIO.SAPCORE(32)          ! SAP-CORE
+CALL SUBSIDIO.FOSFEC(32)           ! FOSFEC SAPCORE
+CALL BRCOMPRAPAGO(32)              ! RECOMPRA FORMA PAGO
+CALL BONOS.ELECTRO(32)             ! CONTROL BONO ELECTROFIESTA
+CALL BONOS.KUPI(32)                ! BONO ELECTRONICO KUPI
+CALL BONOS.ELECTROSUPDRG(32)       ! BONOS SUPER Y DROGUERIA
+CALL BONODEVPAGO(32)               ! Bono nota devolucion 
+
+%INCLUDE UEECR132.U86              ! MODULO TEF REDEBAN
+
+END FUNCTION                                                                    
+                                                                                

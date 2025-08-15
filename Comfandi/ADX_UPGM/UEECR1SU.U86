@@ -1,0 +1,3 @@
+Def U.ECR.Sub(U.ECR.Sub.Parameter) External 
+  Integer*2 U.ECR.Sub.Parameter
+Fend

@@ -1,0 +1,13 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** CSSUDSU2.J86 ******************************************!!
+! TITLE: Date of last sale updates ONLY with wait for completion
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+ 
+SUB CSMLEW01 EXTERNAL                       ! Common error routine
+END SUB
+ 

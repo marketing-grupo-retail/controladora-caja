@@ -1,0 +1,68 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** CS16DSU4.J86 ******************************************!!
+! TITLE: Date of last sale updates ONLY with wait for completion
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.
+!
+\/* CHANGE ACTIVITY                                                 */
+\/* IR23184 - Checkout support user exits for Date Of Last Sale     */
+\/*           function incorrectly pointing to EAMUDOLS.286 in      */
+\/*           ADX_UPGM instead of ADX_IPGM                          */
+\/*           BAH MGV-A 07Jul93                                     */
+\/*                                                                 */
+
+
+WORK2I2 = PACKBIN2(CS.INPUT$,CS.FLD.POS(3),CS.FLD.LEN(3))
+                                    ! Get close indicator from string
+IF (WORK2I2 AND 02H) THEN BEGIN     ! Item movement file closed
+
+!AIR23184
+! WORK1$ = "ADX_UPGM:EAMUDOLS.286"  ! DOLS UPDATE PROGRAM NAME
+  WORK1$ = "ADX_IPGM:EAMUDOLS.286"  ! DOLS UPDATE PROGRAM NAME
+!EIR23184
+
+  WORK2$ = "EAMIMOVO,3,"            ! PARAMETERS - DOLS UPDATE ONLY
+  OPEN "EAMRDESC" RECL 49 AS 6 NOWRITE NODEL
+  READ #6, 4360; WORK3$                      ! READ IN DESCRIPTOR
+  READ #6, 4361; WORK4$                      ! READ IN DESCRIPTOR
+  CLOSE 6
+! WORK3$ = "UPDATE DOLS AND WAIT FOR COMPLETION" ! Background display
+
+  WORK1I2 = ADXSTART(WORK1$,WORK2$,WORK3$)  ! Start Staging program
+  IF WORK1I2 NE 0 THEN BEGIN                ! Error occurred
+    WORK3$ = "DOLS" +                       \ Log PROGRAM NAME
+              "," + STR$(WORK1I2)           ! and error code
+    CALL ADXERROR (0,ASC("U"),0,1,9,WORK3$) ! Log the error
+  ENDIF ELSE BEGIN
+
+   WAIT ; 20000                                ! WAIT 20 SECONDS
+   ON ERROR GOTO USER.ERR2                     ! SET ERROR ADDRESS
+   WORK1I2 = 180                               ! SET TO RETRY 180 TIMES
+   OPEN "EAMIMWRK" AS 56 LOCKED                ! SEE IF FILE IS FREE YET
+   CLOSE 56                                    ! CLOSE IT AND CONTINUE
+NO.FILE.PRESENT:
+  ENDIF
+ENDIF
+GOTO END.OF.DOLS
+
+USER.ERR2:
+ IF ERRF% = 56 THEN BEGIN                      ! EAMIMWRK OPEN ERROR
+   IF ERR = "OE" AND                           \ OPEN ERROR
+      ERRN = 80204010H THEN                    \  BECAUSE FILE NOT THERE
+      RESUME NO.FILE.PRESENT                   !  ALL IS OK
+   IF WORK1I2 > 0 THEN BEGIN                   ! RETRY NOT EXHAUSTED
+     WORK1I2 = WORK1I2 - 1                     ! DECREMENT RETRY COUNT
+!    WORK3$ = " WAITING FOR EAMUDOLS TO COMPLETE " ! WAITING MESSAGE
+     WORK3$ = WORK4$
+     CALL ADXSERVE(WORK1I4,26,0,WORK3$)        ! DISPLAY MESSAGE
+     WAIT ; 10000                              ! WAIT 10 SECONDS
+     RESUME RETRY                              ! RETRY FILE OPEN
+   ENDIF
+ ENDIF                                         ! NOT EAMIMWRK OPEN ERROR
+ CALL CSMLEW01                                 ! Process other errors
+ IF CS.RESUME THEN RESUME                      \ resume after error
+   ELSE RESUME RETRY                           ! retry failing instn.
+END.OF.DOLS:
+

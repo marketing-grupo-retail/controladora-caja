@@ -1,0 +1,105 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMCSUVA.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!!
+!/*                                                                */
+!/*  IR45311 -  AEIR44473. IR44473 broke IR44279                   */
+!/*             The voided coupon would not be deleted.            */
+!/*             JAM MGVA 26Mar2001                                 */
+!/*                                                                */
+!/*  IR53184 -  Added the ability to create TLOG strings that are  */
+!/*             greater than 32K in length.                        */
+!/*             KHG IBM 03Mar2004                                  */
+!/*                                                                */
+!!***** CODE FOR COUPON LOGGING    *****                           */
+!!*******************************************************************
+!!** DEFINED VARIABLES NEEDED FOR COUPON PROCESSING                **
+!!*******************************************************************
+ STRING GLOBAL \
+        A$,                       \ WORK STRING
+        EMSS.XLAT.IN$,            \ TRANSLATE STRINGS FOR PACKED OUTPUT
+        EMSS.XLAT.OUT$            !
+ INTEGER GLOBAL \
+         USR.QTY.SAVE,            \ FLAG ADDED BY IR45311
+         USR.QTY                  ! INPUT QUANTITY IR53184
+\         , USR.OFF               ! INPUT OFFSET   IR53184
+
+ STRING  GLOBAL SL.IT.FAMILYNU$   ! FAMILY NUMBERS
+ INTEGER GLOBAL SL.IEX.INDICAT1   ! EXTENSION FLAGS
+
+ INTEGER GLOBAL \
+         EMSS.COUP.PTR(1),        \ COUPON ARRAY POINTERS
+         EMSS.ITEM.PTR,           \ ITEM SALE ARRAY POINTER
+         EMSS.ITEM.MAX,           \ MAXIMUM ITEM SALE ARRAY POINTER
+         EMSS.COUP.MAX            ! MAXIMUM COUPON ARRAY POINTER
+
+ INTEGER*4 GLOBAL \
+           USR.OFF,               \ INPUT OFFSET   IR53184
+           EMSS.COUP.DATA(3)       ! ARRAY OF COUPON DATA
+
+!! FIRST INDEX IS 0 FOR MFR COUPONS, 1 FOR STORE COUPONS
+!! SECOND INDEX IS COUPON POINTER, THIRD INDEX IS DATA POINTER
+!!
+!! DATA FIELD 0  =  POINTER TO TLOG ENTRY (AND UPC CODE) (0 IF VOIDED)
+!! DATA FIELD 1  =  MANUFACTURER NUMBER (OR 1,000,000 + VELOCITY CODE)
+!! DATA FIELD 2  =  COUPON FAMILY NUMBER
+!! DATA FIELD 3  =  COUPON VALUE
+!! DATA FIELD 4  =  CAMPAIGN NUMBER
+!! DATA FIELD 5  =  POINTER TO MATCHING ITEM (0 if no item)
+!! DATA FIELD 6  =  ENTRY TYPE FLAGS
+!!
+!!                              X"8000" VALIDATE FOR QTY, NO LOG NEEDED
+!!                              X"0300" NO LOG NEEDED, UPC OUT OF RANGE
+!!                              X"0080" UNUSED
+!!                              X"0040" COUPON KEY PRESSED WITH ITEM
+!!                              X"0020" KEYED CAMPAIGN NUMBER
+!!                              X"0010" KEYED VALUE REQUIRED
+!!                              X"0008" KEYED COUPON VALUE
+!!                              X"0004" KEYED COUPON UPC (0 = SCANNED)
+!!                              X"0002" COUPON CREATED BY DOUBLING
+!!                              X"0001" STORE COUPON (0 = MFR COUPON)
+!!
+!! DATA FIELD 7  =  VALIDATION FLAGS
+!!
+!!                              X"8000" COUPON REQUIRED MULTIPLE ITEMS
+!!                              X"4000" KEYED VALUE LIMIT CHECK
+!!                              X"2000" COUPON VALUE EXCEEDS ITEM VALUE
+!!                              X"1000" QUANTITY NOT SATISFIED FOR COUP
+!!                              X"0800" TOO MANY COUPONS FOR SALES
+!!                              X"0400" LIMITED COUPONS PER ORDER
+!!                              X"0200" COUPON HAS EXPIRED
+!!                              X"0100" MINIMUM PURCHASE NOT SATISFIED
+!!                              X"0080" FREE ITEM COUPON
+!!                              X"0040" OPERATOR'S OVERRIDE REQUIRED
+!!                              X"0020" MANAGER'S OVERRIDE REQUIRED
+!!                              X"0010" NO VALIDATION PERFORMED
+!!                              X"0008" ONLY SUPERGROUP IS VALID
+!!                              X"0004" ONLY MANUFACTURER IS VALID
+!!                              X"0002" ONLY DEPARTMENT IS VALID
+!!                              X"0001" NO MATCH FOUND
+
+ INTEGER*4 GLOBAL \
+           EMSS.ITEM.DATA(2)      ! ARRAY OF ITEM SALE DATA
+!!
+!! FIRST INDEX IS COUPON POINTER, SECOND INDEX IS DATA POINTER
+!!
+!! DATA FIELD 0  =  POINTER TO TLOG ENTRY (AND UPC CODE) (0 IF VOIDED)
+!! DATA FIELD 1  =  MANUFACTURER NUMBER (OR 1,000,000 + VELOCITY CODE)
+!! DATA FIELD 2  =  FAMILY NUMBER 1
+!! DATA FIELD 3  =  ITEM VALUE
+!! DATA FIELD 4  =  FAMILY NUMBER 2
+!! DATA FIELD 5  =  POINTER TO MATCHING COUPON
+
+!! Note that these arrays are filled as Checkout support processes the
+!! transaction.  No quantities are kept since quantity entries are
+!! expanded into separate entries.  Coupon entries which are expanded
+!! because of a multiple item requirement are marked so that only 1
+!! log entry (containing only 1 matching UPC) is made.  Voided items
+!! and coupons and multiplied coupons are marked so as not to
+!! participate in validation matching.
+

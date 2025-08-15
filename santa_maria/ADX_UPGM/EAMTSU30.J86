@@ -1,0 +1,39 @@
+!At Balance Due Calculation
+!En el calculo del saldo a pagar
+FUNCTION TSUPEC30 PUBLIC
+
+!call traceNUO( "UE30 1 AMTTENDE=" + str$(SL.TE.AMTTENDE) + " TOTALS=[" + str$(TS.TOTALS(0,0,0)) + "] BALDUE=[" + str$(TS.BALDUE(0)) + "] TENDER=[" + str$(TS.TENDERED(0)) + "]" )
+
+   !Promociones
+   call NUOTPROM30
+
+   !Devolucion de IVA
+   call NUOTDIVA30
+
+   !Clientes y Fidelidad
+   call MSMTCLIE30
+
+   !Nota de Credito
+   call MSMTNCRE30
+
+   !Tarjetas Bancarias
+   call MSMTTARB30
+
+   !Retenciones
+   call MSMTRETE30
+
+   !Cheques
+   call MSMTCHEQ30
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT30
+
+   !Credito Institucional
+   call MSMTINST30
+
+   ! Facturas MSM
+   call MSMTFACT30
+
+!call traceNUO( "UE30 2 AMTTENDE=" + str$(SL.TE.AMTTENDE) + " TOTALS=[" + str$(TS.TOTALS(0,0,0)) + "] BALDUE=[" + str$(TS.BALDUE(0)) + "] TENDER=[" + str$(TS.TENDERED(0)) + "]" )
+
+END FUNCTION

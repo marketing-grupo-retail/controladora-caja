@@ -1,0 +1,45 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+!**********************************************************************         
+!*               MISCELLANEOUS TRANSACTIONS FILE                      *         
+!**********************************************************************         
+!* THE FOLLOWING DEFINES THE STORE RECORD FORMAT FOR THE              *         
+!* MISCELLANEOUS TRANSACTIONS FILE.  THE FIELDS ARE DEFINED IN THE    *         
+!* SEQUENCE IN WHICH THEY APPEAR IN THE LOGICAL RECORD                *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        MT.ST.ACCOUNT$,         \ MISCELLANEOUS ACCOUNT         UPD 2           
+                                \ = X'0000'                                     
+        MT.ST.DATETIME$         ! DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                ! WHEN CURRENT PERIOD STARTED OR                
+                                ! PREVIOUS PERIOD ENDED                         
+                                                                                
+STRING GLOBAL \                                                                 
+        MT.ST.RESERVED$,        \ RESERVED                      ASC 21          
+        MT.ST.USEREXIT$         ! USER FIELD FOR USE WITH EXITS                 
+                                                                                
+!**********************************************************************         
+!* The following defines the account record format for the            *         
+!* miscellaneous transactions file.                                   *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        MT.AC.ACCOUNT$  ! MISCELLANEOUS ACCOUNT (1-999)         UPD 2           
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+        MT.AC.RESTART,  \ THIS FIELD IS USED AS A               INT 4           
+                        \ CONTROL FIELD ON A SYSTEM RESTART                     
+                        \ IT IS USED TO DETERMINE IF THIS                       
+                        \ RECORD HAS BEEN UPDATED BY A                          
+                        \ PARTICULAR TRANSACTION                                
+        MT.AC.AMOUNT    ! AMOUNT FOR THE ACCOUNT                INT 4           
+                                                                                
+STRING GLOBAL \                                                                 
+        MT.AC.NAME$,    \ ACCOUNT DESCRIPTOR                    ASC 18          
+        MT.AC.USEREXIT$ ! USER FIELD FOR USE WITH EXITS         ASC 8           
+                                                                                
+INTEGER*2  MISC.NO      ! FILE I/O NUMBER USED IN OTHER MODULES                 
+!**********************************************************************         
+!* End of the declarations for the miscellaneous transactions file    *         
+!**********************************************************************         

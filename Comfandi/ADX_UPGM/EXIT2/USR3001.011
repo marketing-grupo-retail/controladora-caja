@@ -1,0 +1,39 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR3001.011 
+!     Punto de Entrada   =  EAMTSU30.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para IMPRIMIR  
+!     el Sub-Total en la Tira del Cliente. Ejemplo tomado
+!     del PROGRAMMING GUIDE, Pagina H-27
+!-----------------------------------------------------------
+
+IF TS.IO.MOTORKEY = 81 THEN BEGIN              ! Si se digita <TOTAL>
+   IF TS.BD.FSDUE THEN BEGIN                   ! Si hay Pg.Oblig.
+      IF TO.FOODSTAMPS AND  NOT              \
+         TS.FSBAL.PRINTED THEN BEGIN
+             TS.LINETYPE = 7                   ! Vuelve linea como Total
+             TS.LINEDATA = 2                   ! Linea de Pg.Oblig.
+             TS.FSBAL.PRINTED = -1             ! Muestra Linea Pg.Oblig.
+             CALL TSPREC01                     ! y la Imprime
+      ENDIF
+   ENDIF ELSE BEGIN                            ! No hay Pg.Oblig
+   IF TS.PR.BALDUE <>                        \ 
+    (TS.TOTALS(0,0,0)+TS.TAXES(0,0))         \ ! Si Cambian los Totales
+     THEN BEGIN          
+     TS.FSBAL.PRINTED = 0                      ! Vuelve a Impr. Pg.Oblig.
+     TS.PR.BALDUE=TS.TOTALS(0,0,0)+          \
+                  TS.TAXES(0,0)                ! Salva TOTAL impreso
+     TS.TAX.SAVE =TS.TAXES(0,0)                ! Salva IVA impreso
+     TS.LINETYPE = 7                           ! Vuelve linea como Total
+     TS.LINEDATA = 1                           ! Linea de Total Normal
+     CALL TSPREC01                             ! y la Imprime
+   ENDIF
+  ENDIF
+ENDIF
+!--------------------------------------------------------------------
+

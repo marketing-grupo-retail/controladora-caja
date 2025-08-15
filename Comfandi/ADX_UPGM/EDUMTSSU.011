@@ -1,0 +1,29 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUMTSSU.011                     *
+!Autor         : Daniel Torres                    *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 01 de 2.005                *
+!Observaciones : Rutinas Recaudo Siempre Educando *
+!**************************************************
+
+Sub EDUMTS02.011  External
+End Sub
+
+Sub EDUMTS07.011  External
+End Sub
+
+Sub EDUMTS08.011  External
+End Sub
+
+Sub EDUMTS14.011  External
+End Sub
+
+Sub EDUMTS20.011  External
+End Sub
+
+Sub EDUMTS43.011  External
+End Sub
+
+Sub EDUMTS53.011  External
+End Sub

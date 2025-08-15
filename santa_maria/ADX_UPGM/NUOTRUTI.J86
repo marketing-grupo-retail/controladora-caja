@@ -1,0 +1,921 @@
+!-------------------------------------------------------------------------------
+!Encabezado de rutinas de uso general
+!Fecha: 22 de febrero de 2021
+!Autor: Alejandro Farré P.
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
+!Convierte un numero de 4 bytes a caracteres hexadecimales
+!-------------------------------------------------------------------------------
+! Retorna una cadena de 8 caracteres
+function hexanum$( numero ) external
+   string    hexanum$
+   integer*4 numero
+end function
+
+!-------------------------------------------------------------------------------
+! Convierte una cadena de caracteres hexadecimales a un entero de 4 bytes
+!-------------------------------------------------------------------------------
+! Retorna un entero de 4 bytes.
+function numhexa( cadena$ ) external
+   string    cadena$
+   integer*4 numhexa
+end function
+
+!------------------------------------------------------------------------------
+!retorna una linea en caracteres hex
+!------------------------------------------------------------------------------
+function lineahex$( cadena$ ) external
+   string lineahex$, cadena$
+end function
+
+!-------------------------------------------------------------------------------
+!retorna una cadena en caracteres hex
+!-------------------------------------------------------------------------------
+function cadenahex$( cadena$ ) external
+   string cadenahex$, cadena$
+end function
+
+!--------------------------------------------------------------------------
+! Corta el mensaje en dos lineas para el display
+! msg1$ primeros 20 caracteres
+! msg2$ segundos 20 caracteres
+!--------------------------------------------------------------------------
+sub separaMensajes( msg$, msg1$, msg2$ ) external
+   string msg$, msg1$, msg2$
+end sub
+
+!--------------------------------------------------------------------------
+!Eliminar los espacios que estan a la derecha de la cadena
+!--------------------------------------------------------------------------
+function elider$( v$ ) external
+   string    elider$, v$
+fend
+
+!--------------------------------------------------------------------------
+!Elimina los espacios que estan a la izquierda de la cadena
+!--------------------------------------------------------------------------
+function eliizq$( v$ ) external
+   string    eliizq$, v$
+fend
+
+!------------------------------------------------------------------------
+! Elimina espacios a la izquierda y derecha de la cadena
+!------------------------------------------------------------------------
+function trim$( v$ ) external
+   string trim$, v$
+end function
+
+!-------------------------------------------------------------------------------
+! Valida que todos los caracteres sean numeros
+!retorna 0 si hay caracteres no numericos o es una cadena vacia
+!       -1 si todos son numeros
+!-------------------------------------------------------------------------------
+function esNumero( num$ ) external
+   integer*1 esNumero
+   string    num$
+fend
+
+!----------------------------------------------------------------------------
+! EMULA LA PRESION DE LA TECLA BORRAR.
+! RESTRICCION: ESTA FUNCION SOLO PUEDE SER LLAMADA DENTRO DE LA USER 14.
+!----------------------------------------------------------------------------
+sub ignoraTeclas external
+end sub
+
+!-------------------------------------------
+!Respalda variables de impresion
+!-------------------------------------------
+sub respaldaImpresion external
+end sub
+
+!-------------------------------------------
+!restaura variables de impresion
+!-------------------------------------------
+sub restauraImpresion external
+end sub
+
+! -------------------------------------------
+! Limpia el buffer de impresion
+! --------------------------------------------
+sub limpiaImpresion external
+end sub
+
+!------------------------------------------------------------------------
+! Justifica texto para el ancho de impresion
+!------------------------------------------------------------------------
+function justificarTexto$( texto$ ) external
+   string justificarTexto$, texto$
+end function
+
+!-------------------------------------------------------------------------------
+! Imprime en la estacion de recibo del cliente
+!-------------------------------------------------------------------------------
+! esta rutina desactiva temporalmente la user exit 20 para utilizar la rutina
+! TSPREC01
+sub imprimeCR( texto$ ) external
+   string texto$
+end sub
+
+!-------------------------------------------------------------------------------
+! Imprime en la estacion de journal electronico
+!-------------------------------------------------------------------------------
+! esta rutina desactiva temporalmente la user exit 20 para utilizar la rutina
+! TSPREC01
+sub imprimeSJ( texto$ ) external
+   string texto$
+end sub
+
+!-------------------------------------------------------------------------------
+! Imprime en la estacion de recibo del cliente
+! el texto se justifica en 38 caracteres, se le anteponen los comandos de
+! impresion y agrega un retono de carro al final
+! si no hay texto solo se imprimen los comando de impresion
+! siempre se limpia la variable NUOcmdImpresion$
+!-------------------------------------------------------------------------------
+sub imprime34( texto$ ) external
+   string texto$
+end sub
+
+!-------------------------------------------------------------------------------
+! Imprime en la estacion de recibo del cliente y graba al journal
+! texto$ -> texto a imprimir
+!-------------------------------------------------------------------------------
+sub imprimeCJ( texto$ ) external
+   string texto$
+end sub
+
+!-------------------------------------------------------------------------------
+! Imprime un buffer binario mayor de 200 bytes en el CR
+! se debe usar cuando el buffer tiene un comando de mas de 240 bytes
+! como codigos PDF417, graficos, etc.
+!-------------------------------------------------------------------------------
+sub imprimeMuchos( s$ ) external
+   string s$
+end sub
+
+!------------------------------------------------------------------------------
+!graba mensaje de error del grupo N
+!------------------------------------------------------------------------------
+sub grabaError( mnum, severity, unique$ ) external
+end sub
+
+!------------------------------------------------------
+! Asigna valor a variables globales de uso general
+! al iniciar una nueva transaccion
+!------------------------------------------------------
+sub NUOTRUTI01 external
+end sub
+
+!------------------------------------------------------
+! Asigna valor a variables globales de uso general
+! al iniciar el terminal
+!------------------------------------------------------
+sub NUOTRUTI07 external
+end sub
+
+!------------------------------------------------------------------------------
+!define nombre del archivo de trace y lo crea si el indicador es -1
+!------------------------------------------------------------------------------
+sub defineArchivoTrace( nombre$, crear ) external
+   string    nombre$
+   integer*1 crear
+end sub
+
+!-------------------------------------------
+!graba un mensaje en archivo de trace
+!-------------------------------------------
+sub traceNUO( s$ ) external
+   string s$
+end sub
+
+!---------------------------------------------------------
+!graba las variables del IO en el archivo TRACE de la caja
+!---------------------------------------------------------
+sub grabaVariablesIO( s$ ) external
+   string s$
+end sub
+
+!--------------------------------------------------------
+!detecta secuencia venta de articulo
+!--------------------------------------------------------
+function esVentaArticulo external
+   integer*1 esVentaArticulo
+end function
+
+!---------------------------------------------------------
+!detecta el ingreso de un articulo pesable
+!---------------------------------------------------------
+function esArticuloPesable( codItem$ ) external
+   integer*1 esArticuloPesable
+   string codItem$
+end function
+
+!---------------------------------------------------------
+!respalda las variables del IO
+!---------------------------------------------------------
+sub respaldaVariablesIO external
+end sub
+
+!---------------------------------------------------------
+!restaura las variables del IO
+!---------------------------------------------------------
+sub restauraVariablesIO external
+end sub
+
+!-----------------------------------------------------------------------
+! formatea una cadena insertando separadores de miles
+! separador de miles ,
+!-----------------------------------------------------------------------
+function formateaMiles( numero$ ) external
+   string formateaMiles, numero$
+end function
+
+!-----------------------------------------------------------------------
+! formatea un numero entero considerando 2 decimales
+! separador decimal .
+! separador miles   ,
+! ejemplos 3 -> 0.03
+! 123456789 -> 1234,567.89
+!-----------------------------------------------------------------------
+function formatea2Dec( numero ) external
+   string    formatea2Dec
+   integer*4 numero
+end function
+
+!-----------------------------------------------------------------------
+! formatea un numero entero considerando 3 decimales
+! separador decimal .
+! separador miles   ,
+! ejemplos 3 -> 0.003
+! 123456789 -> 123,456.789
+!-----------------------------------------------------------------------
+function formatea3Dec( numero ) external
+   string    formatea3Dec
+   integer*4 numero
+end function
+
+!-----------------------------------------------------------------------
+! formatea un numero entero considerando 4 decimales
+! separador decimal .
+! separador miles   ,
+! ejemplos 123 -> 0.0123
+! 123456789 -> 12,345.6789
+!-----------------------------------------------------------------------
+function formatea4Dec( numero ) external
+   string    formatea4Dec
+   integer*4 numero
+end function
+
+!-----------------------------------------------------------------------
+! formatea un entero considerando 2 decimales, sin separador de miles
+! separador decimal "."
+! ejemplos 3 -> 0.03  123456789 -> 1234567.89
+!-----------------------------------------------------------------------
+function formateaMonto( numero ) external
+   string    formateaMonto
+   integer*4 numero
+end function
+
+!-----------------------------------------------------------------------
+! restaura el texto de los visores
+! visor: 1 Visor del Operador
+!        2 Visor del Cliente
+!        3 Ambos
+!------------------------------------------------------------------------
+sub restauraVisor( visor ) external
+   integer*1 visor
+end sub
+
+!------------------------------------------------------------------------------
+! respalda variables del proceso que despliega mensajes en visor 
+!------------------------------------------------------------------------------
+sub guardaDisplay external
+end sub
+
+!------------------------------------------------------------------------------
+! restaura variables del proceso que despliega mensajes en visor 
+!------------------------------------------------------------------------------
+sub restauraDisplay external
+end sub
+
+!-----------------------------------------------------------------------
+! muestra texto en un visor
+! visor: 1 Visor del Operador
+!        2 Visor del Cliente
+!        3 Ambos
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+!------------------------------------------------------------------------
+sub muestraVisor( visor, msg1$, msg2$ ) external
+   integer*1 visor
+   string    msg1$, msg2$
+end sub
+
+!-----------------------------------------------------------------------
+! muestra texto en el visor del operador y espera por tecla borrar
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+!------------------------------------------------------------------------
+sub muestraBorrar( msg1$, msg2$ ) external
+   string msg1$, msg2$
+end sub
+
+!-----------------------------------------------------------------------
+! muestra texto en el visor del operador
+! para volver al mensaje anterior usar restauraDisplay
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+!------------------------------------------------------------------------
+sub muestraOperador( msg1$, msg2$ ) external
+   string msg1$, msg2$
+end sub
+
+!-------------------------------------------------------
+! lector de banda magnetica
+! 0 dato directo de la lectura
+! 1 hace unpack pack 
+!-------------------------------------------------------
+function leeMSR$( msr ) external
+   string leeMSR$
+   integer*1 msr
+end function
+
+!------------------------------------------------------------
+! Permite habilitar o des-habilitar el uso de la tecla ANULAR
+! f = -1 habilitado, la tecla BORRAR solo limpia lo ingresado
+! f =  0 la tecla BORRAR aborta el ingreso
+!------------------------------------------------------------
+sub usoTeclaAnular( f ) external
+   integer*1 f
+end sub
+
+!---------------------------------------------------------
+! Recibe datos desde desde teclado en modo alfanumerico
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+! retorna una cadena donde el primer caracter indica
+! "E" en caso de error, "P" dato ingresado (tecla PLU),
+! "A" aborta el ingreso (tecla BORRAR o ANULAR)
+! el segundo caracter "G" si la llave esta girada
+! del tercer en adelante el valor ingresado
+! si esta activo el indicador teclaAnular
+! la tecla BORRAR limpia el texto ingresado y la tecla
+! ANULAR aborta el ingreso
+!---------------------------------------------------------
+function ingresoDatos$( msg1$, msg2$ ) external
+   string ingresoDatos$, msg1$, msg2$
+end function
+
+!---------------------------------------------------------
+! Recibe datos desde desde teclado en modo alfanumerico
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+! retorna una cadena donde el primer caracter indica
+! "E" en caso de error, "P" si se presiono PLU, "A" anular
+! el segundo caracter "G" si la llave esta girada
+! del tercer en adelante el valor ingresado
+!---------------------------------------------------------
+function ingresoTexto$( msg1$, msg2$ ) external
+   string ingresoTexto$, msg1$, msg2$
+end function
+
+!---------------------------------------------------------
+! Consulta binaria
+! msg1$, msg2$ mensaje para linea 1 y linea 2 del visor
+! retorna:
+! -1 si se presiona la tecla PLU
+!  0 si se presiona la tecla BORRAR
+!---------------------------------------------------------
+function pregunta( msg1$, msg2$ ) external
+   integer*1 pregunta
+   string msg1$, msg2$
+end function
+
+!------------------------------------------------------------------------------
+! ingresa numero de supervisor
+!------------------------------------------------------------------------------
+function leeTeclado$(m1$, m2$) external
+   string leeTeclado$, m1$, m2$
+end function
+
+!---------------------------------------------------------
+! ingresa numero de supervisor
+!---------------------------------------------------------
+function capturaAutorizacion(prompt) external
+   string    capturaAutorizacion
+   integer*1 prompt
+end function
+
+!---------------------------------------------------------
+! solicita supervisor
+! retorna -1 si fue autorizado
+!          0 si no fue autorizado
+!---------------------------------------------------------
+function supervisor external
+   integer*1 supervisor
+end function
+
+!---------------------------------------------------------
+! solicita autorizacion de supervisor
+! retorna -1 si fue autorizado
+!          0 si no fue autorizado
+!---------------------------------------------------------
+function entradaAutorizacion external
+   integer*1 entradaAutorizacion
+end function
+
+!-------------------------------------------------------------------------------
+! Busca el primer espacio o TAB
+! retorna la cantidad de caracteres antes del espacio o TAB, 0 si no hay
+!-------------------------------------------------------------------------------
+function espacioTab( s$ ) external
+   integer*2 espacioTab
+   string    s$
+end function
+
+!-------------------------------------------------------------------------------
+! Elimina espacios y TAB al inicio y al final
+!-------------------------------------------------------------------------------
+function eliminaTab$( s$ ) external
+   string    eliminaTab$, s$
+end function
+
+!------------------------------------------------------------------------
+! Lee el valor de un parametro a partir de una posicion del archivo
+! nombre$  nombre del parametro
+! sesion   numero de sesion con que se abrio el archivo de parametros
+! puntero  posicion del registro donde inicia el grupo de parametros
+! retorna el valor del parametro
+!------------------------------------------------------------------------
+function leeParametro$( nombre$, sesion, puntero ) external
+   string    leeParametro$, \ valor del parametro
+             nombre$        ! nombre del parametro
+   integer*1 sesion         ! numero de sesion
+   integer*4 puntero        ! puntero al archivo de parametros
+end function
+
+!------------------------------------------------------------------------
+! Carga los parametros de un grupo
+! sesion  numero de sesion con que se abrio el archivo de parametros
+! puntero posicion del registro donde inicia el grupo de parametros
+! retorna el numero total de parametros cargado
+!------------------------------------------------------------------------
+function cargaParametros( sesion, puntero ) external
+   integer*1 cargaParametros
+   integer*1 sesion         ! numero de sesion
+   integer*4 puntero        ! puntero al archivo de parametros
+end function
+
+!------------------------------------------------------------------------
+! Carga las lineas que hay a continuacion de un grupo
+! sesion  numero de sesion con que se abrio el archivo de parametros
+! puntero posicion del registro donde inicia el grupo de parametros
+! retorna el numero total de parametros cargado
+!------------------------------------------------------------------------
+function cargaLineas( sesion, puntero ) external
+   integer*1 cargaLineas
+   integer*1 sesion        ! numero de sesion
+   integer*4 puntero       ! puntero al archivo de parametros
+end function
+
+!------------------------------------------------------------------------
+! rescata un parametro del arreglo mapParametro$
+! numero  numero del parametro a rescatar (1 a 100)
+! nombre$ retorna el nombre del parametro
+! valor$  retorna el valor del parametro
+!------------------------------------------------------------------------
+sub rescataParametro( numero, nombre$, valor$ ) external
+   integer*1 numero
+   string    nombre$, valor$
+end sub
+
+!------------------------------------------------------------------------
+! Abre un archivo de parametros y obtiene el puntero al primer
+! elemento del grupo
+! archivo$ nombre del archivo de parametros
+! grupo$   nombre del grupo de parametros
+! sesion   numero de sesion para abrir el archivo de parametros
+! retorna  el puntero al primer registro del grupo de parametros
+!          o -1 si hay un error
+!------------------------------------------------------------------------
+function abreParametros( archivo$, grupo$, sesion ) external
+   integer*4 abreParametros
+   integer*2 sesion
+   string    archivo$,   \ nombre del archivo de parametros
+             grupo$      ! nombre del grupo de parametros
+end function
+
+!------------------------------------------------------------------------
+! Obtiene el puntero al primer elemento del grupo
+! grupo$   nombre del grupo de parametros
+! sesion   numero de sesion usada para abrir el archivo de parametros
+! retorna  el puntero al primer registro del grupo de parametros
+!          o -1 si hay un error
+!------------------------------------------------------------------------
+function buscaParametros( grupo$, sesion ) external
+   integer*4 buscaParametros
+   integer*2 sesion
+   string    grupo$      ! nombre del grupo de parametros
+end function
+
+!------------------------------------------------------------------------
+! Cierra un archivo de parametros
+! sesion   numero de sesion usada para abrir el archivo de parametros
+!------------------------------------------------------------------------
+sub cierraParametros( sesion ) external
+   integer*2 sesion
+end sub
+
+!------------------------------------------------------------------------
+! limpia el PRS
+! Se utiliza para evitar que datos antiguos impidan interpretar la
+! respuesta, se debe ejecutar antes de enviar una consulta
+!------------------------------------------------------------------------
+sub limpiaPipe external
+end sub
+
+!------------------------------------------------------------------------
+! espera la llegada de un mensaje por el PIPE
+!------------------------------------------------------------------------
+function esperaPipe( tiempo, m$ ) external
+   integer*1 esperaPipe
+   integer*4 tiempo
+   string    m$
+end function
+
+!------------------------------------------------------------------------
+! envia un mensaje por el PIPE
+!------------------------------------------------------------------------
+function enviaMensaje( m$ ) external
+   integer*1 enviaMensaje
+   string    m$
+end function
+
+!------------------------------------------------------------------------
+! recibe un mensaje del PIPE
+!------------------------------------------------------------------------
+function recibeMensaje( t$ ) external
+   string recibeMensaje, t$
+end function
+
+!----------------------------------------------------------------------------------------------------------------
+! Lee un pi: que fue escrito en JAVA 
+!----------------------------------------------------------------------------------------------------------------
+!function leeComunicacionPI( sesionPipe ) external
+!   string leeComunicacionPI
+!   integer*2 sesionPipe 
+!end function
+
+!----------------------------------------------------------------------------------------------------------------
+! Escribe sobre un pi: creado en JAVA
+!----------------------------------------------------------------------------------------------------------------
+function enviaMensajePI( sesionPipe, mensaje$ ) external
+   integer*1 enviaMensajePI
+   integer*2 sesionPipe
+   string    mensaje$
+end function
+
+!----------------------------------------------------------------------------------------------------------------
+! Abre un pi: que creado en JAVA
+!----------------------------------------------------------------------------------------------------------------
+function abreComunicacionPI( sesionPipe, nombrePipe$, modoEscritura, bufferSize) external
+   integer*2 sesionPipe
+   integer*1 abreComunicacionPI, \
+             modoEscritura
+   integer*4 bufferSize
+end function
+
+!----------------------------------------------------------------------------------------------------------------
+! Recibe comunicacion de un pi: creado en JAVA
+!----------------------------------------------------------------------------------------------------------------
+function recibeComunicacionPI( sesionPipe, nombrePipe$, bufferSize%, timeout ) external
+   string    recibeComunicacionPI,\
+             nombrePipe$
+   integer*2 sesionPipe
+   integer*4 timeout, \
+             bufferSize%   
+end function
+
+!------------------------------------------------------------------------------
+! crea un PIPE pi: para recibir mensajes desde un programa JAVA
+! retorna -1 si el PIPE de escucha se ha creado
+!          0 si no se pudo crear el PIPE de escucha
+!------------------------------------------------------------------------------
+function creaPIPE( sesionPipe, nombrePipe$, bufferSize) external
+   integer*1 creaPIPE
+   integer*2 sesionPipe
+   integer*4 bufferSize
+   string    nombrePipe$
+end function
+
+!------------------------------------------------------------------------------
+! Lee un pi: que fue escrito desde un programa java en el POS
+! retorna el mensaje recibido o una cadena vacia
+! si hubo un error se puede recuperar con la funcion errorPIPE
+!------------------------------------------------------------------------------
+function leePIPE( sesionPipe, pipeTimeOut ) external
+   string    leePIPE
+   integer*2 sesionPipe
+   integer*4 pipeTimeOut
+end function
+
+!------------------------------------------------------------------------------
+! Retorna el codigo de error de la ultima operacion con un pi:
+! "DO80B0000D" corresponde a un time out
+!------------------------------------------------------------------------------
+function errorPIPE external
+   string errorPIPE
+end function
+
+!------------------------------------------------------------------------------
+! Inicia una clase java
+! Retorna -1 en caso de error
+!------------------------------------------------------------------------------
+function iniciaJava( nombre$ ) external
+   integer*1 iniciaJava
+   string    nombre$
+end function
+
+!------------------------------------------------------------------------------
+! Finaliza una clase java
+! Retorna -1 en caso de error
+!------------------------------------------------------------------------------
+function finalizaJava( nombre$ ) external
+   integer*1 finalizaJava
+   string nombre$
+end function
+
+!------------------------------------------------------------------------
+!Calculo check modulo 11
+!------------------------------------------------------------------------
+function digitoModulo11$( dato$ ) external
+   string digitoModulo11$, dato$
+end function
+
+!----------------------------------------------------------------------------
+! Devuelve el campo ubicado en la posicion 'campo' del string 'dato$'
+! desempaquetando el campo
+!----------------------------------------------------------------------------
+function getCampoTSL$(dato$, campo) external
+   integer*2 campo
+   string    dato$, getCampoTSL$
+end function
+
+!----------------------------------------------------------------------------
+! Devuelve el campo ubicado en la posicion 'campo' del string 'dato$'
+! sin desempaquetar el campo
+!----------------------------------------------------------------------------
+function getCampoASC$(dato$, campo) public
+   integer*2 campo
+   string    dato$, getCampoASC$
+end function
+
+function requiereCambioCaja external
+   integer*1 requiereCambioCaja
+end function
+
+!----------------------------------------------------------------------------
+! Devuelve el string ubicado en la posicion 'p' dentro de
+! una transaccion en el TSL.
+!----------------------------------------------------------------------------
+function leeCadenaTSL$(p) external
+   string    leeCadenaTSL$
+   integer*2 p
+end function
+
+!----------------------------------------------------------------------------
+! reemplaza el campo num en cadena$ con el contenido de campo$
+! retorna la cadena modificada
+!----------------------------------------------------------------------------
+sub modificaCadenaTSL$( cadena$, campo$, num ) external
+   string cadena$, campo$
+   integer*1 num
+end sub
+
+!----------------------------------------------------------------------------
+! escribe una cadena en el arreglo de transacciones
+! INDEX posicion a escribir
+! SOURCE$ cadena a escribir
+!----------------------------------------------------------------------------
+function escribeCadenaTSL( INDEX, SOURCE$ ) external
+   INTEGER*2 INDEX
+   STRING SOURCE$
+end function
+
+!----------------------------------------------------------------------------
+! agrega una cadena al arreglo de TSL
+! no se debe llamar desde la user 68
+!----------------------------------------------------------------------------
+sub agregaCadenaTSL( cadena$ ) external
+   string cadena$
+end sub
+
+!----------------------------------------------------------------------------
+! agrega una cadena al arreglo de TSL
+! solo para ser llamada desde la user 68
+!----------------------------------------------------------------------------
+sub agregaCadenaTSL68( cadena$ ) external
+   string cadena$
+end sub
+
+!----------------------------------------------------------------------------
+! evita agregar una cadena al arreglo de TSL en user 68
+!----------------------------------------------------------------------------
+sub evitaCadenaTSL( ELEMENT, ENTRY$ ) external
+   integer*2 ELEMENT
+   string ENTRY$
+end sub
+
+!----------------------------------------------------------------------------
+! inserta una cadena en el arreglo de TSL
+!----------------------------------------------------------------------------
+sub insertaCadenaTSL( cadena$, posicion ) external
+   string cadena$
+   integer*2 posicion
+end sub
+
+!----------------------------------------------------------------------------
+! elimina cadenas en el arreglo de TSL
+!----------------------------------------------------------------------------
+sub eliminaCadenaTSL( posicion, numero ) external
+   integer*2 posicion, numero
+end sub
+
+!------------------------------------------------------------------------
+!retorna un numero de sesion disponible
+!------------------------------------------------------------------------
+function sesionDisponible external
+   integer*1 sesionDisponible
+end function
+
+!------------------------------------------------------------------------
+! busca el campo n esimo en men$
+! los campos estan separados por sep$
+!------------------------------------------------------------------------
+function buscaCampo(men$, sep$, num) external
+   string    buscaCampo, men$, sep$
+   integer*2 num
+end function
+
+!------------------------------------------------------------------------
+! busca valores entre 0 y 255 separados por ; en men$
+! retorna una cadena con los caracteres correspondientes a los valores
+!------------------------------------------------------------------------
+function buscaValores$( m$ ) external
+   string    buscaValores$, m$
+end function
+
+!------------------------------------------------------------------------------
+!Retorna la cantidad de veces que se repite 'texto$' en 'cadena$'
+!------------------------------------------------------------------------------
+function cuentaCadenas( cadena$ , texto$ ) external
+integer*2 cuentaCadenas
+string    cadena$,   \ Cadena de texto a evaluar
+          texto$     ! Texto a buscar en 'cadena'
+end function
+
+!-------------------------------------------------------------------------------
+! Elimina todas las instancias de un caracter en la cadena
+!-------------------------------------------------------------------------------
+function eliminaCar$( cadena$, caracter$ ) external
+   string    eliminaCar$, cadena$, caracter$
+end function
+
+!-------------------------------------------------------------------------------
+! Elimina todas las instancias de un caracter a la izquierda de la cadena
+!-------------------------------------------------------------------------------
+function eliminaCarIzq$( cadena$, caracter$ ) external
+   string eliminaCarIzq$, cadena$, caracter$
+end function
+
+!-------------------------------------------------------------------------------
+! Obtiene el valor de un numero con separador de miles y decimales de una cadena
+! si la cadena contiene "1,024.56" retorna "102456"
+! si la cadena contiene "0.23" retorna "23"
+! si la cadena contiene "15.2" retorna "1520"
+!-------------------------------------------------------------------------------
+function valorCadena$( cadena$ ) external
+   string    valorCadena$, cadena$
+end function
+
+!--------------------------------------------------------------------
+!Graba una transaccion de dotacion con cadenas de usuario
+!num    numero de cadenas de usuario
+!monto$ monto total de la dotacion
+!mp$    medio de pago
+!cad$   cadenas de usuario para agregar
+!se incrementa el valor de la variable SL.HD.TRANSNUM
+!--------------------------------------------------------------------
+sub grabaDotacion( num, monto$, mp$, cad$ ) external
+   integer*1 num
+   string    monto$, mp$, cad$
+end sub
+
+!--------------------------------------------------------------------
+!Graba una transaccion de retiro con cadenas de usuario
+!num    numero de cadenas de usuario
+!monto$ monto total de la dotacion
+!mp$    medio de pago
+!cad$   cadenas de usuario para agregar
+!se incrementa el valor de la variable SL.HD.TRANSNUM
+!--------------------------------------------------------------------
+sub grabaRetiro( num, monto$, mp$, cad$ ) external
+   integer*1 num
+   string    monto$, mp$, cad$
+end sub
+
+!-------------------------------------------------------------------------------
+! graba transaccion 99 al tsl
+!num    numero de cadenas
+!trx99$ contiene las cadenas separadas por "&|&"
+!se incrementa el valor de la variable SL.HD.TRANSNUM
+!-------------------------------------------------------------------------------
+sub grabatrx99(num, trx99$) external
+   string trx99$
+   integer*2 num
+end sub
+
+!--------------------------------------------------------------------
+!lee el nombre de un operador de cajas
+!--------------------------------------------------------------------
+function leeOperador$( idOpe$ ) external
+   string leeOperador$, idOpe$
+end function
+
+!----------------------------------------------------------------------------
+!Calcula digito de chequeo EAN13
+!ean$ contiene el numero sobre el que se calcula el digito verificador
+!retorna el digito verificador calculado
+!retorna -1 si ean$ contiene caracteres no numerico
+!----------------------------------------------------------------------------
+function digitoEAN( ean$ ) external
+   integer*1 digitoEAN
+   string ean$
+end function
+
+!----------------------------------------------------------------------------
+!Calcula digito de chequeo modulo 10
+!num$ contiene el numero sobre el que se calcula el digito verificador
+!retorna el digito verificador calculado
+!retorna -1 si num$ contiene caracteres no numerico
+!----------------------------------------------------------------------------
+function modulo10( num$ ) external
+   integer*1 modulo10
+   string    num$
+end function
+
+!----------------------------------------------------------------------------
+!Verifica cedula
+!num$ contiene el numero de cedula con el digito verificador al final
+!retorna -1 el numero de cedula es correcto
+!         0 el numero de cedula no es correcto
+!----------------------------------------------------------------------------
+function verificaCedula( num$ ) external
+   integer*1 verificaCedula
+   string    num$
+end function
+
+!-----------------------------------------------------------------------
+! Calcula clave de acceso SRI
+!-----------------------------------------------------------------------
+function claveAccesoSRI$( tipoDocumento, secuenciaDocumento, serie$, rucEstablecimiento$, tipoAmbiente$, secuenciaSRI$, tipoEmision$) external
+   string \
+      claveAccesoSRI$, \
+      serie$, \
+      rucEstablecimiento$, \
+      tipoAmbiente$, \
+      secuenciaSRI$, \
+      tipoEmision$
+  
+   integer*1 \
+      tipoDocumento
+
+   integer*4 secuenciaDocumento 
+        
+end function
+
+!------------------------------------------------------------------------------
+!Retorna -1 si la cadena SA es 05 pago o 06 anulacion de pago
+!los demas campos de la cadena retornan en un arreglo global NUOuserData$(1)
+!------------------------------------------------------------------------------
+Function EsCadenaPago( cad$ ) external
+   integer*1 EsCadenaPago
+   string cad$
+end function
+
+!------------------------------------------------------------------------------
+! lista el directorio de un disco RAM
+!------------------------------------------------------------------------------
+sub directorioRAM( disco$ ) external
+   string disco$
+end sub
+
+!------------------------------------------------------------------------------
+! Terminal online/offline 0 = offline 1 = online
+!------------------------------------------------------------------------------
+function estadd external
+   integer*1 estadd
+end function
+
+!------------------------------------------------------------------------------
+! Imprime un codigo QR conteniendo la cadena s$
+!------------------------------------------------------------------------------
+sub imprimeQR( s$ ) external
+   string s$
+end sub

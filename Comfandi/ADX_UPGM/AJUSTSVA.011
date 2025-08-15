@@ -1,0 +1,20 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : AJUSTSVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Ajuste al cambio                 *
+!**************************************************
+
+INTEGER*4 GLOBAL	    \
+  UE.AJUS.MONTO%,     \! Vlr Ajustado 
+  UE.AJUS.REDO%        ! Base para calculo de redondeo
+  
+String Global         \
+  UE.MNTO.DPT$,       \! Grupo  de descuento
+  UE.MNTO.DESC$        ! Descriptor en el tiquete
+  
+Integer*1 Global      \
+  Gr.Ajuste.Proy%      ! Control de proyecto
+  

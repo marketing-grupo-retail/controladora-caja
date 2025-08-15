@@ -1,0 +1,8 @@
+! CALLED AFTER WRITING TRANSACTION LOG DATA
+! Tras escribir en el registro resumen de transacciones
+FUNCTION TSUPEC59 PUBLIC
+
+!call traceNUO( "UE59 TS.RETV.IN.PROGRESS=" + str$(TS.RETV.IN.PROGRESS) + " TS.RECOVERY=" + str$(TS.RECOVERY) )
+
+END FUNCTION
+

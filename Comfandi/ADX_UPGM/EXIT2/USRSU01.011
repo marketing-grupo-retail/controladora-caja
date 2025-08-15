@@ -1,0 +1,463 @@
+!   ***************************************************************************
+!   **    Date       :  Septiembre / 95                                      **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USRSU01.011                                          **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones  para  franqueo de documentos con el nombre del      **
+!   **    CLIENTE y el nombre de la Empresa para Ventas a Credito.           **
+!   ***************************************************************************
+! Mod30Mzo2006
+! Se retiran lineas de impresion en el tiquete, solicitado por Fredy Guerrero
+! ajustado por Oscar Valencia - ASIC
+!------------- Subrutina de Traduccion de Etiquetas ----------------- 
+
+
+SUB ETIQUETAR  PUBLIC                               !
+CALL SAVE.PRINT                                     !
+IF TS.IO.STATE     = 10 AND                        \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> ""      THEN BEGIN            \! digita codigo de variedad,
+   IF TS.IO.KEYS(7) = 91     THEN                  \! si es EFECTIVO, entonces
+      VRDAD$ = "1"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 92     THEN                  \! si es CHEQUE, entonces
+      VRDAD$ = "2"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 94     THEN                  \! si es RED MULTIC, entonces
+      VRDAD$ = "4"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 96     THEN                  \! si es CREDITO, entonces
+      VRDAD$ = "6"+TS.IO.DATA$(3)                   ! salva tipo de pago y vrdad
+   IF TS.IO.KEYS(7) = 93     THEN                  \! si es CREDITO, entonces
+      VRDAD$ = "3"+TS.IO.DATA$(3)                   ! salva tipo de pago y vrdad
+ENDIF                                               !
+                                                    !
+IF TS.IO.STATE     = 10 AND                        \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> "" AND                        \! digita codigo de variedad,
+   TS.IO.KEYS(7)   = 93     OR                     \! si es OTROS PAGOS (mf)
+   TS.IO.KEYS(7)   = 96     THEN BEGIN              ! si es CREDITO, entonces
+      LISVAR$ = STRING$(16, " ")                    !
+      IF VAR.CR$ = "1"     THEN                    \! si Medicam Empr
+         LISVAR$ = "      *MEDICAM EMPRES*"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "2"     THEN                    \! si Temporada Escol
+         LISVAR$ = "      *TEMP. ESCOLAR *"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "3"     THEN                    \! si es Cr Interno
+         LISVAR$ = "      *CRED. INTERNO*"         \!
+      ELSE                                         \!
+      IF VAR.CR$ = "4"     THEN                    \! si es Cr Esp. Empresas
+         LISVAR$ = "      *CR/ESPECIAL "+RATA$+"*" \! 
+      ELSE                                         \!
+      IF VAR.CR$ = "5"     THEN                    \! si es Cr cvc 60%
+         LISVAR$ = "      *CR. C.V.C. 60%*"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "6"     THEN                    \! si es Cr SIN Factura
+         LISVAR$ = LISVAR$ + " (SF)"                !     
+                                                    !
+      IF EPS% <> 0 THEN BEGIN                       ! Si Vta con Cuota Moder
+         LISVAR$ = "    Cta Moderadora " + RATA$    ! cambia Descrip
+      ENDIF                                         !
+      TO.FRANK.TXT$(5,2) = RIGHT$(LISVAR$,20) +    \!
+               RIGHT$(TO.FRANK.TXT$(5,2),18)        !
+ENDIF                                               !
+CALL RESTORE.PRINT    
+END SUB                                             !
+
+!---------------- Subrutina de Busqueda de Vendedor ------------------- 
+                                                    !
+SUB BUSCAVEND PUBLIC                                ! Subrut de Vendedor
+
+         KEY.VE$ = RIGHT$(PACK$("0000000000"+KEY.OP$),5)
+         TS.ER.RETURN = -1
+         READ FORM "C32 C20 C20";#44 KEY KEY.VE$;                \! Lee EAMOPERA
+         CE.NADA1$,NOM.OPER$,CE.NADA2$                            !                         
+         IF TS.ER.RETURN = -1 THEN \
+          VENDIO$ = "Vendedor: "+KEY.OP$+ " " + NOM.OPER$      
+
+END SUB                                             ! Fin Subrutina
+                                                    !
+!------------- Subrutina de Encabezamiento Mini-Factura ----------------
+
+SUB ENCABEZA PUBLIC                                 ! Subrut de Encab Fac
+String XTmp$
+  RAYA$  = STRING$(30,"-")                          ! Rayas
+  CABE$  = "   Cod    Descripci¢n    Vr Uni."       ! Rayas
+  CABE1$ = "                       Cant   Vr Tot."  ! Rayas
+
+  IF PRT4610.ENABLE NE 0 THEN BEGIN 
+    FCORT$ = CHR$(1BH)+CHR$(6DH)                      ! Guillotina
+    FCH12$ = CHR$(27)+CHR$(12)                        ! Salta P gina Channel 12
+    FCIZQ$ = CHR$(27)+CHR$(76)                        ! Posic. Cabeza a la Izqui
+    FON75$ = CHR$(27)+CHR$(14)                        ! Letra 7.5 CPI (19 y 43)
+    FON7D$ = CHR$(27)+CHR$(23)                        ! Letra 7.5 CPI (19 y 43) 2H
+    FON12$ = CHR$(27)+CHR$(58)                        ! Letra 12 CPI  (30 y 68)
+    FON15$ = CHR$(27)+CHR$(59)                        ! Letra 15 CPI  (38 y 86)
+    LFEED$ = CHR$(0DH)
+    FINLIN$= CHR$(0DH)
+  ENDIF ELSE BEGIN
+    FCORT$ = CHR$(27)+CHR$(80)                        ! Guillotina
+    FCH12$ = CHR$(27)+CHR$(12)                        ! Salta P gina Channel 12
+    FCIZQ$ = CHR$(27)+CHR$(76)                        ! Posic. Cabeza a la Izqui
+    FONPH$ = CHR$(27)+CHR$(69)                        ! Letra Emphasized
+    FON75$ = CHR$(27)+CHR$(14)                        ! Letra 7.5 CPI (19 y 43)
+    FON7D$ = CHR$(27)+CHR$(23)                        ! Letra 7.5 CPI (19 y 43) 2H
+    FON12$ = CHR$(27)+CHR$(58)                        ! Letra 12 CPI  (30 y 68)
+    FON15$ = CHR$(27)+CHR$(59)                        ! Letra 15 CPI  (38 y 86)
+    LFEED$ = CHR$(13)+CHR$(10)
+    FINLIN$=CHR$(13)+CHR$(10)
+  ENDIF   
+  CALL SAVE.PRINT                                   ! 
+  FRA.AA$  = LEFT$(DATE$,2)                         ! Arma ano
+  FRA.MM$  = MID$(DATE$,3,2)                        ! Arma mes
+  FRA.DD$  = RIGHT$(DATE$,2)                        ! Arma dia
+  FRA.FAC$ = FRA.AA$+"/"+FRA.MM$+"/"+FRA.DD$        ! Arma Linea Franq
+  CALL U.IMPRIME(TS.PRTBUF$,4100H)
+  IF PRT4610.ENABLE = 0 THEN BEGIN 
+     WRITE FORM "C38 A9";#34;" "
+     WRITE FORM "C38 A3";#34;" "
+     WAIT ; 100       
+  ENDIF ELSE BEGIN
+     CALL U.IMPRIME(CHR$(0DH),4500H)
+  ENDIF
+  CALL U.CORTACR                                    ! Guillotina papel
+  
+  !CALL U.IMPRIME(" C O M F A N D I ",4100H)
+  !CALL U.IMPRIME("NIT 890.303.208 - 5",4100H)
+  
+  CALL U.IMPRIME(" ",4100H)
+  IF PRT4610.ENABLE = 0 THEN BEGIN 
+     CALL U.IMPRIME(TO.HEADERLINE1$,4100H)
+  ENDIF ELSE BEGIN 
+    !TS.TEMP3$ = LEFT$(TO.HEADERLINE1$+STRING$(52," "),52)
+    
+    CALL U.IMPRIME(TO.HEADERLINE1$,4100H)
+  ENDIF 
+  
+  CALL U.IMPRIME(TO.HEADERLINE2$,4100H)
+
+!-- Adicion cabecera tiquete
+      TS.TEMP1$ = Left$(Gr.Fis.Empresa$+String$(38," "),38)
+      Call U.Imprime(TS.TEMP1$,6100H)
+      TS.TEMP1$ = Left$(Gr.Fis.Nit$+String$(38," "),38)
+      Call U.Imprime(TS.TEMP1$,6100H)
+      TS.TEMP1$ = Left$(Gr.Fis.Direc$+String$(38," "),38)
+      Call U.Imprime(TS.TEMP1$,6100H)
+      TS.TEMP1$ = Left$(Gr.Fis.City$+String$(38," "),38)
+      Call U.Imprime(TS.TEMP1$,6100H)
+
+
+  !CALL U.IMPRIME(" LINEA DE CREDITO COMFANDI",4100H)
+  CALL U.IMPRIME(" LC          ",4100H)
+
+!  CALL U.IMPRIME(LISVAR$,4100H)                              ! Variedad del Cr Mod30Mzo2006 OVS - ASIC
+
+  NO.CUO$ = ""                                                ! Reset de Cuota %EPS
+  CALL U.IMPRIME("    Num.: "+FAC$+"  Fecha: "+FRA.FAC$,4100H)     ! Factura y Fecha
+  TS.TEMP3$ = "Emp: "+NOEM$                       ! Entidad Afiliada
+  if noem$ <> "" then begin
+     !CALL U.IMPRIME(TS.TEMP3$,4100H)
+  endif
+  
+ NITW$ = RIGHT$("000000000000"+NITW$,12)            ! Ajuste nit ADD 10 Ago 2005 OVS - ASIC
+  
+  IF LEN(NITW$) < 7 THEN BEGIN                      ! Nit tiene menos de 7 dig
+     NITW$ = RIGHT$("      " + NITW$,6)             ! lo deja en 6 Posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-3) + "."  +    \! Hace la compaginacion
+             RIGHT$(NITW$,3)                        ! de 3 en 3 con .
+  ENDIF ELSE BEGIN                                  ! de lo contrario
+     IF DIGW$ = " "  THEN BEGIN                     ! Si trae Minifac Barras
+        DIGW$ = "-" + RIGHT$(NITW$,3)               ! Separa parte Dig/Ctrl
+        NITW$ = LEFT$(NITW$,LEN(NITW$)-3)           ! y ajusta NIT
+     ENDIF                                          ! Fin de ajuste
+     POSIC% = LEN(NITW$) - 6                        ! toma el resto de posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-6) + "."  +    \! y compagina parte Izq
+             MID$(NITW$,POSIC%+1,3)    + "."  +    \! con punto y de 3 en 3
+             RIGHT$(NITW$,3)                        ! con puntos
+  ENDIF                                             ! fin de Long del NIT
+  NITW$ = NITW$ + DIGW$                             ! Agrega Dig de Ctrl
+  DIGW$ = " "                                       ! Borra Dig de Ctrl
+  
+  TS.TEMP3$ = "Nit:    " + NITW$                   ! Nit y Fecha Rem
+  IF CEDU$ <> "" AND NO.MOD$ <> ""  THEN BEGIN
+!     CALL U.IMPRIME(TS.TEMP3$,4100H)
+!     TS.TEMP3$ = RAYA$                                ! Rayas Mod30Mzo2006 OVS - ASIC
+!     CALL U.IMPRIME(TS.TEMP3$,4100H)
+
+    IF PRT4610.ENABLE = 0 THEN BEGIN                  ! Mod30Mzo2006 OVS - ASIC
+     TS.TEMP3$ =  " Cupo Autorizado: " + (NO.CUP$)    ! Valor Autorizado CR
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = " Vr.del Cr‚dito : "+VRCRE$          ! Valor Utilizado CR
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = " Cuota Moderador:"+CTAMOD$          ! Cuota Moderadora
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     !IF LEN(CEDU$) > 11 THEN CEDU$=RIGHT$(CEDU$,11)   ! Controla Edicion
+     
+     TS.TEMP3$ = " #cc Comprador  :"+CEDU$            ! Cuota Moderadora
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+    ENDIF ELSE BEGIN
+     
+     CALL FORMAT.AMOUNT(VAL(NO.CUP$)) 
+     XTmp$ =  "Cupo Aut:"+TS.TEMP1$
+     CALL FORMAT.AMOUNT(VAL(VRCRE$))
+     TS.TEMP3$ =  Xtmp$ + " Vlr.Crd:"+TS.TEMP1$
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     
+     CALL FORMAT.AMOUNT(VAL(CTAMOD$))
+     TS.TEMP3$ = "Coopago:"+TS.TEMP1$
+     
+     !IF LEN(CEDU$) > 11 THEN CEDU$=RIGHT$(CEDU$,11)      ! Controla Edicion
+     
+     TS.TEMP3$ = TS.TEMP3$ + " Comprador:"+CEDU$         ! Cuota Moderadora
+     CALL U.IMPRIME(TS.TEMP3$,4100H)       
+     
+     !Gr.Fis.Doc% = -1																			! NO PERMITE FECO 25Abr2024
+     
+    ENDIF 
+  ENDIF 
+
+!  TS.TEMP3$ = "Almac‚n: " + STR$(VAL(TS.STORE$)) +  " " + ALMA$                               ! registro el Credito
+!  IF PRT4610.ENABLE = 0 THEN TS.TEMP3$ = LEFT$(TS.TEMP3$,38)
+!  CALL U.IMPRIME(TS.TEMP3$,4100H)
+
+  TS.TEMP3$ =  VENDIO$
+  CALL U.IMPRIME(TS.TEMP3$,4100H)
+
+!  TS.TEMP3$ = CABE$                                 ! Direcc y Fecha Ven
+!  CALL U.IMPRIME(TS.TEMP3$,4100H)
+!  TS.TEMP3$ = CABE1$                                ! Direcc y Fecha Ven
+!  CALL U.IMPRIME(TS.TEMP3$,4100H)
+!  TS.TEMP3$ = RAYA$                                 ! Direcc y Fecha Ven
+!  CALL U.IMPRIME(TS.TEMP3$,4100H)
+
+  LINCR% = 25                                        ! Inicia Cont Lin
+  LINMF% =  5                                        ! Inicia Cont Lin (mf)
+  CALL RESTORE.PRINT
+END SUB                                              ! Fin de Subrutina
+!------------- Subrutina de Calculo de Digito de Control----------------- 
+                                                     !
+
+!----------- Verificaci¢n del Pago de Contado Obligatorio --------------------
+
+SUB CALCUO PUBLIC
+ 
+IF TS.IO.STATE    =  10  AND                          \! Si esta en MAIN 
+   VAL(NO.CUO$)   >  0  AND                           \! Con Dato Asoc de %
+   TS.BALDUE(0)  <>   0  AND                          \! Con Saldo
+   TS.IO.DATA$(7) =  ""  THEN BEGIN                    ! Sin Vr Pago
+      IF VAL(NO.CUO$) > 0   AND                       \! Verifica Rango
+         VAL(NO.CUO$) < 99 THEN BEGIN                  ! entre 1% y 50%
+           EPS%  = (100-VAL(NO.CUO$))/100              ! Calcula % EPS
+           RATA$ = "EPS " + STR$(EPS% * 100) + "%"     ! Arma Descriptor
+      ENDIF ELSE BEGIN                                 ! Si no esta Ok el %
+         CALL VISORES4690(1," CUOTA MODERADORA   ","INVALIDA. VERIFIQUE!",2000,"L")
+         EPS% = 0                                      ! Inicializa var
+         PAGO.CH% = 0                                  ! Inicializa var
+         TS.IO.KEYS(7) = 0                             ! Invalida Medio Pago
+         TS.IO.DATA$(7)="0"                            ! Invalida Medio Pago
+         TS.IO.MOTORKEY =0                             ! Reduce Proceso
+      ENDIF                                            ! Fin condic
+      IF VAL(NO.CUP$) = 0 OR                          \! Si NO hay CUPO, ¢
+         ABS(TS.BALDUE(0)-Gr.Motor2.VlrDs%) < VAL(NO.CUP$) THEN BEGIN   ! el BALDUE < que CUPO
+         NO.CUP$ = STR$(ABS(TS.BALDUE(0)-Gr.Motor2.VlrDs%)) ! el CUPO se torna BALDUE
+      ENDIF                                            ! Fin de Cupo
+      IF TS.BALDUE(0) <  0  THEN BEGIN                
+         EPS% = -1 * EPS%                              ! Si Saldo(-) % tambien
+         VR.EPS% = VAL(NO.CUP$)*EPS%                   ! el pago= % del CUPO
+         VRCRE$  = STR$(VR.EPS%)                       ! Valor del Credito
+         CTAMOD$ = STR$(VAL(NO.CUP$) + VAL(VRCRE$))    ! Vr Cuota Moderadora
+         VRCRE$ = "-" + VRCRE$                         ! ompagina Vr Cr
+      ENDIF ELSE BEGIN      
+        IF EPS% > 0 THEN                              \! Si % Capturado > 0 
+         VR.EPS% = VAL(NO.CUP$)*EPS% ELSE             \! el pago= % del CUPO
+         VR.EPS% = VAL(NO.CUP$)                        ! Asigna el valor del cupo
+         VRCRE$  = STR$(VR.EPS%)                       ! Valor del Credito
+         CTAMOD$ = STR$(VAL(NO.CUP$) - VAL(VRCRE$))    ! Vr Cuota Moderadora
+      LOCATE #30;1,1,OFF                               ! Ubica Cursor
+      WRITE FORM                                      \! Muestra Venta
+      "C9 PIC($$#,###,###) C9 PIC($$#,###,###)";#30;  \! segun formato
+      RATA$,VR.EPS%,"CONTADO=",TS.BALDUE(0)-VR.EPS%    ! con % EPS y Vr Contado
+      WAIT; 2000                                       ! Pausa de 2 Seg
+    ENDIF                                              ! Fin Condic
+ENDIF                                                  ! Fin Condic
+
+END SUB
+
+!----------- Verificaci¢n del Pago de Contado Obligatorio --------------------
+
+SUB CALMOD PUBLIC
+ 
+IF TS.IO.STATE    =  10  AND                          \! Si esta en MAIN 
+   VAL(NO.MOD$)   >  0  AND                           \! Con Dato Asoc de %
+   TS.BALDUE(0)  <>   0  AND                          \! Con Saldo
+   TS.IO.DATA$(7) =  ""  THEN BEGIN                    ! Sin Vr Pago
+      CTAMOD$ = NO.MOD$                           ! Calcula PAGO  
+!-- Se retira control de monto se maneja por la definicion
+!-- en tarifas.dat desarrollado por GR - Feb/2021
+!      IF VAL(NO.MOD$) > 0   AND                       \! Verifica Rango
+!         VAL(NO.MOD$) < 30000 THEN BEGIN               ! entre 1 y 20000
+!           CTAMOD$ = NO.MOD$                           ! Calcula PAGO  
+!      ENDIF ELSE BEGIN                                 ! Si no esta Ok el %
+!         CALL VISORES4690(1," CUOTA MODERADORA   ","INVALIDA. VERIFIQUE!",2000,"L")      
+!         EPS% = 0                                      ! Inicializa var
+!         PAGO.CH% = 0                                  ! Inicializa var
+!         TS.IO.KEYS(7) = 0                             ! Invalida Medio Pago
+!         TS.IO.DATA$(7)="0"                            ! Invalida Medio Pago
+!         TS.IO.MOTORKEY =0                             ! Reduce Proceso
+!      ENDIF                                            ! Fin condic
+
+      IF VAL(NO.CUP$) = 0 OR                          \! Si NO hay CUPO, ¢
+         ABS(TS.BALDUE(0)) < VAL(NO.CUP$) THEN BEGIN   ! el BALDUE < que CUPO
+         NO.CUP$ = STR$(ABS(TS.BALDUE(0)))             ! el CUPO se torna BALDUE
+      ENDIF                                            ! Fin de Cupo
+      IF TS.BALDUE(0) <  0  THEN BEGIN                \! 
+      VRCRE$ = STR$(-1*(VAL(NO.CUP$) - VAL(CTAMOD$)))  ! el pago= % del CUPO
+      IF VAL(VRCRE$) < 0 THEN VRCRE$ = "-" + VRCRE$    ! Compagina Vr Cr
+      ENDIF ELSE BEGIN                                \
+      VRCRE$ = STR$(VAL(NO.CUP$) - VAL(CTAMOD$))       
+      LOCATE #30;1,1,OFF                               ! Ubica Cursor
+      WRITE FORM                                      \! Muestra Venta
+      "C9 PIC($$#,###,###) C9 PIC($$#,###,###)";#30;  \! segun formato
+      "EPS Vr/Cr=",VAL(VRCRE$),"CONTADO=",            \!
+      TS.BALDUE(0) - VAL(VRCRE$)                       ! con % EPS y Vr Contado
+      WAIT; 2000                                       ! Pausa de 2 Seg
+      ENDIF                                            ! Fin Condic
+ENDIF                                                  ! Fin Condic
+
+END SUB
+
+!---------------- Calcula Porcentaje del CR CVC. 60% -----------------------
+SUB CALCVC PUBLIC
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                       \! y si digita "/"
+   TS.IO.DATA$(3) = "5"  AND                       \! con Variedad CVC
+   TS.BALDUE(0)  <>  0   AND                       \! y Saldo en Transac
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                \! y si Digita TECLA CR
+      TS.IO.DATA$(7) = STR$(TS.BALDUE(0)*.6)        ! el pago=60% de BALDUE. 
+      VRCRE$ = TS.IO.DATA$(7)                       ! Valor del Credito
+      LOCATE #30;1,1,OFF                            ! Ubica Cursor
+      WRITE FORM                                   \! Muestra Venta
+      "C8 PIC($$#,###,###) C9 PIC($$#,###,###)";   \! segun formato
+      #30;"CVC 60%=",TS.BALDUE(0)*.6," CONTADO=",  \! con 60% Cr CVC y
+      TS.BALDUE(0) - TS.BALDUE(0)*.6                ! con 40% Contado 
+      RATA$ = " CVC. 60%"                           ! Guarda Descriptor
+      WAIT; 2000                                    ! Pausa de 2 Seg
+ENDIF                                               ! Fin condic
+
+END SUB
+
+!----------------------------------------------------------------------------
+
+SUB IMPRESION.ITEMS.TIQUETE                                               ! Generacion impresion articulos vendidos
+Integer*1 X.Ajuste%
+Integer ARC2%, AA%, BB%
+String UELF$, LETRA$, HOLD$,RELB$, XX$, X.Tmp$, X.Alto$, X.Bajo$, X.Signo$, X.LF$, X.Str$
+String XPrecio$, Xline$, X.Iva$, X.Bin$
+Integer*4 X.I%, X.Qty%, X.Indicat2%, X.indicat1%, X.Tarifa%, XI%
+Integer*1 X.J%, X.IndArt%
+
+  X.IndArt% = 0
+  For X.I% = 1 TO SL.END                          												! Recorre todos los String
+    H$ = READ.SL.STR$(X.I%)                 															! Toma el String
+    If LEN(H$) > 5 Then     Begin          														    ! Si el String es OK
+     If ASC(H$)  = 1 Then Begin            															  ! Si es un articulo
+        If X.IndArt% = 1 Then Begin                                       !
+            Call U.IMPRIME("Cantidad : "+Str$(X.Qty%)+" $"+Xprecio$,4100H) ! Imprime dato de copia
+        EndIf Else X.IndArt% = 1
+        X.TMP$ = ASIC.GETUNPK(H$,3)	              												! Articulo vEndido
+        X.Tmp$ = Pack$(Right$("000000000000"+X.Tmp$,12))
+        X.J% = Valida.Tipo.Item(X.Tmp$)                                   ! Tipo de articulo
+        X.TMP$ = ASIC.GETUNPK(H$,3)	              												! Articulo vEndido
+        X.Tmp$ = Right$("       "+Str$(Val(X.Tmp$)),7)                    ! Ajusta formato Item
+        Xline$ = X.Tmp$ + " "+ Asc.Cnv.Name$                              ! Arma String impresion
+        !Call U.IMPRIME(X.Tmp$,4100H)              	  									! Imprime dato de copia
+        
+        X.SIGNO$ = ""
+        Asc.Tmp.Apun% = 3																				          ! Posiciona apuntador  
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)                  					! CODIGO PLU O EAN
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)                 					! PRECIO DEL ARTICULO
+        Call Format.Amount(Val(X.tmp$))                                   ! Formatea precio
+        XPrecio$ = Right$("          "+TS.TEMP1$,10)											! Dato Formateado
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)              	 	  			  ! DEPARTAMENTO DEL ARTICULO
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)														! Cupon Family 3 y 3 Long 6
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%) 											    ! INDICAT1  PARA IMPUESTOS, PESABLES, ALIAS  ETC...
+        X.Indicat1% = Val(X.tmp$)
+        
+        IF (X.Indicat1% AND 01H) THEN                         \!
+         X.Bin$ = "1" ELSE X.Bin$ = "0"                 !
+        FOR XI% = 1 TO 7                                      !
+          X.Indicat1% = SHIFT(X.Indicat1%,1)                  ! Inicializa sig. BIT
+          IF (X.Indicat1% AND 01H) THEN X.Bin$="1"+X.Bin$\!
+           ELSE X.Bin$ ="0"+X.Bin$                   !
+        NEXT XI%                                              !
+        IF LEFT$(X.Bin$,4) = "1000" THEN                  \! Si hay Indic Plan A     
+                           X.Tarifa% = 1		              \! indica Plan = A          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "0100" THEN                  \! Si hay Indic Plan B     
+                           X.Tarifa% = 2		              \! indica Plan = B          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "0010" THEN                  \! Si hay Indic Plan C     
+                           X.Tarifa% = 3		              \! indica Plan = C          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "0001" THEN                  \! Si hay Indic Plan D     
+                           X.Tarifa% = 4		              \! indica Plan = D          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "1100" THEN                  \! Si hay Indic Plan AB    
+                           X.Tarifa% = 5		              \! indica Plan = E          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "0110" THEN                  \! Si hay Indic Plan BC    
+                           X.Tarifa% = 6		              \! indica Plan = F          
+        ELSE                                               \! si no,                  
+        IF LEFT$(X.Bin$,4) = "0011" THEN                  \! Si hay Indic Plan CD    
+                           X.Tarifa% = 7		              \! indica Plan = G          
+        ELSE                                               \! si no,                  
+                           X.Tarifa% = 8		               ! indica 0%                
+        X.Iva$ = MID$("ABCDEFGH",X.Tarifa%,1)                                   
+
+        Xline$ = Xline$ + " " + Xprecio$+X.IVA$
+        Xline$ = Left$(Xline$+String$(40," "),40)													! Ajusta Tiquete
+        Call U.IMPRIME(Xline$,4100H)              												! Imprime dato de copia
+
+        X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)                           ! X.Indicat2%   QUE SE OPRIMIO ?  KEY CANCEL, KEY DEVOLUC, KEY REFOUND
+        X.Indicat2% = VAL(X.Tmp$) 
+        If (X.Indicat2% AND 0080H)  Then X.Signo$ = "-"    
+        If (X.Indicat2% AND 0040H)  Then X.Signo$ = "-"    
+        X.Qty% = 1
+        If X.SIGNO$ = "-" Then Begin 
+           X.Qty% = -1
+        EndIf         
+        GoTo Next.Lectura
+     EndIf                                  															!
+
+     If ASC(H$)  = 2 Then Begin            															  ! Si es una extencion de articulo
+         Asc.Tmp.Apun% = 3																								! Posiciona apuntador
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)													! NO USADO   MPGROUP= Val(A$)
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)													! NO USADO   DEALQUAN= Val(A$)
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)													! NO USADO   PRICE METH= Val(A$)
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)													! NO USADO   SALEQUAN= Val(A$)
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)						  						! NO USADO   SALEPRIC= Val(A$)
+         Call Format.Amount(Val(X.tmp$))                                  ! Formatea precio
+         XPrecio$ = Right$("          "+TS.TEMP1$,10)											! Dato Formateado
+         X.TMP$ = ASIC.GETUNPK(H$,Asc.Tmp.Apun%)													! CANTIDAD O PESO VEndIDO = QTYORWGT        
+         If X.Qty% > 0 Then \ 																					  ! Si venta
+            X.Qty% = Val(X.Tmp$) Else																		 \! Retorna Valor Sino Reporta devolucion
+            X.Qty% = Val(X.Tmp$) * -1																			! Retorna Valor 
+            Call U.IMPRIME("Cantidad : "+Str$(X.Qty%)+" $"+Xprecio$,4100H)! Imprime dato de copia
+         X.IndArt% = 2																										! Control Impresion Dato
+         GoTo Next.Lectura
+     EndIf 
+    EndIf 
+    Next.Lectura:
+     
+  Next X.I%
+  If X.IndArt% = 1 Then Begin                                             !
+     Call U.IMPRIME("Cantidad : "+Str$(X.Qty%)+" $"+Xprecio$,4100H) 		  ! Imprime dato de copia
+  EndIf 
+  CALL Impresion.Detalle.Iva
+  
+END SUB 

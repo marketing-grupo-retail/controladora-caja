@@ -1,0 +1,54 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU06.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!!*******************************************************************
+!
+!   IR34549 - Option 12.1 and Option 12.2 do not work together.
+!             Before this change the dept file would not get the
+!             impact of setting option 12.1 as well as 12.2
+!             25Mar97 CRM MGVA
+!
+!!****END-OF-CHANGES*************************************************
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** ACCUMULATE KEY VS SCAN TOTALS BY DEPARTMENT                   **
+!!*******************************************************************
+ IF CS.TYPE(CS.STR) = 1 OR                  \ Item entry string
+    CS.TYPE(CS.STR) = 2 THEN BEGIN          ! Item entry extension string
+  IF P1 > 8 THEN BEGIN                      ! Valid dept update
+   IF OP.KEYSCAN.DEPT THEN BEGIN            ! option 12.2
+     IF SL.IT.INDICAT3A = 0 THEN BEGIN      ! Normal item sale
+!AIR34549
+!      IF SL.IT.INDICAT3B = 1 THEN          ! SOLD BY KEYED CODE
+       IF SL.IT.INDICAT3B = 1 AND           \ SOLD BY KEYED CODE
+         OP.KEYUPC.OK = 0 THEN   \ option 12.1 KEYED UPC NOT IN SCANNED
+\EIR34549
+         CALL ADDIN4(CS.DT.STR$(1),P1+38,SL.IE.QTYORWGT * 10000H)
+       IF SL.IT.INDICAT3B = 2 THEN          \ SOLD BY LOOKUP KEY
+         CALL ADDIN4(CS.DT.STR$(1),P1+38,SL.IE.QTYORWGT)
+     ENDIF
+   ENDIF
+
+!!*******************************************************************
+!!** SAVE ADDITIONAL OR MOVE DEPT DATA FOR MULTIPLIED COUPONS      **
+!!*******************************************************************
+   IF ((SL.IT.INDICAT2 AND 0400H) NE 0) AND \ MULTIPLIED COUPON
+      SL.IT.INDICAT3A = 7 THEN BEGIN        !  STORE COUPON
+     IF OP.DT.ACDBL THEN                    \ NEW DBL COUPON TOTAL
+       CALL ADDIN4(CS.DT.STR$(1),           \ ADD TO DEPT EXITS
+                  OP.DT.ACDBL,SL.IT.XPRICE) !  DBL COUP AMOUNT
+     IF OP.DEPT.NODBL THEN BEGIN            ! NO DBL BY DEPT
+       CALL ADDIN4(CS.DT.STR$(1),P1+26,-SL.IE.QTYORWGT) ! BACK OUT
+       CALL ADDIN4(CS.DT.STR$(1),P1+30,-SL.IT.XPRICE)   !  BASE UPDATES
+     ENDIF                                  ! NO DBL BY DEPT
+   ENDIF                                    ! NOT MULTIPLIED COUPON
+  ENDIF                                     ! Valid dept update
+ ENDIF                                      ! Item entry
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

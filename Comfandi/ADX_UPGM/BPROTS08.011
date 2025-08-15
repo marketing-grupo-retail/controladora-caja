@@ -1,0 +1,27 @@
+!************************************************** 
+!Empresa       : ASIC S.A. UNIDAD DE RETAIL       *
+!Programa      : BPROTS08.011                     *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Abril del 2005                   *
+!Observaciones : Bonos promocion                  *
+!**************************************************
+
+IF IR.LINKEDTO$ <> PACK$("0000") Then Begin       												! Tiene cupon ligado
+   Call Calculo.Dscto.Articulo                                            ! Calcula el dscto x articulo
+EndIf
+
+
+
+If IR.ITEMTYPE > 6 THEN BEGIN           																	! Si es un cupon
+   IR.DEPARTME$ = ASC.BRP.DEPARTME$																				! Asigna departamento del articulo
+   If Asc.Bpr.VlrDscto% > 0 Then \
+      IR.SALEPRIC$ = PACK$(RIGHT$("0000000000"+STR$(Asc.Bpr.VlrDscto%),10))  !
+   IF ASC.BPR.INDICAT1 = 1 THEN IR.INDICAT1 = 82H                    			! Le asigna la tarifa de IVA
+   IF ASC.BPR.INDICAT1 = 2 THEN IR.INDICAT1 = 42H
+   IF ASC.BPR.INDICAT1 = 3 THEN IR.INDICAT1 = 22H
+   IF ASC.BPR.INDICAT1 = 4 THEN IR.INDICAT1 = 12H
+   IF ASC.BPR.INDICAT1 = 5 THEN IR.INDICAT1 = 0C2H
+   IF ASC.BPR.INDICAT1 = 6 THEN IR.INDICAT1 = 62H
+   IF ASC.BPR.INDICAT1 = 7 THEN IR.INDICAT1 = 32H
+   IF ASC.BPR.INDICAT1 = 8 THEN IR.INDICAT1 = 92H
+EndIf 

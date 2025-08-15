@@ -1,0 +1,67 @@
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+!
+!  java_ext.j86
+!
+!  External references for the java/cbasic system routines.
+!
+!  Change Activity:
+!
+!
+! END-OF-SPECIFICATIONS
+!컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+SUB JavaCall.Initialize.Request (ClassName,MethodName,TheRequest) EXTERNAL
+  STRING ClassName
+  STRING MethodName
+  STRING TheRequest
+END SUB
+
+SUB JavaCall.AddParameter.Integer1 (TheRequest,TheParameter) EXTERNAL
+  STRING TheRequest
+  INTEGER*1 TheParameter
+END SUB
+
+SUB JavaCall.AddParameter.Integer2 (TheRequest,TheParameter) EXTERNAL
+  STRING TheRequest
+  INTEGER*2 TheParameter
+END SUB
+
+SUB JavaCall.AddParameter.Integer4 (TheRequest,TheParameter) EXTERNAL
+  STRING TheRequest
+  INTEGER*4 TheParameter
+END SUB
+
+SUB JavaCall.AddParameter.String (TheRequest,TheParameter) EXTERNAL
+  STRING TheRequest
+  STRING TheParameter
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnVoid (TheRequest,Exception ) EXTERNAL
+ STRING TheRequest
+ STRING Exception
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnI1 (TheRequest, ReturnValue, Exception) EXTERNAL
+  STRING TheRequest
+  INTEGER*1 ReturnValue
+  STRING Exception
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnI2 (TheRequest, ReturnValue, Exception) EXTERNAL
+  STRING TheRequest
+  INTEGER*2 ReturnValue
+  STRING Exception
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnI4 (TheRequest, ReturnValue, Exception) EXTERNAL
+  STRING TheRequest
+  INTEGER*4 ReturnValue
+  STRING Exception
+END SUB
+
+SUB JavaCall.InvokeMethod.ReturnString(TheRequest, ReturnValue, Exception) EXTERNAL
+  STRING TheRequest
+  STRING ReturnValue
+  STRING Exception
+END SUB
+

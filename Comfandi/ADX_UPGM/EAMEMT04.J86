@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION TSEMEC04 PUBLIC ! AFTER RESPONSE TO CUSTOMER NUMBER PROMPT
+ 
+! insert user exit code here
+ 
+ END FUNCTION

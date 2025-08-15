@@ -1,0 +1,350 @@
+!   ***************************************************************************
+!   **    Date       :  Septiembre / 95                                      **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USRSU01.011                                          **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones  para  franqueo de documentos con el nombre del      **
+!   **    CLIENTE y el nombre de la Empresa para Ventas a Credito.           **
+!   ***************************************************************************
+
+!------------- Subrutina de Traduccion de Etiquetas ----------------- 
+
+
+SUB ETIQUETAR  PUBLIC                               !
+CALL SAVE.PRINT                                     !
+IF TS.IO.STATE     = 10 AND                        \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> ""      THEN BEGIN            \! digita codigo de variedad,
+   IF TS.IO.KEYS(7) = 91     THEN                  \! si es EFECTIVO, entonces
+      VRDAD$ = "1"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 92     THEN                  \! si es CHEQUE, entonces
+      VRDAD$ = "2"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 94     THEN                  \! si es RED MULTIC, entonces
+      VRDAD$ = "4"+TS.IO.DATA$(3)                  \! salva tipo de pago y vrdad
+   ELSE                                            \! de lo contrario
+   IF TS.IO.KEYS(7) = 96     THEN                  \! si es CREDITO, entonces
+      VRDAD$ = "6"+TS.IO.DATA$(3)                   ! salva tipo de pago y vrdad
+   IF TS.IO.KEYS(7) = 93     THEN                  \! si es CREDITO, entonces
+      VRDAD$ = "3"+TS.IO.DATA$(3)                   ! salva tipo de pago y vrdad
+ENDIF                                               !
+                                                    !
+IF TS.IO.STATE     = 10 AND                        \! Si esta en MAIN y se
+   TS.IO.DATA$(3) <> "" AND                        \! digita codigo de variedad,
+   TS.IO.KEYS(7)   = 93     OR                     \! si es OTROS PAGOS (mf)
+   TS.IO.KEYS(7)   = 96     THEN BEGIN              ! si es CREDITO, entonces
+      LISVAR$ = STRING$(16, " ")                    !
+      IF VAR.CR$ = "1"     THEN                    \! si Medicam Empr
+         LISVAR$ = "      *MEDICAM EMPRES*"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "2"     THEN                    \! si Temporada Escol
+         LISVAR$ = "      *TEMP. ESCOLAR *"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "3"     THEN                    \! si es Cr Interno
+         LISVAR$ = "      *CRED. INTERNO*"         \!
+      ELSE                                         \!
+      IF VAR.CR$ = "4"     THEN                    \! si es Cr Esp. Empresas
+         LISVAR$ = "      *CR/ESPECIAL "+RATA$+"*" \! 
+      ELSE                                         \!
+      IF VAR.CR$ = "5"     THEN                    \! si es Cr cvc 60%
+         LISVAR$ = "      *CR. C.V.C. 60%*"        \!
+      ELSE                                         \!
+      IF VAR.CR$ = "6"     THEN                    \! si es Cr SIN Factura
+         LISVAR$ = LISVAR$ + " (SF)"                !     
+                                                    !
+      IF EPS% <> 0 THEN BEGIN                       ! Si Vta con Cuota Moder
+         LISVAR$ = "    Cta Moderadora " + RATA$    ! cambia Descrip
+      ENDIF                                         !
+      TO.FRANK.TXT$(5,2) = RIGHT$(LISVAR$,20) +    \!
+               RIGHT$(TO.FRANK.TXT$(5,2),18)        !
+ENDIF                                               !
+CALL RESTORE.PRINT    
+END SUB                                             !
+
+!---------------- Subrutina de Busqueda de Vendedor ------------------- 
+                                                    !
+SUB BUSCAVEND PUBLIC                                ! Subrut de Vendedor
+
+         KEY.VE$ = RIGHT$(PACK$("0000000000"+KEY.OP$),5)
+         READ FORM "C32 C20 C20";#44 KEY KEY.OP$;                \! Lee EAMOPERA
+         CE.NADA1$,NOM.OPER$,CE.NADA2$                            !                         
+         VENDIO$ = "Vendedor: "+KEY.OP$+ " " + NOM.OPER$      
+!    NOMBV$ = ""                                     ! Falta de Nombre
+ !   VENDIO$ = "Vend: "+STR$(VAL(VENDE$))+NOMBV$     ! Arma String default
+  !  FOR UE.II% = 1 TO 50                               ! Loop de busqueda
+   !     IF CODVEN%(UE.II%) = VAL(VENDE$) THEN BEGIN    ! del Cod del Vendedor
+    !       NOMBV$ = NOMVEN$(UE.II%)                    ! Guarda el nombre
+     !      VENDIO$ = VENDIO$ + " " + NOMBV$         ! Vendedor del CR
+      !     EXIT SUB                                 ! Sale de rutina
+       ! ENDIF                                       ! Fin del Loop 
+!    NEXT UE.II%                                        ! Sig Loop
+END SUB                                             ! Fin Subrutina
+                                                    !
+
+!------------- Subrutina de Encabezamiento Mini-Factura ----------------
+
+SUB ENCABEZA PUBLIC                                 ! Subrut de Encab Fac
+  RAYA$  = STRING$(30,"-")                          ! Rayas
+  CABE$  = "   Cod    Descripci¢n    Vr Uni."       ! Rayas
+  CABE1$ = "                       Cant   Vr Tot."  ! Rayas
+  FCORT$ = CHR$(1BH)+CHR$(6DH)                      ! Guillotina
+  FCH12$ = CHR$(27)+CHR$(12)                        ! Salta P gina Channel 12
+  FCIZQ$ = CHR$(27)+CHR$(76)                        ! Posic. Cabeza a la Izqui
+  !FONPH$ = CHR$(27)+CHR$(69)                        ! Letra Emphasized
+  FON75$ = CHR$(27)+CHR$(14)                        ! Letra 7.5 CPI (19 y 43)
+  FON7D$ = CHR$(27)+CHR$(23)                        ! Letra 7.5 CPI (19 y 43) 2H
+  FON12$ = CHR$(27)+CHR$(58)                        ! Letra 12 CPI  (30 y 68)
+  FON15$ = CHR$(27)+CHR$(59)                        ! Letra 15 CPI  (38 y 86)
+  LFEED$ = CHR$(1BH)+CHR$(33H)+CHR$(1)
+  CALL SAVE.PRINT                                   ! 
+  FRA.AA$  = LEFT$(DATE$,2)                         ! Arma ano
+  FRA.MM$  = MID$(DATE$,3,2)                        ! Arma mes
+  FRA.DD$  = RIGHT$(DATE$,2)                        ! Arma dia
+  FRA.FAC$ = FRA.AA$+"/"+FRA.MM$+"/"+FRA.DD$        ! Arma Linea Franq
+  TS.SAVPRT$  = TS.PRTBUF$ 
+  WRITE #34;TS.SAVPRT$+FINLIN$
+  !TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  WRITE #34;FINLIN$
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  TS.FORMCR$ = "C19 A1"                             ! Formato de DI 19 Char
+!  TS.SAVPRT$  =  TO.FRANK.TXT$(6,1)                 ! 1er Linea de Franq
+  WRITE #34;" C O M F A N D I "+FINLIN$
+ !TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI
+!  TS.SAVPRT$= TO.FRANK.TXT$(6,2)                    ! 2a Linea de Franq
+ 
+ WRITE #34;FCORT$
+  WRITE #34;"NIT 890.303.208 - 5"+FINLIN$
+  !TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+!  TS.SAVPRT$ = TO.FRANK.TXT$(6,3)                   ! 3a Linea de Franq
+  WRITE #34;" LINEA DE CREDITO COMFANDI"+FINLIN$
+  !TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  TS.SAVPRT$ = LISVAR$                              ! Variedad del Cr 
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+
+  NO.CUO$ = ""                                      ! Reset de Cuota %EPS
+  TS.FORMCR$ = "C38 A1"                             ! Formato de DI 38 Char
+  TS.SAVPRT$ =  "    Num.: "+FAC$+"  Fecha: "+FRA.FAC$     ! Factura y Fecha
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  !TS.SAVPRT$ = FCORT$                               ! Corta el Papel
+! WRITE #34;FINLIN$
+! WRITE #34;FCORT$
+  
+  !TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+   TS.SAVPRT$ = "Emp: "+NOEM$                       ! Entidad Afiliada
+  if noem$ <> "" then begin
+   TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  endif
+  IF LEN(NITW$) < 7 THEN BEGIN                      ! Nit tiene menos de 7 dig
+     NITW$ = RIGHT$("      " + NITW$,6)             ! lo deja en 6 Posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-3) + "."  +    \! Hace la compaginacion
+             RIGHT$(NITW$,3)                        ! de 3 en 3 con .
+  ENDIF ELSE BEGIN                                  ! de lo contrario
+     IF DIGW$ = " "  THEN BEGIN                     ! Si trae Minifac Barras
+        DIGW$ = "-" + RIGHT$(NITW$,3)               ! Separa parte Dig/Ctrl
+        NITW$ = LEFT$(NITW$,LEN(NITW$)-3)           ! y ajusta NIT
+     ENDIF                                          ! Fin de ajuste
+     POSIC% = LEN(NITW$) - 6                        ! toma el resto de posic
+     NITW$ = LEFT$(NITW$,LEN(NITW$)-6) + "."  +    \! y compagina parte Izq
+             MID$(NITW$,POSIC%+1,3)    + "."  +    \! con punto y de 3 en 3
+             RIGHT$(NITW$,3)                        ! con puntos
+  ENDIF                                             ! fin de Long del NIT
+  NITW$ = NITW$ + DIGW$                             ! Agrega Dig de Ctrl
+  DIGW$ = " "                                       ! Borra Dig de Ctrl
+  
+  TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+  TS.SAVPRT$ = "Nit:    " + NITW$                   ! Nit y Fecha Rem
+  IF CEDU$ <> "" AND NO.MOD$ <> ""  THEN BEGIN
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+     TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+     TS.SAVPRT$ = RAYA$                                ! Rayas
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+     TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+     TS.SAVPRT$ =  " Cupo Autorizado: " + (NO.CUP$)    ! Valor Autorizado CR
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+     TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+     TS.SAVPRT$ = " Vr.del Cr‚dito : "+VRCRE$          ! Valor Utilizado CR
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+     TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+     TS.FORMCR$ = "C30 A1"                             ! Formato de DI 30 Char
+     TS.SAVPRT$ = " Cuota Moderador:"+CTAMOD$          ! Cuota Moderadora
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  ! CTAMOD$ = ""                                    !
+     TS.FORMCR$ = "C30 A1"                              ! Formato de DI 30 Char
+     IF LEN(CEDU$) > 9 THEN CEDU$=RIGHT$(CEDU$,9)       ! Controla Edicion
+     TS.SAVPRT$ = " #cc Comprador  :"+CEDU$             ! Cuota Moderadora
+!  CEDU$ = ""                                        !
+     TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+ 
+  ENDIF 
+TS.SAVPRT$ = "Almac‚n: " + STR$(VAL(TS.STORE$)) +  " " + ALMA$                               ! registro el Credito
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+                                                     !
+  TS.FORMCR$ = "C38 A1"                              ! Formato de DI 30 Char
+  TS.SAVPRT$ =  VENDIO$
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C38 A1"                              ! Formato de DI 38 Char
+  TS.SAVPRT$ = CABE$                                 ! Direcc y Fecha Ven
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C38 A1"                              ! Formato de DI 38 Char
+  TS.SAVPRT$ = CABE1$                                ! Direcc y Fecha Ven
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  TS.FORMCR$ = "C30 A1"                              ! Formato de DI 30 Char
+  TS.SAVPRT$ = RAYA$                                 ! Direcc y Fecha Ven
+  TS.SAVPRT.OPT=4100H : TS.LINETYPE=29 : CALL TSPREC01
+  LINCR% = 25                                        ! Inicia Cont Lin
+  LINMF% =  5                                        ! Inicia Cont Lin (mf)
+  CALL RESTORE.PRINT
+END SUB                                              ! Fin de Subrutina
+!------------- Subrutina de Calculo de Digito de Control----------------- 
+                                                     !
+!SUB CALDIGI PUBLIC                                   !
+!IF TO.USEROPTS(2) <> 0  THEN BEGIN                   ! UsrOpt 2=Y Dig/Ch Subs
+ !   SUMA% = 0   :  ACUM% = 0                         ! Reset a Contadores
+  !  LL% = LEN(NUCH$) - 1                             ! Calcula Long No.CH
+   ! IF LL% < 1 THEN BEGIN                            ! Si es Invalida
+    !   PAGO.CH% = 2                                  ! Flag de Error
+     !  DIG$ = "x"                                    ! En Posic de Digito
+      ! EXIT SUB                                      ! Sale de Rutina
+!    ENDIF                                            ! Fin 1er Chequeo
+ !   FOR UE.II% = 1 TO LL%                            ! Loop de Calculo
+  !     SUMA% = VAL(MID$(NUCH$,LL%-UE.II%+1,1)) * 2   ! Posic Extrem Der+1*2
+   !    ACUM% = ACUM%                               +\! y Acumula c/digito
+    !   VAL(RIGHT$(RIGHT$("00"+STR$(SUMA%),2),1))   +\! del resultado en
+     !  VAL(LEFT$(RIGHT$("00"+STR$(SUMA%),2),1))      ! forma Individual
+      ! IF UE.II% = LL% THEN GOTO COMPARA             ! Si estan todos los Dig
+      ! UE.II% = UE.II% + 1                           ! Si no, sigue con el sig,
+      ! SUMA% = VAL(MID$(NUCH$,LL%-UE.II%+1,1))       ! lo extrae de la string
+      ! ACUM% = ACUM% + SUMA%                         ! y lo adiciona al Acum
+!    NEXT UE.II%                                      ! Continua Loop
+!COMPARA:                                             ! Comparacion de Resul
+ !   IF VAL(RIGHT$(STR$(ACUM%),1)) = 0 THEN BEGIN     ! Si termina en CERO
+  !     DIG$ = "0"                                    ! el digito sera CERO
+   ! ENDIF ELSE BEGIN                                 ! si no,
+    !   DIG$ = STR$(10-VAL(RIGHT$(STR$(ACUM%),1)))    ! Resta de la sig Decena
+    !ENDIF                                            ! Fin del Calculo
+    !IF DIG$ <> RIGHT$(NUCH$,1) THEN PAGO.CH% = 2     ! Si no son =s, ERROR
+                                                     !
+!ENDIF                                                !
+!END SUB                                              ! Fin de Subrutina
+
+!----------- Verificaci¢n del Pago de Contado Obligatorio --------------------
+
+SUB CALCUO PUBLIC
+ 
+IF TS.IO.STATE    =  10  AND                          \! Si esta en MAIN 
+   VAL(NO.CUO$)   >  0  AND                           \! Con Dato Asoc de %
+   TS.BALDUE(0)  <>   0  AND                          \! Con Saldo
+   TS.IO.DATA$(7) =  ""  THEN BEGIN                    ! Sin Vr Pago
+      IF VAL(NO.CUO$) > 0   AND                       \! Verifica Rango
+         VAL(NO.CUO$) < 99 THEN BEGIN                  ! entre 1% y 50%
+           EPS%  = (100-VAL(NO.CUO$))/100              ! Calcula % EPS
+           RATA$ = "EPS " + STR$(EPS% * 100) + "%"     ! Arma Descriptor
+      ENDIF ELSE BEGIN                                 ! Si no esta Ok el %
+         LOCATE #30;1,1,OFF                            ! Ubica Cursor
+         WRITE FORM "C40";#30;                        \! Despliega el
+         " CUOTA MODERADORA   INVALIDA. VERIFIQUE!"    ! Mensaje
+         EPS% = 0                                      ! Inicializa var
+         PAGO.CH% = 0                                  ! Inicializa var
+         WAIT;2000                                     ! Espera 2 seg
+         TS.IO.KEYS(7) = 0                             ! Invalida Medio Pago
+         TS.IO.DATA$(7)="0"                            ! Invalida Medio Pago
+         TS.IO.MOTORKEY =0                             ! Reduce Proceso
+      ENDIF                                            ! Fin condic
+      IF VAL(NO.CUP$) = 0 OR                          \! Si NO hay CUPO, ¢
+         ABS(TS.BALDUE(0)) < VAL(NO.CUP$) THEN BEGIN   ! el BALDUE < que CUPO
+         NO.CUP$ = STR$(ABS(TS.BALDUE(0)))             ! el CUPO se torna BALDUE
+      ENDIF                                            ! Fin de Cupo
+      IF TS.BALDUE(0) <  0  THEN BEGIN                
+         EPS% = -1 * EPS%                              ! Si Saldo(-) % tambien
+         VR.EPS% = VAL(NO.CUP$)*EPS%                   ! el pago= % del CUPO
+         VRCRE$  = STR$(VR.EPS%)                       ! Valor del Credito
+         CTAMOD$ = STR$(VAL(NO.CUP$) + VAL(VRCRE$))    ! Vr Cuota Moderadora
+         VRCRE$ = "-" + VRCRE$                         ! ompagina Vr Cr
+      ENDIF ELSE BEGIN      
+         VR.EPS% = VAL(NO.CUP$)*EPS%                   ! el pago= % del CUPO
+         VRCRE$  = STR$(VR.EPS%)                       ! Valor del Credito
+         CTAMOD$ = STR$(VAL(NO.CUP$) - VAL(VRCRE$))    ! Vr Cuota Moderadora
+      LOCATE #30;1,1,OFF                               ! Ubica Cursor
+      WRITE FORM                                      \! Muestra Venta
+      "C9 PIC($$#,###,###) C9 PIC($$#,###,###)";#30;  \! segun formato
+      RATA$,VR.EPS%,"CONTADO=",TS.BALDUE(0)-VR.EPS%    ! con % EPS y Vr Contado
+      WAIT; 2000                                       ! Pausa de 2 Seg
+    ENDIF                                              ! Fin Condic
+ENDIF                                                  ! Fin Condic
+
+END SUB
+
+!----------- Verificaci¢n del Pago de Contado Obligatorio --------------------
+
+SUB CALMOD PUBLIC
+ 
+IF TS.IO.STATE    =  10  AND                          \! Si esta en MAIN 
+   VAL(NO.MOD$)   >  0  AND                           \! Con Dato Asoc de %
+   TS.BALDUE(0)  <>   0  AND                          \! Con Saldo
+   TS.IO.DATA$(7) =  ""  THEN BEGIN                    ! Sin Vr Pago
+      IF VAL(NO.MOD$) > 0   AND                       \! Verifica Rango
+         VAL(NO.MOD$) < 20000 THEN BEGIN               ! entre 1 y 20000
+           CTAMOD$ = NO.MOD$                           ! Calcula PAGO  
+      ENDIF ELSE BEGIN                                 ! Si no esta Ok el %
+         LOCATE #30;1,1,OFF                            ! Ubica Cursor
+         WRITE FORM "C40";#30;                        \! Despliega el
+         " CUOTA MODERADORA   INVALIDA. VERIFIQUE!"    ! Mensaje
+         EPS% = 0                                      ! Inicializa var
+         PAGO.CH% = 0                                  ! Inicializa var
+         WAIT;2000                                     ! Espera 2 seg
+         TS.IO.KEYS(7) = 0                             ! Invalida Medio Pago
+         TS.IO.DATA$(7)="0"                            ! Invalida Medio Pago
+         TS.IO.MOTORKEY =0                             ! Reduce Proceso
+      ENDIF                                            ! Fin condic
+      IF VAL(NO.CUP$) = 0 OR                          \! Si NO hay CUPO, ¢
+         ABS(TS.BALDUE(0)) < VAL(NO.CUP$) THEN BEGIN   ! el BALDUE < que CUPO
+         NO.CUP$ = STR$(ABS(TS.BALDUE(0)))             ! el CUPO se torna BALDUE
+      ENDIF                                            ! Fin de Cupo
+      IF TS.BALDUE(0) <  0  THEN BEGIN                \! 
+      VRCRE$ = STR$(-1*(VAL(NO.CUP$) - VAL(CTAMOD$)))  ! el pago= % del CUPO
+      IF VAL(VRCRE$) < 0 THEN VRCRE$ = "-" + VRCRE$    ! Compagina Vr Cr
+      ENDIF ELSE BEGIN                                \
+      VRCRE$ = STR$(VAL(NO.CUP$) - VAL(CTAMOD$))       
+      LOCATE #30;1,1,OFF                               ! Ubica Cursor
+      WRITE FORM                                      \! Muestra Venta
+      "C9 PIC($$#,###,###) C9 PIC($$#,###,###)";#30;  \! segun formato
+      "EPS Vr/Cr=",VAL(VRCRE$),"CONTADO=",            \!
+      TS.BALDUE(0) - VAL(VRCRE$)                       ! con % EPS y Vr Contado
+      WAIT; 2000                                       ! Pausa de 2 Seg
+      ENDIF                                            ! Fin Condic
+ENDIF                                                  ! Fin Condic
+
+END SUB
+
+!---------------- Calcula Porcentaje del CR CVC. 60% -----------------------
+SUB CALCVC PUBLIC
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN 
+   TS.IO.KEYS(3)  = 78   AND                       \! y si digita "/"
+   TS.IO.DATA$(3) = "5"  AND                       \! con Variedad CVC
+   TS.BALDUE(0)  <>  0   AND                       \! y Saldo en Transac
+   TS.IO.KEYS(7)  = 96   THEN BEGIN                \! y si Digita TECLA CR
+      TS.IO.DATA$(7) = STR$(TS.BALDUE(0)*.6)        ! el pago=60% de BALDUE. 
+      VRCRE$ = TS.IO.DATA$(7)                       ! Valor del Credito
+      LOCATE #30;1,1,OFF                            ! Ubica Cursor
+      WRITE FORM                                   \! Muestra Venta
+      "C8 PIC($$#,###,###) C9 PIC($$#,###,###)";   \! segun formato
+      #30;"CVC 60%=",TS.BALDUE(0)*.6," CONTADO=",  \! con 60% Cr CVC y
+      TS.BALDUE(0) - TS.BALDUE(0)*.6                ! con 40% Contado 
+      RATA$ = " CVC. 60%"                           ! Guarda Descriptor
+      WAIT; 2000                                    ! Pausa de 2 Seg
+ENDIF                                               ! Fin condic
+
+END SUB
+
+!----------------------------------------------------------------------------
+

@@ -1,0 +1,229 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+
+!***************************************************************************!
+!                                                                           !
+! This INCLUDE module contains code to replace the common function MMCFEC15.!
+! The Supermarket Enhancement Two feature, Expanded Operator Authorization, !
+! requires that the operator authorization file, EAMOPERA.DAT, be opened    !
+! with a variable record length rather than hard coded record length of 72. !
+!                                                                           !
+! Feature INCLUDE module EAMRL2OA.J86 must precede this J86 in the module   !
+! that INCLUDE's it.  Local variable E2.ERR.LOG$ must be declared and       !
+! initialized before this INCLUDE to handle error logging with MMCFEC99     !
+! The following common function routines must be declared externally before !
+! this INCLUDE module:                                                      !
+!                          MMCFEC03                                         !
+!                          MMCFEC08$                                        !
+!                          MMCFEC09                                         !
+!                          MMCFEC99                                         !
+!                                                                           !
+! Global variable MM.ACCOUNT.TYPE  is also needed                           !
+!                                                                           !
+!***************************************************************************!
+
+
+!*************************** CHECK.ACCOUNTABILITY ***************************
+! This function is called from local function MMCFEC15 to check accountability
+
+FUNCTION CHECK.ACCOUNTABILITY(OPTERM$)
+
+  INTEGER*2 CHECK.ACCOUNTABILITY, \
+            FILE.FOUND
+
+  INTEGER*4                     \
+            TO.AUTOCASH,        \ AUTO LOAN AMOUNT  - CASH
+            TO.AUTOFSTAMP,      \ AUTO LOAN AMOUNT  - FOODSTAMP
+            TO.AUTOMISC1,       \ AUTO LOAN AMOUNT  - MISC 1
+            TO.AUTOMISC2,       \ AUTO LOAN AMOUNT  - MISC 2
+            TO.AUTOMISC3,       \ AUTO LOAN AMOUNT  - MISC 3
+            TO.MAXEXCHANGE,     \ MAXIMUM EXCHANGE AMOUNT
+            TO.MAXPICKUP,       \ MAXIMUM PICKUP AMOUNT
+            TO.MAXLOAN          ! MAXIMUM LOAN AMOUNT
+
+  INTEGER*1                     \
+            TO.ACCOUNTABILITY   ! ACCOUNTABILITY (1 = OPERATOR, 2 = TERMINAL)
+
+  STRING OPTERM$, \
+         TMFILE$
+
+  ON ERROR GOTO BAD.TERM:
+
+  CHECK.ACCOUNTABILITY = -1                   ! Set good return code
+  FILE.FOUND = -1                             ! Set flag
+  TMFILE$ = "EAMT:" + RIGHT$("000"+OPTERM$,3) ! Get file name
+
+  OPEN TMFILE$ RECL 512 AS 62 NOWRITE NODEL   ! Open file
+  IF NOT FILE.FOUND THEN BEGIN                ! If not found
+    TMFILE$ = "EAMT:000"
+    OPEN TMFILE$ RECL 512 AS 62 NOWRITE NODEL ! Open default file
+  ENDIF
+
+  READ #62, 8;           \    SESSION AND RECORD NUMBER
+     TO.AUTOCASH,        \  1 AUTO LOAN AMOUNT  - CASH
+     TO.AUTOFSTAMP,      \  2 AUTO LOAN AMOUNT  - FOODSTAMP
+     TO.AUTOMISC1,       \  3 AUTO LOAN AMOUNT  - MISC 1
+     TO.AUTOMISC2,       \  4 AUTO LOAN AMOUNT  - MISC 2
+     TO.AUTOMISC3,       \  5 AUTO LOAN AMOUNT  - MISC 3
+     TO.MAXEXCHANGE,     \  6 MAXIMUM EXCHANGE AMOUNT
+     TO.MAXPICKUP,       \  7 MAXIMUM PICKUP AMOUNT
+     TO.MAXLOAN,         \  8 MAXIMUM LOAN AMOUNT
+     TO.ACCOUNTABILITY   !  9 ACCOUNTABILITY TYPE
+
+  CLOSE 62                                  ! Close file
+
+  IF TO.ACCOUNTABILITY = 1 THEN BEGIN       ! If operator accntabiliy
+    CHECK.ACCOUNTABILITY = 0                ! Set bad return code
+  ENDIF
+
+EXIT FUNCTION
+
+BAD.TERM:               ! On error routine for terminal options file(s)
+
+  IF ERR = "OE" THEN BEGIN    ! If open error
+    FILE.FOUND = 0            ! Set flag
+    RESUME
+  ENDIF ELSE BEGIN            ! If more serious
+    CALL MMCFEC99(E2.ERR.LOG$)
+    STOP
+  ENDIF
+
+END FUNCTION
+!****************************** END FUNCTION *********************************
+
+
+!********************************* MMCFEC15 **********************************
+! This local function replaces the external function call MMCFEC15.  This is
+! done due to the Expanded Operator Authorization File feature in Enhancement
+! Feature Two.
+! This function validates a string as an operator or terminal defined to the
+! system
+
+FUNCTION  MMCFEC15(OPTERM$,ACCOUNT.TYPE)
+
+   INTEGER*2 MMCFEC15,       \
+             ACCOUNT.TYPE,   \ Whether operator , terminal or mixed
+             NOT.FOUND,      \
+             FOUND,          \
+             TERM.ACCT,      \
+             OPTERM,         \
+             MSG.NUM,        \ " Invalid op/term number .."
+             R.VALUE,        \
+             OA.RECL         ! Operator authorization record length
+
+   STRING    OPTERM$,         \
+             SPARE$,          \
+             TSKEY$,          \ TERMINAL NUMBER UPD 2
+             OA.OPERATOR$,    \ OPERATOR NUMBER UPD 5
+             NULL$,           \
+             OA.FMT$
+
+   R.VALUE = -1                    ! Set good return code
+   NOT.FOUND = 0                   !
+
+   OPTERM$ = MMCFEC08$(OPTERM$)    ! Remove trailing / leading blanks
+   IF OPTERM$ = "" THEN BEGIN
+     R.VALUE = 0
+     MSG.NUM = 172     ! Set up msg number
+     CALL MMCFEC03(MSG.NUM,NULL$)
+     MMCFEC15 = R.VALUE
+     EXIT FUNCTION
+   ENDIF
+
+
+   IF ACCOUNT.TYPE = 0 THEN BEGIN                 ! If mixed accountability
+     FOUND = MATCH("*",OPTERM$,1)                 ! Look for leading asterisk
+     IF (FOUND > 1) OR (OPTERM$ = "*") THEN BEGIN ! If not 1st character or "*"
+       R.VALUE = 0
+       OPTERM  = 2
+     ENDIF ELSE BEGIN
+       IF FOUND <> 0 THEN BEGIN
+         OPTERM = 2
+         OPTERM$ = RIGHT$(OPTERM$,LEN(OPTERM$) - 1)
+       ENDIF ELSE BEGIN
+         OPTERM = 1
+       ENDIF
+     ENDIF
+   ENDIF ELSE BEGIN
+     OPTERM = ACCOUNT.TYPE
+   ENDIF
+
+   IF R.VALUE THEN BEGIN                 ! If o.k. so far
+     R.VALUE = MMCFEC09(OPTERM$)         ! Check if valid number
+     IF R.VALUE THEN BEGIN               ! If o.k. so far
+       IF ((LEN(OPTERM$) > 3) AND (OPTERM = 2)) OR \ If too big term num
+           (VAL(OPTERM$) <= 0)                     \ Or not + ve
+       THEN BEGIN
+         R.VALUE = 0                               ! Set bad return code
+       ENDIF
+     ENDIF
+   ENDIF
+
+   IF NOT R.VALUE THEN BEGIN
+     MSG.NUM = 111 + OPTERM
+     CALL MMCFEC03(MSG.NUM,NULL$)
+     MMCFEC15 = R.VALUE
+     EXIT FUNCTION
+   ENDIF
+
+   ON ERROR GOTO FEC15.ERR
+
+   IF OPTERM = 2 THEN BEGIN
+     TSKEY$ = PACK$(RIGHT$("0000" + OPTERM$,4))
+     OPEN "EAMTERMS" KEYED RECL 72 AS 62 NOWRITE NODEL
+     READ FORM " T3 C70 "; #62 KEY TSKEY$; SPARE$
+     CLOSE 62
+   ENDIF ELSE BEGIN
+     OA.OPERATOR$ = PACK$(RIGHT$("0000000000" + OPTERM$,10))
+
+     OA.RECL = E2.GET.OA.RECL   ! Call function to get op auth rec length
+
+     OPEN "$AMOPERA" KEYED RECL OA.RECL AS 62 NOWRITE NODEL
+
+     OA.FMT$ = " T6 C" + STR$(OA.RECL - 5) ! Format the read of the op auth
+                                           ! file.  This takes in consideration
+                                           ! that file could be 72 byte record
+                                           ! length or 168
+
+     READ FORM OA.FMT$ ; #62 KEY OA.OPERATOR$ ; SPARE$
+     CLOSE 62
+   ENDIF
+
+
+   IF NOT.FOUND THEN BEGIN        ! If record not found
+     MSG.NUM = 118 + OPTERM       ! Msg "Unknown operator num.."
+     R.VALUE = 0                  ! Set bad return code
+   ENDIF ELSE BEGIN               ! If a record was found
+     IF (OPTERM = 2) AND (MM.ACCOUNT.TYPE = 0) THEN BEGIN  ! IF TERM CHECK
+       TERM.ACCT = CHECK.ACCOUNTABILITY(OPTERM$)   ! See if trmnl accntblty
+       IF NOT TERM.ACCT THEN BEGIN          ! If not
+         MSG.NUM = 151                      ! Msg "Terminal not terminal acct.."
+         R.VALUE = 0                        ! Set bad return code
+       ENDIF
+     ENDIF
+   ENDIF
+
+   IF NOT R.VALUE THEN BEGIN
+     CALL MMCFEC03(MSG.NUM,NULL$)
+   ENDIF
+
+   MMCFEC15 = R.VALUE
+
+EXIT FUNCTION
+
+FEC15.ERR:
+
+   IF ((ERR = "KF") AND (ERRN = 80F306C8H)) OR  \ If record not found
+      (ERR = "EF")                              \
+   THEN BEGIN
+     NOT.FOUND = -1       ! Set flag
+     RESUME               ! Continue
+   ENDIF
+
+! Log unrecoverable errors and stop program
+
+   CALL MMCFEC99(E2.ERR.LOG$)
+   STOP
+
+END FUNCTION
+!****************************** END FUNCTION *********************************

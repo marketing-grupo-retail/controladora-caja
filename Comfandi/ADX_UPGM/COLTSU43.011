@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSU43.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+! Modificaciones:
+
+If Asc.Col.IndPrice% = -1 Then Begin     													! Miscelaneo Colegios
+   Asc.Col.IndPrice% = 0																					! Init indicador de precio
+   SL.IT.XPRICE = Val(Asc.Col.VlrBono$)             						  ! Valor por positivo
+   Asc.Col.Devol% = 0      																				! Init de la variable
+Endif

@@ -1,0 +1,8 @@
+!--------------------------------------------
+! Despues de leer el Transaction Summary Log
+!--------------------------------------------
+!User exit called after reading Summary Log
+SUB CSUPEC18 PUBLIC
+
+
+END SUB

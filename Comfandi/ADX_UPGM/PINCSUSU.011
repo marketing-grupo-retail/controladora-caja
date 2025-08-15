@@ -1,0 +1,14 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : PINCSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Mayo 06 de 2.008                 *
+!Observaciones : Ctrl Devoluciones Recarga        *
+!**************************************************
+
+SUB PINCSU01.011 EXTERNAL
+END SUB
+
+SUB PINCSU12.011 EXTERNAL
+END SUB

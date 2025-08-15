@@ -1,0 +1,51 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A.                                **
+!   **    User Exit  :  CELLTS14.011                                         **
+!   **    Inclu¡r en :  EAMTSU14.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD DE RETAIL                   		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+  UE.CELL.CPR% = -1 						! Cambio de precio
+
+!  IF TS.IO.MOTORKEY = 73 AND TS.LINETYPE = 0 AND UE.CELL.ANUL% = -1 THEN BEGIN       					! Si efectivamente se realizo anul/total
+!     UE.CELL.ANUL% = 0
+!     UE.CELL.SALE% = 0
+!  ENDIF
+
+  IF TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN    ! Anular Transaccion
+
+!     UE.CELL.SALE% = 0						! No imprime pines
+
+	 UE.CELL.ANTRX% = -1
+
+!     DIM UE.VTAPIN$(60,2)					! Dimenciona vector
+  ENDIF
+  
+  IF VAL(TS.IO.DATA$(5)) > 0 AND TS.IO.KEYS(5) = 74 THEN       \! Si cambio de precio
+     UE.CELL.CPR% = 0
+
+  IF (TS.TOTALS(0,0,0) < 0) AND UE.CELL.SALE% = 2 THEN \
+     IF (TS.IO.MOTORKEY = 91) OR ((TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97)) THEN \
+	BEGIN
+	LOCATE #30;1,1,OFF                            ! Ubica Cursor
+	WRITE FORM "2C20";#30;"SALDO TRANSACCION  ",\
+			      " NEGATIVO......"
+	WAIT;1500
+	LOCATE #30;1,1,OFF                            ! Ubica Cursor
+	WRITE FORM "2C20";#30;"DEVUELVA TARJETA    ",	\
+			      "PREPAGO PARA SEGUIR."
+	DIM TS.IO.DATA$(10):DIM TS.IO.KEYS(10):TS.IO.MOTORKEY = 73
+	CALL TSHIECET
+	WAIT;2000
+	ENDIF
+
+   IF TS.IO.KEYS(5) = 74 THEN UE.CELL.CPR% = 0			! Si cambio de precio
+
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------

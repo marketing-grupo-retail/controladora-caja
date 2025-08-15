@@ -1,0 +1,121 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMWEDLC.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNALS for WIC Smartcard Device Sup  */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      STATUS: RELEASE 2 LEVEL 0                                 */
+\/*                                                                */
+\/*      PERSON RESPONSIBLE = LOCHNER, TERRY                       */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE ACTIVITY: LEVEL 0                                  */
+\/*                                                                */
+\/*                                                                */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE DATE:                                              */
+\/*                                                                */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+\ REM  *********************  B B D L  ********************************
+
+\ REM  ****************  OVERVIEW OF PROGRAM  *************************
+\ REM
+\ REM   MODULE NAME:
+\ REM   FUNCTION:    CONTROL OF SERIAL IO COMMS SESSION
+\ REM
+\ REM
+\ REM  ****************************************************************
+
+\ rem  *******************  Send a message  ****************************
+!Inputs:
+!- Message to send, without control characters
+!
+!Outputs:
+!- None
+!
+!Description:
+!- Add STX/ETX/LRC to message, if required
+!  Enhanced EFT requires these to be included in the message (DL.OUT.MSG$)
+!  StorePay automatically adds these
+!- Write the data to the pinpad
+!+ Enhanced EFT:
+!. DL.OUT.MSGLEN = LEN(DL.OUT.MSG$)
+!. CALL DLSEND (Note: This routine must be made PUBLIC in EAMEEDLC.BAS)
+!. This call does not wait for the ACK, this should be handled while waiting for the response
+!. Set DL.NEXT.STATE = 3 so the ACK will be handled properly
+!. Set DL.TIMEOUT so the message is automatically retried after a period of time without an ACK
+!+ StorePay:
+!. RC = spts.send.msg(InMsg$)
+!. This call automatically waits for the ACK and returns 0 if no ACK received, -1 if ACK was received.
+
+SUB WICSend(InMsg$, RC) EXTERNAL
+   STRING      InMsg$
+   INTEGER*1   RC
+END SUB
+
+\ rem  *******************  Receive a response  ****************************
+!Inputs:
+!- Max wait time (seconds)
+!  >0 = number of seconds to wait for response
+!
+!Outputs:
+!- Response data from pinpad (null if no data present)
+!
+!Description:
+!- Initialize OutMsg$ to null (ie. No response yet)
+!- Read data from the pinpad if it is available
+!+ Enhanced EFT:
+!  CALL RECEIVE.MESSAGE (Note: This routine must be made PUBLIC in EAMEEDLC.BAS.  It is used instead of DLRCVE because it sends an ACK to the pinpad in response to the message received.)
+!  If DL.IN.PROCESS = 0, then wait 500 mSec and try RECEIVE.MESSAGE again (until MaxWait*2 attempts have been made)
+!+ StorePay:
+!  RC = spts.process.response(MaxWait)
+!  This call automatically sends the ACK and returns -1 if data was received.
+!  Note: spts.header will have to be made global in order to have access to the data received.
+!  If RC = 0, then exit else OutMsg$ = spts.header
+!- If response received, then return data in OutMsg$, excluding the control characters
+SUB WICReceive(MaxWait, OutMsg$) EXTERNAL
+   STRING   OutMsg$
+   INTEGER*2   MaxWait
+END SUB
+
+\ rem  *******************  Send a message and wait for a response  ****************************
+!Inputs:
+!- Message to send
+!- Max wait time (seconds)
+!  0 = wait indefinitely
+!  >0 = number of seconds to wait for response
+!
+!Outputs:
+!- Response code
+!  0 = Response data received
+!  1 = No response was received within the specified time
+!  2 = The CLEAR key was pressed while waiting for a response
+!- Response data from pinpad
+!
+!Description:
+!- Add STX/ETX/LRC to message, if required
+!- Send the message (WIC_Send)
+!- Initialize OutMsg$ to null (ie. No response yet)
+!- Receive the response (WIC_Receive) waiting 1 second for the response
+!- If nothing received, then wait 100 mSec for keyboard input.
+!  If no key, try to receive again unless the wait time has elapsed (RC = 1)
+!  If key pressed, see if it was the CLEAR key
+!  If CLEAR, then exit with RC = 2, else try to receive again unless the wait time has elapsed (RC = 1)
+!- If response received, then return data in OutMsg$
+SUB WICSendAndWait(InMsg$, MaxWait, OutMsg$, RC) EXTERNAL
+   STRING   InMsg$, OutMsg$
+   INTEGER*2   MaxWait
+   INTEGER*1   RC
+END SUB
+

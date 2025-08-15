@@ -1,0 +1,82 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU07.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+! IR41419   Added the ability for the user to define the minimum   */
+!           valid weight and maximum valid price per pound         */
+!           allowed when calculating weighted coupons on random    */
+!           weight items.                                          */
+!           JEO MGV  10Oct99                                       */
+!                                                                  */
+!***END-OF-SPECIFICATIONS*******************************************/
+
+CALL TSU07.FB              ! Read options first
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+%INCLUDE EAMTSC07.J86      ! COUPON ENHANCEMENT CODE
+
+! RAISE THE FOLLOWING VALUES IF THEY ARE TOO SMALL AND IF YOU HAVE
+! SUFFICIENT TERMINAL DATA SPACE TO ACCOMODATE MORE. (10-BYTES PER)
+! THESE VALUES CAN BE LOWERED TO SAVE DATA SPACE IF THE OPTION IS
+! SELECTED TO DEACTIVATE PREFERRED CUSTOMER PROCESSING.
+! EMSS.DELAY.LMT = 25        ! Up to 25 Delayed coupons at total time
+! EMSS.REPLAY.LMT = 50       ! Up to 50 PC coupons at customer ID
+
+! RAISE THE FOLLOWING VALUE IF IT IS TOO SMALL AND IF YOU HAVE
+! SUFFICIENT TERMINAL DATA SPACE TO ACCOMODATE MORE. (20-BYTES PER)
+! THIS VALUE CAN BE LOWERED TO SAVE DATA SPACE IF THE OPTION IS
+! SELECTED TO DEACTIVATE PREFERRED CUSTOMER PROCESSING.
+! EMSS.WGT.LMT = 25          ! Up to 25 weight promotions in an order
+
+! RAISE THE FOLLOWING VALUE IF IT IS TOO SMALL AND IF YOU HAVE
+! SUFFICIENT TERMINAL DATA SPACE TO ACCOMODATE MORE. (20-BYTES PER)
+! THIS VALUE WILL ONLY BE USED IF THE OPTION IS SELECTED FOR VALIDATION
+! BY PROMOTION CODES.
+! EMSS.PROMO.LMT = 50        ! Up to 50 promotion codes in an order
+
+! RAISE THE FOLLOWING VALUE IF IT IS TOO SMALL AND IF YOU HAVE
+! SUFFICIENT TERMINAL DATA SPACE TO ACCOMODATE MORE. (6-BYTES PER)
+! EMSS.PERCENT.LMT = 10      ! Up to 10 unlimited percent off coupons
+                             ! in an order.
+
+! RAISE THE FOLLOWING VALUE IF IT IS TOO SMALL AND IF YOU HAVE
+! SUFFICIENT TERMINAL DATA SPACE TO ACCOMODATE MORE. (6-BYTES PER)
+! THIS VALUE CAN BE LOWERED TO SAVE DATA SPACE IF CATEGORY 5 SCANABLE
+! UPC CODES ARE THE ONLY EXPECTED COUPON CODES GREATER THAN 5 DIGITS.
+! EMSS.XLAT.LMT = 50         ! MFR substitution for up to 50 coupons
+                             !  which contain data in the MFR area of
+                             !  the coupon UPC  (??MMMMM?????)
+ 
+!AIR41419
+! ** ALLOW COUPONS ON RANDOM WEIGHT SALES SMALLER THAN 1/10 LB  
+! THE FOLLOWING VALUE DEFINES THE MINIMUM WEIGHT IN HUNDREDTHS OF A POUND
+! THAT IS ACCEPTABLE WHEN THE WEIGHT OF A RANDOM WEIGHT SALE (ITEM RECORD
+! 2XXXXX00000) IS COMPUTED BY DIVIDING THE VALUE IN THE UPC BY THE PRICE
+! PER POUND IN THE ITEM RECORD.  LOWER THE FOLLOWING VALUE (NOT LESS THAN
+! 1) IF IT IS TOO LARGE AND YOU ARE SURE THAT ALL PROMOTED RANDOM WEIGHT
+! SALES HAVE A VALID PRICE PER POUND IN THE ASSOCIATED ITEM RECORD.
+  EMSS.MIN.WGT = 10                ! MIN = 1/10 LB CALC WEIGHT  
+! THE FOLLOWING VALUE DEFINES THE MAXIMUM PRICE PER POUND IN THE ITEM
+! RECORD FOR A RANDOM WEIGHT SALE (ITEM RECORD 2XXXXX00000) THAT CAN BE
+! USED TO COMPUTE THE WEIGHT OF THE SALE.  RAISE THE FOLLOWING VALUE IF
+! IT IS TOO SMALL AND YOU ARE SURE THAT ALL PROMOTED RANDOM WEIGHT SALES
+! HAVE A VALID PRICE PER POUND IN THE ASSOCIATED ITEM RECORD.
+  EMSS.MAX.PRICE.PER.LB = 3000     ! MAX R/W PRICE/LB = 30.00   
+!EIR41419
+
+!!*******************************************************************
+!!** SAVE DATA SPACE BY PROHIBITING DEPT CHANGE FROM EAMTSPCC      **
+!!*******************************************************************
+ DIM SO.DEPTNUM(0)                           ! Reduce from 1222 to 0
+ DIM GC.ZF.TEND(0)                           ! Reduce from 8 to 0
+ DIM GC.ZF.CASH(0)                           ! Reduce from 30 to 0
+ DIM GC.ZF.PERF(0)                           ! Reduce from 26 to 0
+ DIM SO.TMPRODEXCL(0)                        ! Reduce from 30 to 0
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

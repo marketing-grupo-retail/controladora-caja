@@ -1,0 +1,41 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1996                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR4301.011                                          **
+!   **    Inclu¡r en :  EAMTSU43.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Estas lineas se insertaran en el archivo EAMTSU43.J86              **
+!   **    para calcular el valor Total del Impto al Consumo en               **
+!   **    transacciones donde se digita CANTIDAD.                            **
+!   **                                                                       **
+!   ***************************************************************************
+   VAL.IPO% = IR.USEREXIT1                      !
+   CAV% = SL.IE.QTYORWGT                        !
+!   write form "c38";#34;str$(val.ipo%)+"   "+str$(ir.indicat1)
+   IF IR.INDICAT1 >= 0   AND                   \!
+      IR.INDICAT1 < 16   THEN BEGIN             !
+      IPO00% = VAL.IPO%*CAV%                    ! Toma ImpoConsumo
+      IPOT00% = IPOT00% + IPO00%                ! Acumula Imp Consumo
+   ENDIF                                        !
+   IF (IR.INDICAT1 AND 80H) THEN BEGIN          ! Tiene Iva 16% ?
+      IPO16% = VAL.IPO%*CAV%                    ! Toma ImpoConsumo
+      IPOT16% = IPOT16% + IPO16%                ! Acumula Imp Consumo
+   ENDIF                                        !
+   IF (IR.INDICAT1 AND 40H) THEN BEGIN          ! Tiene Iva 20% ?
+      IPO20% = VAL.IPO%*CAV%                    ! Toma ImpoConsumo
+      IPOT20% = IPOT20% + IPO20%                ! Acumula Imp Consumo
+   ENDIF                                        !
+   IF (IR.INDICAT1 AND 20H) THEN BEGIN          ! Tiene Iva 35% ?
+      IPO35% = VAL.IPO%*CAV%                    ! Toma ImpoConsumo
+      IPOT35% = IPOT35% + IPO35%                ! Acumula Imp Consumo
+   ENDIF                                        !
+   IF (IR.INDICAT1 AND 10H) THEN BEGIN          ! Tiene Iva D% ?
+      IPODD% = VAL.IPO%*CAV%                    ! Toma ImpoConsumo
+      IPOTDD% = IPOTDD% + IPODD%                ! Acumula Imp Consumo
+   ENDIF                                        !
+   CAV% = 1                                     !
+! REM Fin de las lineas incluidas para la funcion especifica 
+!------------------------------------------------------------------------------

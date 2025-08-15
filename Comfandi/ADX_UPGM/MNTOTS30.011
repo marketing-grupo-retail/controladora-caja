@@ -1,0 +1,23 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2000                                        **
+!   **    Proyecto   :  GLOBAL DATATEL COLOMBIA *                            **
+!   **    User Exit  :  GLOBTS30.011                                         **
+!   **    Inclu¡r en :  EAMTSU30.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **                                                                       **
+!   **    Restaura valor de variables al Inicio de Transaccion               **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+IF (TS.BALDUE(0) < 0) AND (TS.PROCEDURE < 1) AND UE.MNTO.ON THEN  \
+BEGIN
+
+   CALL DONACION(-1)
+   TS.BALDUE(0) = TS.BALDUE(0) + UE.MNTO.MONTOF%
+   UE.MNTO.ON = 0
+   UE.MNTO.FREEIT% = -1
+
+ENDIF

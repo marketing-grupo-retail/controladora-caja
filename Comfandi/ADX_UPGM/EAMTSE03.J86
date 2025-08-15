@@ -1,0 +1,48 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU03.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR53766  If a customer card was accepted and then the terminal
+!           goes into special signoff, the next transaction could
+!           have a second header printed.  It also could show the
+!           original customer number on the receipt even though the
+!           transaction might be from a different customer, or might
+!           not even be a Preferred Customer transaction.
+!           GGK IBM 17May2004
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** DISCARD CUSTOMER NUMBER AFTER TIME-OUT BETWEEN TRANSACTION    **
+!!*******************************************************************
+!AIR53766 If a timeout occurred between transactions and a customer
+!         number had been entered, cut the receipt and then reprint header.
+!         If 4610 postprint, just wipe out the buffer and reprint header.
+  IF (EMSS.PANEL.TRANS <> 0) THEN BEGIN ! If a PC card was entered
+    IF (PRT4610.ENABLE) THEN BEGIN ! if 4610 is used
+      IF (EP.ETO.PRINT.POST.TRANS) THEN BEGIN ! post-printing is being used
+        ! nothing else to do for 4610+postprint
+      ENDIF ELSE BEGIN             ! Not postprint
+        CALL DO.GUILLOTINE.CUT     ! separate the old header + customer number
+      ENDIF
+      CR.BUFFER.POINTER% = 1       ! Use first entry if postprint/reprint
+      TS.LINETYPE = 18             ! Print the new header
+      TS.LINEDATA = 2              ! Print the new header
+      HEADER.PRINTED.4610 = 0      ! Ensure that header reprints
+      EMSS.HEADER.PRINTED = 0      ! Ensure that header reprints
+      CALL TSPREC01                ! Print the header
+      HEADER.PRINTED.4610 = -1     ! Indicate that it is done
+    ENDIF                          ! PRT4610.ENABLE
+  ENDIF                            ! EMSS.PANEL.TRANS
+!EIR53766
+  CA.CUSTNUM$ = ""                 ! Clear customer number
+  EMSS.PANEL.TRANS = 0             ! Reset panel transaction flag
+  SL.END = 0                       ! NO DATA ENTRY BUILDUP
+  EMSS.HEADER.PRINTED = 0          ! Reprint header
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

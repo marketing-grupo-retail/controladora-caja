@@ -1,0 +1,74 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/******************************************************************/
+\/*  This include reads to the Auto Store Close Function Options  */
+\/*  file.                                                         */
+\/*                                                                */
+\/*                                                                */
+\/*                                                                */
+\/*  CHANGE DATE:                                                  */
+\/*                                                                */
+\/******************************************************************/
+
+         READ #36, 1;SCR1.ACTIVE(1),        \
+                     SCR1.HOUR(1),          \
+                     SCR1.MIN(1),           \
+                     SCR1.PROC$(1),         \
+                     SCR1.ACCT$(1),         \
+                     SCR1.DATE$(1),         \
+                     SCR1.ACTIVE(2),        \
+                     SCR1.HOUR(2),          \
+                     SCR1.MIN(2),           \
+                     SCR1.PROC$(2),         \
+                     SCR1.ACCT$(2),         \
+                     SCR1.DATE$(2),         \
+                     SCR1.ACTIVE(3),        \
+                     SCR1.HOUR(3),          \
+                     SCR1.MIN(3),           \
+                     SCR1.PROC$(3),         \
+                     SCR1.ACCT$(3),         \
+                     SCR1.DATE$(3),         \
+                     SCR1.ACTIVE(4),        \
+                     SCR1.HOUR(4),          \
+                     SCR1.MIN(4),           \
+                     SCR1.PROC$(4),         \
+                     SCR1.ACCT$(4),         \
+                     SCR1.DATE$(4),         \
+                     SCR1.ACTIVE(5),        \
+                     SCR1.HOUR(5),          \
+                     SCR1.MIN(5),           \
+                     SCR1.PROC$(5),         \
+                     SCR1.ACCT$(5),         \
+                     SCR1.DATE$(5),         \
+                     SCR1.ACTIVE(6),        \
+                     SCR1.HOUR(6),          \
+                     SCR1.MIN(6),           \
+                     SCR1.PROC$(6),         \
+                     SCR1.ACCT$(6),         \
+                     SCR1.DATE$(6),         \
+                     SCR1.ACTIVE(7),        \
+                     SCR1.HOUR(7),          \
+                     SCR1.MIN(7),           \
+                     SCR1.PROC$(7),         \
+                     SCR1.ACCT$(7),         \
+                     SCR1.DATE$(7)          !
+
+         READ #36, 2; SCR2.PICKUP(1),           \
+                      SCR2.PICKUP(2),           \
+                      SCR2.PICKUP(3),           \
+                      SCR2.PICKUP(4),           \
+                      SCR2.PICKUP(5),           \
+                      SCR2.PICKUP(6),           \
+                      SCR2.PICKUP(7),           \
+                      SCR2.PICKUP(8)            !
+
+         READ #36, 3; SCR3.WAIT$(1),            \
+                      SCR3.WAIT$(2),            \
+                      SCR3.WAIT$(3),            \
+                      SCR3.WAIT$(4),            \
+                      SCR3.WAIT$(5),            \
+                      SCR3.WAIT$(6),            \
+                      SCR3.WAIT$(7),            \
+                      SCR3.WAIT$(8),            \
+                      SCR3.WAIT$(9)             !
+

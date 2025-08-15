@@ -1,0 +1,27 @@
+! USER EXIT CALLED AFTER THE READ OF AN ITEM RECORD
+! Despues de leer un registro de articulo
+FUNCTION TSUPEC08 PUBLIC
+   INTEGER*1 TSUPEC08
+
+!call traceNUO( "UE08" )
+
+   ! Simulacion de Venta
+   CALL SIMULAR.VENTA.POS(08)
+
+   ! Inventario
+   if MSMTINVE08 then exit function
+
+   !Deliverys
+   CALL GRDOMICILIOS(08)
+
+   ! Permite el ingreso de peso usando la tecla PLU, autorizacion de supervisor y llave
+   call MSMTFACT08
+
+   ! Recargas Electronicas
+   call MSMTREC08
+
+   !Remates
+   Call GRREMATES(08)
+
+
+END FUNCTION

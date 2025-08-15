@@ -1,0 +1,5 @@
+! After writing a line to the customer receipt
+! Tras imprimir el recibo de cliente
+FUNCTION TSUPEC60 PUBLIC
+
+END FUNCTION

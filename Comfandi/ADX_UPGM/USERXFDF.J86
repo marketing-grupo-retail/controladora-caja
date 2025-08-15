@@ -1,0 +1,33 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** USERXFDF.J86 ******************************************!
+! TITLE: Electronic Marketing Buyer customer activity file definition
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!*******************************************************************
+!!** DEFINE VARIABLES FOR THE CUSTOMER TRANSFER FILE               **
+!!*******************************************************************
+ STRING GLOBAL              \
+         XF.DATA$,          \         15 BYTES OF NUMERIC DATA
+         XF.DOLP$           !         DATE OF LAST PURCHASE
+ 
+ INTEGER*4 GLOBAL           \
+         XF.POINTS,         \         PENDING POINTS
+         XF.TR.POINTS,      \         POINTS FOR LAST TRANSACTION
+         XF.AUTOCOUP,       \         PENDING AUTO COUPON AMOUNT
+         XF.TO.POINTS,      \         TOTAL TRANSFERRED POINTS
+         XF.TO.AUTOCOUP,    \         TOTAL AUTO COUPON AMOUNT
+         XF.RESERVE         !         RESERVED SPACE
+ 
+ INTEGER GLOBAL             \
+         XF.TRANS,          \         NUMBER OF PENDING TRANSACTIONS
+         XF.TO.TRANS        !         NUMBER OF TRANSFERRED TRANSACTIONS
+ 
+ INTEGER GLOBAL                     \
+         USER.FBPEND.OPEN,          \ PENDING FILE OPENED
+         USER.FBPEND.READ,          \ PENDING FILE READ OK
+         USER.FBPEND.HOLD           ! WRITE HOLD ON PENDING FILE
+!

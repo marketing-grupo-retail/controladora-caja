@@ -1,0 +1,27 @@
+\/* TIME STAMP BLOCK **************************************************
+\** END OF TIME STAMP BLOCK ******************************************/
+REM********************************************************************
+REM     READ A RECORD FROM THE ITEM RECORD FILE                       *
+REM********************************************************************
+REM* Ampliacion de registro a 66 caracteres
+
+        READ FORM "T7,3I1,C1,C2,C3,2C1,C5,C2,C18,2I2,C31" ;          \
+            #50  KEY Asc.ITEMCODE$;     \ SESSION NUMBER AND RECORD KEY
+\  not read    Asc.DUMMY$,            \ ITEM CODE                  UPD 6
+               Asc.INDICAT0,          \ INDICATOR FLAG BYTE 0      INT 1
+               Asc.INDICAT1,          \ INDICATOR FLAG BYTE 1      INT 1
+               Asc.INDICAT1A,         \ INDICATOR FLAG BYTE 2      INT 1
+               Asc.INDICAT2$,         \ INDICATOR BYTE 3           UPD 1
+               Asc.DEPARTME$,         \ DEPARTMENT NUMBER          UPD 2
+               Asc.FAMILYNU$,         \ FAMILY COUPON NUMBERS      UPD 3
+               Asc.MPGROUP$,          \ MULTIPRICING GROUP NUMBER  UPD 1
+               Asc.SALEQUAN$,         \ DEAL QUANTITY              UPD 1
+               Asc.SALEPRIC$,         \ PRICE                      UPD 5
+               Asc.LINKEDTO$,         \ LINKED ITEM                UPD 2
+               Asc.ITEMNAME$,         \ ITEM DESCRIPTION           ASC 18
+               Asc.USEREXIT1,         \ RESERVED FOR USER DATA     INT 2
+               Asc.USEREXIT2,         \ RESERVED FOR USER DATA     INT 2
+               ASC.USERDATA$          ! Datos Adicionales          ASC 20     
+
+  ASC.IR.NDEPTO$ = LEFT$(ASC.USERDATA$,16)							! DEPARTAMENTO COMERCIAL
+  

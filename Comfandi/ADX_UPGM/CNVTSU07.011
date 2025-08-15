@@ -1,0 +1,175 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+! Mod28Jul2008
+! Se adiciona el control de variables para los procesos
+! de validacion en linea de planes, beneficiarios y 
+! productos. desarrollado por Grupo Retail - OVS
+!-------------------------------------------------
+
+UE.OPEN.MEDICO%   = 17
+UE.OPEN.IPS% 	    = 82
+UE.OPEN.CONVENIO% = 83
+UE.OPEN.BENEFIC%  = 84			! 66,65, 64 NO SIRVE
+UE.OPEN.PLU%	    = 81
+UE.OPEN.DIAGNOS%  = 88
+UE.OLD.BENEF$     = ""
+UE.OLD.MEDICO$    = ""
+UE.OLD.FORMULA$   = ""
+UE.OLD.IPS$       = ""
+UE.EPS.COPAGOAPLICADO% = 0
+Ue.Cnv.AplicaCopago% = 0 
+UE.EPS.GRABAString% = 0
+Dim Asc.NEGAMT(10)
+Dim Asc.NEGCNT(10)
+For XI% = 0 To 7												  ! Control  Montos devoluciones
+    Asc.NEGAMT(XI%) = TO.NEGAMT(XI%)
+    Asc.NEGCNT(XI%) = TO.NEGCNT(XI%)
+Next XI%
+Call INICIALICE.EPS
+!Call U.Imprime("Modulo Convenios 14 Dic 2007",2100H)  								  	! Rastro en SJ
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN Begin																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Modulo Convenios",1500,"L")    		! Msg Alerta
+ Call Visores4690(1,"Mod. Convenios","No Operativo",1500,"L")			      	! Msg Alerta
+ Call U.Imprime("Error Carga Modulo Convenios ",2100H)								  	! Rastro en SJ
+ UE.EPS.EPSS%       = 00                                                  ! Modulo activo
+EndIf Else Begin									      																	! Apertura OK
+ If END #94 THEN UE.EPS.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    If TS.TEMP1$ = "[CONVENIOS]" Then Begin		              							! Proyecto Convenios
+     Read #94; TS.TEMP1$																									! Lectura registro
+     UE.EPS.EPSS%      = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     UE.EPSS.DSCTOTRX$ = Mid$(TS.TEMP1$,30,2)				  ! Grupo de descuento
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,2)           		  ! Tipo y variedad de pago
+     UE.EPS.TIPO$ = Left$(TS.TEMP1$,1)                                    ! Tipo de pago
+     UE.EPS.VARI$ = Right$(TS.TEMP1$,1)                                   ! Variedad de Pago
+!--- ADD para manejo de capitaciones OVS 10 mayo 2005
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,2)                   				  ! Tipo y variedad de pago
+     UE.EPS.TIPOC$ = Left$(TS.TEMP1$,1)                                   ! Tipo de pago capitacion
+     UE.EPS.VARIC$ = Right$(TS.TEMP1$,1)                                  ! Variedad de Pago capitacion
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,3)
+     Ue.Eps.Motora%    = Val(Ts.Temp1$)                                   ! Tecla Motora
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,3) 				  ! Departamento Misc 
+     Ue.Cnv.Miscelaneo$= Ts.Temp1$                                        ! para capitacion
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     Ue.Cnv.ItmCuota$  = Str$(Val(Mid$(TS.TEMP1$,30,12)))     		  ! Item Recaudo Cuota moderadora
+     Ue.Cnv.ItmCuota$  = Right$("000000000000"+Ue.Cnv.ItmCuota$,12)       ! Ajuste del Item 
+
+!--- 28 Jul 2008
+!--- Lineas adicionadas para procesos de validacion en linea
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     GR.CNV.CADENA$    = Mid$(TS.TEMP1$,30,4) 				  ! Numero de Cadena
+     GR.CNV.CADENA$    = Right$("0000"+Str$(Val(GR.CNV.CADENA$)),4)
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     GR.CNV.APPL$      = Mid$(TS.TEMP1$,30,2) 				  ! Numero de Aplicacion 
+
+!--      
+!-- Add 11 Abr 2007 
+!     Read #94; TS.TEMP1$    																							! Lectura registro
+!     Asc.Cnv.PagCuota$  = Str$(Val(Mid$(TS.TEMP1$,30,2)))        				  ! Pago Parcial asumido cuota
+
+     To.LOGLIMITS(4) = 99999999																						! Modificacion controles
+     To.LOGLIMITS(5) = 99999999																			      ! Miscelaneos Base SMA 
+     To.MISCMAX      = 99999999																						!
+     To.MISCREF      = 99999999																						!
+     To.MISCQTY      = 9999																							  !
+     GoTo UE.EPS.FINAL																									  ! Sale del ciclo de carga
+   EndIf
+ Wend
+ UE.EPS.FINAL:
+   Close 94												        																! Cierra archivo
+   Call visores4690(1,"Modulo Convenios","22 Abr 2013",1000,"l")
+EndIf
+
+If UE.EPS.EPSS% = -1 Then Begin       ! Si proyecto activo
+	Dim UE.EPSS.DESC(4)
+	Dim UE.EPS.CMP$(5)
+  Dim UE.EPS.DSCTLESS$(5)
+	Dim UE.EPSS.DAT(7)
+  TS.ER.RETURN = -1
+  If UE.EPS.APERTURA% <> -1 Then Begin
+     OPEN "R::$EDICO" KEYED   RECL 58 AS UE.OPEN.MEDICO% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","MEDICO",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+     OPEN "R::$PS" KEYED      RECL 54 AS UE.OPEN.IPS% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","IPS",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+
+     OPEN "R::$ONVENIO" KEYED RECL 106 AS UE.OPEN.CONVENIO% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","CONVENIO",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+
+     OPEN "R::$NEFICIA" KEYED RECL 101 AS UE.OPEN.BENEFIC% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","BNEFICIA",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+
+     OPEN "R::$IAGNOST" KEYED RECL 55 AS UE.OPEN.DIAGNOS% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","DIAGNOS",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+
+     Open "R::$LUCONVE" KEYED RECL 24 AS UE.OPEN.PLU% UNLOCKED NOWRITE NODEL
+     If TS.ER.RETURN NE -1 Then Begin 
+        Call VISORES4690(1,"ERROR APERTURA","PLUCONVE",1000,"L")
+        GoTo NO.EPS
+     EndIf 
+
+     
+     UE.EPS.APERTURA% = -1
+  EndIf
+
+  UE.EPSS.DESC(0) = "Dialogo 0           "
+  UE.EPSS.DESC(1) = "DIGITE CODIGO PLAN ?"
+  UE.EPSS.DESC(2) = "NRO. AUTORIZACION  ?"
+  UE.EPSS.DESC(3) = "COD. BENEFICIARIO..?"
+  UE.EPSS.DESC(4) = "Dialogo 4           "
+	      
+	UE.EPS.POSPAGO% = 0
+	For J% = 1 TO TO.NUMTNDR
+	 If VAL(UE.EPS.TIPO$+UE.EPS.VARI$) = VAL(STR$(TO.TENDOPTS(J%,0))+\
+	    STR$(TO.TENDOPTS(J%,1))) Then Begin
+	    UE.EPS.POSPAGO% = J%			! No. Pago Valido
+	 EndIf
+	Next J%
+EndIf
+!Call U.Imprime("Modulo de Convenios Ver. 2.2 OK",6100H)
+!Call U.Imprime("Actualizado Sept. 9 2008",6100H)
+
+If UE.EPS.EPSS% = -1 Then                                                   \! Proyecto Activo
+   Call U.IMPRIME("MODULO CONVENIOS       ON 30/Dic/2014",2100H) Else     \! Msg Proyecto Cargado
+   Call U.IMPRIME("MODULO CONVENIOS      OFF 30/Dic/2014",2100H)           ! Msg Proyecto Cargado
+
+
+Exit Sub
+NO.EPS:
+	   Call Visores4690(1,"ERROR APERTURA","ARCHIVOS MAESTROS",2000,"C")   	
+	   Call Visores4690(1,"MOD  CONVENIOS","** CANCELADO **",2000,"C")   		   
+           Call U.IMPRIME("ERROR="+TS.TS11WERR$+" COD="+TS.DISPERR$+" FILE="+\
+                           STR$(TS.ERRF),6100H)
+	   Call U.Imprime("Error Carga Convenios Aperturas",2100H)								  	! Rastro en SJ
+           UE.EPS.EPSS% = 0                    ! Desactivo proyecto
+     

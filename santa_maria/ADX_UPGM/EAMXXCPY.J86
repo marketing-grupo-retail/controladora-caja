@@ -1,0 +1,6 @@
+\/* TIME STAMP BLOCK ************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+SUB EAMXXCPY
+STRING EAMXXCPY$
+EAMXXCPY$ = "(c) 2012 Toshiba Global Commerce Solutions, Inc."
+END SUB

@@ -1,0 +1,22 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMP4EXJ                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNAL FUNCTION PROTOTYPES            */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*                                                                */
+\/*      IR33229 - Created June 18, 1996 - Matra - ADW             */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+%INCLUDE EAMP4EGJ.J86   ! Generic Public Routines
+%INCLUDE EAMP4ESJ.J86   ! Application Specifiec Public Routines

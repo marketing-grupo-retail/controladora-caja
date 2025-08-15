@@ -1,0 +1,178 @@
+!**************************************************
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CNVTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+! Se adiciona la rutina de inicialziacion de variables
+! de EPS al momento de presionar la tecla de captura de
+! dialogo en convenios
+! Ajuste OVS 14 Dic 2007
+!---------------------------------------------------------
+
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.INTRX) AND (UE.EPSS.ON) Then \
+  IF (Val(UE.EPS.CAPITACION$) = 1) AND (UE.EPS.DEVO% = -1) Then Begin	  	! Si Capitacion y devolucion
+    IF Asc.Cnv.ApplCobro% NE -1 Then Begin 																	! No ha aplicado reverso cuota moderadora
+	     Dim TS.IO.KEYS(10)
+	     Dim TS.IO.DATA$(10)
+	     TS.IO.MOTORKEY = 0    	 
+	     TS.GUIDANCE = 1020                                                 ! Obliga a totalizar
+	     Exit Sub 
+    EndIf 
+  EndIf 
+
+If (TS.IO.KEYS(1) = 82) AND (UE.EPSS.ON) Then Begin
+  Call Visores4690(1,"NO SE PUEDE","SUSPENDER !!",1500,"C")   	
+  Dim TS.IO.KEYS(10)
+  Dim TS.IO.DATA$(10)
+  TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) Then Begin
+ If NOT(UE.EPSS.ON) Then Begin                             ! No es trx EPS
+  If TS.IO.MOTORKEY = Val("9"+UE.EPS.TIPO$) AND \          ! Presionan tecla pago
+	 Val(TS.IO.DATA$(3)) = Val(UE.EPS.VARI$) Then Begin    ! 
+	 Call Visores4690(1,"FORMA PAGO EXCLUSIVA","DE CONVENIOS !!",1500,"C")   	
+   Dim TS.IO.KEYS(10)
+   Dim TS.IO.DATA$(10)
+   TS.IO.MOTORKEY = 0
+	Exit Sub
+  EndIf 	
+ EndIf
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) Then Begin ! Si forma de pago 
+ If UE.EPSS.ON <> 0 AND UE.EPS.COPAGOAPLICADO% = 0 Then Begin
+    Call Visores4690(1,"PRESIONE TECLA","CONVENIO ANTES !!",1500,"C")   	
+    Dim TS.IO.KEYS(10)
+    Dim TS.IO.DATA$(10)
+    TS.IO.MOTORKEY = 0
+    Exit Sub
+ EndIf
+EndIf
+
+If UE.EPSS.ON Then \
+	If ((TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67)) And \
+	   (TS.IO.MOTORKEY = 80) Then \
+		UE.EPS.DEVO% = -1
+		
+If UE.EPSS.ON Then \
+	If (TS.IO.KEYS(1) = 70) AND (TS.IO.MOTORKEY = Ue.Eps.Motora%) Then	\
+	 If NOT(TS.INTRX) Then Begin
+			UEDLG.OK% = 0
+			While (UEDLG.OK% = 0)
+			UE.ERROR% = 0
+			If TS.TOTALS(0,0,0) <> 0 Then Begin 
+			   Call VISOR.AND.BORRAR("PROCEDIMIENTO NO VALIDO, ANULE TRX")
+			   UE.EPS.DEVO% = 0 
+			   Dim TS.IO.KEYS(10):Dim TS.IO.DATA$(10):TS.IO.MOTORKEY = 0
+			   Exit Sub 
+		        EndIf 
+			Call CAPTURE.DATOEPS("ANULA INFORMACION"," DE EPS 1=SI, 9=NO",-1)
+			   If IOPDATA$ <> "E" Then Begin         	! si presiono ENTER
+				 UE.EPSS.LEIDO% = Val(IOPDATA$)
+				 UE.EPSS.LEIDO$ = IOPDATA$
+				 If UE.EPSS.LEIDO% = 1 Then Begin
+					Call INICIALICE.EPS
+					UEDLG.OK% = 1
+					Call Visores4690(1,"DATOS DE CONVENIOS","INICIALIZADOS...",1500,"C")   	
+					EndIf
+				 If UE.EPSS.LEIDO% = 9 Then Begin
+				    Call Visores4690(1,"** ANULACION **","** CANCELADA **",1500,"C")   	
+					UEDLG.OK% = 1
+				 EndIf
+			   EndIf
+			Wend
+	 EndIf Else Begin
+	   Call Visores4690(1,"YA HAY ARTICULOS","VENDIDOS",1500,"C")   	
+	   Call Visores4690(1,"DEBE ANULAR","LA TRANSACCION",1500,"C")   		   
+	   UE.EPS.DEVO% = 0
+	 EndIf
+
+If (TS.IO.MOTORKEY = 62) AND (UE.EPS.NRMLoCATAL$ <> "2") AND UE.EPSS.ON Then Begin
+    Call Visores4690(1,"NO APLICA DSCTO EN","ESTA TRANSACCION !!",1500,"C")   	
+	  Dim TS.IO.KEYS(10):Dim TS.IO.DATA$(10):TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.MOTORKEY = 62) AND (UE.EPS.NRMLoCATAL$ = "2") AND (UE.EPSS.ON) Then Begin
+	TS.IO.DATA$(5) = UE.EPSS.DSCTOTRX$
+	TO.DISC.RATE(Val(UE.EPSS.DSCTOTRX$)-1) = Val(UE.EPS.DSCTOTRX$)*10
+	Call Visores4690(1,"APLICANDO DESCUENTO","....",1500,"C")   	
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.IO.KEYS(1) <> 70) AND (TS.INTRX) AND (TS.TENDVAMT(UE.EPS.POSPAGO%) > 0) Then Begin
+  Dim TS.IO.KEYS(10)
+  Dim TS.IO.DATA$(10)
+  TS.IO.MOTORKEY = 0
+  UEPG.BORRA% = 0
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.INTRX) AND (UE.EPSS.ON) AND (TS.BAL.TAKEN) Then Begin
+  UE.EPSS.COOP% = -1
+  UE.EPS.COPAGOAPLICADO% = COOPAGO          ! Aplicacion del coopago
+  If UE.EPS.COPAGOAPLICADO% = -1 Then      \!
+     UE.EPS.GRABAString% = 0
+  UE.EPS.COPAGOAPLICADO% = -1               ! Control cierre de la trx 
+EndIf
+
+If (TS.IO.KEYS(7) > 90) AND (TS.IO.KEYS(7) < 97) AND (UE.EPS.NRMLoCATAL$ = "2") AND (UE.EPSS.ON) Then	\
+If (UE.EPS.NRMLoCATAL$ = "2") AND (NOT(TS.DISCFLAG)) Then Begin
+    Call Visores4690(1,"DEBE APLICAR EL","DESCUENTO ANTES!",1500,"C")   	
+	  Dim TS.IO.KEYS(10)
+	  Dim TS.IO.DATA$(10)
+	  TS.IO.MOTORKEY = 0
+EndIf
+
+If (TS.IO.KEYS(2) = Ue.Eps.Motora%) AND (TS.INTRX = 0) AND (UE.EPSS.ON <> -1) Then Begin
+ FOR I% = 1 TO 5                       ! Entra limpiando vector datos
+	UE.EPSS.DAT(I%) = ""
+ Next I%
+ Call LEA.EPS													! Captura los Dialogos de la EPS
+ If UEPG.BORRA% >= 3 Then Begin
+	  Dim TS.IO.KEYS(10)
+	  Dim TS.IO.DATA$(10)
+	  Dim UE.EPSS.DAT(6)
+	  TS.IO.MOTORKEY = 0
+	  UEPG.BORRA% = 0
+	  UE.EPSS.ON = 0
+	  TS.IO.KEYS(0) = 73
+	  TS.IO.MOTORKEY = 73
+	  Call INICIALICE.EPS
+	EndIf Else Begin
+	  Dim UE.EPS.PARR(500)
+	  TS.IO.MOTORKEY = 0
+	  UE.EPS.FOTO% = -1
+	  UE.EPSS.HEAD = -1
+    If PRT4610.ENABLE = 0 Then UE.EPS.LINE% = 1 Else UE.EPS.LINE% = 1
+	  Dim TS.IO.KEYS(10)
+	  Dim TS.IO.DATA$(10)
+	  UE.EPS.GRABAString% = -1
+	EndIf
+EndIf
+
+If (TS.IO.KEYS(6) = 75) Then	\
+	UE.EPS.CANT$ = TS.IO.DATA$(6)
+
+!--- Validacion de Reverso de reverso cuota moderadora
+
+ IF TS.IO.MOTORKEY = 81 Then Begin            														! Si presiono tecla Total
+  IF (Val(UE.EPS.CAPITACION$) = 1) AND (UE.EPS.DEVO% = -1) Then Begin	  	! Si Capitacion y devolucion
+    IF (Asc.Cnv.ApplCobro% = 0 Or Asc.Cnv.ApplCobro% = -2 ) Then Begin 		! No ha aplicado reverso cuota moderadora
+       Asc.Cnv.ApplCobro% = -1																						! Control aplicacion reverso cuota moderadora
+       If  Val(Asc.Cnv.CuotaMod$) <> 0 Then Begin 
+         Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)													! Simulacion reverso item cobro cuota moderadora
+         TS.IO.MOTORKEY = 0																								!
+         TS.IO.MOTORKEY = 80
+         TS.IO.KEYS(1)  = 70
+         TS.IO.KEYS(2)  = 80
+         TS.IO.DATA$(2) = Str$(Val(Ue.Cnv.ItmCuota$))
+       EndIf Else Begin 
+       	 Dim TS.IO.DATA$(10) : Dim TS.IO.KEYS(10)													! Simulacion reverso item cobro cuota moderadora
+         TS.IO.MOTORKEY = 73																							!
+       EndIf 
+    EndIf  
+  EndIf 
+ EndIf 

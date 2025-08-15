@@ -1,0 +1,155 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+\ REM!!*****************************************************************        
+\ REM!!  EFT TERMINAL WORKING STORAGE                                           
+\ REM!!*****************************************************************        
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+ TS.ET.INIT.RUN,        \ flag showing IPL initialization complete              
+ TS.ET.ACTIVE           ! flag indicating eft active status                     
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+ TS.AUTH.RESP           ! set by reft to tell dlc msg is auth resp              
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+                        \                                                       
+ TS.IN.HOST,            \   HOST MUST PROCESS THIS MESSAGE                      
+ TS.IN.REFT,            \   REFT MUST PROCESS                                   
+ TS.OUT.REFT,           \   REFT MUST PROCESS                                   
+ TS.OUT.DLC             !   DLC MUST PROCESS                                    
+                                                                                
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+ TS.TERM.PENDING        \ REFT REQUESTS SESSION TERMINATION                     
+                                                                                
+ STRING GLOBAL          \                                                       
+ TS.ET.USER$,           \ USER STRING                                           
+                        \                                                       
+ TS.ET.XMITBUF$,        \ INBOUND MESSAGE TRNASMIT BUFFER                       
+                        \                                                       
+ ET.IN.MSG$,            \ INBOUND MESSAGE                                       
+ ET.OUT.MSG$,           \ OUTBOUND MESSAGE                                      
+ ET.IN.TYPE$,           \ INBOUND MESSAGE TYPE                                  
+ ET.OUT.TYPE$           ! OUTBOUND MESSAGE TYPE                                 
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+ ET.IN.MSGLEN,          \ INBOUND MESSAGE LENGTH                                
+ ET.OUT.MSGLEN          ! OUTBOUND MESSAGE LENGTH                               
+                                                                                
+\ REM!!*****************************************************************        
+\ REM!!  INFORMATION KEPT FOR AUTO PICKUPS                                      
+\ REM!!*****************************************************************        
+                                                                                
+ INTEGER*4 GLOBAL       \                                                       
+ TS.EFT.TOTALS(2)       ! TOTALS BY TYPE AND VARIETY                            
+                                                                                
+\ REM!!*****************************************************************        
+\ REM!!  CHECKOUT MAINLINE CONTROL FLAGS                                        
+\ REM!!*****************************************************************        
+                                                                                
+ STRING    GLOBAL       \                                                       
+ TS.MSG.TERMID$,        \ store id + terminal id                                
+ TS.EFT.REPL.MSG$       ! message to be displayed on EFTS device                
+                        ! when the option is set to replace the                 
+                        ! message to the device.                                
+                                                                                
+ INTEGER*2 GLOBAL       \                                                       
+ TS.VERIF.OVERRIDE,     \ verification overriden by entering override on        
+                        \ prompt for account# (n/a to debit tenders)            
+ TS.EFT.OFFSET,         \ offset within void validation array                   
+ TS.TIMEOUT1,           \ set if an auth request timed out to enable            
+                        \ automatic retry processing                            
+ TS.REVERSAL.RETRY,     \ set if reversal send failed on pipe, to show          
+                        \ that a retry is required on recovery                  
+ TS.ACTREQ.RETRY,       \ set if activation request send failed, to show        
+                        \ that a retry is required                              
+ TS.EFT.LIMIT.ERROR,    \ flag indicating that limit error occurred so          
+                        \ that special processing on return to TSCSEC01         
+                        \ is required.                                          
+ TS.EFT.NOSTACK,        \ flag for csec01 indicating that tender                
+                        \ rejection display has been done and need not          
+                        \ be stacked.                                           
+ TS.EFT.CUST.DISP       \ message# from EAMSDESC corresponding to a             
+                        \ particular auth response for the cashier              
+                        ! display (defalut = 100)                               
+                                                                                
+ INTEGER*4 GLOBAL       \                                                       
+ TS.ACTREQ.TMOUT        \ timeout corresponding to TS.ACTREQ.RETRY              
+                        ! described above                                       
+                                                                                
+!AIR77123                                                                       
+\ REM!!****************************************************! EFTCHANGE          
+\ REM!!  EFT DEVELOPMENT SPECIFIC INFORMATION              ! EFTCHANGE          
+\ REM!!****************************************************! EFTCHANGE          
+                                                           ! EFTCHANGE          
+ STRING GLOBAL          \                                  ! EFTCHANGE          
+                        \                                  ! EFTCHANGE          
+ TS.VS.DEVICE$,         \ NRF TAG/STORE/TERM       LEN 10  ! EFTCHANGE          
+ TS.VS.CASHBACK$,       \ cash back for auth message       ! EFTCHANGE          
+ TS.VS.TRACK2$,         \ extra track2 data        LEN 0/9 ! EFTCHANGE          
+ TS.VS.ENTRY$,          \ acct#+expiry date block  LEN 40  ! EFTCHANGE          
+ TS.VS.OPERATOR$,       \ truncated operator#      LEN 2   ! EFTCHANGE          
+\ CS 2/3/88 Should be reference, change name for completeness          ! CS     
+ TS.VS.REF.ORG$,        \ LAST TRX SEQUENCE NUMBER         ! EFTCHANGE ! CS     
+\TS.VS.SEQ.ORG$,        \ LAST TRX SEQUENCE NUMBER         ! EFTCHANGE ! CS     
+ TS.VS.SAVEMSG$,        \ last auth request sent to SEFT for TOR generation     
+ TS.T2SAVE$,            \ last auth request received from T2 for void gen'n     
+ TS.MSG.EFT.SAVE$,      \ last eft msg to display on 4683  ! EFTCHANGE          
+ TS.MSG.POS.SAVE$       ! last msg to display on T2        ! EFTCHANGE          
+                                                           ! EFTCHANGE          
+ INTEGER*4 GLOBAL       \                                  ! EFTCHANGE          
+ TS.VS.SEQI4            ! sequence number for AFT auth     ! EFTCHANGE          
+                                                           ! EFTCHANGE          
+ INTEGER*2 GLOBAL       \                                  ! EFTCHANGE          
+ GC.MAX.EFTERRS,        \ max allowed eft errors           ! EFTCHANGE          
+ TS.ERRCODE.OFFS,       \ offset of error code in arrays   ! EFTCHANGE          
+ TS.VS.EXPIRYFORM,      \ 0 = MMYY, 1 = YYMM               ! EFTCHANGE          
+ TS.T2SAVLEN,           \ length of last auth req rxed from T2                  
+ TS.REQD.LINE,          \ msg to display at trx reset (default B097 timeout)    
+ TS.LK.SERV.ID,         \ servicer id for a given account number                
+ TS.MSG.EFT.NUM,        \ last eft msg# on 4683            ! EFTCHANGE          
+ TS.MSG.POS.NUM         ! last msg# to T2                  ! EFTCHANGE          
+                                                                                
+!EIR77123                                                                       
+                                                                                
+\ REM!!*****************************************************************        
+\ REM!!  VISA 2 INFORMATION                                                     
+\ REM!!*****************************************************************        
+                                                                                
+ STRING GLOBAL          \                                                       
+                        \                                                       
+ TS.VS.SERIAL$,         \ TERMINAL SERIAL NUMBER                                
+ TS.VS.AMOUNT$,         \ AMOUNT FROM REQUEST                                   
+ TS.VS.AMOUNT.SV$,      \ SAVED AMNT FROM REQUEST FOR LATER COMPARISON          
+ TS.VS.ACCOUNT$,        \ ACCOUNT/TRACK 2 DATA                                  
+ TS.VS.EXPIRY$,         \ EXPIRY DATE                                           
+ TS.VS.RESPONSE$,       \ RESPONSE (AA, NO, EX, NP)                             
+ TS.VS.APPROVAL$,       \ APPROVAL CODE                                         
+ TS.VS.TENDTYPE$,       \ CUSTOMER-SELECTED TENDER TYPE                         
+ TS.VS.DATE$,           \ TRANSACTION DATE                                      
+ TS.VS.TIME$,           \ APPROVAL CODE                                         
+ TS.VS.NAME$,           \ CUSTOMER NAME                                         
+ TS.VS.REFERENCE$,      \ REFERENCE NUMBER                                      
+ TS.VS.DISPLAY$,        \ MESSAGE FOR DISPLAY                                   
+ TS.VS.SEQUENCE$,       \ TRX SEQUENCE NUMBER                                   
+ TS.VS.SEQ.OLD$,        \ LAST TRX SEQUENCE NUMBER                              
+ TS.VS.SOURCE$,         \ DATA SOURCE (KEYED/SWIPED)                            
+ TS.VS.STATUS$,         \ STATUS CODE (WITH VOID INDICATOR)                     
+ TS.VS.PIN$,            \ PIN NUMBER                                            
+ TS.VS.TYPE$,           \ TRX TYPE                                              
+ TS.VS.CODE$,           \ TRX CODE                                              
+ TS.VS.FIRMREV$,        \ FIRMWARE REVISION NUMBER                              
+\                                                                               
+\ THE FOLLOWING FIELDS DEFINE INFORMATION FROM THE AUTH REQUEST HEADER          
+\                                                                               
+ TS.VS.BIN$,            \ BIN                      LEN 6                        
+ TS.VS.MERCHANT$,       \ MERCHANT ID              LEN 12                       
+ TS.VS.STID$,           \ STORE/TERMINAL ID        LEN 8                        
+ TS.VS.CATEGORY$,       \ MERCHANT CATEGORY        LEN 4                        
+ TS.VS.COUNTRY$,        \          COUNTRY         LEN 3                        
+ TS.VS.CITY$,           \          CITY (ZIP)      LEN 5                        
+ TS.VS.TIMEZONE$,       \ TIMEZONE DIFFERENTIAL    LEN 3                        
+ TS.VS.TRXCODE$,        \ NORMAL TRX CODE          LEN 2   TOT 43               
+\                                                                               
+ TS.VS.PORTID$          ! ECR PORT ID                                           
+                                                                                

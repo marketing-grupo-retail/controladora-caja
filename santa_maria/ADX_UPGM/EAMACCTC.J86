@@ -1,0 +1,405 @@
+\/* TIME STAMP BLOCK ***************************************************        
+\** END OF TIME STAMP BLOCK *******************************************/        
+!**********************************************************************         
+!*                      ACCOUNTING FILE                               *         
+!**********************************************************************         
+!* The following defines the store record format for the              *         
+!* accounting file.  The fields are defined in the sequence in which  *         
+!* they appear in the logical record.                                 *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.ST.TYPE$,           \ RECORD TYPE = "1" FOR         ASC 1           
+                                \ THE STORE RECORD                              
+         AC.ST.OPERTERM$,       \ OPERATOR/TERMINAL             UPD 5           
+                                \ NUMBER = 0                                    
+         AC.ST.DATETIME$        ! DATE & TIME YYMMDDHHMM        UPD 5           
+                                ! WHEN CURRENT PERIOD STARTED OR                
+                                ! PREVIOUS PERIOD ENDED                         
+INTEGER*1 GLOBAL \                                                              
+         AC.ST.INDICAT0         ! BIT 0 - X'80'                 INT 1           
+                                ! INDICATES THAT THE STORE OFFICE               
+                                ! TOTALS HAVE BEEN RECONCILED FOR               
+                                ! THE PERIOD.  (CARRY FORWARD OFFICE            
+                                ! TENDER HAS BEEN RUN)                          
+                                ! BIT 1 -X'40' INDICATES THAT THE               
+                                ! STORE OFFICE ACCOUNTING TOTALS HAVE           
+                                ! BEEN PRINTED SINCE THE LAST UPDATE            
+                                ! TO THE RECORD.                                
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.ST.TERMINAL$        ! TERMINAL WHICH LAST UPDATED   UPD 2           
+                                ! THIS RECORD                                   
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+         AC.ST.RESTART,         \ THIS FIELD IS USED AS A       INT 4           
+                                \ CONTROL FIELD ON A SYSTEM RESTART.            
+                                \ IT IS USED TO DETERMINE IF THIS               
+                                \ RECORD HAS BEEN UPDATED BY A                  
+                                \ PARTICULAR TRANSACTION.                       
+\                                                                               
+\*********************************************************************          
+\*      The following are the gross totals for all the terminals     *          
+\*      in the store  (these totals are updated only when and        *          
+\*      operator is signed off.  They are not reset by the close     *          
+\*      of a reporting period but accumulate forever                 *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.GROSSPOS,        \ GROSS POSITIVE -              INT 4           
+                                \ ACCUMULATION OF THE POSITIVE SALES            
+                                \ ENTRIES. INCLUDES STAND-ALONE TOTALS          
+                                \ BUT NO TOTALS FROM VOIDED OR                  
+                                \ TRAINING TRANSACTIONS.                        
+                                \ (SALES + DEPOSITS + TAXES +                   
+                                \ TENDER FEES)                                  
+\                                                                               
+         AC.ST.GROSSNEG,        \ GROSS NEGATIVE -              INT 4           
+                                \ ACCUMULATION OF THE NEGATIVE SALES            
+                                \ ENTRIES. INCLUDES STAND-ALONE TOTALS          
+                                \ BUT NO TOTALS FROM VOIDED OR                  
+                                \ TRAINING TRANSACTIONS.                        
+                                \ NOTE THAT THIS IS A POSITIVE AMOUNT           
+                                \ (DEPOSIT RETURNS + ITEM REFUNDS +             
+                                \  TAX REFUNDS + DISCOUNTS + CANCELS            
+                                \  OF SALES, DEPOSITS, ITEM REFUNDS,            
+                                \  DEPOSIT RETURNS, AND TENDER FEES)            
+\                                                                               
+         AC.ST.NUMTRANS,        \ NUMBER OF SALES TRANSACTIONS.  INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals are the sum of the loans made during    *          
+\*      the period.                                                  *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.LOAMT(1),         \ SUM OF LOANS 1-CASH           INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals are the sum of all pickups made         *          
+\*      during the period.                                           *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.PIAMT(1),         \ SUM OF PICKUPS 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals represent the tender count when         *          
+\*      the store safe is 'counted down'.                            *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.TEAMT(1),         \ COUNTED TENDER 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals are used to reflect the change in       *          
+\*      the 'net tender' position as a result of miscellaneous       *          
+\*      transactions, loans, pickups, and tender counts.  These      *          
+\*      totals reflect the "short/over" position of the safe         *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.NTAMT(1),         \ COUNTED TENDER 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals represent the amount of tender which    *          
+\*      was left in the store safe after the bank deposit was        *          
+\*      made for the last period.                                    *          
+\*********************************************************************          
+\                                                                               
+         AC.ST.SAAMT(1),         \ COUNTED TENDER - CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\                                                                               
+         AC.ST.AMTMISCE         \ MISCELLANEOUS TRANSACTIONS    INT 4           
+                                \ CREDITED TO THE STORE BY THE                  
+                                \ STEAMBOAT PROCEDURE.                          
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.ST.RESERVED$        ! RESERVED                      ASC 214         
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+         AC.ST.USERINTS(1)      ! 15 4-BYTE INTEGERS FOR USE    INT 60          
+                                ! WITH EXITS                                    
+STRING GLOBAL \                                                                 
+         AC.ST.USEREXIT$        ! USER FIELD FOR USE            ASC 40          
+                                ! WITH EXITS                                    
+                                                                                
+!**********************************************************************         
+!* The following defines the operator/terminal format for the         *         
+!* accounting file.  The fields are defined in the sequence in which  *         
+!* they appear in the logical record.                                 *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.OT.TYPE$,           \ RECORD TYPE =                 ASC 1           
+                                \ "2" FOR AN OPERATOR RECORD                    
+                                \ "3" FOR A TERMINAL RECORD                     
+                                \                                               
+         AC.OT.OPERTERM$,       \ OPERATOR/TERMINAL NUMBER      UPD 5           
+                                \                                               
+         AC.OT.DATETIME$        ! DATE & TIME YYMMDDHHMM        UPD 5           
+                                ! OF TRANSACTION WHICH LAST                     
+                                ! UPDATED THIS RECORD                           
+                                                                                
+INTEGER*1 GLOBAL \                                                              
+         AC.OT.INDICAT0         ! BIT 0 - X'80' INDICATES       INT 1           
+                                ! THAT THE OPERATOR/TERMINAL RECORD             
+                                ! HAS BEEN RECONCILED FOR THE PERIOD            
+                                ! (TRANSFER TENDER TO STORE OFFICE              
+                                !  HAS BEEN RUN).                               
+                                ! BIT 1 - X'40' INDICATES THAT THE              
+                                ! OPERATOR/TERMINAL TOTALS HAVE BEEN            
+                                ! PRINTED SINCE THE LAST UPDATE TO              
+                                ! THE RECORD.                                   
+                                ! BIT 2 - X'20' INDICATES THAT THE              
+                                ! SYSTEM IS MISSING TRANSACTION                 
+                                ! SUMMARY LOG RECORDS FOR THIS                  
+                                ! OPERATOR/TERMINAL.                            
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.OT.TRANSNUM$        ! TRANSACTION NUMBER OF THE     UPD 2           
+                                ! LAST UPDATE TO THIS FILE                      
+                                                                                
+INTEGER*4 GLOBAL \                                                              
+         AC.OT.RESTART,         \ THIS FIELD IS USED AS A       INT 4           
+                                \ CONTROL FIELD ON A SYSTEM RESTART.            
+                                \ IT IS USED TO DETERMINE IF THIS               
+                                \ RECORD HAS BEEN UPDATED BY A                  
+                                \ PARTICULAR TRANSACTION.                       
+\                                                                               
+\*********************************************************************          
+\*      The following are the gross totals for the                   *          
+\*      operator/terminal                                            *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.GROSSPOS,        \ GROSS POSITIVE -              INT 4           
+                                \ ACCUMULATION OF THE POSITIVE SALES            
+                                \ ENTRIES. DOES NOT INCLUDE TOTALS              
+                                \ FROM STANDALONE, VOIDED, OR                   
+                                \ TRAINING TRANSACTIONS.                        
+                                \ (SALES + DEPOSITS + TAXES +                   
+                                \  TENDER FEES)                                 
+\                                                                               
+         AC.OT.GROSSNEG,        \ GROSS NEGATIVE -              INT 4           
+                                \ ACCUMULATION OF THE NEGATIVE SALES            
+                                \ ENTRIES. DOES NOT INCLUDE TOTALS              
+                                \ FROM STANDALONE, VOIDED, OR                   
+                                \ TRAINING TRANSACTIONS. NOTE THAT              
+                                \ THIS IS A POSITIVE AMOUNT.                    
+                                \ (DEPOSIT RETURNS + ITEM REFUNDS +             
+                                \  DISCOUNTS + CANCELS OF SALES,                
+                                \  DEPOSITS, ITEM REFUNDS, DEPOSIT              
+                                \  REFUNDS, DEPOSIT RETURNS, AND                
+                                \  TENDER FEES)                                 
+\                                                                               
+         AC.OT.NUMTRANS,        \ NUMBER OF SALES TRANSACTIONS. INT 4           
+\                                                                               
+\*********************************************************************          
+\*      The following totals are the sum of the loans made to        *          
+\*      the operator/terminal                                        *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.LOAMT(1),         \ SUM OF LOANS 1-CASH           INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals are the sum of all pickups from         *          
+\*      the operator/terminal.                                       *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.PIAMT(1),         \ SUM OF PICKUPS 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals represent the tender count when         *          
+\*      the operator/terminal till is 'counted down'.                *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.TEAMT(1),         \ COUNTED TENDER 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      The following totals are used to reflect the change in       *          
+\*      the 'net tender' position as a result of miscellaneous       *          
+\*      transactions, loans, pickups, and tender counts.  These      *          
+\*      totals reflect the "short/over" position of the              *          
+\*      operator/terminal till.                                      *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.NTAMT(1),         \ COUNTED TENDER 1-CASH         INT 4          
+                                 \ 2-CHECKS                      INT 4          
+                                 \ 3-FOOD STAMPS                 INT 4          
+                                 \ 4-MISCELLANEOUS TENDER 1      INT 4          
+                                 \ 5-MISCELLANEOUS TENDER 2      INT 4          
+                                 \ 6-MISCELLANEOUS TENDER 3      INT 4          
+                                 \ 7-MANUFACTURER COUPONS        INT 4          
+                                 \ 8-STORE COUPONS               INT 4          
+\                                                                               
+\*********************************************************************          
+\*      Sales amounts (standalone, voided, and training              *          
+\*      transactions not included. all amounts include               *          
+\*      cancels except for sales and deposits)                       *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.AMTSALE,         \ ITEM SALE AMOUNT              INT 4           
+         AC.OT.AMTREST(1),      \ 1  DEPOSIT AMOUNT             INT 4           
+                                \ 2  REFUND AMOUNT              INT 4           
+                                \ 3  DEPOSIT RETURN AMOUNT      INT 4           
+                                \ 4  AMOUNT OF MISCELLANEOUS    INT 4           
+                                \    ITEM RECORD RECEIPTS                       
+                                \ 5  AMOUNT OF MISCELLANEOUS    INT 4           
+                                \    ITEM RECORD PAYOUTS                        
+                                \ 6  DISCOUNT AMOUNT            INT 4           
+                                \ 7  TAXABLE AMOUNT TO WHICH    INT 4           
+                                \    EXEMPTIONS APPLY                           
+                                \ 8  ITEM SALE CANCEL AMOUNT    INT 4           
+                                \ 9  DEPOSIT CANCEL AMOUNT      INT 4           
+                                \ 10 CREDIT (AUDACTION)         INT 4           
+                                \    TRANSACTION AMOUNT                         
+         AC.OT.AMTTNFEE,        \ AMOUNT OF TENDER FEES         INT 4           
+                                \ (INCL CHECKS) PAID                            
+         AC.OT.AMTMISCE,        \ MISCELLANEOUS TRANSACTIONS    INT 4           
+                                \ AMOUNT CREDITED TO THIS OPERATOR/             
+                                \ TERMINAL BY THE STEAMBOAT PROC.               
+         AC.OT.AMTSTND,         \ AMOUNT OF TENDER CASHED       INT 4           
+                                \ WITH NO-SALE                                  
+         AC.OT.AMTTXCHG,        \ AMOUNT OF TENDER EXCHANGED    INT 4           
+                                \ WITH NO-SALE                                  
+\                                                                               
+\*********************************************************************          
+\*      Tax information                                              *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.AMTTAXSL(1),     \ ITEM SALES FOR EACH TAX PLAN  INT 4           
+                                \ 1=PLAN A, 2=PLAN B ETC                        
+         AC.OT.AMTTAX(1),       \ TAX PAID FOR EACH TAX PLAN    INT 4           
+\                                                                               
+\*********************************************************************          
+\*      Amounts for standalone, training, and voided transactions    *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.SA.GROSSPOS,     \ STAND ALONE GROSS POSITIVE    INT 4           
+         AC.OT.SA.GROSSNEG,     \ STAND ALONE GROSS NEGATIVE    INT 4           
+         AC.OT.SA.AMTVOIDS,     \ AMOUNT OF VOID TRANSACTIONS   INT 4           
+         AC.OT.SA.AMTTTAF,      \ AMOUNT OF TRAINING            INT 4           
+                                \ TRANSACTIONS                                  
+\                                                                               
+\*********************************************************************          
+\*      Sales counts (standalone, voided, and training               *          
+\*      transactions not included.  All counts include cancels       *          
+\*      except for sales and deposits)                               *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.NUMITEMS,        \ NUMBER OF - ITEMS SOLD        INT 4           
+                                \ (SCANNED OR KEYED)                            
+         AC.OT.NUMKEYED,        \ - ITEMS SOLD BY KEYED ITEM    INT 4           
+                                \ CODES                                         
+         AC.OT.NUMDEPAR,        \ - ITEMS SOLD BY ITEM LOOKUP   INT 4           
+                                \ KEYS                                          
+         AC.OT.NUMTRADI         ! - TRADING STAMPS ISSUED       INT 4           
+                                                                                
+INTEGER*2 GLOBAL \                                                              
+         AC.OT.NUMREST(1),      \ 1  DEPOSITS                   INT 2           
+                                \ 2  REFUNDS                    INT 2           
+                                \ 3  DEPOSIT RETURNS            INT 2           
+                                \ 4  MISCELLANEOUS ITEM RECORD  INT 2           
+                                \    RECEIPTS                                   
+                                \ 5  MISCELLANEOUS ITEM RECORD  INT 2           
+                                \    PAYOUTS                                    
+                                \ 6  DISCOUNTS                  INT 2           
+                                \ 7  TAX EXEMPTIONS             INT 2           
+                                \ 8  ITEM SALE CANCELS          INT 2           
+                                \ 9  DEPOSIT CANCELS            INT 2           
+                                \ 10 CREDIT TRANSACTIONS        INT 2           
+         AC.OT.NUMSPSOF,        \ SPECIAL SIGN-OFFS             INT 2           
+         AC.OT.NUMOPENC,        \ COUNT OF THE TIMES THE        INT 2           
+                                \ CASH DRAWER WAS OPENED OUTSIDE                
+                                \ A SALES TRANSACTION                           
+\                                                                               
+\*********************************************************************          
+\*      The following are tender counts                              *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.NTNUM(1),        \ NUMBER OF 1-CASH XACTS        INT 2           
+                                \ 2-CHECKS                      INT 2           
+                                \ 3-FOOD STAMPS                 INT 2           
+                                \ 4-MISCELLANEOUS TENDER 1      INT 2           
+                                \ 5-MISCELLANEOUS TENDER 2      INT 2           
+                                \ 6-MISCELLANEOUS TENDER 3      INT 2           
+                                \ 7-MANUFACTURER COUPONS        INT 2           
+                                \ 8-STORE COUPONS               INT 2           
+                                \ 9-LOANS TO THIS TILL          INT 2           
+                                \10-PICKUPS FROM THIS TILL      INT 2           
+\                                                                               
+\*********************************************************************          
+\*      Counts for standalone, training, and voided transactions     *          
+\*********************************************************************          
+\                                                                               
+         AC.OT.SA.NUMTRANS,     \ NUMBER OF STANDALONE TRANS    INT 2           
+                                \                                               
+         AC.OT.SA.NUMVOIDS,     \ NUMBER OF VOIDED TRANSACTIONS INT 2           
+                                \                                               
+         AC.OT.SA.NUMTRAIN      ! NUMBER OF TRAINING TRANS      INT 2           
+                                                                                
+ INTEGER*4 GLOBAL               \                                               
+         AC.OT.SA.AMTTAXES      ! AMOUNT OF STANDALONE TAXES    INT 4           
+                                                                                
+!*********************************************************************          
+!*      Rest of the record                                           *          
+!*********************************************************************          
+                                                                                
+STRING GLOBAL \                                                                 
+         AC.OT.RESERVED$        ! RESERVED                     ASC 172          
+                                                                                
+!*********************************************************************          
+!* End of accounting file declarations                               *          
+!*********************************************************************          

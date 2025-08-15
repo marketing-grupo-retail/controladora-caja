@@ -1,0 +1,15 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+!                                                                               
+!THIS INCLUDE FILE PROVIDES A PLACE FOR THE USER TO DEFINE VARIABLES            
+!WHICH ARE COMMON TO SEVERAL OF HIS USER EXIT FUNCTIONS IN EAMTSUPC.            
+!                                                                               
+!                                                                               
+STRING    GLOBAL ENTRA$, CFVERSION$, GRVERAPP$
+INTEGER*2 GLOBAL ELEMENTO%, IDPIPE%
+INTEGER*1 GLOBAL Ue.Cnv.Fiscal%, Asc.Pay.Pago%
+INTEGER*4 GLOBAL Asc.Pay.Motora%
+STRING    GLOBAL Gr.CrdSoc.Str$ 
+
+%INCLUDE EAMTSEVA.J86             ! EMS PRPQ
+%INCLUDE QXLGVART.J86

@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSEMEC09 PUBLIC ! BEFORE THE WRITE OF A COUPON TRACKING RECORD
+ 
+! insert user exit code here
+ 
+ END FUNCTION

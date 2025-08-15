@@ -1,0 +1,40 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU11.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+!!*******************************************************************
+!!** ADD PREFERRED CUSTOMER NUMBER TO EXCEPTION LOG ENTRIES        **
+!!*******************************************************************
+ IF LEN(XL.USEREXIT$) < 15 THEN XL.USEREXIT$ = "" ! CLEAR OLD EXIT VALUES
+ IF EMSS.PANEL.TRANS AND                          \ PANELIST TRANSACTION
+    LEN(CA.CUSTNUM$) > 0 THEN BEGIN               ! VALID ACCOUNT NUMBER
+   IF ASC(XL.CODE$) = 2 OR                        \ DISCOUNT
+      ASC(XL.CODE$) = 3 THEN BEGIN                ! TENDER EXCEPTION
+     WORK3$ = UNPACK$(CA.CUSTNUM$)                ! GET CUSTOMER
+     WHILE LEFT$(WORK3$,1) = "0"                  ! DELETE
+       WORK3$ = MID$(WORK3$,2,18)                 !  LEADING
+     WEND                                         !   ZEROES
+     XL.USEREXIT$ = WORK3$                        ! ADD CUSTOMER NUMBER
+   ENDIF                                          ! DISCOUNT OR TENDER
+ ENDIF
+ 
+!!*******************************************************************
+!!** CALL FOR AUTOMATIC START OF BATCH OR TRANSFER PROCESSING      **
+!!*******************************************************************
+ IF ASC(XL.CODE$) = 11H THEN BEGIN        ! SIGN-ON/OFF
+   IF OP.BAT.AUTOTIME > 0 THEN            \ OPTION SELECTED
+     CALL AUTO.BATCH.TIME                 ! START IF NEEDED
+   IF OP.XFR.AUTOTIME > 0 THEN            \ OPTION SELECTED
+     CALL AUTO.UXFER.TIME                 ! START IF NEEDED
+   IF OP.REF.AUTOTIME > 0 THEN            \ OPTION SELECTED
+     CALL AUTO.UREFA.TIME                 ! START IF NEEDED
+ ENDIF                                    ! SIGN-ON/OFF
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE

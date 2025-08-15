@@ -1,0 +1,44 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A.                                **
+!   **    User Exit  :  CELLTS56.011                                         **
+!   **    Inclu¡r en :  EAMTSU56.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD RETAIL                      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+TS.ER.RETURN = -1
+OPEN "R::CELLSTAR" KEYED RECL 55 AS UE.PIN.SES1%						!
+IF TS.ER.RETURN <> -1 THEN GOTO ERR.OPEN56
+FOR I% = 1 TO 60 
+  IF UE.VTAPIN$(I%,0) <> "" THEN BEGIN
+    UE.CELL.KEY$ = STR$(VAL(UE.VTAPIN$(I%,0)))
+	UE.CELL.KEY$ = PACK$(RIGHT$("000000000000"+UE.CELL.KEY$,12))
+    UE.CELL.ERROR% = 0
+    TS.ER.RETURN = -1
+	READ FORM "C8 C2 C2 2C3 C2 C35";#UE.PIN.SES1% KEY UE.CELL.KEY$;	\
+    UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$,         \
+    UE.CELL.ALM$, UE.CELL.QTY$, F$
+    IF TS.ER.RETURN = -1 THEN BEGIN
+       UE.CELL.QTY$ = UNPACK$(UE.CELL.QTY$)
+       UE.CELL.QTY$ = STR$(VAL(UE.CELL.QTY$) + VAL(UE.VTAPIN$(I%,1)))
+       UE.CELL.QTY$ = PACK$(RIGHT$("0000"+UE.CELL.QTY$,4))
+	   WRITE FORM "C8 C2 C2 2C3 C2 C35";#UE.PIN.SES1% ;	       \
+	   UE.CELL.KEY$,UE.CELL.CONT$,UE.CELL.FIN$,UE.CELL.CODOP$, \
+       UE.CELL.ALM$, UE.CELL.QTY$, F$
+    ENDIF
+  ENDIF
+NEXT I%
+CLOSE UE.PIN.SES1%
+ERR.OPEN56:
+  UE.CELL.SALE% = 0						! No imprime pines
+  DIM UE.VTAPIN$(60,2)					! Dimenciona vector
+
+
+!------------------------------------------------------------------------------
+!                    Fin de las User Exits de Usuario
+!------------------------------------------------------------------------------

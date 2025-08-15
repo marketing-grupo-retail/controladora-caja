@@ -1,0 +1,55 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1401.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Jul. 10 de 1997
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 14 para VENDER/CREAR Items
+! que tengan Codigo de Barras, UTILIZANDO el PLU que trae el Articulo
+! e ingresando el EAN/UPC como dato de Usuario con ENTRADA DE DATOS.
+!
+! Se debe Utilizar la siguiente Secuencia :
+!
+!         .----------.           .---.   .-----------------------.
+!         | AUTORIZA |   No de   | / |   | "Scan de Cod Barras"  |
+!          ----------     PLU     ---     -----------------------
+!
+! Cuando el  PLU  de cada Articulo de Almacen pasa la VERIFICACION de
+! Precio, el Sistema lo CREA en EAMITEMR al momento de Imprimir en CR.
+!
+!------------------------------------------------------------------------
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN 
+   TS.IO.KEYS(2)  = 80   AND                       \! Si hay ENTER
+   TS.IO.KEYS(3)  = 78   AND                       \! Si digita "/"
+   TS.IO.KEYS(8)  = 79   AND                       \! Si digita OVERRIDE
+   TS.IO.DATA$(2) <> ""  AND                       \! Si hay Lect SCANNER
+   TS.IO.DATA$(3) <> ""  THEN BEGIN                 ! Con Dato de PLU
+      IF TS.TRAINING     THEN BEGIN                 ! Si esta en TRAINNIG 
+         TS.IO.DEVICE = 1                           ! Cambia Disposit Lect
+         CREA.CODBAR% = 1                           ! Flag Grabar Barras
+         TS.IO.KEYS(10)  = 63                       ! Asigna ENTR/DATOS
+         TS.IO.DATA$(10) = TS.IO.DATA$(2)           ! Con Dato Asoc CodBar
+         IR.CODBAR$      = TS.IO.DATA$(2)           ! Guarda Dato CodBar
+         TS.IO.DATA$(2)  = TS.IO.DATA$(3)           ! Asigna PLU a ENTER
+         TS.IO.KEYS(3)   = 0                        ! Borra SLASH
+         TS.IO.KEYS(8)   = 0                        ! Borra OVERRIDE 
+         TS.IO.DATA$(3)  = ""                       ! Borra Dato Asoc Slash 
+         IF LEN(IR.CODBAR$) > 12 THEN BEGIN         ! Verifica Barras EAN13
+            IR.CODBAR$=LEFT$(IR.CODBAR$,           \!
+                       LEN(IR.CODBAR$)-1)           ! y quita Check Digit
+         ENDIF                                      ! Fin de EAN13
+         IF LEN(IR.CODBAR$) = 8 THEN BEGIN          ! Verifica Barras EAN8
+            IR.CODBAR$=LEFT$(IR.CODBAR$,           \!
+                       LEN(IR.CODBAR$)-1)           ! y quita Check Digit
+         ENDIF                                      ! Fin de EAN8
+         IR.CODBAR$="0000000000" + IR.CODBAR$       ! Ajusta con CEROS
+         IR.CODBAR$=PACK$(RIGHT$(IR.CODBAR$, 12))   ! Arma Llave PD/6 Bytes
+      ENDIF ELSE BEGIN                              ! Fin Condic
+         CALL VISORES4690(1,"SOLO PUEDE HACERLO","EN ENTRENAMIENTO.!",3000,"L")
+      ENDIF                                         ! Fin Condic
+ENDIF                                               ! Fin Condic
+!------------------------------------------------------------------------

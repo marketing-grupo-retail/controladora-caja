@@ -1,0 +1,23 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC01 PUBLIC
+! TSUPEC01 - BEFORE TX
+%INCLUDE EAMTSE01.J86              ! EMS PRPQ
+CALL QXL.TSUPEC01                  ! EJ V2
+CALL COMFTS01.011                  ! PROYECTO BONOS S.
+CALL LIBLINE(1,1)                  ! Reset campos de Descuento
+CALL LIBLINE(1,2)                  ! Reset Flags Medicamentos
+CALL LIBLINE(1,3)                  ! Iva Impreso 
+CALL EPSMTS01.011                  ! Modulo Convenios
+
+CALL RECATS01.011                  ! RECARGAS ONLINE
+CALL IVATSU01.011                  ! IMPRESION DE IVAS
+!CALL MKTPTS01.011                  ! MODULO PROMOCIONES
+
+CALL CRDEMPRESAS(01)               ! CREDITO EMPRESARIAL
+CALL GRMOVRMS(01)                  ! Remisiones de mercancia
+CALL SUBSIDIO.SAPCORE(01)          ! SAP-CORE
+
+END FUNCTION
+

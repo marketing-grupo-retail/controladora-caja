@@ -1,0 +1,52 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!**********************************************************************
+! ITEM MOVEMENT SPECIFIC GLOBAL VARIABLES
+!**********************************************************************
+!AIR44092 Vars cs.im.numbufs and cs.im.rd being 2 byte int's will cause
+!         failures when eamitemr.dat gets too large to properly contain
+!         the values in 15 bits. Changed to 4 byte int's to resolve
+!INTEGER*2 GLOBAL \
+!         CS.IM.NUMBUFS,        \ NUMBER OF CACHE BUFFERS IN USE
+!         CS.IM.RD,             \ RANDOMISING DIVISOR OF IM FILE
+!         CS.IM.LENLIM          ! LARGEST ALLOWED BLOCK IN WK FILE
+INTEGER*2 GLOBAL \
+\         CS.IM.NUMBUFS,        \ NUMBER OF CACHE BUFFERS IN USE
+\         CS.IM.RD,             \ RANDOMISING DIVISOR OF IM FILE
+          CS.IM.LENLIM          ! LARGEST ALLOWED BLOCK IN WK FILE
+INTEGER*4 GLOBAL \
+          CS.IM.NUMBUFS,        \ NUMBER OF CACHE BUFFERS IN USE
+          CS.IM.RD              ! RANDOMISING DIVISOR OF IM FILE
+!EIR44092
+
+!**********************************************************************
+!* FILE BUFFERS
+!**********************************************************************
+
+!AIR72664 - Change string variable to array
+STRING GLOBAL   \
+        CS.IM.BF$(1)            ! STORAGE CACHE
+INTEGER*2 GLOBAL CS.IM.BFNUM    ! current cache buffer number
+!EIR72664
+
+!**********************************************************************
+!* STRING WORK AREAS
+!**********************************************************************
+
+STRING GLOBAL   \
+        CS.FLIP$,               \ NULL STRING
+        CS.ZEROES$,             \ NULL STRING
+        CS.NULLCODE$,           \ NULL CODE FOR COMPARISON
+        CS.BF.CODE$,            \ ITEM CODE FROM CACHE
+        CS.IM.CODE$,            \ ITEM CODE FROM ITEM FILE
+        CS.WK.CODE$,            \ ITEM CODE FROM WORK FILE
+        CS.IM.REC$              ! BUILD AREA FOR IM RECORD
+
+!ACSGF Added variables for IM memory buffer sizes
+INTEGER * 2  GLOBAL \
+  CS.IM.SHIFT, \ Shift value convert bucket # to string #. Normal = 5, GF = 4
+  CS.IM.MASK,  \ Mask to convert bucket # to offset. Normal = 001FH, GF = 000FH
+  CS.IM.BK.LEN,\ Size of each memory bucket. Normal = 512, GF = 2048
+  CS.IM.BOUND  ! Boundary in memory bucket. Normal = 500, GF = 2040
+
+!ECSGF

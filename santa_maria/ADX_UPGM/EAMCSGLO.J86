@@ -1,0 +1,431 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\********************************************************************
+\*
+\* IR39145  Added Variables CS.OPOP5$, OP.OP5.READ, OP.OP5.WRITE
+\*          to support expanded performance file to report
+\*          department subtotal groups 21 - 40.
+\*          RSH MGVA 12Nov98
+\*
+\* IR53183  Added the ability to create TLOG strings that are
+\*          greater than 32K in length.
+\*          KHG IBM 03Mar2004
+\*
+\*END-OF-SPECIFICATIONS**********************************************
+\*
+\********************************************************************
+\* ARRAY FOR DEPARTMENT TOTALS PROCESSING
+\********************************************************************
+!IR78084 comment CS.DT.PROCESSED correctly
+ INTEGER*1 \
+     CS.DT.PROCESSED(1)                 ! ARRAY OF DEPTS PROCESSED FOR
+                                        ! THIS TRANSACTION
+ INTEGER*2 GLOBAL \
+     CS.STR,                            \ STRING ARRAY INDEX
+\
+     CS.DT.BAD,                         \ INVALID DEPARTMENT NUMBER
+     CS.FLUSH                           ! IM FLUSH FLAG
+\
+\********************************************************************
+\* ACCOUNTING AND OPERATOR PERFORMANCE I/O STRINGS
+\********************************************************************
+\
+ STRING GLOBAL   \
+     CS.ACST$,                          \ ACCOUNTING STORE RECORD
+     CS.ACOT$,                          \ ACCOUNTING OPERATOR/TERMINAL
+     CS.EACOT$(1),                      \ ACCOUNTING OPERATOR/TERMINAL ENH.ACCT
+     CS.OPOP$,                          \ OPERATOR PERFORMANCE
+\AIR39145 Add extention record
+     CS.OPOP5$,                         \ OPERATOR PERFORMANCE EXTENTION
+\EIR39145
+     CS.OPST$                           ! PERFORMANCE STORE RECORD
+\
+\********************************************************************
+\* FILE UPDATE INDICATORS
+\*   These flags are set if a record was read and requires updating
+\********************************************************************
+\
+ INTEGER*2 GLOBAL \
+     AC.ST.READ,                        \ ACCOUNTING STORE
+     AC.OT.READ,                        \ ACCOUNTING OP/TERM
+     AC.EOT.READ(1),                    \ ACCOUNTING OP/TERM  CTBV
+     OP.ST.READ,                        \ OP PERF STORE RECORD
+     OP.OP.READ,                        \ OP PERF OPERATOR RECORD
+\AIR39145 Add flag for extention record
+     OP.OP5.READ,                       \ OP PERF OPERATOR RECORD EXTENTION
+\EIR39145
+     CS.TR.READ,                        \ CHECKOUT SUPPORT TERM REC
+     CA.CR.READ,                        \ CUSTOMER ACCOUNT STATUS
+     CS.DP.READ,                        \ DEPARTMENT TOTALS
+     MT.AC.READ,                        \ MISCELLANEOUS TRANSACTIONS
+     OS.OP.READ,                        \ OPERATOR STATUS
+     TS.TR.READ                         ! TERMINAL STATUS
+
+\
+\********************************************************************
+\* FILE WRITE INDICATORS
+\*   These flags are set if a record was read and requires writing
+\********************************************************************
+\
+ INTEGER*2 GLOBAL \
+     AC.ST.WRITE,                       \ ACCOUNTING STORE
+     AC.OT.WRITE,                       \ ACCOUNTING OP/TERM
+     AC.EOT.WRITE(1),                   \ ACCOUNTING OP/TERM    CTBV
+     OP.ST.WRITE,                       \ OP PERF STORE RECORD
+     OP.OP.WRITE,                       \ OP PERF OPERATOR RECORD
+\AIR39145 Add flag for record extention
+     OP.OP5.WRITE,                      \ OP PERF OPERATOR RECORD EXTENTION
+\EIR39145
+     CS.TR.WRITE,                       \ CHECKOUT SUPPORT TERM REC
+     CA.CR.WRITE,                       \ CUSTOMER ACCOUNT STATUS
+     CS.DP.WRITE,                       \ DEPARTMENT TOTALS
+     MT.AC.WRITE,                       \ MISCELLANEOUS TRANSACTIONS
+     OS.OP.WRITE,                       \ OPERATOR STATUS
+     TS.TR.WRITE                        ! TERMINAL STATUS
+
+!**********************************************************************
+!* DEPARTMENT NUMBER ARRAY
+!**********************************************************************
+! This array is built from the department array in store options
+! It contains 1000 elements, each of which references a department
+! entry in the file, or zero.
+
+!AIR74368
+!IR74368 ! File entries 101 to 200 are stored as -1 to -100 in order to
+!IR74368 ! pack into 1 byte
+!IR74368 ***************************************************************
+!IR74368 INTEGER*1 GLOBAL \
+!IR74368          CS.DEPTNO(1)
+!IR74368
+!IR74368 INTEGER*1 GLOBAL \
+!IR74368          CS.DEPTGRP(1)
+
+!AIR74084 - increased 1 byte arrays to 2 byte
+
+INTEGER*2 GLOBAL \              !IR74368
+         CS.DEPTNO(1)           !IR74368
+
+INTEGER*2 GLOBAL \              !IR74368
+         CS.DEPTGRP(1)          !IR74368
+
+!EIR74084
+
+INTEGER*2 GLOBAL \            !IR74368   Added new flag which is set if
+          CS.DT.OVERFLOW      !IR74368     totals data exceeds one string
+
+!EIR74368
+
+
+!**********************************************************************
+!* The following are used to store and process all the transaction info
+!* for use by checkout support
+!**********************************************************************
+INTEGER*2 GLOBAL \
+         CS.SIZE,               \ NUMBER OF STRINGS IN TRANSACTION
+         CS.TYPE(1),            \ TYPE CORRESPONDING ARRAY OF STRINGS
+\         CS.OFFSET(1),          \ OFFSETS TO EACH STRING IN TRANX. IR53183
+         CS.FLD.LEN(1),         \ LENGTH OF FIELD WITHIN STRING
+         CS.FLD.POS(1)          ! POSITION OF THE COLON AT THE START  IR78084
+                                ! OF EACH FIELD WITHIN THE STRING     IR78084
+INTEGER*4 GLOBAL \
+         CS.OFFSET(1),          \ OFFSETS TO EACH STRING IN TRANX. IR53183
+         CS.TX.TAXES(2)         ! TAX STRING
+INTEGER*2 GLOBAL \
+         CS.STR.COMB(1),        \ VALID STRING COMBINATIONS
+         CS.STR.HEX(1)          ! HEX VALUES FROM x'8000' TO x'0001'
+STRING GLOBAL \
+         CS.SKIP$,              \ SKIPPING SUMMARY LOG RECORDS STRING
+         CS.INPUT$              ! INPUT STRING
+!**********************************************************************
+!* POINTER TO START OF TRANSACTION BEING PROCESSED
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+        CS.TSLOG.PTR
+
+!**********************************************************************
+!* CURRENT READ POSITION IN SUMMARY LOG
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+        CS.PTRRTN
+
+!**********************************************************************
+!* FLAG FOR INVALID OR PENDING TRANSACTION
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.INVAL.TX
+
+!**********************************************************************
+!* FLAG FOR PREVIOUS TRANSACTION WAS PENDING
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.PENDING
+
+!**********************************************************************
+!* FLAG FOR RESUME REQUIRED AFTER CALL TO MAINLINE ERROR ROUTINE
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.RESUME
+
+INTEGER*1 GLOBAL \        ! INDICATES THAT ERROR CANNOT CAUSE IR76702
+        CS.MUST.RETRY     ! SKIP OF TRANSACTION IN PROGRESS   IR76702
+
+!**********************************************************************
+!* COUNT OF NUMBER OF TIMES TIMER PROCESSING CALLED SINCE LAST
+!* AUTOMATIC CLOSE OF SUMMARY LOG
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.CHKPNTS
+
+!**********************************************************************
+!* FLAG FOR ITEM ENTRY EXTENSION
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.ITEMEXTN
+
+!**********************************************************************
+!* FLAG FOR CHECKOUT SUPPORT BACKLOG
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.BACKLOG
+
+!**********************************************************************
+!* FLAG FOR TERMINAL OR OPERATOR ACCOUNTABILITY
+!**********************************************************************
+
+INTEGER*1 GLOBAL \
+        CS.TERM.ACCNT
+
+!**********************************************************************
+!* COUNT OF EXCEPTION LOG POINTS IN EACH TRANSACTION PROCESSED
+!**********************************************************************
+
+INTEGER*2 GLOBAL \
+        CS.NUMEXCPT
+
+
+!**********************************************************************
+!* FLAG FOR COLLECT TOTALS BY VARIETY SELECTED
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.COLLECT.TBV$
+
+!**********************************************************************
+!* BALANCE DUE AMOUNT AT TENDER TIME
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+        CS.AMTBALAN
+
+!**********************************************************************
+!* RESTART COUNTER
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+        CS.RESTART
+
+!**********************************************************************
+!* NUMBER OF DEPARTMENTS DEFINED IN OPTIONS
+!**********************************************************************
+
+!IR74368   INTEGER*2 GLOBAL \
+!IR74368             CS.DT.NUMDEPT
+
+INTEGER*4 GLOBAL \        ! !IR74368 CHANGED FROM 2 BYTE TO 4 BYTE
+        CS.DT.NUMDEPT     ! !IR74368 TO GIVE 4 BYTE RESULT WHEN USED IN CALCS.
+
+
+
+!**********************************************************************
+!* FORMAT STRING FOR DEPARTMENT TOTALS READ/WRITES
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.DT.FORMAT$
+
+!**********************************************************************
+!* STRING FOR DEPARTMENT TOTALS READ/WRITES
+!**********************************************************************
+
+!IR74368  STRING GLOBAL \
+!IR74368          CS.DT.STR$
+
+STRING GLOBAL \           !IR74368
+        CS.DT.STR$(1)     !IR74368 Turned into array of strings
+
+!**********************************************************************
+!* VARIABLES FOR WRITING ITEM MOVEMENT CLOSE RECORD
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.IM.ITEMCODE$,       \ = 0
+        CS.IM.DATETIME$,       \ DATE AND TIME PERIOD CLOSED
+        CS.IM.RESERVED$        ! RESERVED
+
+!**********************************************************************
+! POSITIVE AND NEGATIVE TENDER AMOUNTS FROM TILL CHANGE STRING
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+        POS.TENDER(1),         \ POSITIVE TENDERS FROM TILL CHANGE STR.
+        NEG.TENDER(1)          ! NEGATIVE TENDERS FROM TILL CHANGE STR.
+
+!**********************************************************************
+! KEY STRING FOR READING KEYED FILES
+!**********************************************************************
+
+STRING GLOBAL \
+        KEYVAL$, EKEYVAL$(1)                     ! CTBV
+
+!**********************************************************************
+! DATE AND TIME VARIABLES FOR MAINLINE
+!**********************************************************************
+
+STRING GLOBAL \
+        CS.LAST.TIME$     ! date and time in current transaction
+
+INTEGER*2 GLOBAL \
+        CS.OLDHOUR,       \ hour of last transaction
+        CS.NEWHOUR        ! hour of next transaction
+
+!**********************************************************************
+! END OF SUMMARY LOG INDICATOR
+!**********************************************************************
+
+INTEGER*2 GLOBAL \
+        CS.END.FILE       ! = yes^ if end of log
+
+!**********************************************************************
+! VARIABLES USED BY MAINLINE FOR MODULE TRACING
+!**********************************************************************
+
+INTEGER*2 GLOBAL \
+        CS.TRC(1)         ! array of ten most recent module ids traced
+
+INTEGER*1 GLOBAL \
+        CS.TRCPTR         ! pointer to next available slot in CS.TRC
+
+!AIR77861 Variables added by go-faster checkout support
+!         applicable to all stores
+!**********************************************************************
+! VARIABLES USED TO REMOVE LEADING F'S FROM PACKED STRINGS
+!**********************************************************************
+
+STRING GLOBAL \
+       GF.LEADFS$,       \ =pack$("?0?1?2?3?4?5?6?7?8?9")
+       GF.LEAD0S$        ! =pack$("00010203040506070809")
+
+!**********************************************************************
+! VARIABLES USED WHEN PADDING ITEM CODE WITH 0'S IN ITEM MOVEMENT
+!**********************************************************************
+
+INTEGER GLOBAL \
+       GF.ITEMCODE.LEN   ! Length of item code used in item movement
+
+!**********************************************************************
+! VARIABLES USED FOR TENDER FILE / EXCEPTION LOG RESTART PROCESSING
+!**********************************************************************
+
+INTEGER * 4 GLOBAL \
+       GF.EXPOINT,       \ Internal pointer into exception log for recovery
+       GF.TLPOINT        ! Internal pointer into tender listing for recovery
+
+STRING GLOBAL \
+       GF.EX.READ$,      \ Used to read exception log for restart processing
+       GF.TL.READ$       ! Used to read tender listing for restart processing
+
+INTEGER GLOBAL \
+       GF.EX.RESTART,    \ Flag set during restart of Exception Log file
+       GF.TL.RESTART     ! Flag set during restart of Tender Listing file
+
+!**********************************************************************
+! CONSTANTS USED
+!**********************************************************************
+
+STRING GLOBAL \
+       GF.NULLS5$,       \ String of 5 nulls
+       GF.NULLS512$      ! String of 512 nulls
+
+!IR77861  Variables applicable only to high-performance stores
+
+!**********************************************************************
+! VARIABLES USED TO BUFFER CONTROL FILE STORE RECORD UPDATES
+!**********************************************************************
+
+INTEGER GLOBAL \
+       GF.CTR.CNT        ! # of control file updates needed before flushing
+
+!AIR31484 ADD GLOBAL VARIABLE FOR FLUSH ENHANCEMENTS 01/25/96
+!**********************************************************************
+! VARIABLE USED FOR CONTROLLING FLUSH ON TIME INTERVAL
+!**********************************************************************
+
+INTEGER*2 GLOBAL \
+       FLUSH.TIMER.INTERVAL !Number of minutes in which to flush im&depting
+!EIR31484
+
+!**********************************************************************
+! VARIABLES USED TO BUFFER ACCOUNTING AND OPERATOR RECORD UPDATES
+!**********************************************************************
+
+INTEGER GLOBAL \
+       GF.AC.BUFF(1),    \ # of acctg updates before flushing
+       GF.ACOT.BUFF,     \ # acctg updates for current op/term rec
+       GF.TABLESIZE,     \ Size of tables for buffered acctg data & op. data
+       GF.TNDR.CNT,      \ Flag set if proc. tender count in log
+       GF.OP.SIGNOFF,    \ Flag set if proc. operator signoff
+       GF.OP.BUFF(1),    \ # of acctg updates before flushing
+       GF.OPOP.BUFF,     \ # acctg updates for current op/term rec
+       GF.AC.LOC,        \ Location of current entry in actg table
+       GF.OP.LOC,        \ Location of current entry in oper table
+       GF.ENTRY.FOUND    ! Flag whether entry in table or not
+
+
+STRING GLOBAL \
+       GF.TEST.KEY$,     \ String to hold keys when searching for updates
+       GF.ACOT.DATA$,    \ Work string for buffered acctg. updates
+       GF.OPOP.DATA$,    \ Work string for buffered operf. updates
+       GF.AC.TABLE$(1),  \ Table of acctg change records
+       GF.OP.TABLE$(1)   ! Table of operator change records
+
+
+
+!EIR77861
+!**********************************************************************
+! Work Variables
+!**********************************************************************
+
+STRING GLOBAL     \
+        WORK$,    \
+        WORK1$,   \
+        WORK2$,   \
+        WORK3$,   \
+        WORK4$,   \
+        ZEROES$
+
+INTEGER*1 GLOBAL \
+        WORK1I1, \
+        WORK2I1, \
+        WORK3I1, \
+        WORK4I1
+
+INTEGER*2 GLOBAL \
+        I%,J%,K%,L%, \
+        WORK1I2, \
+        WORK2I2, \
+        WORK3I2, \
+        WORK4I2
+
+INTEGER*4 GLOBAL \
+        WORK1I4, \
+        WORK2I4, \
+        WORK3I4, \
+        WORK4I4

@@ -1,0 +1,17 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  IIVATS01.011 
+!     Punto de Entrada   =  EAMTSU01.J86
+!     Fecha de Revisi¢n  =  Dic 15 de 1995
+!     Unidad Responsable =  Casa Informatica - T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 01 para permitir una 
+! sola impresion del iva en la tira del cliente
+!                                                  
+!------------------------------------------------------------
+
+UE.IVA.IMPRESO% = 1				! Prender Bandera para imprimir
+						! una sola vez discriminado el iva
+!---------------------------------------------------------------

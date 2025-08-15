@@ -1,0 +1,3 @@
+IF TO.USEROPTS(7) <> 0 THEN BEGIN       			! TERMINAL USER OP 7 = Y
+  Call U.ECR.Sub(32)						!
+ENDIF								! FIN USER OP 7 = Y

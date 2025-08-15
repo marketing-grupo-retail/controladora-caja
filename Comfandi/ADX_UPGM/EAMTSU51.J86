@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC51(CALLPARM) PUBLIC                                              
+INTEGER*2 CALLPARM                                                              
+%INCLUDE EAMTSE51.J86        ! EMS PRPQ
+END FUNCTION                                                                    
+                                                                                

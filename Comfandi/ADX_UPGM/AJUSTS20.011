@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : AJUSTS20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Ajuste al cambio                 *
+!**************************************************
+
+IF (UE.AJUS.MONTO% > 0) AND (TS.LINETYPE = 2)  THEN BEGIN
+  CALL FORMAT.AMOUNT((UE.AJUS.MONTO% * -1))
+ 	TS.TEMP1$ = STRING$(8," ")+UE.MNTO.DESC$+"      "+TS.TEMP1$
+  Call U.Imprime(TS.TEMP1$,6100H)
+  UE.AJUS.MONTO% = 0
+ENDIF

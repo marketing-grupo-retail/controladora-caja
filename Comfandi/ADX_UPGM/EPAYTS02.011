@@ -1,0 +1,78 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+
+If (Asc.Pay.IMPMSG% = -1) Then Begin      ! Registro pago de Subsidio 
+ 
+ If (Asc.Pay.Bug% = -1) Then begin        ! Si se anulo la trx
+    CALL U.IMPRIME("REVERSO MOVIMIENTO..",2100H) 
+    Call Reverso.Trama.Error(Asc.Pay.NumNota$)     ! Reversa la trama
+    Asc.Pay.IMPMSG% = 0
+    Asc.Pay.Bug% = 0
+ ENDIF 
+ 
+ENDIF 
+
+IF Asc.Pay.Impr% = 2 THEN BEGIN           ! Si anulacion total de la transaccion
+   Call Reversa.Anul.total                ! Reversa todos los pagos registrados
+   
+   !Call Validacion.Operacion              ! Valida contra java la operacion 
+   
+ENDIF ELSE BEGIN 
+   !Call Validacion.Operacion              ! Valida contra java la operacion
+    
+    If Asc.Pay.Pago% = -1 Then Begin 
+        Call Format.Amount( Val(Asc.Pay.VlrBono$) )
+        CALL TSHIECET
+        Call VISORES4690(1,"ENTREGAR SUBSIDIO :","$"+TS.TEMP1$,800,"L")
+    EndIf
+    Call Confirmacion.Movimientos.Pes      ! Confirma la operacion 
+ENDIF 
+
+If Asc.Pay.OptTrx$ = "12" Then Begin 
+   Asc.Pay.OptTrx$ = "00"
+   Call U.IMPRIME(TO.HEADERLINE1$,4100H)
+   Call U.IMPRIME(TO.HEADERLINE2$,4100H)
+EndIf 
+
+Asc.Pay.Impr%    = 0											! Init de variable control de franqueo
+Asc.Pay.InCambio% = 0                     ! Control intercambio medios de cambio
+Asc.Pay.NotaNul$ = ""                     ! Init de variable control de anulaciones
+Asc.Pay.NtCap%   = 0                      ! Control de notas capturadas
+Asc.Pay.Cambio%  = 0                      ! Intercambio medios de pago
+Asc.Pay.InDevol% = 0                      ! Control de autorizaciones por devolucion y pago
+Asc.Pay.NumNota$ = ""                     ! Temporal
+Asc.Pay.VlrDev$  = ""                     ! 
+Asc.Pay.NroBon%  = 0                      ! Nro bonos capturados
+DIM Asc.Pay.Vtabono$(60,5)                ! Init vector control bonos
+Asc.Pay.Recup% = 0                        ! Control recuperaciones
+Asc.Pay.Cambio% = 0                       ! Intercambios
+Asc.Pay.AutPay% = 0                       ! Control autorizacion de pagos
+Asc.Pay.Tipo%   = 0
+Asc.Pay.Vari%   = 0
+Asc.Pay.SlEnd%  = 0
+Asc.Pay.IMPMSG% = 0
+Asc.Pay.VlrBono$ = "0"                    ! Init Valor del pago del Bono 22 Oct 2012 GR-OVS
+XL.PES% = 0
+Dim XL.JAVA$(50,4)
+Dim XL.PES$(50,4)
+Asc.Pay.Bug% = 0
+Asc.Pay.OptTrx$ = "00"
+Asc.Pay.Pago% = 0 
+TO.CDLIMIT2 = Gr.Pay.CDLIMIT2%            ! VALOR LIMITE CASH DRAWER 
+
+
+
+!--- Lineas adicionadas limpieza variables SMA  GR-OVS 22Dic2011
+TS.GROSSPOS = 0        										! GROSS + FOR THIS TRX
+TS.GROSSNEG = 0        										! GROSS - FOR THIS TRX
+!TS.MISCTRX.AMT = 0     									! MISC TRX AMOUNT FOR THIS TRX
+!TS.TENDERED(0) = 0                       ! Init para evitar basura pago subsidio
+!CALL TSETEC03                            ! Inicializa Totales Trx
+

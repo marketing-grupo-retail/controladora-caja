@@ -1,0 +1,56 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSFBX, EAMTSFBY, EAMTSFBZ ********************!!
+! TITLE: Electronic Marketing WIC EBT Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 2004 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/* CHANGE ACTIVITY                                                */
+\/*                                                                */
+\/*                                                                */
+\/* IRwicEM  Add Item to Coupon Association for WIC EBT function.  */
+\/*          REM IBM 02Sep2004                                     */
+\/*                                                                */
+\/****END-OF-SPECIFICATIONS*****************************************!
+
+!!*******************************************************************
+!!** PROCESS WIC RELATED COUPONS AT CALL FROM SA DURING WIC TENDER **
+!!*******************************************************************
+!!  THIS SUBROUTINE IS CALLED BY THE WIC TENDER PROCESSING TO CAUSE
+!!  COUPONS TO BE MOVED AWAY FROM WIC SALES WHEN POSSIBLE AND TO
+!!  DETERMINE THE PORTION OF WHOLE ORDER DISCOUNTS THAT APPLY TO
+!!  WIC SALES.
+
+SUB WEBT.FINISH.COUPONS EXTERNAL             ! FINISH WIC COUPON PROCESS
+END SUB
+
+!!*******************************************************************
+!!**  DEFINE SUBROUTINE CALLS NEEDED IN EM FOR WIC EBT SUPPORT     **
+!!*******************************************************************
+!!  THESE SUBROUTINES ARE CALLED FROM EM TO ALLOW THE ITEM TO COUPON
+!!  ASSOCIATION CODE TO BUILD THE ASSOCIATION DATA ARRAYS
+
+SUB EM000.WEB EXTERNAL
+END SUB
+
+SUB EM008.WEB EXTERNAL
+END SUB
+
+SUB EM014.WEB EXTERNAL
+END SUB
+
+SUB EM020.WEB EXTERNAL
+END SUB
+
+SUB EM120.WEB EXTERNAL
+END SUB
+
+SUB EM037.WEB EXTERNAL
+END SUB
+
+SUB EM051.WEB EXTERNAL
+END SUB
+
+

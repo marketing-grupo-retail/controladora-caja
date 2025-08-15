@@ -1,0 +1,36 @@
+!************************************************** 
+!Empresa       : CellStar de Colombia             *
+!Programa      : PINTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   *
+!Observaciones : Recarga en Linea                 *
+!**************************************************
+! Modificaciones:
+
+
+TS.TEMP1I1 = 0 
+TS.TEMP1I1 = ITEM.RECARGA(SL.IT.ITEMCODE$)																			 ! Verifica si producto es recarga
+
+If TS.TEMP1I1 = -1  Then Begin             																			 ! Si es una recarga
+ If (TS.IO.KEYS(1) = 70 OR TS.IO.KEYS(8) = 67 ) THEN BEGIN	                     ! ANULACIONES
+    TS.TEMP1I1 = 0 																															 ! Init Variable
+    CALL ANULACION.RECARGAS
+ EndIf
+EndIf Else Begin 
+   If Ue.Pin.Devol% = -1 Then Begin 																						 ! Anulacion de un telefono
+       IR.INDICAT0 = IR.INDICAT0 OR 04H												                   ! No permite venta
+       Exit Sub																																	 ! Sale del Procedim      
+   EndIf 
+EndIf 
+
+If TS.TEMP1I1 = -1  Then Begin             																			 ! Si es una recarga
+   Call Valida.Montos.Operador(Ue.Pin.Oper$)                                     ! Validacion de los montos  
+   Ue.Pin.AnulItm% = 0																													 ! Control anulacion items
+   TS.TEMP1I1 = 0																																 ! Reset Variable
+   TS.TEMP1I2 = 0																																 ! Reset Variable
+   TS.TEMP1I2 = INGRESA.RECARGA																								   ! Captura telefono y valor
+   If TS.TEMP1I2 = 0  Then Begin				     					                           ! No se capturo dato
+       IR.INDICAT0 = IR.INDICAT0 OR 04H												                   ! No permite venta
+       Exit Sub																																	 ! Sale del Procedimiento      
+   EndIf
+EndIf 

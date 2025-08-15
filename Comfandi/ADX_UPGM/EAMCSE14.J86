@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU14.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+!!*******************************************************************
+!!** PROCESS DATA ENTRY MADE PRIOR TO TRANSACTION                  **
+!!*******************************************************************
+ IF CS.FLD.LEN(1) = 1 THEN BEGIN          ! Field 1 is one character
+   WORK1$ = MID$(CS.INPUT$,               \ Get field 1 into a string
+            CS.FLD.POS(1)+1,1)            !
+   IF WORK1$ = PACK$("??") AND            \ Panel diary marker found
+      (SL.HD.TRANTYPE = 0) THEN BEGIN     !  Sales transaction
+     EMSS.PANEL.TRANS = -1                ! Flag trans. to be written
+     CA.CUSTNUM$ = MID$(CS.INPUT$,CS.FLD.POS(2)+1, CS.FLD.LEN(2))
+                                ! Capture current customer for XLOG only
+   ENDIF
+ ENDIF
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE

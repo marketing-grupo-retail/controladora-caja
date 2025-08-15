@@ -1,0 +1,30 @@
+!------------------------------------------------------
+! Variables globales de uso general
+!------------------------------------------------------
+
+! Constantes para almacenar comandos de impresión
+string global          \
+   NUO.SaltaLineas$,   \ Comando para saltar lineas, se le debe agregar el numero de lineas a saltar
+   NUO.CortaPapel$,    \ Comando para cortar el papel
+   NUO.AlineaIzq$,     \ Comando para alinear a la izquierda
+   NUO.AlineaDer$,     \ Comando para alinear a la derecha
+   NUO.Centrado$,      \ Comando para centrar
+   NUO.LetraGigante$,  \ Comando para letra muy grande
+   NUO.LetraGrande$,   \ Comando para letra grande
+   NUO.LetraMediana$,  \ Comando para letra mediana
+   NUO.LetraNormal$,   \ Comando para letra normal
+   NUO.LetraJunta$,    \ Comando para letra junta
+   NUO.InterLinea6$,   \ Comando para interlinea de 1/6 de pulgada
+   NUO.InterLinea8$,   \ Comando para interlinea de 1/8 de pulgada
+   NUO.InterLinea3$,   \ Comando para interlinea de 3 mm
+   NUO.NegritaA$,      \ Comando para activar negrita 
+   NUO.NegritaD$,      \ Comando para desactivar negrita
+   NUO.NegritaFontA$,  \ Comando para negrita en font A
+   NUO.NegritaFontB$,  \ Comando para negrita en font B
+   NUO.NegritaFontC$,  \ Comando para negrita en font C
+   NUOcmdImpresion$,   \ Comandos de impresion
+   CRLF$
+
+! Arreglo para retorno a funciones globales
+string global          \
+   NUOuserData$(1)     !

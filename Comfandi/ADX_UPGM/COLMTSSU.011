@@ -1,0 +1,29 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLMTSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+
+Sub COLMTS02.011  External
+End Sub
+
+Sub COLMTS07.011  External
+End Sub
+
+Sub COLMTS08.011  External
+End Sub
+
+Sub COLMTS14.011  External
+End Sub
+
+Sub COLMTS20.011  External
+End Sub
+
+Sub COLMTS43.011  External
+End Sub
+
+Sub COLMTS53.011  External
+End Sub

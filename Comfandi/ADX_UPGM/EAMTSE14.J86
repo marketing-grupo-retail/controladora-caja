@@ -1,0 +1,212 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU14.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+! CODE FOR PRPQ 5799-DCB (COUPON ENHANCEMENTS) MUST FOLLOW THIS CODE IF
+! THE PRPQ CODE IS IMPLEMENTED AND CATEGORY 4 CUSTOMER NUMBERS ARE USED.
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+
+\/* CHANGE ACTIVITY                                                 */
+\/*                                                                 */
+\/* IR25703 - Message B094 during non-sales Price Verify procedure  */
+\/*           if a split package price is used with a deal quantity */
+\/*           of 3.                                                 */
+\/*           BAH MGVA 04/11/94                                     */
+\/*                                                                 */
+\/* IR25943 - CORRECT IR25703, MODULE EAMTSEVA.J86 required a       */
+\/*           symbol "TS.PC.DET" be added as a global variable.     */
+\/*           Module EAMTSE14.J86 not changed from IR25703.         */
+\/*           MWD MGVA 04/20/94                                     */
+\/*                                                                 */
+\/* IR46321 - Add function for new 'Could haved saved' algorithm.   */
+\/*           CMJ MGVA 08/01/01                                     */
+\/*                                                                 */
+\/*******************************************************************/
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+CALL TSU14.FB
+
+%INCLUDE EAMTSC14.J86      ! COUPON ENHANCEMENT CODE
+
+!!*******************************************************************
+!!** SAVE DATA SPACE BY PROHIBITING DEPT CHANGE FROM EAMTSPCC      **
+!!*******************************************************************
+ IF TS.PROCEDURE = 6 THEN BEGIN      ! Terminal Price Change
+  IF TS.IO.KEYS(3) = 78 AND          \ Asterisk key field number
+     VAL(TS.IO.DATA$(3)) = 3 AND     \ Change to dept number field
+\AIR25703
+\    TS.IO.KEYS(5) = 74 THEN BEGIN   ! Price key field change
+     TS.IO.KEYS(5) = 74 AND          \ Price key field change
+     TS.PC.DET = -1 THEN BEGIN       ! Item Details already printed
+\EIR25703
+    TS.GUIDANCE = 1094               ! Guidance =procedure not available
+    TS.IO.MOTORKEY = 0               ! Give error with no processing
+  ENDIF                              ! Change to dept number field
+ ENDIF                               ! Terminal Price Change
+
+ENDIF                      ! EM PROCESSING IS ACTIVE
+
+!AIR46321
+!!*******************************************************************
+!!** ISOLATE FINAL TENDER SEQUENCE FOR NON-PREFERRED CUSTOMER      **
+!!*******************************************************************
+IF TS.INTRX NE 0 AND                         \ IN TRANSACTION
+   TS.PROCEDURE < 1 THEN BEGIN               ! IN CHECKOUT
+ IF TS.IO.MOTORKEY = 73 THEN                 \ CLEAR KEY
+   TS.MAN.REENTRY = 0                        ! RESTART MANUAL TENDER
+ IF TS.IO.KEYS(7) > 90 AND                   \ TENDER SEQUENCE
+    TS.IO.KEYS(1) NE 70 AND                  \ NOT A VOID
+    TS.BAL.TAKEN NE 0 THEN BEGIN             ! BALANCE TAKEN
+!! STOP IF B020 GUIDANCE DUE FROM EM AFTER AUTO TOTAL (NO IR40417) 08/00
+ IF EMSS.DELAY.SAVE = 0 OR                   \ NO DELAYED COUPS    08/00
+    EMSS.PR.BALDUE = (TS.TOTALS(0,0,0)       \  OR BALANCE         08/00
+              + TS.TAXES(0,0)) THEN BEGIN    !   ALREADY PRINTED   08/00
+  IF SPCS.CS.ACTIVE NE 0 AND                 \ FUNCTION IS ACTIVE
+     EMSS.TR.PCCPNAMT = 0 AND                \ NOT DONE ALREADY
+     EMSS.PANEL.TRANS = 0 THEN BEGIN         ! NOT PREFERRED CUSTOMER
+   IF VAL(TS.IO.DATA$(7)) >= TS.BALDUE(0) OR \ AMOUNT WILL END ORDER
+      TS.IO.KEYS(2) = 80 OR                  \ MANUAL REVERSE KEYING
+      TS.MAN.REENTRY NE 0 THEN BEGIN         ! SECOND MANUAL TENDER KEY
+   IF TS.GROSSPOS > 0 OR                     \ SALES IN ORDER      05/99
+      TS.MISCTRX.AMT > 0 THEN BEGIN          ! MISC SALES          05/99
+!! STOP IF PRIOR EXIT CODE REQUIRES GUIDANCE AT EXIT 14 TENDER     08/00
+   IF TS.GUIDANCE = 0 AND                    \ NO PRIOR EXIT ERROR 08/00
+      TS.ERRPTR = 1 THEN BEGIN               ! NO PRIOR EXIT ERROR 08/00
+
+!!**************************************************************RM-01/98
+!!** SAVE ARRAY DATA IN CASE CARD ENTERED AFTER TENDER FAILS    RM-01/98
+!!**************************************************************RM-01/98
+    SPCS.C1.SAVE = 0                         ! CLEAR REPLAY CNT RM-01/98
+    IF EMSS.REPLAY.SAVE > 0 THEN BEGIN       ! SAVED PC COUPONS RM-01/98
+     SPCS.C1.SAVE = EMSS.REPLAY.SAVE         ! SAVE REPLAY CNT  RM-01/98
+     DIM SPCS.C1.DATA(SPCS.C1.SAVE,2)        ! DIM SAVE ARRAY   RM-01/98
+     DIM SPCS.C1.AMTS(SPCS.C1.SAVE)          ! DIM SAVE ARRAY   RM-01/98
+     FOR I% = 1 TO SPCS.C1.SAVE              ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 2                        ! FOR ALL ENTRIES  RM-01/98
+       SPCS.C1.DATA(I%,J%) = EMSS.REPLAY.DATA(I%,J%) !SAVE DATA RM-01/98
+      NEXT J%                                ! NEXT ENTRY       RM-01/98
+      SPCS.C1.AMTS(I%) = EMSS.REPLAY.AMTS(I%) ! SAVE AMTS       RM-01/98
+     NEXT I%                                 ! NEXT ENTRY       RM-01/98
+    ENDIF                                    ! SAVED PC COUPONS RM-01/98
+                                                              ! RM-01/98
+    SPCS.C2.SAVE = 0                         ! CLEAR PROMO CNT  RM-01/98
+    IF OP.PROMO.ACTIVE AND                   \ PROMO VALIDATION RM-01/98
+       EMSS.PROMO.SAVE > 0 THEN BEGIN        ! SAVED PROMO DATA RM-01/98
+     SPCS.C2.SAVE = EMSS.PROMO.SAVE          ! SAVE PROMO CNT   RM-01/98
+     DIM SPCS.C2.DATA(SPCS.C2.SAVE,5)        ! DIM SAVE ARRAY   RM-01/98
+     DIM SPCS.C2.AMTS(SPCS.C2.SAVE,1)        ! DIM SAVE ARRAY   RM-01/98
+     FOR I% = 1 TO SPCS.C2.SAVE              ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 5                        ! FOR ALL ENTRIES  RM-01/98
+       SPCS.C2.DATA(I%,J%) = EMSS.PROMO.DATA(I%,J%) ! SAVE DATA RM-01/98
+      NEXT J%                                ! NEXT ENTRY       RM-01/98
+      FOR J% = 0 TO 1                        ! FOR ALL ENTRIES  RM-01/98
+       SPCS.C2.AMTS(I%,J%) = EMSS.PROMO.AMTS(I%,J%) ! SAVE AMTS RM-01/98
+      NEXT J%                                ! NEXT ENTRY       RM-01/98
+     NEXT I%                                 ! NEXT ENTRY       RM-01/98
+    ENDIF                                    ! SAVED PROMO DATA RM-01/98
+                                                              ! RM-01/98
+    SPCS.C3.SAVE = 0                         ! CLEAR WEIGHT CNT RM-01/98
+    IF EMSS.WGT.SAVE > 0 THEN BEGIN          ! SAVED WEIGHTS    RM-01/98
+     SPCS.C3.SAVE = EMSS.WGT.SAVE            ! SAVE WEIGHT CNT  RM-01/98
+     DIM SPCS.C3.DATA(SPCS.C3.SAVE,4)        ! DIM SAVE ARRAY   RM-01/98
+     FOR I% = 1 TO SPCS.C3.SAVE              ! FOR ALL ENTRIES  RM-01/98
+      FOR J% = 0 TO 4                        ! FOR ALL ENTRIES  RM-01/98
+       SPCS.C3.DATA(I%,J%) = EMSS.WGT.DATA(I%,J%) ! SAVE DATA   RM-01/98
+      NEXT J%                                ! NEXT ENTRY       RM-01/98
+     NEXT I%                                 ! NEXT ENTRY       RM-01/98
+    ENDIF                                    ! SAVED WEIGHTS    RM-01/98
+                                                              ! RM-01/98
+    SPCS.C4.SAVE = 0                         ! CLEAR PERCNT CNT RM-01/98
+    IF EMSS.PERCENT.SAVE > 0 THEN BEGIN      ! SAVED PERCENTS   RM-01/98
+     SPCS.C4.SAVE = EMSS.PERCENT.SAVE        ! SAVE PERCENT CNT RM-01/98
+     DIM SPCS.C4.DATA(SPCS.C4.SAVE)          ! DIM SAVE ARRAY   RM-01/98
+     DIM SPCS.C4.AMTS(SPCS.C4.SAVE)          ! DIM SAVE ARRAY   RM-01/98
+     FOR I% = 1 TO SPCS.C4.SAVE              ! FOR ALL ENTRIES  RM-01/98
+      SPCS.C4.DATA(I%) = EMSS.PERCENT.ITM(I%) ! SAVE DATA       RM-01/98
+      SPCS.C4.AMTS(I%) = EMSS.PERCENT.AMT(I%) ! SAVE AMTS       RM-01/98
+     NEXT I%                                 ! NEXT ENTRY       RM-01/98
+    ENDIF                                    ! SAVED PERCENTS   RM-01/98
+                                                              ! RM-01/98
+!!*******************************************************************
+!!** APPLY ANY COUPONS TARGETED TO ALL RAINCHECK CUSTOMERS         **
+!!*******************************************************************
+    IF EMSS.TG.RC.CNT > 0 THEN BEGIN         ! RAINCHECK COUPONS
+     FOR K% = 1 TO EMSS.TG.RC.CNT            ! FOR EACH RC COUPON
+      IF EMSS.REPLAY.SAVE < EMSS.REPLAY.LMT THEN BEGIN ! MORE ROOM
+       EMSS.REPLAY.SAVE = EMSS.REPLAY.SAVE+1 ! NEXT ARRAY ENTRY
+       EMSS.REPLAY.DATA(EMSS.REPLAY.SAVE,0)  \ SAVE TARGETED UPC
+                            = EMSS.TG.RC(K%) ! FROM RAINCHECK
+       EMSS.REPLAY.DATA(EMSS.REPLAY.SAVE,1) = 99 ! ALLOW UP TO 99
+       EMSS.REPLAY.DATA(EMSS.REPLAY.SAVE,2) = 0  ! NO SAVED WEIGHT
+       EMSS.REPLAY.AMTS(EMSS.REPLAY.SAVE) = 0    ! NO SAVED AMOUNT
+      ENDIF                                  ! MORE ROOM
+     NEXT K%                                 ! NEXT INPUT
+    ENDIF                                    ! RAINCHECK COUPONS
+
+!!*******************************************************************
+!!** SAVE TENDER SEQUENCE AND STATUS AND LOG POSITION              **
+!!*******************************************************************
+    IF EMSS.REPLAY.SAVE > 0 THEN BEGIN       ! PREFERRED COUPONS PRESENT
+     DIM SPCS.CS.DAT2(21)                    ! SAVE AREA FOR INPUT 09/99
+     DIM SPCS.CS.DAT4(04)                    ! SAVE AREA FOR INPUT 02/00
+     DIM SPCS.CS.DATA$(11)                   ! SAVE AREA FOR INPUT
+     FOR I% = 0 TO 10                        ! FOR ALL INPUT
+      SPCS.CS.DAT2(I%) = TS.IO.KEYS(I%)      ! SAVE INPUT KEYS
+      SPCS.CS.DATA$(I%) = TS.IO.DATA$(I%)    ! SAVE INPUT DATA
+     NEXT I%                                 ! NEXT INPUT
+     SPCS.CS.DATA$(11) = TS.IO.HDR$          ! SAVE INPUT HEADER
+     SPCS.CS.DAT2(11) = TS.IO.MOTORKEY       ! SAVE MOTORKEY
+     SPCS.CS.DAT2(12) = TS.IO.DEVICE         ! SAVE INPUT DEVICE
+     SPCS.CS.DAT2(13) = TS.TEMP1I2           ! SAVE INPUT KEY COUNT
+     SPCS.CS.DAT2(14) = TS.TRX.STATUS        ! SAVE TRANS STATUS
+     SPCS.CS.DAT2(15) = SL.END               ! SAVE TLOG POINTER
+     SPCS.CS.DAT2(16) = TS.MAN.REENTRY       ! SAVE MANUAL TENDER
+     SPCS.CS.DAT2(17) = TS.IO.PREV.KEYS(7)   ! SAVE PRIOR TENDER KEY
+     SPCS.CS.DAT2(18) = TS.COUP.QTY          ! SAVE COUPON QUANTITY
+     SPCS.CS.DAT2(19) = TS.DELCNT(4)         ! SAVE NEG ENTRY CNT
+     SPCS.CS.DAT2(20) = TS.DELCNT(5)         ! SAVE NEG ENTRY CNT
+     SPCS.CS.DAT2(21) = TS.PENDCOUNT         ! SAVE PENDING OVRD   09/99
+     SPCS.CS.DAT4(01) = EMSS.TR.ACOUPSTR     ! SAVE AUTO STR COUPONS
+     SPCS.CS.DAT4(02) = EMSS.TR.ACOUPMFR     ! SAVE AUTO MFR COUPONS
+     SPCS.CS.DAT4(03) = TS.TENDERED(7)       ! SAVE ALL MFR COUPS  02/00
+     SPCS.CS.DAT4(04) = TS.TENDERED(8)       ! SAVE ALL STR COUPS  02/00
+
+!!*******************************************************************
+!!** FORCE REPLAY OF PREFERRED COUPONS                             **
+!!*******************************************************************
+     SPCS.COULDSAV = -1                      ! FLAG FALSE REPLAY
+     EMSS.PANEL.TRANS = -1                   ! FLAG PREFERRED CUSTOMER
+     CA.CUSTNUM$ = ""                        ! CLEAR CUSTOMER NUMBER
+     CA.POINTS = 0 : CA.PPOINTS = 0          ! NO POINTS           08/99
+     CA.DISCG = 0                            ! NO DISCOUNTS        08/99
+     CA.STATUS   = 0                         ! NO STATUS           08/99
+     CA.OPTIONS  = 88H                       ! NO DISC OR POINTS   08/99
+     IF OP.CA.DSOFF > 71 THEN                \ USER DATA           08/99
+       CA.USER$ = STRING$(OP.CA.DSOFF-71,CHR$(0)) ! NO USER DATA   08/99
+     TS.TRX.STATUS = 1                       ! ALLOW SALES
+     EMSS.COUP.REPLAY = -1                   ! START REPLAY
+     EMSS.REPLAY.CNT = 0                     ! RESET REPLAY COUNT
+     EMSS.TSU14.FLAG = 0                     ! CLEAR EXIT FLAG
+     EMSS.TG.REJ.RPLY = 0                    ! DON'T REJECT REPLAY
+     EMSS.TG.NOTDONE = 0                     ! ASSURE NO 2ND PASS
+     DIM TS.IO.KEYS(10)                      ! CLEAR INPUT
+     TS.IO.MOTORKEY = 73                     ! CLEAR INPUT
+     CALL LOCK.IOP                           ! LOCK I/O PROCESSOR
+    ENDIF                                    ! PREFERRED COUPONS PRESENT
+   ENDIF                                     ! NO PRIOR EXIT ERROR 08/00
+   ENDIF                                     ! SALES IN ORDER      05/99
+   ENDIF                                     ! AMOUNT WILL END ORDER
+  ENDIF                                      ! NOT PREFERRED CUSTOMER
+ ENDIF                                       ! BALANCE PRINTED     08/00
+ ENDIF                                       ! TENDER SEQUENCE
+ENDIF                                        ! INITIAL ENTRY IN CHECKOUT
+
+!EIR46321

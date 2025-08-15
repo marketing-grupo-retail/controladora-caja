@@ -1,0 +1,9 @@
+!------------------------------------------------------------------------------
+! En proceso para nueva hora
+!------------------------------------------------------------------------------
+!User exit called after timer processing
+FUNCTION CSUPEC17 PUBLIC
+
+   !call copiaItem
+
+END FUNCTION

@@ -1,0 +1,39 @@
+!BEFORE WRITING A LINE TO THE DISPLAY
+!Antes de escribir una linea al visor
+FUNCTION TSUPEC23 PUBLIC
+   INTEGER*1 TSUPEC23                        ! define variable !IR89474
+   !CALL SUBSTR(TS.DISP1$,8,"*EC*",0,4)
+   !CALL SUBSTR(TS.DISP2$,8,"*23*",0,4)
+
+!call traceNUO( "UE23 LT=" + str$( TS.LINETYPE ) + " LD=" + str$( TS.LINEDATA ) + "]" )
+!call traceNUO( "TS.DISP1$=[" + TS.DISP1$ + "] TS.DISP2$=[" + TS.DISP2$ + "]" )
+!call traceNUO( "TS.GUIDANCE=[" + STR$(TS.GUIDANCE) + "]" )
+!call traceNUO( "TS2.DISP1$=[" + TS2.DISP1$ + "] TS2.DISP2$=[" + TS2.DISP2$ + "]" )
+
+
+!-- Para el ambiente grafico 
+IF LEFT$(TS.DISP1$,2) = "B0" THEN BEGIN 
+   TO.MGRKEY = 0													! SIMULA LLAVE PUESTA
+ENDIF 
+
+
+   if ( TS.LINETYPE        = 9   ) and \
+      ( TS.LINEDATA        = 0   ) and \
+      ( left$(TS.DISP2$,8) = TS.SDESC$(98) + " " + TS.SDESC$(90) ) then begin
+      TS.DISP1$ = TS2.DISP1$
+      TS.DISP2$ = TS2.DISP2$
+   endif
+
+   ! Inventario
+   if MSMTINVE23 then exit function
+
+   ! PROMOCIONES NUO MODULO NUOTPROM.BAS
+   call NUOTPROM23
+
+   ! CANASTA
+   call MSMTFACT23
+
+
+
+END FUNCTION
+

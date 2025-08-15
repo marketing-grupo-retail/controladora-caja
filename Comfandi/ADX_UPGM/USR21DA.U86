@@ -1,0 +1,8 @@
+IF IMPREDA% = 1 THEN BEGIN
+PRTLINE ="DATOS Tra: #BCO" + "   #Cheque      #Cedula" !  
+CALL QXL.TSUPEC21(PRTLINE)
+PRTLINE ="      "+NO.BAN$+ "      "+NO.CHE$+ "      "+NO.CTA$ !
+CALL QXL.TSUPEC21(PRTLINE)                            !
+CALL QXL.TSUPEC21("CUENTA No: "+ TS.IO.DATA$(9))
+IMPREDA% = 0
+ENDIF

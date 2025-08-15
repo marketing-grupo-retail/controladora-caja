@@ -1,0 +1,40 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU67.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR46754  Add external declaration for SAVE.PROMO function
+!           used by UserExit 67.
+!           CMJ MGVA 20Sep2001
+!
+!  IR46794  AEAPAR IR46754 Added the use of a flag so that this routine
+!           runs only where the use of an alias is detected during a
+!           retrieved transaction.
+!           JAM MGVA 02Oct2001
+!
+!*END-OF-SPECIFICATIONS**********************************************
+
+  INTEGER*4 QTY, WGT
+
+ IF EMSS.ALIAS.IN.RETV THEN BEGIN    ! If valid item  IR46794
+  IF ((IR.USEREXIT1 > 0) AND         \ Promo code
+      (TS.RETV.IN.PROGRESS) AND      \ Retrieval in progress
+       (OP.PROMO.ACTIVE)) THEN BEGIN ! Promo is active
+    IF (SL.IE.INDICAT1 AND 40H) THEN BEGIN ! Weight item
+      WGT = SL.IE.QTYORWGT           ! Set up weight value
+      QTY = 1                        ! Set quantity
+    ENDIF ELSE BEGIN
+      WGT = 0                        ! Set weight to zero
+      QTY = SL.IE.QTYORWGT           ! Set up quantity
+    ENDIF
+    IF (SL.IT.INDICAT3A <> 6) AND (SL.IT.INDICAT3A <> 7) THEN BEGIN
+      CALL SAVE.PROMO(SL.IE.SALEPRIC, QTY, WGT)
+    ENDIF
+  ENDIF
+ ENDIF                              ! If valid item   IR46794
+ EMSS.ALIAS.IN.RETV = 0             ! reset the flag  IR46794
+

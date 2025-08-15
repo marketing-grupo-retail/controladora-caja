@@ -1,0 +1,233 @@
+\/* TIME STAMP BLOCK *************************************************
+\*PROM  JT40 ADXHS5KF J86      01/29/93 23:49:10 FEBLD    IT40 IR97809          
+\*RTIME JT40 ADXHS5KF J86      01/20/93 12:22:00 FEBLD    IT40 IR97809          
+\*PROM  IT40 ADXHS5KF J86      01/20/93 12:08:31 FEBLD    CT40 IR97809          
+\*RTIME IT40 ADXHS5KF J86      01/14/93 12:15:50 FEBLD    CT40 IR97809          
+\*PROM  CT40 ADXHS5KF J86      01/14/93 11:51:03 LEVERETT BT40 IR97809          
+\*RTIME CT40 ADXHS5KF J86      12/07/92 11:11:18 LEVERETT BT40 IR97809          
+\*PROM  BT40 ADXHS5KF J86      12/07/92 11:10:54 LEVERETT MT40 IR97809          
+\*RTIME BT40 ADXHS5KF J86      11/11/92 07:41:59 LEVERETT MT40 IR97809          
+\*LIB   MT40 ADXHS5KF J86      11/11/92 07:41:39 BITZ     *    IR97809          
+\*LIB   MT40 ADXHS5KF J86      10/31/92 13:54:30 LEVERETT *    IR97809
+\*PROM  CT42 ADXHS5KF J86      09/30/92 13:25:56 LEVERETT BT42 *
+\*RTIME CT42 ADXHS5KF J86      09/28/92 17:32:10 LEVERETT BT42 *
+\*PROM  BT42 ADXHS5KF J86      09/28/92 17:32:04 V$IJOHN  MT42 IR97809
+\*RTIME BT42 ADXHS5KF J86      09/21/92 14:45:20 V$IJOHN  MT42 IR97809
+\*LIB   MT42 ADXHS5KF J86      09/21/92 14:42:57 V$IJOHN  *    *
+\*PROM  CT42 ADXHS5KF J86      09/15/92 13:13:31 LEVERETT BT42 *
+\*RTIME CT42 ADXHS5KF J86      09/15/92 11:59:49 LEVERETT BT42 *
+\*PROM  BT42 ADXHS5KF J86      09/15/92 11:59:39 V$E015   MT42 IR97809
+\*RTIME BT42 ADXHS5KF J86      09/14/92 16:03:08 V$E015   MT42 IR97809
+\*LIB   MT42 ADXHS5KF J86      09/14/92 16:02:49 V$E015   *    IR97809
+\** END OF TIME STAMP BLOCK *****************************************/
+
+REM******************************************************************
+REM
+REM  THIS IS THE X25 API VERB PROTOTYPE FILE.
+REM  TO BE INCLUDED BY CBASIC PROGRAMS.
+REM
+REM   CHANGE ACTIVITY:
+REM
+
+REM********************************************************************
+REM                  X25 API VERB PROTOTYPES FOR CBASIC            *
+REM********************************************************************
+
+sub  xload ( line.name, line.name.length, return.code ) external
+  STRING    line.name
+  INTEGER*2 line.name.length
+  INTEGER*4 return.code
+end sub
+
+sub  xsto ( verb.timeout.seconds, return.code ) external
+  INTEGER*4 verb.timeout.seconds
+  INTEGER*4 return.code
+end sub
+
+sub  xopen ( vcr.name,                      \
+             vcr.name.length,               \
+             remote.application,            \
+             remote.application.length,     \
+             D.bit.services,                \
+             called.address.length,         \
+             called.address,                \
+             facilities.field.length,       \
+             facilities.field,              \
+             call.user.databuff.length,         \
+             call.user.databuff,                \
+             connection.id,                 \
+             return.code ) external
+  STRING    vcr.name
+  INTEGER*2 vcr.name.length
+  STRING    remote.application
+  INTEGER*2 remote.application.length
+  INTEGER*2 D.bit.services
+  INTEGER*2 called.address.length
+  STRING    called.address
+  INTEGER*2 facilities.field.length
+  STRING    facilities.field
+  INTEGER*2 call.user.databuff.length
+  STRING    call.user.databuff
+  INTEGER*4 connection.id
+  INTEGER*4 return.code
+end sub
+
+sub  xsend    ( connection.id,      \
+                databuff.length,    \
+                databuff,           \
+                Q.bit.indicator,    \
+                M.bit.indicator,    \
+                D.bit.indicator,    \
+                data.bytes.sent,    \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 databuff.length
+  STRING    databuff
+  INTEGER*2 Q.bit.indicator
+  INTEGER*2 M.bit.indicator
+  INTEGER*2 D.bit.indicator
+  INTEGER*2 data.bytes.sent
+  INTEGER*4 return.code
+end sub
+
+sub  xreceive ( connection.id,              \
+                databuff.buffer.size,           \
+                call.receipt.delay,         \
+                databuff.length,                \
+                databuff,                       \
+                Q.bit.indicator,            \
+                M.bit.indicator,            \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 databuff.buffer.size
+  INTEGER*2 call.receipt.delay
+  INTEGER*2 databuff.length
+  STRING    databuff
+  INTEGER*2 Q.bit.indicator
+  INTEGER*2 M.bit.indicator
+  INTEGER*4 return.code
+end sub
+
+sub  xclose   ( connection.id,                  \
+                facilities.field.length,        \
+                facilities.field,               \
+                clear.user.databuff.length,         \
+                clear.user.databuff,                \
+                cause.code,                     \
+                diagnostic.code,                \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 facilities.field.length
+  STRING    facilities.field
+  INTEGER*2 clear.user.databuff.length
+  STRING    clear.user.databuff
+  STRING    cause.code
+  STRING    diagnostic.code
+  INTEGER*4 return.code
+end sub
+
+sub  xevent   ( connection.id,            \
+                event.type,               \
+                facilities.field.length,  \
+                facilities.field,         \
+                databuff.length,              \
+                databuff,                     \
+                cause.code,               \
+                diagnostic.code,          \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 event.type
+  INTEGER*2 facilities.field.length
+  STRING    facilities.field
+  INTEGER*2 databuff.length
+  STRING    databuff
+  STRING    cause.code
+  STRING    diagnostic.code
+  INTEGER*4 return.code
+end sub
+
+sub  xopenrec ( first.byte.of.user.databuff,        \
+                first.byte.of.user.databuff.value,  \
+                D.bit.services,                     \
+                calling.address.length,             \
+                calling.address,                    \
+                called.address.length,              \
+                called.address,                     \
+                call.receipt.delay,                 \
+                facilities.field.length,            \
+                facilities.field,                   \
+                call.user.databuff.length,          \
+                call.user.databuff,                 \
+                connection.id,                      \
+                return.code ) external
+  INTEGER*2 first.byte.of.user.databuff
+  STRING    first.byte.of.user.databuff.value
+  INTEGER*2 D.bit.services
+  INTEGER*2 calling.address.length
+  STRING    calling.address
+  INTEGER*2 called.address.length
+  STRING    called.address
+  INTEGER*2 call.receipt.delay
+  INTEGER*2 facilities.field.length
+  STRING    facilities.field
+  INTEGER*2 call.user.databuff.length
+  STRING    call.user.databuff
+  INTEGER*4 connection.id
+  INTEGER*4 return.code
+end sub
+
+sub  xopenacc ( connection.id,              \
+                facilities.field.length,    \
+                facilities.field,           \
+                call.user.databuff.length,      \
+                call.user.databuff,             \
+                D.bit.services,             \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 facilities.field.length
+  STRING    facilities.field
+  INTEGER*2 call.user.databuff.length
+  STRING    call.user.databuff
+  INTEGER*2 D.bit.services
+  INTEGER*4 return.code
+end sub
+
+sub  xit      ( connection.id,              \
+                interrupt.databuff.length,      \
+                interrupt.databuff,             \
+                return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*2 interrupt.databuff.length
+  STRING    interrupt.databuff
+  INTEGER*4 return.code
+end sub
+
+sub  xreset   ( connection.id,              \
+                cause.code,                 \
+                diagnostic.code,            \
+                return.code ) external
+  INTEGER*4 connection.id
+  STRING    cause.code
+  STRING    diagnostic.code
+  INTEGER*4 return.code
+end sub
+
+sub  xalloc ( vcr.name, vcr.name.length, connection.id, return.code ) external
+  STRING    vcr.name
+  INTEGER*2 vcr.name.length
+  INTEGER*4 connection.id
+  INTEGER*4 return.code
+end sub
+
+sub  xdealloc ( connection.id, return.code ) external
+  INTEGER*4 connection.id
+  INTEGER*4 return.code
+end sub
+
+sub XWAIT ( num.waits, wait.time, wait.ids, wait.types, wait.event ) external
+  INTEGER*2 num.waits
+  INTEGER*4 wait.time
+  INTEGER*4 wait.ids
+  INTEGER*1 wait.types
+  INTEGER*4 wait.event
+end sub

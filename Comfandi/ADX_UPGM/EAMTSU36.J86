@@ -1,0 +1,10 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC36 PUBLIC
+! TSUPEC34 - MANAGERS OVERRIDE
+
+CALL LIBLINE(36,1)             ! Medicos
+
+END FUNCTION
+

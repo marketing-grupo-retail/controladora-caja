@@ -1,0 +1,211 @@
+!   ***************************************************************************
+!   **    Date       :  Junio de 1996                                        **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USR02UV.011                                          **
+!   **    Inclu¡r en :  EAMTSUVA.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Estas varibales de usuario se requieren para guardar el valor      **
+!   **    limite  de viveres, el  monto  acumulado de lo comprado en la      **
+!   **    quincena  y  calcula la  diferencia dando el CUPO DISPONIBLE.      **
+!   **                                                                       **
+!   **    Definicion  de  Variables para reporte de Nombres de Clientes      **
+!   **    en el momento de Franqueo.                                         **
+!   ***************************************************************************
+
+REAL      GLOBAL   CIENP                !
+REAL      GLOBAL   PESO, PESO1           !
+
+INTEGER*1 GLOBAL                       \!
+          UE.NIT,                      \! Guarda Iva de Articulos 
+          SIGNO%,  COU.PON1,           \! Guarda Iva de Articulos 
+          COU.PON, OFERTA%,            \! Guarda Iva de Articulos 
+          FER%,    GANSUB%,            \!
+	  NIVA%,   MUEST%,             \! Guarda Iva de Articulos 
+          FLAG.SR%, VERIAM%,           \! Para Indicar Recuperac de Transac
+          IS%,      MEDIBLE%,          \! 1er. Indice Descriptores
+          INDS%,                       \! 1er. Indice Descriptores
+          DSCR%,                       \! 2o.  Indice Descriptores
+          SINF%,                       \! Flag Error Factura
+          SINC%,                       \! Flag Error cc ¢ NIT
+          TI61%,                       \! Flag Medicamentos
+          TI65%,                       \! Flag CVC
+          TI66%,                       \! Flag sin Factura
+          YA.OK%,                      \! Flag Datos Completos
+          PROCE%,                      \! Flag sin Factura
+          CON.NO.FRAN%,                \! Flag para Franqueo
+          TESIO%,                      \! 
+          CP%,                         \!
+         IMPRE%,   ue.logo.impreso%
+INTEGER*2 GLOBAL                       \!
+          UE.X%,                       \! Indice ARRAY Datos/Keys
+          UE.Y%,                       \! Indice ARRAY Datos/Keys
+          UE.II%,                      \! Indice ARRAY Datos/Keys
+          LL%,                         \! Indice Calculo Dig Chequeo
+          KK,                          \! Indice ARRAY Datos/Keys
+          YY%,                         \! Indice ARRAY Datos/Keys
+          AI%,                         \! Para Loops FOR
+          CAVW%,                       \! Para Loops FOR
+          POSL%,                       \! Long del Vr Unit
+          POSX%,                       \! Posicion del "x"
+          LINCR%,                      \! Control Lineas CR
+          LINMF%,                      \! Control Lineas CR (mf)
+          POSA%,                       \! Posicion de letra
+          TYPE5%,                      \! Indica Linea CANT
+          FACT.NO%,                    \! Indica si hay #Factura
+          PAGO.CH%,                    \! Indica si hay datos Cheque
+          CE.NUM% ,                    \! Num. Transac CUSTA
+          UE.TS.TOTALS    
+INTEGER*4 GLOBAL                       \
+          EXENTO,                      \! 
+          PRECIO,      PRECIO1,        \! 
+          WORKI4,      SIN.IVA.TOTALS, \! 
+          MEX.VAT.TOTAL(1),            \! 
+          MEX.VAT.TAB(1),              \! 
+          IPO00%,      IPOT00%, IPO20%,\!  
+          IPO16%,      IPO35%,  IPODD%,\!  
+          IPOT16%,     IPOT35%,        \!  
+          IPOT20%,     IPOT10%, IPOTDD%,\!  
+          PEAJ%,       XMENS%,         \! Valor recuperado de ADXALMA.DAT
+          PEAJES%,     YMENS%,         \! Valor recuperado de ADXALMA.DAT
+          SW.FIN%,     KGCM%,          \! Control de Fin de RIFA.DAT
+          NR.TRAN%,    VTADESC%,       \! No. de Transaccion
+          NR.TERM%,                    \! No. de Terminal
+          IC%,                         \! Vr Impo Consumo Definitivo
+          IND%,                        \! Indice para Arreglo Premios
+          CODVEN%(1),                  \! Arreglo para guardar Vendedores
+          PREMIO%(1),                  \! Arreglo para guardar Premios
+          NO.LIN.FRAN%                 \! No. de lineas impresas en Franqueo
+
+INTEGER*4 GLOBAL                       \!
+          AUTO1%,      AUTO2%,         \! Codigos de Autorizados
+          CE.VRACUM%,  NITE%,          \! Vr ACUMULADO a la fecha
+          CE.DISPON%,  COTRA%,         \! Para guardar DISPONIBLE 
+          COEMP%,      NIEM%,          \! Para guardar DISPONIBLE 
+          VR.EPS%,     SL.PESO%,       \! Para guardar Cuota EPS
+          ANUL%,       F%,             \! Para guardar SIGNO void
+          HX%,         S%,             \!
+          SX%,         SUM%,           \!
+          RESW%,       COTRA1%,        \!
+          CE.RESTA%,   CE.USER%,       \! Restart y Userexit CUSTA
+          POSIC%,      ACUM%,          \!
+          SUMA%,       PLUPAGO%, TOT.SIN%
+
+STRING    GLOBAL                       \! VARIABLES para leer partes
+          VARIEDA$,  AUX$,             \! Variedad para Mcia Especial
+          SIGNO$,    USR.PAGO$,        \! Guarda Signo
+          VRDAD$,    USR.BASE$,        \! Mensaje de PRTBUF$ y Variedad
+          CE.LLAVE$, CE.CARAC$,        \! Llave y Reservado de CUSTA
+          CE.NADA1$, CE.NADA2$,        \! no utilizadas de un registro
+          LLAVEO$,   NOMOPER$,         \! Llave y Nombre de Operador
+          COD1$,     COD2$,            \! Codigos de Personas Autoriz
+          LLAV1$,    NOVE$,            \! Llave de Lectura EAMTENDV    
+          NOM$,      MENSA$,           \! Nombre/Empresa del Cliente,
+          NOM1$,     NOM2$,            \! Nombres personas Autorizadas
+          NOVED$,    MENS$,  LETCUPO$, \! Novedad Status Empresa
+          MEN1$,     MEN2$,  MEN3$,    \! Mensajes para Premios
+          DATO1$,    DATO2$, DATO3$,   \! Mensajes para Datos Usuario
+          DATO4$,    DATO5$, DATO6$,   \! Mensajes para Datos Usuario
+          NUCH$,     NOE$,   NO.CUO$,  \! Num CH Subs y Empresa
+          NO.CHE$,   NO.BAN$,NO.MOD$,  \! No. Cheque y No. Banco
+          NO.CTA$,   NO.CED$,          \! No. Cta.Cte y Cedula Girador
+          NO.NIT$,   NO.APR$,          \! No. NIT Comprador y Aprobacion
+          NO.FAC$,   NO.VEN$,          \! No. Factura y Vendedor
+          ALMA$,     NO.MIN$,          \! Nombre del Almac‚n y MiniFact
+          REQUE$,    LINPESO$,         \! 
+                     NO.CUP$,          \! Nombre de la Variedad
+          CUPOA$,    AVISO$,           \!
+          COBAR$,    AVISA$,           \!
+          DSPG$(1),  CENTRA$,          \! Arreglo para guardar Nombr Descrip
+          NOMVEN$(1), BONO$,           \! Arreglo para guardar Nombr Vend
+          VR$,       VALO$,            \! Para impresion del valor
+          LF$,       OPE$,             \! Parte izquierda y Operador
+          COD$,      CAJA$,            \! Para guardar PLU y Terminal
+          VLR$,      FACTU$             ! Para Valor y No. Factura
+
+STRING GLOBAL \!
+          CEDU$,     NUMBO$,           \! Nit Empresa Afiliada
+          NITE$,     VALOCH$,          \! Nit Empresa Afiliada
+          NITEW$,    SSUB1$,           \! Nit Empresa Afiliada
+          NITE1$,    NOCHE$,           \! Nit Empresa Afiliada Medicam
+          NITE2$,                      \! Nit Empresa Afiliada CVC
+          NOEM$,                       \! Nombre Empresa Afiliada
+          NOEMP$,                      \! Nombre Empresa Afiliada
+          NOEMP1$,                     \! Nombre Empresa Afiliada Medic
+          NOEMP2$,                     \! Nombre Empresa Afiliada CVC
+          NOEMP4$,      Vend.medica$,  \! Nombre Empresa Afiliada Medic
+          NOEMP5$,      key.op$,       \! Nombre Empresa Afiliada CVC
+          NOEMP6$,      nom.oper$,     \! Nombre Empresa Afiliada CVC
+          FECRE$,                      \! Fecha Creacion
+          FECRED$,                     \! Fecha Creacion
+          FEMOD$,                      \! Fechas de Creac, Modif
+          FEMODD$,                     \! Nit Empresa echa Modificacion
+          FAC$,                        \! Para  No. Factura
+          FACTU.IN$,                   \! Para  No. Factura
+          ACUMQ$,    FECHTR$,          \! 
+          DISPO$,    LLAV2$,           \!
+          LLAV3$,    TIPO$,            \!
+          KEMP$,     ERRORCOD$,        \!
+          ERRFX$                        !
+
+STRING GLOBAL \!
+          LIN.CRE$,  USR.IVA$,         \! Linea para Franqueo Creditos
+          COMPH$,    UTILI$,           \!
+          CAN.CRE$,                    \! Cant para Franqueo Creditos
+          VAL.UNI$,                    \! Valor Unitario Medicamentos 
+          BUF$,                        \! Para guardar Buffer Linea Datos
+          SUPER$,    VAR.CR$,          \! Tipo de Autorizacion
+          LISVAR$,   KODEM$,           \! Variedad de Pago y Cod. Empresa
+          Z$,        ROTUL$,           \! Nombre Empresa Tiquete de Cupos
+          RAYA$,                       \! 
+          CABE$,                       \!
+          CAB1$,                       \!
+          CABE1$,                      \!
+          FCORT$,                      \!
+          SUBT$,     RETE$,            \!
+          PEAJ$,     IVAS$,            \!
+          DESC$,     TOTA$,            \!
+          FONPH$,                      \!
+          FON12$,                      \! Para Guardar Font de 12 CPI 
+          FON15$,                      \! Para Guardar Font de 15 CPI 
+          FCH12$,                      \!
+          FCIZQ$,                      \! 
+          FON75$,                      \! 
+          FON7D$,                      \! 
+          NITW$,                       \!
+          CTAMOD$,                     \! Cuota Moderadora
+          DIG$,                        \! 
+          DIGW$,                       \! 
+          VRAUT$,                      \!
+          VRCRE$,                      \!
+          VENDE$,                      \!
+          VENDIO$,                     \!
+          NOMBV$,                      \!
+          FILALM$,                     \!
+          FILVEN$,                     \!
+          FILMEN$,  SITEM$,ITEM$        !
+
+STRING GLOBAL \!
+          FILDES$,                     \!
+          FRA.DEP$,                    \!                 
+          FRA.COD$,                    \!
+          FRA.LIN$,                    \!
+          FRA.FAC$,                    \!
+          FRA.TIM$,    CNV$(1),        \!
+          FRA.H$,      CONVE$,         \!
+          FRA.M$,      DATRA$,         \!
+          FRA.S$,      PLU$,           \!
+          FRA.FEC$,    TIP$,           \!
+          FRA.AA$,     FILIMB$,        \!
+          FRA.MM$,     TS.PRTCAR$,     \!
+          FRA.DD$,     TS.PRTFRU$,     \!
+          USR.IP16$,   USR.IP35$,      \!  
+          USR.IP20$,   USR.IPDD$,      \!  
+          USR.IP00$,                   \!  
+          RET,   TSPESO1$,TSPESO$          ! Acumule Valor de RETEFUENTE
+
+! REM Fin de la definicion de variables de usuario para esta funcion
+!-----------------------------------------------------------------------------

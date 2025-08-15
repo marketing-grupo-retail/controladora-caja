@@ -1,0 +1,33 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSE05.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variables          *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+If GR.LCL.PROCESA% = -2 Then Begin 
+  CA.POINTS       = 0                             														! Asigna puntaje Total
+  Gr.Lcl.Ptot%    = GR.LCL.PTO1% - GR.LCL.PTO2%   														! Asigna puntaje Total
+  CA.PPOINTS      = GR.LCL.PTO3%                   														! Asigna puntaje Periodo
+  Gr.Lcl.Name$    = Translate$(Gr.Lcl.Name$,","," ")                          ! Elimina posibles comas
+  Gr.Lcl.Name$    = Translate$(Gr.Lcl.Name$,":"," ")                          ! Elimina posibles dos puntos
+  Gr.Lcl.Name$    = TrimRight$(Gr.Lcl.Name$)																	! Retira Blancos
+  Gr.Lcl.SurNames$= TrimRight$(Gr.Lcl.SurNames$)															! Retira Blancos
+  CA.CUSTOMER$    = Left$(Gr.Lcl.Name$,10) + " " + Left$(Gr.Lcl.SurNames$,10) ! Nombre y apellidos cliente 21Oct2021
+  CA.CUSTOMER$    = Ucase$(CA.CUSTOMER$)
+  AL.CUSTOMER$    = CA.CUSTOMER$                                              ! Nombre del cliente
+  Gr.FeNat.Aplicado% = -1																											! Activa proceso fiscal cliente
+  GR.LCL.PROCESA% = 0 																												!
+!-- Se retira grabacion UD  15Feb2023
+!  Gr.Lcl.Tmp1$ = PACK$(Gr.Lcl.Clte$)                              +          \! Id del cliente
+!		    ":"+PACK$(Right$("0000000000"+Str$(Gr.Lcl.Ptot%),10)) 		+				   \! Puntos inicio de trx
+!		    ":"+PACK$(Right$("0000000000"+Str$(GR.LCL.PTO3%),10)) 		+				   \! Puntos del periodo
+!		    ":"+CA.CUSTOMER$                                       		+				   \! Nombre del cliente
+!		    ":"+Pack$("00")                  																			! 
+!  Call Grabacion.String.Usuario2("15",Gr.Lcl.Tmp1$)                           ! Graba String de Usuario
+
+EndIf

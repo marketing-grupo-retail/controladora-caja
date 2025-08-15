@@ -1,0 +1,110 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Agosto de 2002                   *
+!Observaciones : Impresion de promociones         *
+!**************************************************
+!*
+!
+
+  If (TS.LINETYPE = 18) And (TS.LINEDATA = 99) Then Begin
+   If (TS.TOTALS(0,0,0) > 0) Then Begin
+     Gr.Mkp.Compra$ = Str$(TS.TOTALS(0,0,0))																		! Total de compra
+   EndIf
+  EndIf
+
+
+If MATCH(TS.SDESC$(59),TS.PRTBUF$,1) > 0 Then Begin			       									! Mensaje de Anulacion Total
+   For I% = 1 to Gr.Mkp.CntRif%						       																! Valida Total de Rifas Cargadas
+       Gr.Mkp.Rifa$(I%,2) = "0"						       																!
+   Next I%																																			!
+   ASC.MKP.LOGO% = 0																														!
+EndIf																																						!
+
+If TS.LINETYPE = 22 AND ASC.MKP.ANTRX% = -1 Then Begin       	                  ! Si efectivamente se realizo anul/total
+   ASC.MKP.LOGO% = 0						                                                ! No print Msg
+   ASC.MKP.PSEC% = 0						                                                ! No manejo seccion
+   ASC.MKP.TDSC% = 0 														                                ! No total dsctos
+   ASC.MKP.NOPRESENCIA% = -1					                                          ! No ctrl presencia
+   ASC.MKP.TOTDSCT% = 0 
+EndIf								                                                            !
+
+ If ASC.MKP.TDSC% > 0 AND TS.LINETYPE = 6 AND TS.LINEDATA = 2 Then Begin        ! si dscto reportados
+      Call FORMAT.AMOUNT(ASC.MKP.TDSC%)                                         ! formatea valor dscto
+      ASC.MKP.TMP1$ = RIGHT$("          "+TS.TEMP1$,10)                         ! imprime en el tiquete 
+      ASC.MKP.TMP1$ = CHR$(1BH)+CHR$(21H)+CHR$(01H) +                          \!
+                      "DESCUENTO EVENTOS"+ASC.MKP.TMP1$                         !      
+      Call U.IMPRIME(ASC.MKP.TMP1$,6100H)                                       ! en CR y SJ
+ EndIf
+
+!If (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) Then Begin                         ! Si final de trx
+! If (TS.TOTALS(0,0,0) > 0) AND (ASC.MKP.PSEC% = 2) Then Begin                   ! hay venta y logos
+!   ASC.MKP.TMP1$ = VENTAS.DEPTO                                                 ! Ventas por departamento
+!   Call NO.PRESENCIA.SECCION(ASC.MKP.TMP1$)                                     ! Impresion msg publicitarios
+!   Call PRESENCIA.SECCION(ASC.MKP.TMP1$)                                        ! Impresion msg publicitarios
+!   Call NO.PRESENCIA.ARTICULOS                                                  ! Impresion msg publicitarios
+!   Call COMPRA.MINIMA																												   ! Compra Minima
+!   ASC.MKP.PSEC% = 0                                                            ! cierra acceso
+! EndIf                                                                          !
+!EndIf                                                                           !
+
+ If (NOT TS.TRAINING And TS.INTRX) THEN BEGIN                                    ! Si no en entrenamiento
+    IF TS.LINETYPE = 6 AND                                                      \! Store Data y Transacc  
+      TS.LINEDATA = 1 THEN BEGIN                                                 ! Fecha, Hora, etc        
+       IF TS.TENDERED (0) <> 0 OR                                               \! Si hay pagos            
+          TS.TRX.STATUS <> 100 THEN BEGIN                                        ! y NO hay VOID en curso  
+
+          If UE.RECASRV.QTY% <> 0 Then begin                                     ! Si en un proceso de recaudo
+          	   ASC.MKP.LOGO% = 0						                                     ! No print Msg
+               ASC.MKP.PSEC% = 0						                                     ! No manejo seccion
+               ASC.MKP.TDSC% = 0 														                     ! No total dsctos
+               ASC.MKP.NOPRESENCIA% = -1					                               ! No ctrl presencia
+               ASC.MKP.TOTDSCT% = 0 																						 ! No total dsctos
+               Exit Sub 
+          EndIf
+   				CALL VENTAS.DEPTO                     									               ! Ventas por departamento
+   				Call PRESENCIA.SECCION                                                 ! Impresion msg publicitarios
+   				Call NO.PRESENCIA.ARTICULOS                                            ! Impresion msg publicitarios
+   				
+   				!Call NO.PRESENCIA.SECCION(ASC.MKP.TMP1$)                               ! Impresion msg publicitarios
+   				
+   				Call VALIDA.RIFA                                                       ! Rifas de productos 
+   				CALL VALIDA.RIFAS.TOTALES                                              ! Rifa por monto total de compra
+   				Call COMPRA.MINIMA																							       ! Compra Minima   				
+   				Call Mensaje.Tipificacion																							 ! Msg a determinada tipificacion
+   				ASC.MKP.TMP1$ = VENTA.TIQUETE                   									     ! Ventas por Items
+          CALL Msg.Venta.Item(ASC.MKP.TMP1$)                                     ! Impresion msg publicitarios
+          
+   				ASC.MKP.PSEC% = 0                                                      ! cierra acceso
+   				ASC.MKP.COMPRA% = TS.TOTALS(0,0,0)                                     ! Asigna total de la compra
+   				ASC.MKP.LOGO% = 2
+       EndIf 
+   EndIf 
+ EndIf 
+
+
+If TS.PROCEDURE < 1 AND TS.INTRX AND \
+   TS.LINETYPE = 6 AND TS.LINEDATA = 1 Then Begin
+     Call TOT.DSCTOS.MOTOR                       														! CALCULA DSCTOS APLICADOS EN LA TRX
+     ASC.MKP.TOTDSCT% = TS.TEMP5I4               														! ENTREGA DSCTOS CALCULADOS EN LA TRX
+     If (ASC.MKP.TOTDSCT%+Gr.Escl.TotEscal%) <> 0 Then Begin 								! Si hay dscto en la trx
+       TS.TEMP1$ = STRING$(37,"*")
+       CALL U.IMPRIME(TS.TEMP1$,4101H)
+       Call FORMAT.AMOUNT(ASC.MKP.TOTDSCT% + Gr.Escl.TotEscal%)
+       TS.TEMP1$ = Right$("          "+TS.TEMP1$,10)
+       TS.TEMP1$ = "AHORRASTE HOY :"+TS.TEMP1$
+       Call U.Imprime(TS.TEMP1$,4110H)
+       TS.TEMP1$ = STRING$(37,"*")
+       CALL U.IMPRIME(TS.TEMP1$,4101H)
+       CALL U.IMPRIME(TS.TEMP1$,2100H)
+       Call FORMAT.AMOUNT(ASC.MKP.TOTDSCT% + Gr.Escl.TotEscal%)
+       TS.TEMP1$ = Right$("                "+TS.TEMP1$,16)
+       TS.TEMP1$ = "AHORRASTE HOY:"+TS.TEMP1$
+       Call U.Imprime(TS.TEMP1$,2100H)
+       TS.TEMP1$ = STRING$(37,"*")
+       CALL U.IMPRIME(TS.TEMP1$,2100H)
+     EndIf 
+EndIf
+   

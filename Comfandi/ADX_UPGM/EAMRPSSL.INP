@@ -1,0 +1,5 @@
+EAMRPSSL.286 = EAMRPSSC,
+               EAMMMCFC,
+               EAMRPCFC,
+           ADXACRCL.L86 [s],
+           ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

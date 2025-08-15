@@ -1,0 +1,68 @@
+!------------------------------------------------------------------------------
+! Al iniciar una transacción de venta
+!------------------------------------------------------------------------------
+function MSMTINVE01 external
+   integer*1 MSMTINVE01
+end function
+
+!------------------------------------------------------------------------------
+! Al finalizar una transacción de venta
+!------------------------------------------------------------------------------
+function MSMTINVE02 external
+   integer*1 MSMTINVE02
+end function
+
+!------------------------------------------------------------------------------
+! Despues de apertura de todos los archivos
+!------------------------------------------------------------------------------
+sub MSMTINVE07 external
+end sub
+
+!------------------------------------------------------------------------------
+! Despues de leer un registro de articulo
+!------------------------------------------------------------------------------
+function MSMTINVE08 external
+   integer*1 MSMTINVE08
+end function
+
+!------------------------------------------------------------------------------
+! Despues de la lectura del Teclado/Scan/Lect Optico
+!------------------------------------------------------------------------------
+function MSMTINVE14 external
+   integer*1 MSMTINVE14
+end function
+
+!------------------------------------------------------------------------------
+! Antes de imprimir a la estacion de recibo de caja
+!------------------------------------------------------------------------------
+function MSMTINVE20 external
+   integer*1 MSMTINVE20 
+end function
+
+!------------------------------------------------------------------------------
+! Antes visualizar una linea en visor
+!------------------------------------------------------------------------------
+function MSMTINVE23 external
+   integer*1 MSMTINVE23
+end function
+
+!------------------------------------------------------------------------------
+! En el computacional price
+!------------------------------------------------------------------------------
+sub MSMTINVE43 external
+end sub
+
+!------------------------------------------------------------------------------
+! En la recuperación de transacción
+!------------------------------------------------------------------------------
+sub MSMTINVE53 external
+end sub
+
+!------------------------------------------------------------------------------
+! Antes de actualizar la matriz de transacciones
+!------------------------------------------------------------------------------
+function MSMTINVE68(ENTRY$, ELEMENT) external
+   INTEGER*1 MSMTINVE68
+   STRING ENTRY$
+   INTEGER*2 ELEMENT
+end function

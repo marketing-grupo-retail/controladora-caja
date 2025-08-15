@@ -1,0 +1,50 @@
+
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR14VE.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  FEBRERO DE 2005
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertaran en el archivo EAMTSU14.J86
+! a manera de INCLUDE para SALVAR E IMPRIMIR el 
+! codigo y nombre del vendedor de medicamentos que despacha la formula
+! Lee el archivo de OPERADORES para por tanto los vendedores deben estar 
+! matriculados. como operadores del pos perfil 3       
+!-----------------------------------------------------------
+
+
+IF  TO.USEROPTS(5) <> 0  and                                    \!  opcion encendida
+    TS.IO.MOTORKEY = 253 then begin                              ! tecla vendedor medica.
+       Vend.Medica$ = ASIC.DATOS$("Ingrese El Vendedor ?","")    ! pide vendedor
+     IF (Vend.Medica$ = "") OR (Vend.Medica$ = "E") THEN BEGIN	 ! Si no existe 
+       DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)	                 ! reset vectores
+       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+       TS.IO.MOTORKEY = 0
+     ENDIF ELSE BEGIN
+       IF Vend.medica$ <> "" THEN BEGIN
+         ts.io.keyS(10)  = 63
+         TS.IO.DATA$(2) = Vend.Medica$   
+         TS.IO.MOTORKEY = 80   
+         TS.IO.KEYS(2)  = 80
+!   for i% = 0 to 10
+ !      write form "c7 c6 c25";#34;"Key "+str$(i%),    \
+  !           "= "+ str$(ts.io.keys(i%)),              \
+   !          "Dato "+ts.io.data$(i%)
+  ! next i%
+
+!       TS.IO.MOTORKEY = 73																											 ! Tecla Borrar
+
+       ENDIF 
+         KEY.OP$ = RIGHT$(PACK$("0000000000"+Vend.Medica$),5)
+         READ FORM "C32 C20 C20";#44 KEY KEY.OP$;                \! Lee EAMOPERA
+         CE.NADA1$,NOM.OPER$,CE.NADA2$                            !                         
+     
+      IF NOM.OPER$  = "" AND Vend.Medica$ <> "" THEN BEGIN                                    ! Si no leyo nombre       
+        CALL VISORES4690(1,"ERROR DE VENDEDOR.","VERIFIQUE: "+Vend.Medica$,3000,"L")
+      ENDIF
+     ENDIF
+ENDIF
+  

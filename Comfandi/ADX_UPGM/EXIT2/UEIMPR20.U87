@@ -1,0 +1,40 @@
+!IF TO.USEROPTS(9) <> 0 THEN BEGIN       		! TERMINAL USER OP 10 = Y
+
+!-----------------------------------------------------------
+!  SOBRE-ESCRIBE BUFFER DE IMPRESION PARA CORREGIR IVA EN CERO 
+!-----------------------------------------------------------
+!IF TS.LINETYPE = 7 AND TS.LINEDATA = 1 THEN  \ ! Si es TOTAL y no FS TTL
+!    TS.PRTBUF$ = "**** SUBTOTAL/TOTAL >>>> $"+RIGHT$(TS.PRTBUF$,12)  
+!----------------------------------------------------------------
+! Editamos  @ -> x
+!----------------------------------------------------------------
+     TS.PRTBUF$ = TRANSLATE$(TS.PRTBUF$,"@","x")
+    ! LINCRE2$ =   TRANSLATE$(TS.PRTBUF$,"@","x")
+    ! WRITE #34; LINCRE2$
+!implu% = 0
+!IF (TS.LINETYPE =1 OR TS.LINETYPE = 5) THEN BEGIN
+!   IF MATCH("@",TS.PRTBUF$,1) > 0 THEN                           \ 
+!      TS.PRTBUF$=LEFT$(TS.PRTBUF$,MATCH("@",TS.PRTBUF$,1)-1)+"x"+\
+!                 RIGHT$(TS.PRTBUF$,LEN(TS.PRTBUF$)-              \
+!                 MATCH("@",TS.PRTBUF$,1))
+!                 implu% = 1
+!     ts.prinj$ = ts.prtbuf$ 
+!ENDIF
+!-----------------------------------------------------------
+!  IMPRIME PLU EN TIRA DE CLIENTE Y TIRA DE AUDITORIA 
+!-----------------------------------------------------------
+!IF TS.LINETYPE = 1   THEN BEGIN                     ! Si es Item Sale   
+!   IF RIGHT$(TS.PRTBUF$,6) <> STRING$(6," ") AND \  !
+!      (LEN(STR$(VAL(UNPACK$(ITEMCODE$)))) > 6 OR \  !
+!       LEFT$(TS.PRTBUF$,7) <> STRING$(7," ")) THEN BEGIN 
+!          CALL U.IMPRIMIR(RIGHT$(STRING$(12,"0") + \!
+!          STR$(VAL(UNPACK$(ITEMCODE$))),12),4100H)  !
+!   ENDIF ELSE BEGIN
+!      IF RIGHT$(TS.PRTBUF$,6) <> STRING$(6," ") THEN BEGIN
+!         TS.PRTBUF$ = RIGHT$(STRING$(6,"0")+       \!
+!           STR$(VAL(UNPACK$(ITEMCODE$))),6)+       \! 
+!                      RIGHT$(TS.PRTBUF$,32)         ! Concatena PLU y descripci¢n
+!      ENDIF
+!   ENDIF
+!ENDIF					           !FIN ITEM DE VENTA
+!ENDIF 						   ! FIN USER OP 10 = Y

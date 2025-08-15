@@ -1,0 +1,28 @@
+!-----------------------------------------------------------------------------
+! Modulo: MSMTINST.BAS Modulo Credito Institucional
+! Fecha : 22 de Diciembtre de 2021
+! Autor : Carlos Calderon
+!------------------------------------------------------------------------------
+
+SUB MSMTINST02 EXTERNAL
+END SUB
+
+SUB MSMTINST07 EXTERNAL
+END SUB
+
+SUB MSMTINST14 EXTERNAL
+END SUB
+
+SUB MSMTINST20 EXTERNAL
+END SUB
+
+SUB MSMTINST30 EXTERNAL
+END SUB
+
+SUB MSMTINST53 EXTERNAL
+END SUB
+
+SUB MSMTINST68(ENTRY$,ELEMENT) EXTERNAL
+   string ENTRY$
+   integer*2 ELEMENT
+END SUB

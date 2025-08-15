@@ -1,0 +1,9 @@
+! -------------------------------------------------
+! Antes de procesar una cadena de entrada de datos
+! -------------------------------------------------
+!User exit called before processing transaction data entry string
+FUNCTION CSUPEC14 PUBLIC
+   STRING CSUPEC14
+
+
+END FUNCTION

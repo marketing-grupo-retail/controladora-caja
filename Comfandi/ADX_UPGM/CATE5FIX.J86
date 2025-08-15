@@ -1,0 +1,161 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** CATE5FIX.J86 ***********************************************!!
+!!  TITLE: Category 5 UPC Translation
+!!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.
+!!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1993 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!!
+This module provides user installable exit code which can be used to
+enhance the electronic marketing package by adding to it an optional
+function provided with the Coupon Processing PRPQ.  It is suggested
+that this code be added only if the user had installed the similar
+function from the Coupon Processing PRPQ and does not wish to lose it.
+ 
+Category 5 UPC translation allows for correction of invalid or mismarked
+manufacturer coupons by translating the bad UPC read from the coupon
+into the UPC that should have been on the coupon.  The sole purpose of
+this translation function is to correct coupons whose scanable UPC code
+is incorrect, and thus the need for this function is related directly to
+the coupon manufacturer's ability to print the proper category 5 UPC on
+their coupons.
+ 
+The input to this function is a file referenced by the name EAMCATE5.
+The user should create a user logical name that defines EAMCATE5 to be
+ADXLXAAN::C:ADX_IDT1\EAMCATE5.DAT.  The user must also create the input
+file EAMCATE5.DAT, place this file on C:\ADX_IDT1, and use the file
+utilities to make this file compound per update.  The file itself can be
+created with any common editor.  Note that the process of editing this
+file may change the distribution attribute and it is the users
+responsibility to correct the distribution attribute using the file
+utilities following each update.  Since this input file would normally
+be transmitted to all stores from a central site, the distribution
+attribute should normally be set as part of the transmission job.
+ 
+The first line (record) in the file must contain an ASCII number which
+defines the maximum number of translation pairs to follow.  This number
+must be in the range of 1 to 999 and should be kept as small as possible
+to conserve terminal heap space.  All following lines should contain a
+pair of category 5 UPCs (11 digit ASCII numerics) separated by a comma.
+The first UPC in each record is bad UPC from the coupon while the second
+is the replacement UPC to be used whenever the first UPC is encountered.
+ 
+ 
+The contents of an input file might look as follows:
+ 
+5
+52800000125,52800000130
+51230000025,51200000025
+54600011330,54600011030
+52400011330,02400011030
+ 
+As the contents of this file shows, this translation table can be used
+to fix a coupon value, a coupon family code, or a coupon manufacturer
+number.  The table can correct the category number if the input category
+is nonzero, but it cannot create a category 5 UPC from a category 0 UPC.
+This is excluded because of performance implications and because such a
+coupon can be corrected by creation of a manufacturer coupon item record
+for the category 0 UPC code.
+ 
+ 
+The following code should be added to the end of module EAMTSUVA.J86:
+!***** EAMTSUVA.J86 ..... 11/21/88 ........ Robert Meares ****!!
+! TITLE: Fix category 5 UPCs
+!
+!********************************************************************
+!*    DEFINE TRANSLATION TABLE VARIABLES                            *
+!********************************************************************
+ 
+REAL USER.CAT5.UPC(2)              ! Array of UPC translation codes
+REAL USER.IN.UPC                   ! Input UPC in real format
+INTEGER*2 USER.CAT5.MAX            ! Array size
+ 
+ 
+The following code should be added to the end of module EAMTSU07.J86:
+!***** EAMTSU07.J86 ..... 11/21/88 ........ Robert Meares ****!!
+! TITLE: Fix category 5 UPCs
+!
+!********************************************************************
+!*    INITALIZE CATEGORY 5 TRANSLATION ARRAY                        *
+!********************************************************************
+ 
+ DIM USER.CAT5.UPC(1,1)                  ! Prepare for errors
+ USER.CAT5.MAX = 1                       !  by initializing array
+ TS.ER.RETURN = -1                       ! Return if error
+ OPEN "R::EAMCATE5" AS 8 BUFFSIZE 512 NOWRITE NODEL
+ IF TS.ER.RETURN = -1 THEN BEGIN         ! Open successful
+   READ #8; USER.CAT5.MAX                ! Read max input dept
+   IF TS.ER.RETURN = -1 AND              \ Read successful
+      USER.CAT5.MAX > 0 AND              \ And variable is in range
+      USER.CAT5.MAX < 1000 THEN BEGIN    !
+     DIM USER.CAT5.UPC(USER.CAT5.MAX,1)  ! Dimension translation table
+     IF END #8 THEN USER.CAT5.DONE       ! Prepare for end of file
+     FOR I% = 0 TO USER.CAT5.MAX         ! Until table is full
+       READ #8; USER.CAT5.UPC(I%,0),     \ Read in input UPC
+                USER.CAT5.UPC(I%,1)      !      and output UPC
+       IF TS.ER.RETURN = 0 THEN          \ Read error
+         GOTO USER.CAT5.DONE             !      so read no more
+       IF USER.CAT5.UPC(I%,0) < 10000000000 OR    \ Input must contain
+          USER.CAT5.UPC(I%,0) > 999999999999 THEN \  11 or 12 digits
+         I% = I% -1                      ! Ignore invalids
+     NEXT I%
+USER.CAT5.DONE:
+     IF I% < USER.CAT5.MAX THEN          \ Found less than maximum
+       USER.CAT5.MAX = I%                ! Reduce max to actual founds
+   ENDIF                                 ! Good max size
+   CLOSE 8                               ! Close the file
+ ENDIF                                   ! Good open
+ IF TS.ER.RETURN NE -1 THEN BEGIN        ! Error occurred
+   TS.LINETYPE = 8                       ! error guidance linetype
+   TS.LINEDATA = 40                      ! file access failure
+   CALL TSCSEC08                         ! display/clear
+   J$ = "COUPON TRANSLATION TABLE ACCESS ERROR "
+   WRITE FORM "C38 A1"; #36; J$
+ ENDIF
+ TS.ER.RETURN = 0                        ! Return if error
+ 
+! Terminal user exit 7 which is called after terminal initialization is
+! used to create the category 5 translation array from a user file.
+! This data is kept in a real array to conserve heap space.  The array
+! is defaulted so that if no user input file can be read, then no
+! translations are performed.
+ 
+ 
+The following code should be added to the end of module EAMTSU14.J86:
+!***** EAMTSU14.J86 ..... 11/21/88 ........ Robert Meares ****!!
+! TITLE: Fix category 5 UPCs
+!
+!********************************************************************
+!*    LOOK FOR POSSIBLE TRANSLATION OF ENTERED UPC                  *
+!********************************************************************
+ I% = LEN(TS.IO.DATA$(2)) - 10
+ IF I% > 0 THEN BEGIN                                ! UPC > 10 digits
+  IF MID$(TS.IO.DATA$(2),I%,1) = "4" OR              \ Cat. 4  RM-5/89
+     MID$(TS.IO.DATA$(2),I%,1) = "5" THEN BEGIN      ! CAT. 5  RM-5/89
+   IF TS11.OVRFLAG = 0 AND                           \ Initial entry
+      TS.IO.KEYS(2) = 80 THEN BEGIN                  ! ENTER key or scan
+    USER.IN.UPC = VAL(TS.IO.DATA$(2))                ! Get UPC as real
+    FOR I% = 0 TO USER.CAT5.MAX                      ! For all entries
+     IF USER.IN.UPC = USER.CAT5.UPC(I%,0) THEN BEGIN ! Found match
+       TS.IO.DATA$(2) = STR$(USER.CAT5.UPC(I%,1))    !  so translate
+       I% = USER.CAT5.MAX                            !   and end search
+     ENDIF                                           ! No match
+    NEXT I%                                          !  so continue
+   ENDIF
+  ENDIF
+ ENDIF
+ 
+! Terminal user exit 14 which is called after a read of input data is
+! used to search for a replacement for any category 4 or 5 UPCs in the
+! category 5 translation table.   If the input UPC is found in the table
+! then it is replaced by the output UPC from the table.
+ 
+ 
+Once the changes listed in this document have beem made, then the
+impacted modules are rebuilt through the same process used to install
+electronic marketing.  The category 5 UPC translation change requires
+the module for terminal checkout (EAMTS11L) to be rebuilt.

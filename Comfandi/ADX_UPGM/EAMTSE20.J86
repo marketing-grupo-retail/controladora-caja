@@ -1,0 +1,72 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU20.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR46321 - Add new 'Could have saved' algorithm.
+!            CMJ MGVA 01Aug01
+!
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+%INCLUDE EAMTSC20.J86      ! COUPON ENHANCEMENT CODE
+
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+! CODE FOR PRPQ 5799-DCB (COUPON ENHANCEMENTS) MUST PRECEDE THIS CODE
+! IF THE PRPQ CODE IS IMPLEMENTED
+!!**NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE** **NOTE**
+
+CALL TSU20.FB
+
+!AIR46321
+  !!*******************************************************************
+  !!** AVOID PRINTING OF COUPONS REPLAYED JUST FOR COULD SAVE TOTAL  **
+  !!*******************************************************************
+   IF SPCS.COULDSAV AND                        \ FALSE REPLAY
+      EMSS.PANEL.TRANS AND                     \ PREFERRED CUSTOMER
+      EMSS.COUP.REPLAY THEN BEGIN              ! IN REPLAY
+    IF TS.LINETYPE = 1 AND                     \ SALE PRINT LINE
+       TS.LINEDATA < 2 AND                     \ ITEM SALE PRINT
+       RIGHT$(TS.PRTBUF$,4) NE " " THEN BEGIN  ! NOT QTY LINE
+  !!* UPDATE TS.TENDERED SO PERCENT OFF CAN IGNORE PRIOR COUPONS     02/00
+     IF SL.IT.INDICAT3A = 6 THEN               \ MFR COUPON          02/00
+       TS.TENDERED(7) = TS.TENDERED(7) - TS.XPRICE ! UPDATE TENDER   02/00
+     IF SL.IT.INDICAT3A = 7 THEN               \ STR COUPON          02/00
+       TS.TENDERED(8) = TS.TENDERED(8) - TS.XPRICE ! UPDATE TENDER   02/00
+     TS.XPRICE = 0                             ! NO TOTALS UPDATES
+     TS.LINETYPE = 0                           ! NO MORE EXIT PROCESSING
+     TS.LINEDATA = 0                           ! NO MORE EXIT PROCESSING
+     IR.ITEMCODE$ = ""                         ! ASSURE NEW LOOKUP
+    ENDIF                                      ! SALE PRINT LINE
+    TS.PRTBUF$ = " "                           ! BLANK LINE
+    TS.FORMCR$ = "C1 A0"                       ! AND DON'T PRINT
+  !! ASSURE NO TERMINAL MONITOR OF DUMMY COUPON PRINT LINES          08/00
+  \\TS.PRINTPRM = 4000H                        ! NO JOURNAL PRINT    08/00
+    TS.PRINTPRM = 0                            ! NO JOURNAL PRINT    08/00
+    TS.PRT.OPT = 0                             ! NO MONITOR PRINT    08/00
+    TS.PRDATA$ = TS.PRTBUF$                    ! NO MONITOR PRINT    08/00
+   ENDIF                                       ! FALSE REPLAY
+
+  !!*******************************************************************
+  !!** CLEAR LINE WHEN WOULD HAVE SAVED IS DUMMY ZERO VALUE          **
+  !!*******************************************************************
+   IF SPCS.CS.ACTIVE NE 0 AND                  \ FUNCTION IS ACTIVE  12/98
+      EMSS.PANEL.TRANS = 0 THEN BEGIN          ! NOT PREFERRED ORDER 12/98
+    IF TS.LINETYPE = 29 AND                    \ PRINT AS PASSED     12/98
+       TS.LINEDATA = -1 THEN BEGIN             ! EM PRINT MESSAGE    12/98
+     IF (M%/4) = 3 THEN BEGIN                  ! NON-PC MESSAGE      12/98
+      L% = MATCH("88.88-",TS.PRTBUF$,1)        ! LOCATE DUMMY ZERO   12/98
+      IF L% THEN BEGIN                         ! LINE NOT NEEDED     12/98
+        TS.PRTBUF$ = " "                       ! BLANK LINE          12/98
+  \\    TS.FORMCR$ = "C1 A0"                   ! AND DON'T PRINT     12/98
+      ENDIF                                    ! LINE NOT NEEDED     12/98
+     ENDIF                                     ! NON-PC MESSAGE      12/98
+    ENDIF                                      ! EM PRINT MESSAGE    12/98
+   ENDIF                                       ! FUNCTION IS ACTIVE  12/98
+!EIR46321
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

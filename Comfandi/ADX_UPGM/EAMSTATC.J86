@@ -1,0 +1,34 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+
+ OS.TERMINAL$ = PACK$("0000")          ! PREPARE STRING TO ACCEPT DATA
+
+ CALL SUBSTR(OS.TERMINAL$,0,K$,0,2)    ! TERM. # MOST RECENT      UPD 2
+                                       ! USED BY THIS OPER.
+ OS.NUMLOANS = GETN2(K$,2)             ! NUMBER OF LOANS          INT 2
+ OS.AMTLOANS = GETN4(K$,4)             ! AMOUNT OF LOANS          INT 4
+ OS.NUMPKUPS = GETN2(K$,8)             ! NUMBER OF PICKUPS        INT 2
+ OS.AMTPKUPS = GETN4(K$,10)            ! AMOUNT OF PICKUPS        INT 4
+ OS.AMOUNTS(1)       = GETN4(K$,14)    ! ENTERED TENDER -CASH     INT 4
+ OS.AMOUNTS(2)       = GETN4(K$,18)    ! ENTERED TENDER CHECKS    INT 4
+ OS.AMOUNTS(3)       = GETN4(K$,22)    ! ENTERED TENDER FOODSTMP  INT 4
+ OS.AMOUNTS(4)       = GETN4(K$,26)    ! ENTERED TENDER           INT 4
+                                       ! MISCELLANEOUS TENDER 1
+ OS.AMOUNTS(5)       = GETN4(K$,30)    ! ENTERED TENDER           INT 4
+                                       ! MISCELLANEOUS TENDER 2
+ OS.AMOUNTS(6)       = GETN4(K$,34)    ! ENTERED TENDER           INT 4
+                                       ! MISCELLANEOUS TENDER 3
+ OS.AMOUNTS(7)       = GETN4(K$,38)    ! ENTERED TENDER           INT 4
+                                       ! MANUFACTURER COUPONS
+ OS.AMOUNTS(8)       = GETN4(K$,42)    ! ENTERED TENDER           INT 4
+                                       ! STORE COUPONS
+ OS.STATUS = ASC(MID$(K$,47,1))        ! TRUE IMPLIES OPERATOR IS INT 1
+                                       ! CURRENTLY SIGNED ON
+                                       ! TRUE = NON-ZERO VALUE, FALSE = 0
+ OS.CLOSE  = ASC(MID$(K$,48,1))        ! TRUE = CLOSE PENDING     INT 1
+                                       ! CURRENTLY SIGNED ON
+                                       ! TRUE = NON-ZERO VALUE, FALSE = 0
+ OS.RESERVE1 = ASC(MID$(K$,49,1))      ! RESERVED FOR IBM USE     INT 1
+ OS.RESERVE2 = GETN2(K$,49)            ! RESERVED FOR IBM USE     INT 2
+
+

@@ -1,0 +1,32 @@
+!
+! jguiu03.j86
+!
+!
+
+! javagui exception 
+! parms: event       The event number fired
+!        data$       The data buffer passed
+!        execption$  The java exception data buffer returned from the
+!                    CBASIC InvokeMethod call (null indicates success).
+!
+! Comments:  This subroutine is provided so that the user can
+!            have an opportunity to become aware of, and possibly handle
+!            exceptions excountered from the invokeMethod call.
+!            This routine should be used with extreme caution as the
+!            call mechanism is recursive -> generating multiple errors
+!            without ever returning will result in a stack overflow.
+!            So, the advice is to NOT use this routine to call the javaEvent
+!            function!
+!User exception handler
+!  INTEGER*2                                \
+!             eventNum                      ! event number
+!  STRING                                   \
+!             eventData,                    \ data originally passed
+!             eventException                ! exception
+
+! insert user code here
+!call traceNUO( "JGUIU03" )
+!call traceNUO( "Eventnum->[" + str$(eventNum) + "]" )
+!call traceNUO( "eventData->[" + eventData + "]" )
+!call traceNUO( "Exeption->[" + eventException + "]" )
+

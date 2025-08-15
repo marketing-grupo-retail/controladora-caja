@@ -1,0 +1,105 @@
+! TULIO ANGEL GIRALDO
+!---------------------------------------------------------------------------
+
+STRING MES$,DIA$,FECHA$,FECHA1$,FECHA2$
+STRING FIELDS$,FECHA3$
+STRING CREA$,CREA2$,ANO$,FEC$,AUDI1$,CEN$,CENC$,CREA3$,AUDI2$
+INTEGER*1 A%,B%,C%,D%
+INTEGER*2 ANO%,CENCO%
+!----------------------------------------------------------------------------
+
+FINR$=CHR$(13)+CHR$(10)		!CREA UN FIN DE REGISTRO
+CLEARS				!LIMPIA PANTALLA
+
+A%=1 
+
+
+!*********** para extraer el numero del almacen **********
+
+OPEN "c:/adxalma.dat" DIRECT RECL 80 AS 15
+
+!IF END #15 THEN DONE2:  
+DIM ALMAS$(100)
+FOR K%=1 TO 100
+	 READ FORM "C80";#15,K%;AL$
+	 ALMAS$(K%)=AL$
+NEXT K%
+
+AL$=ALMAS$(1)
+CENC$=STR$(VAL(LEFT$(AL$,4)))
+
+!*********************************************  
+
+
+
+!--------------------	 MENU CAPTURA DATOS TIQUETE	 ----------------
+
+WHILE  A%<>0
+CLEARS 
+PRINT "		 "
+PRINT "                                                      		  "  
+INPUT "	 DIGITE ANO - 2 DIGITOS (AA ej: 01,07,12): 	 ";ANO$ 
+INPUT "	 DIGITE MES - 2 DIGITOS (MM ej: 02,09,11): 	 ";MES$ 
+INPUT "	 DIGITE DIA - 2 DIGITOS (DD ej: 07,16,27):	 ";DIA$
+
+!------ VALIDA INFORMACION INGRESADA --------------- 
+
+
+IF VAL(ANO$)<0 OR VAL(ANO$)>99 THEN BEGIN
+	 CLEARS
+	 PRINT "		 LOS ANOS VAN DESDE 00 A 99" 
+	 WAIT;2000 
+ENDIF
+
+IF VAL(MES$)>13 THEN BEGIN
+	 CLEARS
+	 PRINT "		 LOS MESES VAN DESDE 01 A 12"  
+	 WAIT;2000 
+ENDIF  
+IF VAL(DIA$)<1 OR VAL(DIA$)>31 THEN BEGIN
+	 CLEARS
+	 PRINT "		 LOS DIAS VAN DESDE 01 A 31" 
+	 WAIT;2000 
+ENDIF
+
+
+ANO%=VAL(ANO$)
+MES%=VAL(MES$)					 !CONVIERTE STRING EN VALOR
+DIA%=VAL(DIA$) 
+
+
+IF ANO%>=0 AND ANO%<=99 AND MES%>0 AND MES%<13 AND DIA%>0 AND DIA%<32 THEN BEGIN 
+	 FECHA1$=RIGHT$("0"+MES$,1)		 !ENCAPSULA EL STRING EN UN CARACTER
+	 IF MES$="10" THEN BEGIN
+		 FECHA1$="A"
+	 ENDIF 
+	 IF MES$="11" THEN BEGIN
+		 FECHA1$="B"
+	 ENDIF 
+	 IF MES$="12" THEN BEGIN
+		 FECHA1$="C"
+	 ENDIF  
+	 FEC$=RIGHT$("00"+ANO$,2)
+	 AUD1$=RIGHT$("00"+MES$,2)
+	 FECHA2$=RIGHT$("00"+DIA$,2)
+	 AUDI1$="C:/ADX_UDT1/TL"+FEC$+AUD1$+FECHA2$+"."+CENC$
+	 AUDI2$="C:/ADX_UDT1/EAMT"+AUD1$+FECHA2$+".DAT"
+	 A%=0 
+ENDIF 
+WEND      
+
+CREATE "C:/COMFANDI/BUSFECHA.BAT" AS 5
+WRITE FORM "C70 C2";#5;"ECHO OF",FINR$ 
+WRITE FORM "C70 C2";#5;"IF EXIST "+AUDI1$+" GOTO CREA",FINR$  
+WRITE FORM "C70 C2";#5;" ",FINR$  
+WRITE FORM "C70 C2";#5;":CREA",FINR$
+WRITE FORM "C70 C2";#5;"COPY "+AUDI1$+" "+AUDI2$,FINR$
+WRITE FORM "C70 C2";#5;" ",FINR$    
+
+CLOSE 5
+
+END
+
+
+
+ 

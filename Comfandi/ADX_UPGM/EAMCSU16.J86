@@ -1,0 +1,20 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC16 PUBLIC
+! insert user exit code here
+Asc.Err.Proceso$ = "EAMCSU16"
+
+%INCLUDE EAMCSE16.J86            ! Electronic Marketing PRPQ
+CALL GDTCSU16.011                ! Saldos en linea
+CALL RMSCSU16.011                ! MODULO REMISIONES MERCANCIA
+CALL FELCSU16.011                ! MINIFACTURAS - FACTURA ELECTRONICA
+CALL TRXCSU16.011                ! MODULO TRANSACCIONES ONLINE
+
+!CALL NFFCSU16.011		             ! Modulo Fiscal 
+!WORK1I2 = ADXSTART("ADX_UPGM:PESCLOSE.286","","")  ! Cambio fecha contable 
+
+WORK1I2 = ADXSTART("ADX_UPGM:GRINTDIA.286","","")  ! PROCESOS DE CIERRE CONTABLE
+
+!WORK1I2 = ADXSTART("ADX_UPGM:BKCLSPAY.286","","")  REM OVS 4 FEB 2006
+
+ END FUNCTION

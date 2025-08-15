@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC03 PUBLIC
+ Asc.Err.Proceso$ = "CSE03"
+! insert user exit code here
+Asc.Err.Proceso$ = "CSE03"
+%INCLUDE EAMCSE03.J86            ! Electronic Marketing PRPQ
+Asc.Err.Proceso$ = "CSU03"
+
+! CALL MNPCSU03.011                ! MODULO REMISIONES SALEFORCE 
+ 
+ END FUNCTION

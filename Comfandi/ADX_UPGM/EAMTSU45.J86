@@ -1,0 +1,8 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC45 PUBLIC
+! TSUPEC45 - CASH DRAWER LIMIT CHECKING
+INTEGER*1 TSUPEC45                        ! define variable !IR89474
+END FUNCTION
+

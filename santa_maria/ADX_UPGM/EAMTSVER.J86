@@ -1,0 +1,94 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\*********************************************************************          
+\*      EFT/EXTERNAL/INTERNAL VERIFICATION VARIABLES.                *          
+\*********************************************************************          
+\*                                                                   *          
+\*      THE FOLLOWING VARIABLES DEFINE THE MESSAGES SENT AND RECEIVED*          
+\*      AS PART OF EXTERNAL TENDER VERIFICATION PROCESSING.          *          
+\*                                                                   *          
+\*********************************************************************          
+\*                                                                   *          
+\*      FIRST THE HOSTBOUND ('UP') MESSAGE IS DEFINED.               *          
+\*                                                                   *          
+\*********************************************************************          
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.UP.MSGTYPE          ! message type;                                 
+                                !   1 = debit                                   
+                                !   2 = void                                    
+                                !   3 = authorize                               
+                                                                                
+INTEGER*2 GLOBAL                \                                 INT 2         
+         TS.UP.TRANSNUM         ! transaction number                            
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.UP.DATETIME$        ! date and time                                 
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.UP.TENDID           ! tender type/variety;                          
+                                ! 'xy' : x = tender, y = variety                
+                                                                                
+INTEGER*4 GLOBAL                \                                 INT 4         
+         TS.UP.AMT              ! tender amount                                 
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.UP.ACNUM$           ! account number                                
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.UP.ACORG            ! origin of account number:                     
+                                !   0 = key entered                             
+                                !   1 = MSR                                     
+                                !   2 = ???                                     
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.UP.PIN$             ! PIN number, EFTS only                         
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.UP.EXPIRY$          ! expiry date; debit only                       
+                                                                                
+STRING    GLOBAL                \                                 UPD           
+         TS.UP.OVR$             ! override number                               
+                                                                                
+INTEGER*4 GLOBAL                \                                 INT 1         
+         TS.UP.RETRY            ! retry/timeout indication;                     
+                                !   0 = first time msg sent                     
+                                !  -1 = retry                                   
+                                                                                
+\*********************************************************************          
+\*                                                                   *          
+\*      INBOUND ('IN') MESSAGE DEFINITION.                           *          
+\*                                                                   *          
+\*********************************************************************          
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.IN.MSGTYPE          ! message type;                                 
+                                !   x'50' = accept                              
+                                !   x'51' = reject                              
+                                !   x'60' = accept with fee override            
+                                                                                
+STRING    GLOBAL                \                                 UPD           
+         TS.IN.TERMP$           ! (packed) terminal number                      
+                                                                                
+INTEGER*2 GLOBAL                \                                 INT 2         
+         TS.IN.TRANSNUM         ! transaction number                            
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.IN.DATETIME$        ! date and time                                 
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.IN.TENDID           ! tender type/variety;                          
+                                ! 'xy' : x = tender, y = variety                
+                                                                                
+INTEGER*4 GLOBAL                \                                 INT 4         
+         TS.IN.AMT              ! tender amount                                 
+                                                                                
+STRING    GLOBAL                \                                 ASC           
+         TS.IN.ACNUM$           ! account number                                
+                                                                                
+INTEGER*1 GLOBAL                \                                 INT 1         
+         TS.IN.GUIDANCE         ! guidance id to be displayed                   
+                                                                                
+STRING    GLOBAL                \                                 UPD           
+         TS.IN.REF$             ! bank reference number                         
+                                                                                

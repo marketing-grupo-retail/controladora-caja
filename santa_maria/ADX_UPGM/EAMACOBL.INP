@@ -1,0 +1,10 @@
+EAMACOBL = EAMACOBC,
+           EAMMMCFC [S],
+           EAMRPCFC [S],
+           EAMACEFC [S],
+           EAMCSASC [S],
+           EAMMCACC [S],
+           EAMEEA3K.L86 [S],
+           EAMEESAK.L86 [S],
+           ADXACRCL.L86 [s],
+           ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

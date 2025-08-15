@@ -1,0 +1,111 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSU60.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Impresion de msg de promocion    *
+!**************************************************
+!*
+
+!If (ASC.MKP.OK% = -1 AND ASC.MKP.NRPRO% <> 0 ) Then Begin
+
+
+If UE.EPSS.ON <> 0 Then Exit Sub                                             ! Si es una trx de EPS no aplica promocion 
+
+If TS.LINETYPE = 1 Then begin                                               \! Es un articulo
+ If (ASC.MKP.DSCT% <> 0 ) Then Begin 
+   ASC.MKP.OK% = 0
+   ASC.MKP.TMP1$ = BUSQUEDA.EVENTO(ASC.MKP.NRPRO%,2)
+   ASC.MKP.TMP1$ = LEFT$(ASC.MKP.TMP1$+STRING$(21," "),21)
+   
+   !ASC.MKP.TOTDSCT% = ASC.MKP.TOTDSCT% + (ASC.MKP.DSCT%*ASC.MKP.TQTY%)       ! Total de descuento   
+   
+   If SL.IT.INDICAT3A = 8 Then ASC.MKP.DSCT% = 0 - ASC.MKP.DSCT%              ! Si es una anulacion
+   Call FORMAT.AMOUNT(((ASC.MKP.DSCT%*ASC.MKP.TQTY%) * -1))
+   	 
+   ASC.MKP.TMP1$ = ASC.MKP.TMP1$ + RIGHT$("          "+TS.TEMP1$,10)
+   ASC.MKP.TMP1$ = RIGHT$(STRING$(38," ")+ASC.MKP.TMP1$,38)
+   Call U.IMPRIME(ASC.MKP.TMP1$,2100H)
+   Call U.IMPRIME(ASC.MKP.TMP1$,4101H)
+   Ue.Tmp.Sgn$ = "00"
+   If ASC.MKP.DSCT% < 0 Then Begin 
+   	  ASC.MKP.DSCT% = ASC.MKP.DSCT% * -1                             ! Ajusta dato para almacenar
+   	  Ue.Tmp.Sgn$ = "01"
+   EndIf 
+   Ue.Tmp.Vlr% = SL.IT.XPRICE + (ASC.MKP.DSCT%*ASC.MKP.TQTY%)        ! Precio total mas descuento
+   If NOT TS.RETV.IN.PROGRESS Then Begin
+      ASC.MKP.TMP1$  = Pack$(Gr.Mkp.Promo$)                     +   \! Codigo de la promocion
+                ":"+PACK$(SL.IT.ITEMCODE$)                      +	  \! Item vendido
+                ":"+PACK$(Str$(SL.IE.QTYORWGT))                 +	  \! Qty vendido
+                ":"+PACK$(Str$(Ue.Tmp.Vlr%))                    +	  \! Precio Vendido
+                ":"+PACK$(Str$(ASC.MKP.DSCT%*ASC.MKP.TQTY%))    +	  \! Dscto otorgado
+                ":"+Pack$(Ue.Tmp.Sgn$)                          +   \! Signo de la operacion 
+                ":"+Pack$("00")                                 +   \! Forma pago promocion
+                ":"+Pack$("00")                                 +   \! Dscto forma de pago
+                ":"+Pack$("01")                                      ! Tipo Promocion - Presencia Item
+      Call Grabacion.Cadena.Usuario2("68",ASC.MKP.TMP1$)               ! Almacena user data
+    ENDIF 
+    ASC.MKP.NRPRO% = 0
+    ASC.MKP.DSCT%  = 0 
+    IR.PRICE1 = ASC.MKP.ANTPRICE%
+ EndIf
+
+ If (ASC.MKP.DSCTO% <> 0) Then Begin 														 ! Dscto x Seccion 
+  If NOT TS.RETV.IN.PROGRESS Then Begin
+     If ASC.MKP.DscOtorgado% < 0 Then TS.TEMP5I4 = ASC.MKP.DscOtorgado% * -1 Else \
+        TS.TEMP5I4 = ASC.MKP.DscOtorgado%
+     ASC.MKP.TMP1$  = Pack$(Gr.Mkp.Promo$)                  +   \! Codigo de la promocion
+                   ":"+PACK$(Gr.Mkp.ItmSec$)                +	  \! Item vendido
+                   ":"+PACK$(Gr.Mkp.SecQty$)                +	  \! Qty vendido
+                   ":"+PACK$(Gr.Mkp.SecPrc$)                +	  \! Precio Vendido
+                   ":"+PACK$(Str$(TS.TEMP5I4))              +   \! Dscto otorgado
+                   ":"+Pack$(Gr.Mkp.Sgn$)                   +   \! Signo de la operacion 
+                   ":"+Pack$("00")                          +   \! Forma pago promocion
+                   ":"+Pack$("00")                          +   \! Dscto forma de pago
+                   ":"+Pack$("02")                               ! Tipo Promocion - Dscto x seccion 
+
+     Call Grabacion.Cadena.Usuario2("68",ASC.MKP.TMP1$)          ! Almacena user data
+  ENDIF
+  TS.TEMP1I4 = ASC.MKP.DscOtorgado% * -1
+  Call Format.amount(TS.TEMP1I4)
+  TS.TEMP1$ = Right$("          "+TS.TEMP1$,10) 
+
+  TS.TEMP2$ = Right$(" 00"+Str$(ASC.MKP.DSCTO%),3)
+  TS.TEMP2$ = Left$(TS.TEMP2$,2)+"."+Right$(TS.TEMP2$,1)+"%"
+  TS.TEMP2$ = "DESCUENTO "+TS.TEMP2$+" :"
+  TS.TEMP2$ = LEFT$(TS.TEMP2$+STRING$(21," "),21)
+  TS.TEMP2$ = TS.TEMP2$ + TS.TEMP1$
+  TS.TEMP1$ = RIGHT$(STRING$(37," ")+TS.TEMP2$,37)
+  Call U.Imprime(TS.TEMP1$,4101H)
+  Call U.Imprime(TS.TEMP1$,2100H)
+  ASC.MKP.DSCTO% = 0 
+  ASC.MKP.DscOtorgado% = 0 
+  Gr.Mkp.DstSec% = 00
+ EndIf 
+ 
+!--- Lineas retiradas de ejecucion, solo validad en cierre de trx 
+! If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \
+!    Call Valida.Rifa(-1) Else \                                              ! Valida Boletas para Rifa
+!    Call Valida.Rifa(1)
+
+If (IR.INDICAT1 AND 4H) THEN BEGIN																						! Si acumula puntos
+    TS.TEMP5I4 = SL.IT.XPRICE                                                 ! Valor total de la venta del item
+    If SL.IT.INDICAT3A = 4 Then \                                             ! 
+       TS.TEMP5I4 = 0 - TS.TEMP5I4                                            ! Valor negativo del producto 
+
+		If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \										! Es una anulacion producto
+		    Gr.Mkp.VlrCmpBol% = Gr.Mkp.VlrCmpBol% - TS.TEMP5I4 Else \
+		    Gr.Mkp.VlrCmpBol% = Gr.Mkp.VlrCmpBol% + TS.TEMP5I4									  ! Si es una venta de producto
+
+    TS.TEMP1$ = ";" + Right$("0000"+STR$(SL.IT.DEPARTME),4) + ";"             ! Depto para validar
+    If Match(TS.TEMP1$,Gr.Mkp.LstExcen$,1) > 0 Then Begin                     ! Si en lista de Excentos
+		   If (TS.IO.KEYS(1) = 70) OR (TS.IO.KEYS(8) = 67) Then \									! Es una anulacion producto
+		      Gr.Mkp.Excento% = Gr.Mkp.Excento% - TS.TEMP5I4 Else                \! Resta compra
+		      Gr.Mkp.Excento% = Gr.Mkp.Excento% + TS.TEMP5I4								      ! Si es una venta de producto
+    EndIf
+    
+ENDIF 
+ 
+EndIf 
+
+CALL PRMFPAGO(60)                 ! PROMOCION FORMAS DE PAGO

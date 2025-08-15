@@ -1,0 +1,64 @@
+! Declaracion de funciones y subrutinas
+
+!JOURNAL ELECTRONICO
+%INCLUDE QXLTSUSU.J86
+
+!%INCLUDE GUISU.J86
+
+!Rutinas NUO
+%INCLUDE NUOTRUTI.J86
+
+!Rutinas java
+%INCLUDE NUOTJAVA.J86
+
+!Facturacion MSM
+%INCLUDE MSMTFACT.J86
+
+! PROMOCIONES
+%INCLUDE NUOTPROM.J86
+
+! Cliente no bancario
+%INCLUDE NUOTCNB.J86
+
+! Devolucion de IVA
+%include NUOTDIVA.J86
+
+! Informacion Electoral
+%INCLUDE NUOTELEC.J86
+
+! Credito Institucional
+%INCLUDE MSMTINST.J86
+
+! Tarjeta de Regalo
+%INCLUDE MSMTGIFT.J86
+
+! Tarjetas Bancarias
+%INCLUDE MSMTTARB.J86
+
+! Recargas Electronicas
+%INCLUDE MSMTREC.J86
+
+! Nota de Credito
+%INCLUDE MSMTNCRE.J86
+
+! Clientes y Fidelidad
+%INCLUDE MSMTCLIE.J86
+
+!Cheques
+%INCLUDE MSMTCHEQ.J86
+
+!Retenciones
+%INCLUDE MSMTRETE.J86
+
+!Inventario
+%INCLUDE MSMTINVE.J86
+
+!Seguridad
+%INCLUDE MSMTSEGU.J86
+
+%INCLUDE GRRUTINA.011              ! Rutinas Grupo Retail
+
+Sub SIMULAR.VENTA.POS(Xopt%) External
+Integer*4 Xopt%, Gri%
+End Sub
+

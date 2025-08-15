@@ -1,0 +1,24 @@
+\/* TIME STAMP BLOCK ***********************************************            
+\** END OF TIME STAMP BLOCK ***************************************/            
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*                  REPORTS USER EXIT - EAMRPUVA                          
+\ REM!!*                                                                        
+\ REM!!*  THIS INCLUDE FILE PROVIDES A PLACE TO PUT GLOBAL VARIABLES            
+\ REM!!*  WHICH ARE NEEDED BY USER EXIT CODE IN EAMRPU01.  SEE EAMRPU01         
+\ REM!!*  FOR MORE INFORMATION ON REPORTS USER EXITS.                           
+\ REM!!*                                                                        
+\ REM!!*  CODE PLACED IN THIS FILE IS INSERTED INTO THE REPORT                  
+\ REM!!*  COMMON FUNCTIONS MODULE EAMRPCFC.  THIS CODE IS INSERTED              
+\ REM!!*  ABOVE ALL OF THE SUBROUTINE DEFINITIONS SO THAT GLOBAL                
+\ REM!!*  VARIALBES CAN BE DEFINED IN THIS INCLUDE FILE.                        
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+\ REM!!*                                                                        
+\ REM!!*  INSERT USER EXIT CODE HERE:                                           
+\ REM!!*                                                                        
+\ REM!!****************************************************************         
+!         START OF USER EXIT CODE                                               
+                                                                                
+!         END OF USER EXIT CODE                                                 
+\ REM!!****************************************************************         

@@ -1,0 +1,8 @@
+!for UE.II% = 0 to 10   
+!	write form "c7 c6 c25";#34;"Key "+str$(UE.II%),    \
+!        "= "+ str$(ts.io.keys(UE.II%)),              \
+!      	"Dato "+ts.io.data$(UE.II%)
+!next UE.II%   
+!	write form "c7 c6";#34;"PROC: "+str$(TS.PROCEDURE)
+
+

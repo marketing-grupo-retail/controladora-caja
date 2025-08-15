@@ -1,0 +1,135 @@
+\/*********************************************************************/
+\/*                                                                   */
+\/*      MODULE NAME: EAMTSFXV.J86                                    */
+\/*                                                                   */
+\/*      DESCRIPTIVE NAME: FleXible Spending VARIABLE DECLARATIONS    */
+\/*                                                                   */
+\/*      COPYRIGHT:                                                   */
+\/*      5799-QZH THIS MODULE IS "RESTRICTED MATERIALS OF IBM"        */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED        */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT      */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                           */
+\/*                                                                   */
+\/*      STATUS: RELEASE 1 LEVEL 0                                    */
+\/*                                                                   */
+\/*                                                                   */
+\/*      PERSON RESPONSIBLE = Joel Gormley                            */
+\/*                                                                   */
+\/*      FX = FleXible Spending FSA                                   */
+\/*                                                                   */
+\/*      CHANGE ACTIVITY: LEVEL 0                                     */
+\/*                                                                   */
+\/*                                                                   */
+\/*   IO08257 - Created initial version.                              */
+\/*             Added FSA.NS.REJECT global variable, used with        */
+\/*             TSFXECUE.04 tender cashing/exchange.                  */
+\/*             Also added a new local work variable for use          */
+\/*             in building the FSA array.                            */
+\/*             JTG of IBM 18Feb08                                    */
+\/*                                                                   */
+\/*   IO08569 - Flexible Spending Account.                            */
+\/*             2467 - Added indicat2 to internal array for void      */
+\/*                    validation.                                    */
+\/*             2468 - Changed print logic to show before each tender */
+\/*                    as opposed to once at end of transaction.      */
+\/*             JTG IBM 24Mar2008                                     */
+\/*                                                                   */
+\/*   IO08657 - Flexible Spending Account.                            */
+\/*             2483 - Added flag to indicate we are buffering a      */
+\/*                    line for clean receipt.                        */
+\/*             JTG IBM 04Apr2008                                     */
+\/*                                                                   */
+\/*   D2494   - Flexible Spending Account.                            */
+\/*             Moved this file from EM to SA Base.                   */
+\/*             GGK IBM 07Apr2008                                     */
+\/*                                                                   */
+\/*   IO08817 - Add dedicated FSA variable for itemtype.              */
+\/*             JTG IBM 24Apr2008                                     */
+\/*                                                                   */
+\/* END-OF-SPECIFICATIONS *********************************************/
+
+!The following variables are associated with FSA amounts
+ INTEGER*4 GLOBAL                \
+   FSA.QHPAMT,                   \ FSA QHPamount. Use for auth and display
+   FSA.RXAMT,                    \ FSA RxAmount. Use for auth and display
+   FSA.QHPTDR,                   \ FSA QHP amount in last tender - from payment system
+   FSA.RXTDR,                    \ FSA RxAmount in last tender   - from payment system
+   FSA.CUM.QHPTDR,               \ FSA QHP cumulative tender amount
+   FSA.CUM.RXTDR                 ! FSA Rx cumulative tender amount
+
+!The following are used for printing
+ INTEGER*4 GLOBAL                \ Print variables
+   FSA.P.QHP.TOTAL,              \ The top line
+   FSA.P.CPN.TOTAL,              \ Coupons
+   FSA.P.TAX.TOTAL,              \ Tax
+   FSA.P.CUM.QHPTDR,             \ Tenders so far
+   FSA.P.QHP.GRAND.TOTAL,        \ Grand total before any adjustments
+   FSA.P.ADJ.TOTAL               ! Adjusted total if necessary
+
+ INTEGER*1  GLOBAL               \
+   FSA.WORK.BYTE,                \ IR Work byte
+   FSA.BIT,                      \ One byte integer representing the item
+                                 \   record flag bit (right to left)
+   FSA.BASE.PRINT,               \ Flag for balance print options IO08569 (2468)
+   FSA.VOID.OK,                  \ Flag for extra void validation IO08569 (2467)
+   FSA.QHP.BUF,                  \ Flag for buffering a QHP line  IO08657 (2483)
+   FSA.FSFLAG,                   \ Flag for use with price verify IO08817
+   FSA.ACTIVE                    ! FSA code active flag
+
+ INTEGER*2 GLOBAL FSA.ITEMTYPE   ! FSA version of IR.ITEMTYPE     IO08817
+
+!The following variables are associated with the FSA arrays
+STRING GLOBAL FSA.ITEMCODE$(1)   ! FSA Item Array
+INTEGER*2 GLOBAL                 \
+   FSA.INDICAT1(1),              \ Need for coupon/tx
+   FSA.INDICAT2(1),              \ Need for void validation       IO08569 (2467)
+   FSA.ITEMOFFSET(1)             ! Will need when we figure out applicable coupons
+INTEGER*4 GLOBAL                 \
+   FSA.INDICAT4(1)               ! 4 BYTES !!
+INTEGER*2 GLOBAL                 \
+   FSA.A%                        ! FSA ARRAY Index
+
+!The following variables are associated with the FSA balance accumulation
+INTEGER*2 GLOBAL                 \
+   FSA.MAXT,                     \ Max number of FSA Types - Default to 2 in base
+   FSA.MAXE                      ! Max number of FSA Entries - Default is 200 in base
+                                 !   (100 sales plus 100 voids)
+
+INTEGER*4 GLOBAL                 \
+   FSA.ITEM.BALDUE(1),           \ Gross FSA baldue
+   FSA.TAX.BALDUE(1),            \ Associated Tx baldue
+   FSA.CPN.BALDUE(1)             ! Associated coupon amount
+
+INTEGER*4 GLOBAL                 \
+   FSA.TXAMTA(1),                \ The AMOUNTS on which we calculate the tax
+   FSA.TXAMTB(1),                \     (not the actual tax)
+   FSA.TXAMTC(1),                \
+   FSA.TXAMTD(1),                \
+   WORK.TXAMTA(1),               \
+   WORK.TXAMTB(1),               \
+   WORK.TXAMTC(1),               \
+   WORK.TXAMTD(1)                !
+
+ STRING GLOBAL                   \
+   FSA.WORK1$,                   \
+   FSA.SIGN$,                    \
+   FSA.PARM$,                    \ Parm literal
+   FSA.RECP.ID$,                 \ To identify on receipt
+   FSA.ITEMRECORD$,              \ Item record work string
+   FSA.INDICAT1$,                \ INDICAT1 stored as a string
+   FSA.VALUE$                    ! Option value
+
+ INTEGER*4                       \
+   FSA.I%,                       \ Misc work index
+   FSA.I4.SAVE                   !
+!AIO08569 Made global for void validation (2467)
+\  FSA.I4                        ! Work variable
+ INTEGER*4 GLOBAL FSA.I4         ! Work variable
+!EIO08569
+
+!The following variables are associated with the FSA user exit flags
+ INTEGER*1 GLOBAL                \
+   FSA.DO.APPEND,                \ For use with the indicat4 append logic
+   FSA.NS.REJECT,                \ For use in controlling tender cashing/exchange
+   FSA.SKIP.PR                   ! For use with the print line logic
+

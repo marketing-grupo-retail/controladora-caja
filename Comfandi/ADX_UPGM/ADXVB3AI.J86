@@ -1,0 +1,123 @@
+\/* TIME STAMP BLOCK ************************************************
+\*PROM  XE22 ADXVB3AI J86      11/08/90 19:48:41 MKEITH   BE22 *                
+\*RTIME XE22 ADXVB3AI J86      09/12/90 10:00:12 MKEITH   BE22 *                
+\*LIB   BE22 ADXVB3AI J86      09/12/90 09:59:43 TCMILLER *    IR88678          
+\** END OF TIME STAMP BLOCK ****************************************/
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!                                                                           !!
+!!                  *************************************                    !!
+!!                  4 6 8 0 / 3 2 7 0   E M U L A T I O N                    !!
+!!                  *************************************                    !!
+!!                                                                           !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!                                                                           !!
+!!  Module Name:  S3DEFN.J86                                                 !!
+!!                                                                           !!
+!!  Description:  API VERB LIBRARY ROUTINES SUB-ROUTINE DEFINITIONS          !!
+!!                                                                           !!
+!!                                                                           !!
+!!  Author:       AKD                      Date:          06-22-90           !!
+!!                                                                           !!
+!!  Status:       Release 1                Last Modified: 06-22-90           !!
+!!                APAR IR88678                                               !!
+!!                                                                           !!
+!!  Processor:    IBM 4680 BASIC                                             !!
+!!                                                                           !!
+!!  Classification:                                                          !!
+!!                (C) Copyright IBM Corp. 1990                               !!
+!!                                                                           !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!                                                                           !!
+!!  Notes:                                                                   !!
+!!                                                                           !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!                                                                           !!
+!!  Change History:                                                          !!
+!!                                                                           !!
+!!  06-22-90    AKD     Initial Coding                                       !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! EXTERNAL FUNCTION DECLARATIONS:                                           !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUB S3.CONNECT (SESSION.ID$, SHARED%, NODE.NAME$, LINK.NAME$, PRINT.NAME$,    \
+                                          MESSAGE.TEXT$, RETURN.CODE%) EXTERNAL
+  STRING    SESSION.ID$
+  INTEGER*2 SHARED%
+  STRING    NODE.NAME$
+  STRING    LINK.NAME$
+  STRING    PRINT.NAME$
+  STRING    MESSAGE.TEXT$
+  INTEGER*2 RETURN.CODE%
+END SUB
+
+SUB S3.DISCONNECT(TERMINATE%,RET.CODE%) EXTERNAL
+  INTEGER*2 TERMINATE%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.WAIT(WAIT.TYPE%,WAIT.TIME%,RET.CODE%) EXTERNAL
+  INTEGER*1 WAIT.TYPE%
+  INTEGER*2 WAIT.TIME%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.LOCSTR(SEARCH$,DIRECTION%,OFFSET%,RET.CODE%) EXTERNAL
+  STRING    SEARCH$
+  INTEGER*2 DIRECTION%
+  INTEGER*2 OFFSET%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.LOCFIELD(DIRECTION%,OFFSET%,ATTRIB%,RET.CODE%) EXTERNAL
+  INTEGER*2 DIRECTION%
+  INTEGER*2 OFFSET%
+  INTEGER*1 ATTRIB%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.LOCCURSOR(OFFSET%,RET.CODE%) EXTERNAL
+  INTEGER*2 OFFSET%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.SETCURSOR(OFFSET%,RET.CODE%) EXTERNAL
+  INTEGER*2 OFFSET%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.QUERYOGL(MESSAGE%,RET.CODE%) EXTERNAL
+  INTEGER*2 MESSAGE%
+  INTEGER*2 RET.CODE%
+END SUB
+
+SUB S3.SENDKEY(KEY.CODE%,KEY.TYPE%,RET.CODE%) EXTERNAL
+  INTEGER*2 KEY.CODE%
+  INTEGER*2 KEY.TYPE%
+  INTEGER*2 RET.CODE%
+END SUB
+
+
+SUB S3.SENDSTRING(IN.STRING$,LENGTH%,RET.CODE%) EXTERNAL
+  STRING    IN.STRING$
+  INTEGER*2 LENGTH%
+  INTEGER*2 RET.CODE%
+END SUB
+
+
+SUB S3.COPYSTRING(OUT.STRING$,OFFSET%,LENGTH%,RET.CODE%) EXTERNAL
+  STRING    OUT.STRING$
+  INTEGER*2 OFFSET%
+  INTEGER*2 LENGTH%
+  INTEGER*2 RET.CODE%
+END SUB
+
+
+SUB S3.COPYFIELD(OUT.FIELD$,OFFSET%,LENGTH%,RET.CODE%) EXTERNAL
+  STRING    OUT.FIELD$
+  INTEGER*2 OFFSET%
+  INTEGER*2 LENGTH%
+  INTEGER*2 RET.CODE%
+END SUB
+
+

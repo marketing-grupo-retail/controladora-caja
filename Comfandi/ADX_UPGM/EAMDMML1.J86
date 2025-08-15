@@ -1,0 +1,27 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** EAMDMML1.J86 ***********************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  *************************************************************
+   IF TGT.NO = 4 THEN BEGIN                     ! ITEM RECORD
+    IF LEFT$(DM.DMSDATA$,6) = LEFT$(REST$,6) AND \ REPLACE OF
+       LEN(DM.DMSDATA$) = LEN(REST$) THEN BEGIN  ! EXISTING ITEM
+     DM.DMSDATA$ = MID$(DM.DMSDATA$,01,12)  \ UPDATE SOURCE
+                 + MID$(REST$      ,13,03)  \  WITH FAMILY
+                 + MID$(DM.DMSDATA$,16,07)  \
+                 + MID$(REST$      ,23,02)  \  AND LINK CODE
+                 + MID$(DM.DMSDATA$,25,18)  \
+                 + MID$(REST$      ,43,04)  !  AND EXITS FIELDS
+    ENDIF                                   ! REPLACE EXISTING
+   ENDIF                                    ! ITEM RECORD
+!  *************************************************************
+! This code updates the source item record data with the family code,
+! link field, and exit fields from the target item record before the
+! source is written to the target file on an item record replacement.
+! This change prevents host price maintenance from altering the item
+! record fields that might be set in the store for electronic marketing.

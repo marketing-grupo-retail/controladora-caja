@@ -1,0 +1,55 @@
+\/*********************************************************************/
+\/*                                                                   */
+\/*      MODULE NAME: EAMTSWES.J86                                    */
+\/*                                                                   */
+\/*      DESCRIPTIVE NAME: WIC EBT SMARTCARD EXTERNAL FUNCTION        */
+\/*                        DECLARATIONS                               */
+\/*                                                                   */
+\/*      COPYRIGHT:                                                   */
+\/*      5799-QZH THIS MODULE IS "RESTRICTED MATERIALS OF IBM"        */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED        */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT      */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                           */
+\/*                                                                   */
+\/*      STATUS: RELEASE 1 LEVEL 0                                    */
+\/*                                                                   */
+\/*                                                                   */
+\/*      PERSON RESPONSIBLE = Tom Gaskill                             */
+\/*                                                                   */
+\/*      WE = WIC EBT                                                 */
+\/*                                                                   */
+\/*      CHANGE ACTIVITY: LEVEL 0                                     */
+\/*                                                                   */
+\/* END-OF-SPECIFICATIONS *********************************************/
+
+SUB WIC.EBT.INITIALIZATION EXTERNAL
+END SUB
+
+SUB WIC.EBT.PINPAD.INITIALIZE EXTERNAL
+END SUB
+
+SUB WIC.EBT.SIGN.ON EXTERNAL
+END SUB
+
+SUB WIC.EBT.TENDER EXTERNAL
+END SUB
+
+SUB WIC.EBT.LOG.ITEM.SUMMARY EXTERNAL
+END SUB
+
+SUB WIC.EBT.END.OF.TRANSACTION EXTERNAL
+END SUB
+
+SUB WIC.EBT.BALANCE.INQUIRY EXTERNAL
+END SUB
+
+SUB WIC.EBT.REPRINT.RECEIPT EXTERNAL
+END SUB
+
+SUB WIC.EBT.PRINT.HELP EXTERNAL
+END SUB
+
+SUB WIC.EBT.TRNX.RECOVERY EXTERNAL
+END SUB
+
+!****************************** END EAMTSWES.J86 ******************************

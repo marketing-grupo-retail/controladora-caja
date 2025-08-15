@@ -1,0 +1,28 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudos Colegios        *
+!**************************************************
+
+
+IF UNPACK$(LEFT$(SL.STR.ENTRY$,1)) = "11" THEN BEGIN   	    													! Si DATA/ENTRY
+ IF UNPACK$(MID$(SL.STR.ENTRY$,3,4)) = "20050602" THEN BEGIN  												! Recibo de Colegio
+    Asc.Edu.Impr% = -1
+    Asc.Tmp.Apun% = 3
+    TS.TEMP1$  = ASIC.GETUNPK2(SL.STR.ENTRY$,Asc.Tmp.Apun%)														! Ajuste del String
+    TS.TEMP1$  = ASIC.GETUNPK2(SL.STR.ENTRY$,Asc.Tmp.Apun%)														! Numero del bono
+    Asc.Edu.Lista$ = Asc.Edu.Lista$ +(","+TS.TEMP1$+",")									            ! Adiciona a la lista
+ Endif
+
+ IF UNPACK$(MID$(SL.STR.ENTRY$,3,4)) = "20050603" THEN BEGIN  												! Anulacion Recibo colegio
+    Asc.Tmp.Apun% = 3
+    TS.TEMP1$  = ASIC.GETUNPK2(SL.STR.ENTRY$,Asc.Tmp.Apun%)														! Ajuste del String
+    TS.TEMP1$  = ASIC.GETUNPK2(SL.STR.ENTRY$,Asc.Tmp.Apun%)														! Numero del bono
+    Asc.Edu.NotaNul$ = Asc.Edu.NotaNul$ +(","+TS.TEMP1$+",")									        ! Adiciona a la lista
+ Endif
+
+Endif	         
+

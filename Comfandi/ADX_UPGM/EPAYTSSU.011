@@ -1,0 +1,51 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Definicion de Subrutinas         *
+!**************************************************
+
+Sub EPAYMS02.011  External
+End Sub
+
+Sub EPAYMS04.011  External
+End Sub
+
+Sub EPAYMS05.011  External
+End Sub
+
+Sub EPAYMS07.011  External
+End Sub
+
+Sub EPAYMS13.011  External
+End Sub
+
+Sub EPAYMS14.011  External
+End Sub
+
+Sub EPAYMS20.011  External
+End Sub
+
+Sub EPAYMS23.011  External
+End Sub
+
+Sub EPAYMS37.011  External
+End Sub
+
+Sub EPAYMS32.011  External
+End Sub
+
+Sub EPAYMS43.011  External
+End Sub
+
+Sub EPAYMS53.011  External
+End Sub
+
+Sub EPAYMS56.011  External
+End Sub
+
+Sub EPAYMS66.011(X.CallParm) External
+Integer*1 X.CallParm
+End Sub

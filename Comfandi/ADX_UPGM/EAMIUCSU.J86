@@ -1,0 +1,11 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+SUB EXTMIR01.011 EXTERNAL 
+END SUB
+
+SUB EXTMIR06.011 EXTERNAL 
+END SUB
+
+SUB EXTMIR07.011 EXTERNAL 
+END SUB

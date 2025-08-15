@@ -1,0 +1,48 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSFBX, EAMTSFBY, EAMTSFBZ ********************!!
+! TITLE: Electronic Marketing WIC EBT Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 2004 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/* CHANGE ACTIVITY                                                */
+\/*                                                                */
+\/*                                                                */
+\/* IRwicEM  Add Item to Coupon Association for WIC EBT function.  */
+\/*          REM IBM 02Sep2004                                     */
+\/*                                                                */
+\/****END-OF-SPECIFICATIONS*****************************************!
+
+!********************************************************************
+!*    DEFINE VARIABLES NEEDED IN EM FOR WIC EBT SUPPORT             *
+!********************************************************************
+ INTEGER*1 GLOBAL EM.WE.ENABLED      ! ALLOW SEPARATE ENABLE OF EM CODE
+ INTEGER*1 GLOBAL EM.WE.ZEROVAL      ! SAVE ZERO VALUE COUPONS IN ARRAYS
+
+!********************************************************************
+!*    DEFINE COUPON TO ITEM ASSOCIATION ARRAYS                      *
+!********************************************************************
+ INTEGER*2 GLOBAL   \
+           WEBT.SAVE,            \ USED ARRAY ENTRIES
+           WEBT.IOFF(1),         \ OFFSET IN TLOG OF SALE
+           WEBT.COFF(1)          ! OFFSET IN TLOG OF COUPON
+ INTEGER*4 GLOBAL   \
+           WEBT.IUPC(1),         \ LAST 8 DIGITS OF ITEM UPC
+           WEBT.CUPC(1),         \ LAST 8 DIGITS OF COUPON UPC
+           WEBT.IVAL(1),         \ VALUE OF SALE
+           WEBT.CVAL(1)          ! VALUE OF DISCOUNT
+ INTEGER*1 GLOBAL   \
+           WEBT.CVLD(1),         \ VALIDATION TYPE (1 - XX)
+                                 \ TWO COUPONS WITH THE SAME VALIDATION
+                                 \ TYPE CANNOT MATCH TO THE SAME SALE
+           WEBT.CTYP(1)          ! COUPON TYPE
+                                 ! 0 = AUTOMATIC LINKED COUPON
+                                 ! 1 = AUTOMATIC TARGETED COUPON
+                                 ! 2 = PAPER NON-NSC5 COUPON
+                                 ! 3 = PAPER NSC5 COUPON
+                                 ! 4 = DOUBLED COUPON
+                                 ! 5 = PRORATED PORTION OF COUPON
+
+

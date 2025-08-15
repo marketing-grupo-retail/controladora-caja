@@ -1,0 +1,32 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC01 PUBLIC
+! insert user exit code here
+ STRING XDAT1$, XDAT2$, XH$, XM$
+ INTEGER*4 XI%, Xret%, PP
+ 
+ Asc.Err.Proceso$ = "CSE01"
+
+ CALL MRVCSU01.011                ! MODULO RESERVAS HOTELERAS 
+ CALL RMSCSU01.011                ! MODULO REMISIONES SALEFORCE 
+ CALL FELCSU01.011                ! MINIFACTURAS - FACTURA ELECTRONICA
+ CALL TRXCSU01.011                ! MODULO TRANSACCIONES ONLINE
+ 
+ %INCLUDE EAMCSE01.J86            ! Electronic Marketing PRPQ
+ Asc.Err.Proceso$ = "CSU01"
+  
+! If unpack$(MID$(CS.INPUT$,1,1)) = "21" Then Begin 										! En proceso de Cierre de Tienda
+!    Call ADXSERVE (XRET%, 26, 0,"Generando IPL "+Xdat2$)							! Mensaje al Background
+!    Wait ; 2000
+! EndIf
+  
+ FOR XI% = 1 TO SL.HD.NUMSTRIN + 1                                    ! Recorre Transaccion
+   CALL CSVFEC02(XI%)                                                 ! Toma diferentes Strings
+   XDAT1$ = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(1)+1,CS.FLD.LEN(1)))    ! Extrae dato string
+   IF XDAT1$ = "20060425" THEN BEGIN                                  ! Si puntaje adicional
+      XDAT2$ = UNPACK$(MID$(CS.INPUT$,CS.FLD.POS(2)+1,CS.FLD.LEN(2))) ! Extrae el puntaje adicional obtenido
+      UE.PTOS.ADD% = VAL(XDAT2$)                                      ! Lo convierte a numerico
+   ENDIF 
+ NEXT XI%
+ 
+END FUNCTION

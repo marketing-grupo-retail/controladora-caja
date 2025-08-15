@@ -1,0 +1,97 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+! Mod29Dic2006
+! Se adiciona manejo de articulos miscelaneos
+! para manejo de capitaciones, desarrollado para 
+! Comfandi, diciembre 29 de 2.006 OVS 
+!
+
+If UE.EPS.COPAGOAPLICADO% = -1 Then Begin   	! Copago aplicado
+   TS.TEMP1I1 = 0			                        ! Cancelo acceso
+   IR.INDICAT0 = IR.INDICAT0 OR 04H	          ! No permite venta
+   TS.GUIDANCE = 1117              	          ! Totalice la venta
+   TS.IO.MOTORKEY = 0			                    !
+   EXIT Sub
+EndIf
+
+If UE.EPSS.ON Then Begin                                    ! Si convenios Activo
+  TS.TEMP1I1 = Valida.Tipo.Articulo(IR.ITEMCODE$) 					! Valida tipo de articulo
+  If TS.TEMP1I1 = -1 Then Begin  														! Si codigo de barras 
+     TS.TEMP1$ = Ue.Eps.Cod5$    														! Asigna codigo correcto 
+  EndIf Else TS.TEMP1$ = IR.ITEMCODE$												! Si no toma PLU digitado
+
+	If UE.EPS.CVMERCA$ = "1" Then	\
+		D$ = UE.EPS.CCOD$+TS.TEMP1$	\
+	ELSE \
+		D$ = UE.EPS.CCOD$+PACK$(String$(8,"0"))+IR.DEPARTME$
+
+	TS.ER.RETURN = -1
+	OPEN "R::PLUCONVE" KEYED RECL 24 AS UE.OPEN.PLU%
+  If TS.ER.RETURN = -1 Then Begin
+      Read Form "C14 C4 C3 C3";#UE.OPEN.PLU% KEY D$;\
+           D$,UE.EPS.CIPRECIO$,UE.EPS.CIfECHI$,UE.EPS.CIfECHF$
+      CLOSE UE.OPEN.PLU%
+  EndIf ELSE BEGIN
+     CALL VISORES4690(1,"PLUCONVE NO ","VALIDADO",1200,"L")
+  ENDIF 
+  
+  If TS.ER.RETURN NE -1 Then Begin
+		UE.EPS.ERROR$= "ITEM NO VALIDO"
+		IR.DEPARTME$ = PACK$("0000"):EXIT Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+	EndIf
+	VISOR% = TS.TOTALS(0,0,0)
+	
+	If VAL(UE.EPS.ACTFECHA$) >= VAL(UNPACK$(UE.EPS.CIfECHI$)) AND \
+	   VAL(UE.EPS.ACTFECHA$) <= VAL(UNPACK$(UE.EPS.CIfECHF$)) Then Begin
+		UE.EPS.DEVO% = 0
+		If VAL(UE.EPS.NRMLoCATAL$) = 0 Then Begin
+			If VAL(UE.EPS.CANT$) > 0 Then Begin
+			    If VAL(UNPACK$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = VAL(UNPACK$(UE.EPS.CIPRECIO$))/VAL(UNPACK$(IR.SALEQUAN$))* VAL(UE.EPS.CANT$)	\
+				ELSE \
+				TS.TEMP1I4 = VAL(UNPACK$(UE.EPS.CIPRECIO$))*VAL(UE.EPS.CANT$)
+			EndIf ELSE Begin 	
+			    If VAL(UNPACK$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = VAL(UNPACK$(UE.EPS.CIPRECIO$))/VAL(UNPACK$(IR.SALEQUAN$))	\
+				ELSE \
+				TS.TEMP1I4 = VAL(UNPACK$(UE.EPS.CIPRECIO$))
+			EndIf
+			If ((TS.TOTALS(0,0,0)-TS.MISCTRX.AMT+TS.TEMP1I4) > VAL(UNPACK$(UE.EPS.CMAX$))) AND  NOT(UE.EPS.DEVO%) Then Begin
+				UE.EPS.ERROR$= "SUPERAVALOR"
+				IR.DEPARTME$ = PACK$("0000"):EXIT Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+			EndIf
+			UE.EPS.PRECIO% = VAL(UNPACK$(UE.EPS.CIPRECIO$))
+			Call Visores4690(1,"PRECIO CATALOGO","....",500,"C")   	
+
+		EndIf ELSE Begin
+			If VAL(UE.EPS.CANT$) > 0 Then Begin
+			    If VAL(UNPACK$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = VAL(UNPACK$(IR.SALEPRIC$))/VAL(UNPACK$(IR.SALEQUAN$))*VAL(UE.EPS.CANT$)	\
+				ELSE \
+				TS.TEMP1I4 = VAL(UNPACK$(IR.SALEPRIC$))*VAL(UE.EPS.CANT$)
+			EndIf ELSE Begin
+			    If VAL(UNPACK$(IR.SALEQUAN$)) > 0 Then	\
+				TS.TEMP1I4 = VAL(UNPACK$(IR.SALEPRIC$))/VAL(UNPACK$(IR.SALEQUAN$))	\
+				ELSE \
+				TS.TEMP1I4 = VAL(UNPACK$(IR.SALEPRIC$))
+			EndIf
+			If ((TS.TOTALS(0,0,0)-TS.MISCTRX.AMT+TS.TEMP1I4) > VAL(UNPACK$(UE.EPS.CMAX$))) AND  NOT(UE.EPS.DEVO%) Then Begin
+				UE.EPS.ERROR$= "SUPERAVALOR"
+				IR.DEPARTME$ = PACK$("0000"):EXIT Sub   ! SI EL ITEM ESTA POR FUERA DEL CONVENIO
+			EndIf
+			UE.EPS.PRECIO% = 0
+			Call Visores4690(1,"PRECIO NORMAL","....",500,"C")   	
+		EndIf
+	EndIf ELSE Begin
+		UE.EPS.DEVO% = 0
+		UE.EPS.PRECIO% = 0
+		Call Visores4690(1,"PRECIO ARTICULO","FUERA DE FECHA",1000,"C")
+		IF TS.IO.DATA$(6) = "" THEN TS.IO.DATA$(6) = "1"
+	EndIf
+EndIf

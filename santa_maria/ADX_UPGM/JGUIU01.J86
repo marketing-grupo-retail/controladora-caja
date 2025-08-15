@@ -1,0 +1,19 @@
+!
+! jguiu01.j86
+!
+!
+
+! javagui initialization user exit
+!
+! In order to disable this function in the code, set the variable javaGuiActive to 0.
+!
+! function javaGuiInitUserExit
+!
+! Parms: startEvent - lowest value for user exit events
+! user start event number
+! INTEGER*2 startEvent
+! Allow user to add events
+
+! insert user code here
+!call traceNUO( "JGUIU01" )
+

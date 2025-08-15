@@ -1,0 +1,78 @@
+!**************************************************************************
+!* GLOBAL variables for Scrolling Receipt Support
+!**************************************************************************
+
+!**************************************************************************
+!* - session numbers
+!**************************************************************************
+INTEGER*2 GLOBAL  scDisplaySession      ! Session number for the display
+
+!**************************************************************************
+!* - optional advertising messages
+!**************************************************************************
+STRING    GLOBAL  scAdvertMessage$(1)   ! Text for advertising messages
+INTEGER*2 GLOBAL  scNumAdvertMessages   ! Number of advertising messages
+
+!**************************************************************************
+!* - saved receipt information to allow scrolling
+!**************************************************************************
+STRING    GLOBAL  scReceiptLines$(1)    ! Text saved for the receipt
+INTEGER*2 GLOBAL  scReceiptLinesSize    ! Maximum number of lines to save
+INTEGER*2 GLOBAL  scReceiptLinesIndex   ! Index to place next line
+INTEGER*2 GLOBAL  scReceiptViewIndex    ! Index to start displaying at
+
+!**************************************************************************
+!* - receipt "window" variables
+!**************************************************************************
+STRING    GLOBAL  scReceiptForm$        ! WRITE FORM format string
+STRING    GLOBAL  scReceiptTitle$       ! Title (if any) for the window
+STRING    GLOBAL  scReceiptBorder$      ! Border characters (if any)
+INTEGER*4 GLOBAL  scReceiptAttr         ! Color attributes
+INTEGER*1 GLOBAL  scReceiptRow          ! Window dimensions
+INTEGER*1 GLOBAL  scReceiptColumn       !
+INTEGER*1 GLOBAL  scReceiptWidth        !
+INTEGER*1 GLOBAL  scReceiptHeight       !
+
+!**************************************************************************
+!* - 2x20 "window" variables
+!**************************************************************************
+STRING    GLOBAL  scCustomerForm$       ! WRITE FORM format string
+STRING    GLOBAL  scCustomerTitle$      ! Title (if any) for the window
+STRING    GLOBAL  scCustomerBorder$     ! Border characters (if any)
+INTEGER*4 GLOBAL  scCustomerAttr        ! Color attributes
+INTEGER*1 GLOBAL  scCustomerRow         ! Window dimensions
+INTEGER*1 GLOBAL  scCustomerColumn      !
+INTEGER*1 GLOBAL  scCustomerWidth       !
+INTEGER*1 GLOBAL  scCustomerHeight      !
+
+!**************************************************************************
+!* - terminal "status" "window" variables
+!**************************************************************************
+STRING    GLOBAL  scStatusForm$         ! WRITE FORM format string
+STRING    GLOBAL  scStatus1$            ! First line of status information
+STRING    GLOBAL  scStatus2$            ! First line of status information
+INTEGER*4 GLOBAL  scStatusAttr          ! Color attributes
+INTEGER*1 GLOBAL  scStatusRow           ! Window dimensions
+INTEGER*1 GLOBAL  scStatusColumn        !
+INTEGER*1 GLOBAL  scStatusWidth         !
+INTEGER*1 GLOBAL  scStatusHeight        !
+
+!**************************************************************************
+!* - subtotal "window" variables
+!**************************************************************************
+STRING    GLOBAL  scSubTtlForm$         ! WRITE FORM format string
+INTEGER*4 GLOBAL  scSubTtlAttr          ! Color attributes
+INTEGER*1 GLOBAL  scSubTtlRow           ! Window dimensions
+INTEGER*1 GLOBAL  scSubTtlColumn        !
+INTEGER*1 GLOBAL  scSubTtlWidth         !
+INTEGER*1 GLOBAL  scSubTtlHeight        !
+
+!**************************************************************************
+!* - "promotional" message "window" variables
+!**************************************************************************
+STRING    GLOBAL  scPromoForm$          ! WRITE FORM format string
+INTEGER*4 GLOBAL  scPromoAttr           ! Color attributes
+INTEGER*1 GLOBAL  scPromoRow            ! Window dimensions
+INTEGER*1 GLOBAL  scPromoColumn         !
+INTEGER*1 GLOBAL  scPromoWidth          !
+INTEGER*1 GLOBAL  scPromoHeight         !

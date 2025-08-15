@@ -1,0 +1,61 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR4301.011 
+!     Punto de Entrada   =  EAMTSU43.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!  DESCUENTOS: Calcular descuento por articulo y acumularlo
+!              Esta UE se incluye en el EAMTSU43, para 
+!              ser ejecutada despues de calcular el
+!              precio de un articulo.   
+!-----------------------------------------------------------
+!    WRITE FORM "C38 A1";#34;STR$(CA.PPOINTS)+"VRA"+STR$(CA.POINTS)+"VRC"+STR$(XF.TO.POINTS)!
+!    WRITE FORM "C38 A1";#34;STR$(CA.TR.POINTS)+"VR"+STR$(XF.POINTS)+"VRC"+STR$(X%)
+!-----------------------------------------------------------------------------
+!write #34;" valor " + str$(sl.it.xprice)
+!write #34;" cou.Pon1 "+ str$(cou.Pon1)
+if ts.totals(0,0,0) >= 200000    AND              \
+   COU.PON1         = 1         THEN BEGIN
+   SL.IT.XPRICE     = 20000
+   COU.PON1         = 0
+ENDIF
+IF TS.IO.KEYS(1) = 70  THEN          \!  es reintegro 
+SIGNO% = -1 ELSE SIGNO% = 1
+
+if ts.io.keys(0) <> 79 then begin
+
+if ts.totals(0,0,0) >= 300000    AND              \
+   COU.PON1         = 1         THEN BEGIN
+   SL.IT.XPRICE     = 30000 * signo%
+   COU.PON1         = 0
+ENDIF
+
+!IF DCTO.COUP =   10 THEN BEGIN
+! TOT.COUP = TOT.COUP+(SL.IT.XPRICE)*signo%
+! DCTO.COUP = 0
+!ENDIF
+
+
+!IF COU.PON = 1 then begin
+! PRICE% =PRICE% + (SL.IT.XPRICE)*SIGNO%  
+!ENDIF  
+
+! ** instrucciones eduardo valencia
+!IF DCTO.COUP =   8 THEN BEGIN
+! TOT.COUE = TOT.COUE+(SL.IT.XPRICE)*signo%
+! DCTO.COUP = 0
+!ENDIF
+endif
+
+!IF PRICE%  > 0 AND         \
+!   COU.PON1  = 1  THEN BEGIN
+!   SL.IT.XPRICE = PRICE%
+!   COU.PON1  = 0
+!ENDIF 
+!-----------------------------------------------------------
+!TS.PRTFRU$  = "   **   TOTAL DESCUENTOS     $" + STR$(TS.COUP.AMT) !bufer imp
+!TS.PRTCAR$  = "   **   TOTAL DESCUENTOS     $" + STR$(PRECIO)      !bufer imp
+!-----------------------------------------------------------

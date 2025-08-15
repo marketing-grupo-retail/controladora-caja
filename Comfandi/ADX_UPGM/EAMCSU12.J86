@@ -1,0 +1,16 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSUPEC12 PUBLIC
+! insert user exit code here
+Integer*4 PP
+Asc.Err.Proceso$ = "CSE12"
+%INCLUDE EAMCSE12.J86            ! Electronic Marketing PRPQ
+Asc.Err.Proceso$ = "CSU12"
+CALL MRVCSU12.011                ! MODULO RESERVAS HOTELERAS
+CALL RMSCSU12.011                ! MODULO REMISIONES MERCANCIA
+CALL FELCSU12.011                ! MINIFACTURAS - FACTURA ELECTRONICA
+CALL TRXCSU12.011                ! MODULO TRANSACCIONES ONLINE
+
+%INCLUDE CVERSION.011            ! CONTROL VERSION CHECKOUT SUPPORT
+
+ END FUNCTION

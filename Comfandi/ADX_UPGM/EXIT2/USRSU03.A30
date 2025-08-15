@@ -1,0 +1,36 @@
+!   ***************************************************************************
+!   **    Date       :  Octubre 27 / 97                                      **
+!   **    Responsable:  DEPTO DE SISTEMAS                                    **
+!   **    User Exit  :  USRSU03.011                                          **
+!   **    Inclu¡r en :  EAMTSUSU.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SISTEMAS POS                                         **
+!   **                                                                       **
+!   **    Instrucciones  para  franqueo de documentos con el nombre del      **
+!   **    CLIENTE y el nombre de la Empresa para Ventas a Credito.           **
+!   **    Ademas imprime tiquete doble Minifactura.                          **
+!   ***************************************************************************
+!
+!---------------- Subrutina de Impresi¢n  ----------------------------- 
+SUB IMPRIMIR                                             ! Subrut de Vendedor
+     
+     FOR USR.IND1% = 1 TO 499                            ! Loop para vaciar CR
+        IF USR.ITEMS$(USR.IND1%) = "" THEN BEGIN         ! Si no hay mas lineas
+           IF LINMF% > 0 THEN BEGIN                      ! Si faltan lineas
+           ENDIF                                          ! Fin de Condic
+!--- Ajuste string de impresion OVS - ASIC 10 Ago 2005
+           
+           FOR USR.IND1% = 450 TO 489                     ! Loop para vaciar TOT
+           NEXT USR.IND1%                                 ! Sig Loop
+           USR.IND1% = 499                                ! Asigna final Loop
+        ENDIF ELSE BEGIN                                  !
+          CAB1$ = USR.ITEMS$(USR.IND1%)
+          CALL U.IMPRIMIR(CAB1$,4100H)
+          LINMF% = LINMF% - 2                            ! Decrem Cont Linea
+        ENDIF                                             !
+      NEXT USR.IND1%                                      !
+      NOM$ = STRING$(30," ")                              ! Borra Nombre
+
+END SUB                                                  ! Fin Subrutina
+!----------------------------------------------------------------------------

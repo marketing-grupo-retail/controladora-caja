@@ -1,0 +1,24 @@
+\/* TIME STAMP BLOCK ***********************************************/
+\/* END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMP4VSJ                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME:  APP-SPECIFIC VARIABLE DEFINITIONS      */
+\/*                                                                */
+\/*      CHANGE ACTIVITY:                                          */
+\/*                                                                */
+\/*     IR33229 - Created on June 18, 1996 - mat_adw.              */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+\/******************************************************************/
+
+!********************************************************************
+! Cleaning routine variables. These are SA specific in as much as   *
+! as the cleaning routine algorithm is dependent on the void        *
+! processing algorithm in SA                                        *
+!********************************************************************
+INTEGER*2 GLOBAL                \!
+          IGNORE.NEXT.ITEM,     \!
+          IGNORE.NEXT2          !!
+

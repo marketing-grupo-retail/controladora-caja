@@ -1,0 +1,71 @@
+\/* TIME STAMP BLOCK ************************************************           
+\** END OF TIME STAMP BLOCK ****************************************/           
+!**********************************************************************         
+!*                 TENDER LISTING FILE                                *         
+!**********************************************************************         
+!* The following defines the tender record format for the             *         
+!* tender listing file.  The fields are defined in the sequence       *         
+!* in which they appear in the logical record.                        *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.TR.TYPE$             ! RECORD TYPE -                 ASC 1           
+                                ! "1" INDICATES A TENDER RECORD FROM            
+                                !     AN OPERATOR ACCTY. TERMINAL               
+                                ! "2" INDICATES A TENDER RECORD FROM            
+                                !     A TERMINAL ACCTY. TERMINAL                
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.TR.TERMINAL$,        \ TERMINAL NUMBER               UPD 2           
+        TL.TR.TENDTYPE$,        \ TENDER TYPE DESIGNATION       UPD 1           
+                                \ X"2X" INDICATES CHECK TENDER,                 
+                                \       VARIETY X                               
+                                \ X"4X" INDICATES MISC TENDER TYPE 1,           
+                                \       VARIETY X                               
+                                \ X"5X" INDICATES MISC TENDER TYPE 2,           
+                                \       VARIETY X                               
+                                \ X"6X" INDICATES MISC TENDER TYPE 3,           
+                                \       VARIETY X                               
+        TL.TR.OPERATOR$,        \ OPERATOR NUMBER               UPD V5          
+        TL.TR.CUSTOMER$         ! CUSTOMER ACCOUNT NUMBER       UPD V10         
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.TR.AMTTENDER$,       \ AMOUNT OF THE TENDER          ASC V4          
+        TL.TR.AMTTNFEE$,        \ AMOUNT OF THE TENDER FEE      ASC V4          
+        TL.TR.USEREXIT$         ! USER FIELD FOR USE WITH EXITS ASC V?          
+                                                                                
+!**********************************************************************         
+!* The following defines the group delimiter record format for the    *         
+!* tender listing file.                                               *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.GD.TYPE$             ! RECORD TYPE - "3"             ASC 1           
+                                ! INDICATES A GROUP DELIMITER                   
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.GD.TERMINAL$,        \ TERMINAL NUMBER               UPD 2           
+        TL.GD.TENDTYPE$,        \ TENDER TYPE                   UPD 1           
+        TL.GD.OPERATOR$,        \ OPERATOR NUMBER               UPD V5          
+        TL.GD.DATETIME$         ! DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                ! OF TENDER REMOVAL                             
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.GD.USEREXIT$         \ USER FIELD FOR USE WITH EXITS ASC V?          
+                                                                                
+!**********************************************************************         
+!* The following defines the end of period record format for the      *         
+!* tender listing file.                                               *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.EP.TYPE$             ! RECORD TYPE - "4"             ASC 1           
+                                ! INDICATES END OF PERIOD                       
+                                                                                
+STRING GLOBAL \                                                                 
+        TL.EP.DATETIME$         ! DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                ! OF PERIOD CLOSE                               
+                                                                                
+!**********************************************************************         
+!* End of declarations of tender listing file                         *         
+!**********************************************************************         

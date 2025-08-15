@@ -1,0 +1,51 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU40.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+\/* CHANGE ACTIVITY                                                   !
+\/* IR98349 - ALLOW NEGATIVE TRANSACTION IF CAUSED BY DEPOSIT RETURN  !
+\/*           MWD MGVA 7/14/92                                        !
+\/*                                                                   !
+\/* IR28982 - Prevent negative transactions from being overridable    !
+\/*           when not allowed on this terminal.                      !
+\/*           JEO MGVA 3/21/95                                        !
+\/*                                                                   !
+\/*                                                                   !
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!!*******************************************************************
+!!** REQUIRE A MANAGER'S OVERRIDE FOR A NEGATIVE TRANSACTION       **
+!!*******************************************************************
+ IF (TS.TAXES(0,0) + TS.TOTALS(0,0,0)) < 0 AND      \ NEGATIVE TOTAL
+     TS.PROCEDURE < 1 THEN BEGIN                    !  IN CHECKOUT
+!AIR98349
+  IF (TS.TOTALS(0,0,0) + TS.DELAMT(2)) < 0 OR       \ EXCLUDE DEP RETURN
+     TS.DELAMT(2) <= 0 THEN BEGIN                   ! WHEN PRESENT
+!AIR28982
+!  IF OP.1TERM.GONEG > 0 AND                        \ 1 TERM NEGATIVE
+!     OP.1TERM.GONEG NE SL.HD.TERMINAL THEN         \ NOT THIS ONE
+!    TS.STACKERR(0) = 4                             ! NO OVERRIDE
+   IF OP.1TERM.GONEG > 0 AND                        \ 1 TERM NEGATIVE
+      OP.1TERM.GONEG NE SL.HD.TERMINAL THEN BEGIN   ! NOT THIS ONE
+       TS.STACKERR(0) = 4                           ! NO OVERRIDE
+       TS.PURGE.ERR = -1                            ! No B061
+   ENDIF
+!EIR28982
+!EIR98349
+   TS.NO.LIM = -1                                   ! ASSURE ERROR
+   TS.LINEDATA = 8                                  ! TRANSACTION LIMIT
+   TS.STACKERR(2) = TS.TAXES(0,0)+TS.TOTALS(0,0,0)  ! SHOW BALANCE
+   TS.STACKERR(3) = 172                             ! "NEGATIVE BALANCE"
+   TS.XXMOD = 17                                    ! XXMOD = TR
+   TS.STACKERR(5) = - 41                            ! XXMOD = BAL
+!AIR98349
+  ENDIF                                             ! EXCLUDE DEP RETURN
+!EIR98349
+ ENDIF
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

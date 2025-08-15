@@ -1,0 +1,436 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/**********************************************************************/
+\/*                                                                    */
+\/*   Module Name: EAMMCCVT.J86                                        */
+\/*                                                                    */
+\/*   Full title: Multiple Currency Conversion Subroutines Module      */
+\/*                                                                    */
+\/*   COPYRIGHT:                                                       */
+\/*  5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"             */
+\/*  (C) COPYRIGHT IBM CORP 1986, 1997 ALL RIGHTS RESERVED             */
+\/*  LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT           */
+\/*  INSTRUCTIONS FORM NUMBER G120-2083                                */
+\/*                                                                    */
+\/*  Description: This module contains the "Base Currency to Foreign   */
+\/*               Currency" and the "Foreign Currency to Base          */
+\/*               Currency" Currency Conversion for the IBM 4680-4690  */
+\/*               SuperMarket Application Multiple Currency Feature.   */
+\/*               It is derived from the GSA Foreign Currency          */
+\/*               Routines.                                            */
+\/*                                                                    */
+\/*                                                                    */
+\/*  AUTHOR: Ralph Gustafson IBM NRSC                                  */
+\/*                                                                    */
+\/*  Change History:                                                   */
+\/*  20 April 1998   Initial Version                                   */
+\/*                                                                    */
+\/*  IR38497 - Bring Module up to coding standards.                    */
+\/*            RDG IBM 09Sep98                                         */
+\/*                                                                    */
+\/*  IR40090 - Change routines to allow direct conversion of a         */
+\/*            negative amount.  The calculations are still performed  */
+\/*            only on positive values.  Also, routines have been      */
+\/*            modified to allow "conversion" of the PBC, so that      */
+\/*            the code in other modules can be more generic.  This    */
+\/*            conversion of PBC should return the input value.        */
+\/*            RSH MGVA 17Mar99                                        */
+\/*                                                                    */
+\/*  IR40159 - Rounding was incorrectly being performed to only        */
+\/*            one decimal place in some circumstances, losing         */
+\/*            accuracy.                                               */
+\/*            RSH MGVA 26Mar99                                        */
+\/*                                                                    */
+\/*  IR47486 - Correct problem with incorrect rounding when the        */
+\/*            value is less than one.                                 */
+\/*            CMJ MGVA 14Jan2002                                      */
+\/*                                                                    */
+\/*  IR48311 - Some currencies require different final rounding        */
+\/*            due to no 'pennies' used in that currency               */
+\/*            CRM IBM  1May2002                                       */
+\/*                                                                    */
+\/* END-OF-SPECIFICATIONS **********************************************/
+
+
+REM -- CNVRT.TO.BASE -----------------------------------------------------------
+REM
+REM   CONVERT FOREIGN CURRENCY TO BASE
+REM
+REM   This function is passed the Selected Foreign Currency Slot, and a
+REM   foreign currency amount.  It returns the Domestic base amount in a
+REM   4 byte integer, or zero if invalid exchange rate.
+REM
+REM   It accesses the Foreign Currency Exchange Rate Array FCER.ARR$ by slot
+REM   for Exchange Rate and Decimal Format Information.
+REM
+REM   Exchange Rate Processing is preformed per the Selected Foreign
+REM   Currency Processing Method as Defined in the Exchange Rate File.
+REM ---------------------------------------------------------------------------
+
+  FUNCTION CNVRT.TO.BASE(AMT,SEL.FC.SLOT) PUBLIC RECURSIVE
+
+    REAL                                         \
+              TMP.REAL,                          \ tempory real
+              SEL.REAL,                          \ selected real
+              PBC.REAL,                          \ Primary Base Currency real
+              INTERM.REAL                        ! interm real
+
+    INTEGER*1                                    \
+              NEG.FLAG,                          \ Negative Amt Flag IR40090
+              SEL.FC.SLOT,                       \ selected slot
+              DEC.FLG,                           \ decimal flag
+              MULTIPLIER,                        \ multiplier
+              PBC.FLG                            ! Primary Base Currency Decimal
+                                                 !  flag.
+
+    INTEGER*2                                    \
+              I2                                 ! work variable
+
+    INTEGER*4                                    \
+              TEMPI4,                            \ Temporary Int IR40090
+              CNVRT.TO.BASE,                     \ returned value
+              AMT                                ! amount to convert
+
+    STRING                                       \
+              TEMP$,                             \ work string
+              TEMP2$                             ! work string
+
+    ON ERROR GOTO CNVRT.ERR                      ! set ON ERROR
+
+!AIR40090
+    IF (AMT < 0) THEN BEGIN                      ! Negative amount
+      NEG.FLAG = -1                              ! Set flag
+      AMT = - AMT                                ! Make positive
+    ENDIF ELSE BEGIN                             ! Positive Amount
+      NEG.FLAG = 0                               ! Clear Flag
+    ENDIF                                        ! +/- amount
+
+    IF (SEL.FC.SLOT = 0) THEN BEGIN              ! No slot
+      SEL.FC.SLOT = PBC.SLOT                     ! Defalut to PBC
+    ENDIF                                        ! No slot
+!EIR40090
+
+    TEMP2$ = FCER.ARR$(SEL.FC.SLOT,6)            ! Seltd Exchg. Rate
+    I2 = MATCH(",",TEMP2$,1)                     ! look for comma
+    IF I2 <> 0 THEN BEGIN                        ! If comma found
+      TEMP$ = LEFT$(TEMP2$,(I2 -1)) +            \ it, replace it with
+              "." +                              \ a period.
+              RIGHT$(TEMP2$,(LEN(TEMP2$)-I2))    !
+    ENDIF ELSE BEGIN                             ! else if no comma found
+      TEMP$ = TEMP2$                             ! just copy the exchange rate
+    ENDIF                                        ! comma found
+
+    SEL.REAL = VAL(TEMP$)                        ! Selected Exchange Rate
+    IF (FCER.ARR$(SEL.FC.SLOT,7) = "1") OR       \ if decimal format 1 or
+     (FCER.ARR$(SEL.FC.SLOT,7) = "2") THEN BEGIN !  decimal format 2.
+      DEC.FLG = -1                               ! set decimal flag on
+    ENDIF ELSE BEGIN                             ! else if no decimal format
+      DEC.FLG = 0                                ! reset decimal flag
+    ENDIF                                        ! decimal format 1 or 2
+
+    TEMP2$ = FCER.ARR$(PBC.SLOT,6)               ! Primary Currency Exchg. Rate
+    I2 = MATCH(",",TEMP2$,1)                     ! look for comma in exchange
+                                                 !  rate.
+    IF I2 <> 0 THEN BEGIN                        ! If comma found
+      TEMP$ = LEFT$(TEMP2$,(I2 -1)) +            \ it, replace it with
+              "." +                              \ a period.
+              RIGHT$(TEMP2$,(LEN(TEMP2$)-I2))    !
+    ENDIF ELSE BEGIN                             ! else if no comma found
+      TEMP$ = TEMP2$                             ! just copy exchange rate
+    ENDIF                                        ! comma found
+
+    PBC.REAL = VAL(TEMP$)                        ! set Primary Base Currency
+    IF (FCER.ARR$(PBC.SLOT,7) = "1") OR          \ if decimal format 1 or
+     (FCER.ARR$(PBC.SLOT,7) = "2") THEN BEGIN    !  decimal format 2.
+      PBC.FLG = -1                               ! set PBC decimal flag
+    ENDIF ELSE BEGIN                             ! else if no decimal format
+      PBC.FLG = 0                                ! reset PBC decimal flag
+    ENDIF                                        ! decimal format 1 or 2
+    MULTIPLIER = 1                               ! initialize multiplier
+    IF PBC.FLG THEN BEGIN                        ! if base currency uses
+                                                 !  decimals.
+      IF NOT(DEC.FLG) THEN BEGIN                 ! if foreign currency doesn't
+                                                 !  use decimals.
+        MULTIPLIER = 100                         ! set multiplier x100
+      ENDIF                                      ! foreign currency
+                                                 !  doesn't use decimals.
+    ENDIF ELSE BEGIN                             ! no decimals in PBC
+      IF DEC.FLG THEN BEGIN                      ! if foreign currency uses
+                                                 !  decimals.
+        MULTIPLIER = -100                        ! set multiplier x -100
+      ENDIF                                      ! endif no decimals in foreign
+                                                 !  currency.
+    ENDIF                                        ! PBC uses decimals
+
+    PROC.METHOD = VAL(FCER.ARR$(SEL.FC.SLOT,5))  ! Get Currency Proc. Method
+    IF SEL.REAL > 0 THEN BEGIN                   ! if exchange rate was found
+!AIR40090
+      IF (PROC.METHOD = 1) THEN BEGIN            ! This is the BASE Currency
+        TMP.REAL = AMT                           ! Return the same amount
+      ENDIF                                      ! Base currency
+!EIR40090
+      IF PROC.METHOD = 2 THEN BEGIN              ! if Processing Method 2
+        TMP.REAL = AMT * SEL.REAL                ! conversion is AMT * Rate
+      ENDIF                                      ! processing method 2
+      IF PROC.METHOD = 3 THEN BEGIN              ! if Processing Method 3
+        TMP.REAL = AMT / SEL.REAL                ! conversion is AMT / Rate
+!AIR47486
+        IF (TMP.REAL < 1) THEN BEGIN
+          TMP.REAL = 0
+        ENDIF
+!EIR47486
+      ENDIF                                      ! processing method 3
+      IF PROC.METHOD = 4 THEN BEGIN              ! if Processing Method 4
+        TMP.REAL = AMT * SEL.REAL                ! conversion is AMT * Rate
+      ENDIF                                      ! processing method 4
+      IF PROC.METHOD = 5 THEN BEGIN              ! if Processing Method 5
+        TMP.REAL = AMT * SEL.REAL                ! conversion is AMT * Rate
+      ENDIF                                      ! processing method 5
+      IF PROC.METHOD = 6 THEN BEGIN              ! if Processing Method 6
+        TMP.REAL = AMT / SEL.REAL                ! conversion is AMT / Rate
+!AIR47486
+        IF (TMP.REAL < 1) THEN BEGIN
+          TMP.REAL = 0
+        ENDIF
+!EIR47486
+      ENDIF                                      ! processing method 6
+
+      IF (PROC.METHOD = 3) OR                    \ Processing Methods which
+       (PROC.METHOD = 4) THEN BEGIN              ! require two step Conversion.
+!AIR40159 - Always round to 3 decimal places
+!       IF TS.CENTSEP$ NE " " THEN BEGIN         ! if non-blank cents seperator
+!         INTERM.REAL = ROUND(TMP.REAL,1,0)      ! round the interm amount
+!       ENDIF ELSE BEGIN                         ! else if no cents seperator
+!EIR40159
+          INTERM.REAL = ROUND(TMP.REAL,3,0)      ! round the interm amount
+!IR40159ENDIF                                    ! endif non-blank cents seperator
+        TMP.REAL = INTERM.REAL * PBC.REAL        ! complete the second
+                                                 !  calculation Interm * PBC.
+      ENDIF                                      ! processing method 3 or 4
+      IF (MULTIPLIER = -100) THEN BEGIN          ! if minus 100 multiplier
+        TMP.REAL = TMP.REAL*.01                  ! apply the multiplying factor
+      ENDIF                                      ! minus 100 multiplier
+      IF (MULTIPLIER = 100) THEN BEGIN           ! if plus 100 multiplier
+        TMP.REAL = TMP.REAL*100                  ! apply the multiplying factor
+      ENDIF                                      ! plus 100 multiplier
+!AIR40090
+!     CNVRT.TO.BASE = ROUND(TMP.REAL,3,0)        ! Return Converted amount
+
+        TEMPI4 = ROUND(TMP.REAL,3,0)             ! Get converted amount
+        
+!AIR48311  rounding precision may need to be adjusted
+  IF (FCER.ARR$(PBC.SLOT,3) = "SKK") THEN BEGIN ! Specific base currency
+    TEMPI4 = ROUND(TMP.REAL,-1,0)               ! Get converted amount
+  ENDIF
+                                             
+! Allow for user data to specify rounding to base currency                                             
+  IF (LEFT$(FCER.ARR$(PBC.SLOT,14),6) = "ROUND=") THEN BEGIN   ! keyword there?
+     IF LEN(FCER.ARR$(PBC.SLOT,14)) > 6 THEN BEGIN             ! big enough?
+       TEMP$  = MID$(FCER.ARR$(PBC.SLOT,14),7,1)               ! pull out the dig
+       IF TEMP$ = "-" or (TEMP$ >= "0" AND TEMP$ <= "9") THEN BEGIN ! 1st dig valid
+         TEMP$  = MID$(FCER.ARR$(PBC.SLOT,14),8,1)             ! pull out the dig
+         IF TEMP$ = " " or (TEMP$ >= "0" AND TEMP$ <= "9") THEN BEGIN ! 2nd digit valid
+           TEMP$  = MID$(FCER.ARR$(PBC.SLOT,14),7,2)           ! pull out the dig
+           I2 = VAL(TEMP$)                                     ! convert to int
+           TEMPI4 = ROUND(TMP.REAL,I2,0)                       ! Get converted amt
+         ENDIF
+       ENDIF
+     ENDIF
+  ENDIF
+!EIR48311
+
+      IF (NEG.FLAG) THEN BEGIN                   ! Negative Amount
+        TEMPI4 = -TEMPI4                         ! Invert
+      ENDIF                                      ! Negative Amount
+      CNVRT.TO.BASE = TEMPI4                     ! Return Converted Amount
+!EIR40090
+    ENDIF                                        ! endif exchange rate found
+
+ DONE:
+    EXIT FUNCTION
+
+ !--------------- LOCAL ON ERROR ----------------------------------------!
+ CNVRT.ERR:
+    CNVRT.TO.BASE = 0                            ! set returned value to 0
+    RESUME DONE                                  ! exit
+
+  END FUNCTION                                   ! end CNVRT.TO.BASE
+
+
+REM -- CNVRT.TO.FOREIGN --------------------------------------------------------
+REM
+REM   CONVERT BASE CURRENCY TO FOREIGN
+REM
+REM   This function is passed the Selected Foreign Currency Slot, and a
+REM   Primary Base currency amount.  It returns the Foreign Currency amount
+REM   in a 4 byte integer, or zero if invalid exchange rate.
+REM
+REM   It accesses the Foreign Currency Exchange Rate Array FCER.ARR$ by slot
+REM   for Exchange Rate and Decimal Format Information.
+REM
+REM   Exchange Rate Processing is preformed per the Selected Foreign
+REM   Currency Processing Method as Defined in the Exchange Rate File.
+REM ---------------------------------------------------------------------------
+
+  FUNCTION CNVRT.TO.FOREIGN(AMT,SEL.FC.SLOT) PUBLIC RECURSIVE
+
+    REAL                                         \
+              SEL.REAL,                          \ selected real
+              TMP.REAL,                          \ temporary real
+              PBC.REAL,                          \ Primary Base Currency real
+              INTERM.REAL                        ! interm real
+
+    INTEGER*1                                    \
+              NEG.FLAG,                          \ Flag for Negative Amt IR40090
+              SEL.FC.SLOT,                       \ selected slot
+              DEC.FLG,                           \ decimal flag
+              MULTIPLIER,                        \ multiplier
+              PBC.FLG                            ! Primary Base Currency Decimal
+                                                 !  flag.
+    INTEGER*2                                    \
+              I2                                 ! work variable
+
+    INTEGER*4                                    \
+              TEMPI4,                            \ Temporary Integer IR40090
+              CNVRT.TO.FOREIGN,                  \ returned value
+              AMT                                ! amount to convert
+
+    STRING                                       \
+              TEMP$,                             \ work variable
+              TEMP2$                             ! work string
+
+    ON ERROR GOTO CNVRT.ERR                      ! set ON ERROR
+
+!AIR40090
+    IF (AMT < 0) THEN BEGIN                      ! Negative amount
+      NEG.FLAG = -1                              ! Set flag
+      AMT = - AMT                                ! Make positive
+    ENDIF ELSE BEGIN                             ! Positive Amount
+      NEG.FLAG = 0                               ! Clear Flag
+    ENDIF                                        ! +/- amount
+
+    IF (SEL.FC.SLOT = 0) THEN BEGIN              ! No slot
+      SEL.FC.SLOT = PBC.SLOT                     ! Defalut to PBC
+    ENDIF                                        ! No slot
+!EIR40090
+
+    TEMP2$ = FCER.ARR$(SEL.FC.SLOT,6)            ! Seltd Exchg. Rate
+    I2 = MATCH(",",TEMP2$,1)                     ! look for comma in exchange
+                                                 !  rate.
+    IF I2 <> 0 THEN BEGIN                        ! If comma found
+      TEMP$ = LEFT$(TEMP2$,(I2 -1)) +            \ it, replace it with
+              "." +                              \ a period.
+              RIGHT$(TEMP2$,(LEN(TEMP2$)-I2))    !
+    ENDIF ELSE BEGIN                             ! else if no comma in exchange
+                                                 !  rate.
+      TEMP$ = TEMP2$                             ! just copy exchange rate
+    ENDIF                                        ! comma found
+
+    SEL.REAL = VAL(TEMP$)                        ! Selected exchange rate
+    IF (FCER.ARR$(SEL.FC.SLOT,7) = "1") OR       \ if decimal format 1 or
+     (FCER.ARR$(SEL.FC.SLOT,7) = "2") THEN BEGIN !  decimal format 2.
+      DEC.FLG = -1                               ! set decimal flag on
+    ENDIF ELSE BEGIN                             ! else if no decimal format
+      DEC.FLG = 0                                ! reset decimal flag
+    ENDIF                                        ! decimal format 1 or 2
+
+    TEMP2$ = FCER.ARR$(PBC.SLOT,6)               ! Primary Currency Exchg. Rate
+    I2 = MATCH(",",TEMP2$,1)                     ! look for comma in exchange
+                                                 !  rate.
+    IF I2 <> 0 THEN BEGIN                        ! If comma found
+      TEMP$ = LEFT$(TEMP2$,(I2 -1)) +            \ it, replace it with
+              "." +                              \ a period.
+              RIGHT$(TEMP2$,(LEN(TEMP2$)-I2))    !
+    ENDIF ELSE BEGIN                             ! else if no comma found
+      TEMP$ = TEMP2$                             ! just copy exchange rate
+    ENDIF                                        ! comma found
+
+    PBC.REAL = VAL(TEMP$)                        ! set Primary Base Currency
+                                                 !  real.
+    IF (FCER.ARR$(PBC.SLOT,7) = "1") OR          \ if decimal format 1 or
+     (FCER.ARR$(PBC.SLOT,7) = "2") THEN BEGIN    !  decimal format 2.
+      PBC.FLG = -1                               ! set PBC decimal flag
+    ENDIF ELSE BEGIN                             ! else if no decimal format
+      PBC.FLG = 0                                ! reset PBC decimal flag
+    ENDIF                                        ! decimal format 1 or 2
+    MULTIPLIER = 1                               ! initialize multiplier
+    IF PBC.FLG THEN BEGIN                        ! if base currency uses
+                                                 !  decimals.
+      IF NOT(DEC.FLG) THEN BEGIN                 ! if foreign currency doesn't
+                                                 !  use decimals.
+        MULTIPLIER = -100                        ! set multiplier x100
+      ENDIF                                      ! fc doesn't use decimals
+    ENDIF ELSE BEGIN                             ! else if no decimals in PBC
+      IF DEC.FLG THEN BEGIN                      ! if foreign currency uses
+                                                 !  decimals.
+        MULTIPLIER = 100                         ! set multiplier x -100
+      ENDIF                                      ! no decimals in foreign
+                                                 !  currency.
+    ENDIF                                        ! PBC uses decimals
+
+    PROC.METHOD = VAL(FCER.ARR$(SEL.FC.SLOT,5))  ! Get Currency Proc. Method
+    IF SEL.REAL > 0 THEN BEGIN                   ! if exchange rate was found
+!AIR40090
+      IF (PROC.METHOD = 1) THEN BEGIN            ! This is the BASE Currency
+        TMP.REAL = AMT                           ! Return the same amount
+      ENDIF                                      ! Base currency
+!EIR40090
+      IF PROC.METHOD = 2 THEN BEGIN              ! if Processing Method 2
+        TMP.REAL = AMT / SEL.REAL                ! conversion is AMT / Rate
+      ENDIF                                      ! processing method 2
+      IF PROC.METHOD = 3 THEN BEGIN              ! if Processing Method 3
+        TMP.REAL = AMT / PBC.REAL                ! conversion is AMT / Rate
+      ENDIF                                      ! processing method 3
+      IF PROC.METHOD = 4 THEN BEGIN              ! if Processing Method 4
+        TMP.REAL = AMT / PBC.REAL                ! conversion is AMT / Rate
+      ENDIF                                      ! processing method 4
+      IF PROC.METHOD = 5 THEN BEGIN              ! if Processing Method 5
+        TMP.REAL = AMT / SEL.REAL                ! conversion is AMT / Rate
+      ENDIF                                      ! processing method 5
+      IF PROC.METHOD = 6 THEN BEGIN              ! if Processing Method 6
+        TMP.REAL = AMT * SEL.REAL                ! conversion is AMT * Rate
+      ENDIF                                      ! processing method 6
+      IF (PROC.METHOD = 3) OR                    \ Processing Methods which
+       (PROC.METHOD = 4) THEN BEGIN              ! require two step Conversion.
+!AIR40159 - Always round to 3 decimal places
+!       IF TS.CENTSEP$ NE " " THEN BEGIN         ! if non-blank cents seperator
+!         INTERM.REAL = ROUND(TMP.REAL,1,0)      ! round the interm amount
+!       ENDIF ELSE BEGIN                         ! else if blank cents seperator
+!EIR40159
+          INTERM.REAL = ROUND(TMP.REAL,3,0)      ! round the interm amount
+!IR40159ENDIF                                    ! blank cents seperator
+        IF PROC.METHOD = 3 THEN BEGIN            ! Processing Method 3
+          TMP.REAL = INTERM.REAL * SEL.REAL      ! TMP.REAL = Selected Amount
+        ENDIF ELSE BEGIN                         ! else if Processing Method 4
+          TMP.REAL = INTERM.REAL / SEL.REAL      ! TMP.REAL = Selected Amount
+        ENDIF                                    ! processing method 3 or 4
+      ENDIF                                      ! two step conversion
+      IF (MULTIPLIER = -100) THEN BEGIN          ! if minus 100 multiplier
+        TMP.REAL = TMP.REAL*.01                  ! apply the multiplying factor
+      ENDIF                                      ! minus 100 multiplier
+      IF (MULTIPLIER = 100) THEN BEGIN           ! if plus 100 multiplier
+        TMP.REAL = TMP.REAL*100                  ! apply the multiplying factor
+      ENDIF                                      ! plus 100 multiplier
+!AIR40090
+!     CNVRT.TO.FOREIGN = ROUND(TMP.REAL,3,0)     ! Return converted amount
+      TEMPI4 = ROUND(TMP.REAL,3,0)               ! Get converted amount
+      IF (NEG.FLAG) THEN BEGIN                   ! Negative Amount
+        TEMPI4 = -TEMPI4                         ! Invert
+      ENDIF                                      ! Negative Amount
+      CNVRT.TO.FOREIGN = TEMPI4                  ! Return Converted Amount
+!EIR40090
+    ENDIF                                        ! exchange rate found
+
+ DONE:
+    EXIT FUNCTION                                ! exit CNVRT.TO.FOREIGN
+
+ !--------------- LOCAL ON ERROR ----------------------------------------!
+ CNVRT.ERR:
+    CNVRT.TO.FOREIGN = 0                         ! set returned value to 0
+    RESUME DONE                                  ! exit
+
+  END FUNCTION                                   ! End CNVRT.TO.FOREIGN
+
+\/***********************************************************************/
+\/* End of EAMMCCVT.J86                                                 */
+\/***********************************************************************/

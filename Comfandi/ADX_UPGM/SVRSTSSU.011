@@ -1,0 +1,29 @@
+SUB SAVE.PRINT EXTERNAL
+END SUB
+
+SUB RESTORE.PRINT External
+END SUB
+
+SUB TSPREC01 EXTERNAL
+END SUB
+
+!SUB U.IMPRIMIR(U.CADENA$,U.STATION) PUBLIC
+!   STRING U.CADENA$
+!   INTEGER*2 U.STATION
+!   CALL SAVE.PRINT
+!   TS.LINETYPE   = 29
+!   TS.SAVPRT$    = U.CADENA$
+!   TS.SAVPRT.OPT = U.STATION
+!   CALL TSPREC01
+!   CALL RESTORE.PRINT
+!END SUB
+
+Function U.IMPRIME(UE.STRING$,UE.STATION) External 	! Rutina de Impresion
+String UE.STRING$, LF$ 															! Variables temporales
+INTEGER*2 UE.STATION																!
+End Function 																				!
+
+Function ASIC.GETUNPK(X.B$,X.J%) External 
+INTEGER*2 X.J%, X.K%
+STRING    X.B$, ASIC.GETUNPK
+End Function

@@ -1,0 +1,20 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : CLPTSE01.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Validacion del cliente           *
+!                en rutinas de E.M.S              *
+!**************************************************
+!*
+			
+If ASC.MKP.TS7% = 2 Then Begin					              ! Control de paso UE
+ If USER.FBACT.READ Then Begin                    		! Si CLF capturado
+
+   !ASC.MKP.CADENA$ = BUSQUEDA.CLIENTE(CA.CUSTNUM$) 		! Busca cliente Para clientes sin modulo de lealtad OVS 7 Abr 2011
+   
+   ASC.MKP.CADENA$ = BUSQUEDA.CLIENTE(Pack$(Gr.Lcl.Clte$)) 	! Busca cliente
+   ASC.MKP.LEC% = -1						                      ! Ctrl acceso
+ EndIf
+EndIf								                                  ! Fin control UE
+

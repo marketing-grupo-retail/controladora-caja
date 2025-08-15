@@ -1,0 +1,20 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2007.011 
+!     Punto de Entrada   =  EAMTSU20.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 20  para controlar los
+! datos  digitados  por  el  cajero  en  el  momento  de venta de 
+! articulos, antes de Imprimir en CR, apagando Flag de Verificac.   
+!                                                                  
+!------------------------------------------------------------------
+
+  IF TS.LINETYPE = 1 THEN BEGIN           ! Si es line Impres. PLU
+     USER.VERIFY.ITEM = 0                 ! Restaura Flag de Verif
+     USER.VERIFY.CHEQ = 0                 ! Restaura Flag de Verif
+  ENDIF                                   ! 
+!-----------------------------------------------------------------

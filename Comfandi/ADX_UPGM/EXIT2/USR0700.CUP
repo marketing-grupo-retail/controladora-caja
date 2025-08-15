@@ -1,0 +1,31 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR0700.011 
+!     Punto de Entrada   =  EAMTSU07.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!    Esta linea se inserta para abrir el archivo item.lst 
+!    para el descuento con cupon de articulos.
+!    Desarrollado por jorge losada y fernando sanchez.
+!-----------------------------------------------------------
+
+  SITEM$ = "M"                                         ! 
+  FILIMB$ = "R::C:\ITEM.LST"                           ! Archivo ARTIULOS
+  OPEN FILIMB$ AS 59 BUFFSIZE 128 NOWRITE NODEL        ! Archivo Ctrl Almacen
+  IF END #59 THEN SALIR                                !
+  WHILE FER% = 0                                       !
+     READ #59;LINE RALMA$                              ! Lee Control Almac
+!     WRITE FORM "C38"; #34; RALMA$                     !
+        ITEM$ = RIGHT$(RALMA$,6)                       !
+        SITEM$ = SITEM$ + ITEM$ + "M"                  !
+!     WRITE FORM "C38"; #34; SITEM$                     !
+     WEND                                              !
+  SALIR:                                               !
+!     WRITE FORM "C38"; #34; SMED$                     !
+!     WRITE FORM "C38"; #34; SDGN$                     !
+     CLOSE 59                                          !
+     FER% =  1                                         ! 
+!-------------------------------------------------------------------------------

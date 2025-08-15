@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC16 PUBLIC                                                        
+! TSUPEC16 - AFTER EX TDR VERIF READ                                            
+END FUNCTION                                                                    
+                                                                                

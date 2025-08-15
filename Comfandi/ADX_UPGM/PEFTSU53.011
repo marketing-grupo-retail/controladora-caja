@@ -1,0 +1,64 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU53.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+Asc.Pef.InDevol% = 0                                          ! Control de autorizaciones por devolucion y pago
+
+If Asc.Pef.Recup% = 0 Then Begin
+   Asc.Pef.Impr%    = 0											! Init de variable control de franqueo
+   Asc.Pef.InCambio% = 0                     ! Control intercambio medios de cambio
+   Asc.Pef.NotaNul$ = ""                     ! Init de variable control de anulaciones
+   Asc.Pef.NtCap%   = 0                      ! Control de notas capturadas
+   Asc.Pef.Cambio%  = 0                      ! Intercambio medios de pago
+   Asc.Pef.InDevol% = 0                      ! Control de autorizaciones por devolucion y pago
+   Asc.Pef.NumNota$ = ""                     ! Temporal
+   Asc.Pef.VlrDev$  = ""                     ! 
+   Asc.Pef.NroBon%  = 0                      ! Nro bonos capturados
+   DIM Asc.Pef.Vtabono$(60,4)                ! Init vector control bonos
+   DIM Asc.Pef.Vtabono2$(60,2)                ! Init vector control bonos
+   Asc.Pef.Recup% = 0                        ! Control recuperaciones
+   Asc.Pef.Cambio% = 0                       ! Intercambios
+   Asc.Pef.AutPay% = 0                       ! Control autorizacion de pagos
+   Asc.Pef.Tipo%   = 0
+   Asc.Pef.Vari%   = 0
+   Asc.Pef.SlEnd%  = 0  
+   Asc.Pef.IMPMSG% = 0
+   FN.PES% = 0
+   Dim FN.JAVA$(50,4)
+   Dim FN.PES$(50,4)
+   Asc.Pef.Recup% = -1
+   Asc.Pef.DataPos% = 0 
+Endif 
+
+IF UNPACK$(LEFT$(SL.STR.ENTRY$,1)) = "99" THEN BEGIN   	    	! Si DATA/ENTRY
+
+ IF UNPACK$(MID$(SL.STR.ENTRY$,3,4)) = "20060523" THEN BEGIN                ! Pago Electronico - FONEDE
+	  Asc.Tmp.Apun% = 3																												! Apuntador String
+    TS.TEMP1$ = ASIC.GETUNPK4(SL.STR.ENTRY$,Asc.Tmp.Apun%)					  	 		! Numero del proyecto
+    TS.TEMP1$ = ASIC.GETUNPK4(SL.STR.ENTRY$,Asc.Tmp.Apun%)						   		! String de la operacion
+    TS.TEMP2$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)						    		! Valor de la credencial
+    Asc.Pef.NumNota$ = STR$(VAL(MID$(TS.TEMP1$,39,18)))                     ! Numero de la nota
+    Call U.Imprime("CREDENCIAL FONEDE:"+Asc.Pef.NumNota$,6100H)             ! Imprime nro tarjeta en tiquete   
+    Asc.Pef.Operacion% = 11
+    Call Busca.Pef.Registrado(Asc.Pef.NumNota$,TS.TEMP2$,TS.TEMP1$)         ! Controla pagos recaudados
+    
+ Endif
+
+ IF UNPACK$(MID$(SL.STR.ENTRY$,3,4)) = "20060524" THEN BEGIN                ! Pago Electronico - FONEDE
+	  Asc.Tmp.Apun% = 3																												! Apuntador String
+    TS.TEMP1$ = ASIC.GETUNPK4(SL.STR.ENTRY$,Asc.Tmp.Apun%)						  		! Numero del proyecto
+    TS.TEMP1$ = ASIC.GETUNPK4(SL.STR.ENTRY$,Asc.Tmp.Apun%)						  		! String de la operacion
+    TS.TEMP2$ = ASIC.GETUNPK(SL.STR.ENTRY$,Asc.Tmp.Apun%)						    		! Valor de la credencial
+    Asc.Pef.NumNota$ = STR$(VAL(MID$(TS.TEMP1$,39,18)))
+    Call U.Imprime("CREDENCIAL FONEDE:"+Asc.Pef.NumNota$,6100H)             ! Imprime nro tarjeta en tiquete              
+    CALL U.IMPRIME(TS.TEMP2$,4100H)           
+    CALL U.IMPRIME(TS.TEMP1$,4100H)           
+    Call Busca.Pef.Registrado(Asc.Pef.NumNota$,"0",TS.TEMP1$)               ! Controla pagos recaudados
+ Endif     
+
+Endif	         
+

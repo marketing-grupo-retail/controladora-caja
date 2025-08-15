@@ -1,0 +1,216 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1966                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR2004.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   ***************************************************************************
+
+IF (TO.USEROPTS(4) <> 0) AND                       \! Terminal User Op 4 = Y
+UE.IVA.IMPRESO% = 1     THEN BEGIN                  ! Para una sola impresion
+ !  IMPRE%  = 0 						                        ! de IVA
+
+
+   IF TS.LINETYPE = 6 AND TS.INTRX AND             \! Store Data y Transacc
+      (TS.LINEDATA = 1 OR                          \! Fecha, Hora, etc
+       TS.LINEDATA = 2) THEN BEGIN                  ! Linea de Items Vendidos
+         FOR UE.II% = 1 TO 4                        !
+            IF UE.II% = 1 THEN IC% = IPOT16%        ! Impo Consumo Plan A
+            IF UE.II% = 2 THEN IC% = IPOT20%        ! Impo Consumo Plan B
+            IF UE.II% = 3 THEN IC% = IPOT35%        ! Impo Consumo Plan C
+            IF UE.II% = 4 THEN IC% = IPOTDD%        ! Impo Consumo Plan D
+              
+            IF UE.II% = 1 AND                      \!
+              (TS.TOTALS(1,0,0) <> 0 OR            \!
+               TS.TOTALS(2,0,0) <> 0 OR            \!
+               TS.TOTALS(3,0,0) <> 0 OR            \!
+               TS.TOTALS(4,0,0) <> 0) THEN BEGIN    !
+
+		           UE.IVA.IMPRESO% = 0
+		              CALL U.IMPRIMIR(" ",4100H)
+                  AUX$ = "** DETALLE DEL IVA **"    ! 
+                  CALL U.IMPRIMIR(AUX$,6100H)
+                  AUX$ = "Tarifa     Compra  "  +  \!
+                         "Base/Imp.    IVA"         ! 
+                  CALL U.IMPRIMIR(AUX$,6100H)
+            ENDIF                                   !
+            
+!            CALL U.IMPRIMIR("VALOR "+STR$(UE.II%)+" "+STR$(TS.TOTALS(UE.II%,0,0)),4100H)
+            
+            IF UE.II% = 4 AND                      \!
+               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+                  UE.IVA.IMPRESO% = 0
+                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+                  CALL U.IMPRIMIR(AUX$,6100H)
+            ENDIF                                   !
+            
+            IF TS.TOTALS(UE.II%,0,0) <> 0 AND         \!
+                 MEX.VAT.TOTAL(0) <> 0 THEN BEGIN   !
+                 AUX$ = CNV$(UE.II%)+STR$(MEX.VAT.TAB(UE.II%))+"%"
+
+            CALL FORMAT.AMOUNT(TS.TOTALS(UE.II%,0,0))! Format va return TS.TEMP1$
+               USR.PAGO$ = TS.TEMP1$                !
+               USR.PAGO$ = RIGHT$("          " +   \!
+                           USR.PAGO$,10)            !
+            CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(UE.II%))! Format va return TS.TEMP1$
+               USR.BASE$ = TS.TEMP1$                !
+               USR.BASE$ = RIGHT$("          " +   \!
+                           USR.BASE$,10)            !
+            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+                             - IC%                 \!
+                             - MEX.VAT.TOTAL(UE.II%))  ! Format va return TS.TEMP1$
+            IF UE.II%=1 THEN NFF.IT1$=USR.IVA$      !
+            IF UE.II%=2 THEN NFF.IT2$=USR.IVA$      !
+            IF UE.II%=3 THEN NFF.IT3$=USR.IVA$      !
+            IF UE.II%=4 THEN NFF.IT6$=USR.IVA$      !
+            CALL FORMAT.AMOUNT(TS.TOTALS(UE.II%,0,0) \!
+                             - IC%                 \!
+                             - MEX.VAT.TOTAL(UE.II%))  ! Format va return TS.TEMP1$
+               USR.IVA$ = TS.TEMP1$                 !
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+         ENDIF                                      ! End if printing line
+         IF UE.II% = 4 THEN BEGIN                   !
+           AUX$ = "*SIN IVA"                        !
+           SIN.IVA.TOTALS       = TS.TOTALS(0,0,0) \! Compra Exenta = Pago Total -
+                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+                                - TS.TOTALS(2,0,0) \! Iva 2 de la Compra -
+                                - TS.TOTALS(3,0,0) \! Iva 3 de la Compra
+                                - TS.TOTALS(4,0,0) \! Iva 4 de la Compra
+                                + VRLIQ%            !
+            CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(UE.II%)) ! Format va return TS.TEMP1$
+               USR.IVA$ = TS.TEMP1$                 !
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+               NFF.EXE$ = STR$(SIN.IVA.TOTALS)      ! 
+               TS.TEMP1$ = RIGHT$("          " +   \!
+                           TS.TEMP1$,10)            !
+               CALL U.IMPRIMIR(AUX$+TS.TEMP1$,6100H)
+
+            IF VRLIQ% <> 0 THEN BEGIN               !
+               CALL FORMAT.AMOUNT(VRLIQ% * -1)      ! Format va return TS.TEMP1$
+               TS.TEMP1$ = RIGHT$("          " +   \!
+                           TS.TEMP1$,10)            !
+               AUX$ = "*R/FTE ="                    !
+               CALL U.IMPRIMIR(AUX$+TS.TEMP1$,6100H)
+            ENDIF                                   !
+            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+               AUX$ = "TOTAL ="                     ! Impresion de Datos CERO
+               CALL FORMAT.AMOUNT(TS.TOTALS(0,0,0)) ! Format va return TS.TEMP1$
+               USR.PAGO$ = TS.TEMP1$                !
+               USR.PAGO$ = RIGHT$("          " +   \!
+                           USR.PAGO$,10)            !
+               CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(0)) ! Format va return TS.TEMP1$
+               USR.BASE$ = TS.TEMP1$                !
+               USR.BASE$ = RIGHT$("          " +   \!
+                           USR.BASE$,10)            !
+               IC%=IPOT16%+IPOT20%+IPOT35%+        \!
+                   IPOTDD%+((VRLIQ%)*-1)            ! Sumatoria de los Ivas
+               NFF.IT8$ = STR$(IPOT16%+IPOT20%+    \!
+                               IPOT35%+IPOTDD%)     ! Sumatoria de ImpoCons
+               CALL FORMAT.AMOUNT(TS.TOTALS(0,0,0) \! Total de la Compra -
+                             - IC%                 \! Suma del Imp Consumo
+                             - SIN.IVA.TOTALS      \! Total Exento       -
+                             - MEX.VAT.TOTAL(0))    ! Base Imponible         
+               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+               IVAS$    = TS.TEMP1$                 !
+               CALL U.IMPRIMIR(AUX$+USR.PAGO$+USR.BASE$+USR.IVA$,6100H)
+            ENDIF                                   ! Fin de Tot Vta Excluida
+               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+               USR.IP00$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT16%)          ! Formato 16%
+               USR.IP16$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT20%)          ! Formato 20%
+               USR.IP20$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT35%)          ! Formato 35%     
+               USR.IP35$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOTDD%)          ! Formato Plan DD%
+               USR.IPDD$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+            IF IPOT00% > 0        THEN BEGIN        ! Si ha Imp Consumo
+              CALL U.IMPRIMIR("ImpoC '*'="+USR.IP00$,6100H)
+
+            ENDIF                                   !
+            IF IPOT16% > 0 OR IPOT20% > 0 THEN BEGIN! Si hay Imp Consumo
+              CALL U.IMPRIMIR("ImpoC *A*="+USR.IP16$+" "+"ImpoC *B*="+USR.IP20$,6100H)
+
+            ENDIF                                   ! 
+            IF IPOT35% > 0 OR IPOTDD% > 0 THEN BEGIN! Si ha Imp Consumo
+              CALL U.IMPRIMIR("ImpoC *C*="+USR.IP35$+" "+"ImpoC *D*="+USR.IPDD$,6100H)
+
+            ENDIF                                   !
+            CALL U.IMPRIMIR(" ",4100H)
+            TS.TEMP1$  = "LE ATENDIO CON GUSTO:  " +   \!              
+            " "+NOMOPER$
+            IF PRT4610.ENABLE = 0 THEN BEGIN
+               TS.TEMP1$ = LEFT$(TS.TEMP1$,37)
+            ENDIF
+            CALL U.IMPRIMIR(TS.TEMP1$,6100H)
+            IF Len(vend.medica$) > 1 THEN BEGIN
+               CALL U.IMPRIMIR("Despacho: " +" "+vend.medica$+" "+nom.oper$,6100H)
+               CALL Grabacion.String.Usuario2("20080407",PACK$(vend.medica$)+":"+PACK$(STR$(ITEM.COUNT)))
+            ENDIF   
+            IF PRT4610.ENABLE  = 0 THEN BEGIN 
+               CALL U.IMPRIMIR("Somos Autoretenedores Segun Resolucion",4100H)
+               CALL U.IMPRIMIR("Numero 1660 de marzo 7 de 2000",4100H)
+               CALL U.IMPRIMIR("Somos grandes contribuyentes segun",4100H)
+               CALL U.IMPRIMIR("Resolucion 7029 de Nov-22 de 1996",4100H)
+            ENDIF ELSE BEGIN 
+!                               1234567890123456789012345678901234567890123456789012            
+               CALL U.IMPRIMIR(" ",4100H)
+               CALL U.IMPRIMIR("Autoretenedores S/Res.No.1660 de marzo 7/2000",4100H)
+               CALL U.IMPRIMIR("Grandes Contribuyentes S/Res.No.7029 de Nov-22/1996",4100H)
+            ENDIF 
+
+               IPOT16% = 0  : IPOT20% = 0              !
+               IPOT35% = 0  : IPOTDD% = 0 : IPOT00% = 0!
+               CALL FORMAT.AMOUNT(TS.TOTALS(4,0,0)    \! Total Exento   +
+                             + MEX.VAT.TOTAL(0)    \! Base Imponible +
+                             + VRLIQ%              \! Retencion Fte  +
+                             + PEAJES%)             ! Peajes pagados  
+                SUBT$    = TS.TEMP1$                 ! Subtotal sin Iva
+         ENDIF                                      !
+        
+         NEXT UE.II%                                !
+   ENDIF                                            ! End if taxes > 0     
+                                                    ! according Local TAX
+   IF TS.LINETYPE = 1 AND                          \! Si es Linea Item
+      RIGHT$(TS.PRTBUF$,6) <> "      " THEN BEGIN   ! con dato de Valor
+      IF IR.INDICAT1 AND 80H THEN                  \! Si hay Indic Plan A
+         TS.PRTBUF$ = LEFT$(TS.PRTBUF$,            \! asigna letra que 
+                      LEN(TS.PRTBUF$)-1) + "A"     \! indica 16% = D
+      ELSE                                         \! si no,
+      IF IR.INDICAT1 AND 40H THEN                  \! Si hay Plan B
+         TS.PRTBUF$ = LEFT$(TS.PRTBUF$,            \! asigna letra que
+                      LEN(TS.PRTBUF$)-1) + "B"     \! indica 35% = L
+      ELSE                                         \! si no,
+      IF IR.INDICAT1 AND 20H THEN                  \! Si hay plan C
+         TS.PRTBUF$ = LEFT$(TS.PRTBUF$,            \! asigna letra que
+                      LEN(TS.PRTBUF$)-1) + "C"     \! indica 20% = V
+      ELSE                                         \!
+      IF IR.INDICAT1 AND 10H THEN                  \! Si hay plan C
+         TS.PRTBUF$ = LEFT$(TS.PRTBUF$,            \! asigna letra que
+                      LEN(TS.PRTBUF$)-1) + "D"     \! indica 20% = V
+      ELSE BEGIN                                    ! si no,
+         TS.PRTBUF$ = LEFT$(TS.PRTBUF$,            \! indica letra que
+                      LEN(TS.PRTBUF$)-1) + "*"      ! indica 0% = Z
+         EXENTO = 0                                 ! 
+      ENDIF                                         !
+
+   ENDIF                                            ! End if Linetype = 1 
+ENDIF                                               ! End if User Options set
+
+!-----------------------------------------------------------------------------

@@ -1,0 +1,46 @@
+
+! VERIFICA% = 1                                         ! No Verificar
+
+IF TS.IO.STATE    = 10  AND                           \! Si estado MAIN y
+   TS.IO.MOTORKEY = 80  AND                           \! con MOTOR ENTER y
+   TS.IO.KEYS(2)  = 80  AND                           \! Tecla ENTER y
+   TS.IO.KEYS(4)  = 100 AND                           \! con NOSALE
+   TS.IO.DATA$(2) <> "" THEN BEGIN                     ! con Dato PLU
+      VERIAM% = 1                                      ! Indica Verific MAM
+      IF TS.IO.KEYS(6) = 72 THEN BEGIN                 ! con tecla PESO y
+         CALL TSHIEC05                                 !
+         KGCM% = TS.TEMP1I4                            ! Variable Peso
+         IF TS.TEMP1I4 = 0 THEN                       \!
+            KGCM% = VAL(TS.IO.DATA$(6))                ! Coloca string con Kgs 
+         TS.IO.DATA$(6) = STR$(KGCM%)                  ! Coloca string con Kgs 
+         ANUL% = 1                                     ! Reset de Anular
+      ENDIF                                            !
+      IF TS.IO.KEYS(6) = 0 AND                        \! No hay Motor en 6
+         TS.IO.DATA$(6) = "" THEN BEGIN                !
+            TS.IO.KEYS(6) = 75                         ! con tecla CANT y
+            TS.IO.DATA$(6) = "1"                       ! Sin Cant Coloca UNO 
+      ENDIF                                            !
+      IF TS.IO.KEYS(6) = 75 THEN BEGIN                 ! con tecla CANT y
+         KGCM% = VAL(TS.IO.DATA$(6))                   ! Coloca string con Cant
+         ANUL% = 1                                     ! Reset de Anular
+      ENDIF                                            !
+      TS.IO.KEYS(4) = 0                                ! elimina NOSALE
+ENDIF                                                  !
+!------------------------------------------------------------------------------
+
+IF TS.PROCEDURE = 7 OR                                \! Si esta en Training
+   TS.PROCEDURE < 1 THEN BEGIN                         ! Si esta en Venta 
+   IF TS.IO.KEYS(6) = 72 AND                          \! y se Digita PESO
+      TS.IO.MOTORKEY > 0 AND                          \! y el Motor esta OK
+      LEN(TS.IO.DATA$(2)) < 7 THEN BEGIN               ! con Plu Fruver
+         TS.IO.DATA$(2)=RIGHT$("000000"+              \!
+                        TS.IO.DATA$(2),6)              ! Inserta Ceros
+         TS.IO.DATA$(2)="000000" + TS.IO.DATA$(2)      ! Inserta Prefijo 777777
+         TS.IO.MOTORKEY=80                             ! Asigna Tecla ENTER
+         TS.IO.KEYS(2) =80                             ! con MOTOR Enter
+         ANUL% = 1                                     ! Reset de Anular
+         IF TS.IO.KEYS(1) = 70 THEN BEGIN              ! y se Digita VOID
+            ANUL% = -1                                 ! se torna negativo
+         ENDIF                                         ! Fin de Anular
+   ENDIF                                               ! Fin de Balanza
+ENDIF                                                  ! Fin Procedm Vta

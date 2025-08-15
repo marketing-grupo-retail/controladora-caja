@@ -1,0 +1,9 @@
+!-------------------------------------------------------------------------
+! Antes de escribir un registro a el archivo de productividad de terminal
+!-------------------------------------------------------------------------
+!User exit called before writing terminal productivity record
+FUNCTION CSUPEC10(P1) PUBLIC
+   INTEGER*1 P1
+
+
+END FUNCTION

@@ -1,0 +1,766 @@
+\/*********************************************************************/
+\/*                                                                   */
+\/*      MODULE NAME: DATEFUNC.J86                                    */
+\/*                                                                   */
+\/*      DESCRIPTIVE NAME: Common date functions                      */
+\/*                                                                   */
+\/*      COPYRIGHT:                                                   */
+\/*      5799-QZH THIS MODULE IS "RESTRICTED MATERIALS OF IBM"        */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED        */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT      */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                           */
+\/*                                                                   */
+\/*      STATUS: RELEASE 1 LEVEL 0                                    */
+\/*                                                                   */
+\/*                                                                   */
+\/*      PERSON RESPONSIBLE = Tom Gaskill                             */
+\/*                                                                   */
+\/*      CHANGE ACTIVITY: LEVEL 0                                     */
+\/*                                                                   */
+\/* IO02996 - Daylight savings time is amended beginning in           */
+\/*           2007.  Starting date goes from the first Sunday in      */
+\/*           April to the second Sunday in March.  Ending date       */
+\/*           goes from the last Sunday in October to the first       */
+\/*           Sunday in November.                                     */
+\/*           GGK IBM 14Nov2005                                       */
+\/*                                                                   */
+\/* END-OF-SPECIFICATIONS *********************************************/
+
+!******************************************************************************
+! Function Notes for JULIAN.DATE and GREGORIAN.DATE$:
+!
+! The Julian Day Count is a uniform count of days from a remote epoch in the
+! past (-4712 January 1, 12 hours Greenwich Mean Time (Julian proleptic
+! Calendar) = 4713 BCE January 1, 12 hours GMT (Julian proleptic Calendar) =
+! 4714 BCE November 24, 12 hours GMT (Gregorian proleptic Calendar)). At this
+! instant, the Julian Day Number is 0. It is convenient for astronomers to use
+! since it is not necessary to worry about odd numbers of days in a month, leap
+! years, etc. Once you have the Julian Day Number of a particular date in
+! history, it is easy to calculate time elapsed between it and any other Julian
+! Day Number.
+!
+! The Julian Day Count has nothing to do with the Julian Calendar introduced by
+! Julius Caesar. It is named for Julius Scaliger, the father of Josephus Justus
+! Scaliger, who invented the concept. It can also be thought of as a logical
+! follow-on to the old Egyptian civil calendar, which also used years of
+! constant lengths.
+!
+! Scaliger chose the particular date in the remote past because it was before
+! recorded history and because in that year, three important cycles coincided
+! with their first year of the cycle:  The 19-year Metonic Cycle, the 15-year
+! Indiction Cycle (a Roman Taxation Cycle) and the 28-year Solar Cycle (the
+! length of time for the old Julian Calendar to repeat exactly).
+!******************************************************************************
+
+!******************************************************************************
+! Function Name: JULIAN.DATE
+! Description: This function converts the passed Gregorian Date to a Julian Date
+!
+! Function algorithm:
+!
+! 1) Express the date as Y M D, where Y is the year, M is the month number
+!    (Jan = 1, Feb = 2, etc.),and D is the day in the month.
+!
+! 2) If the month is January or February, subtract 1 from the year to get a new
+!    Y, and add 12 to the month to get a new M. (Thus, we are thinking of
+!    January and February as being the 13th and 14th month of the previous year)
+!
+! 3) Dropping the fractional part of all results of all multiplications and
+!    division, let...
+!
+!   A = Y/100
+!   B = A/4
+!   C = 2-A+B
+!   E = 365.25x(Y+4716)
+!   F = 30.6001x(M+1)
+!   JD= C+D+E+F-1524.5  (we drop the .5)
+!
+!  This is the Julian Day Number for the beginning of the date in question at 0
+!  hours, Greenwich time. Note that this always gives you a half day extra. That
+!  is because the Julian Day begins at noon, Greenwich time. This is convenient
+!  for astronomers (who until recently only observed at night), but it is
+!  confusing.
+!
+!  Example: If the date is 1582 October 15,
+!
+!   Y = 1582
+!   M = 10
+!   D = 15
+!   A = 15
+!   B = 3
+!   C = -10
+!   E = 2300344
+!   F = 336
+!   JD = 2299160.5  (but we drop the .5)
+!
+!******************************************************************************
+FUNCTION JULIAN.DATE(FN.DATE$)
+
+  STRING                               \
+         FN.DATE$                      ! Date passed to function  CCYYMMDD
+
+  INTEGER*4                            \
+            A,B,C,D,E,F,M,Y,           \ work variables
+            JULIAN.DATE                ! function return
+
+  JULIAN.DATE = 0                                ! initialize function return
+
+  IF (LEN(FN.DATE$) <> 8) THEN BEGIN             ! if date invalid
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if date invalid
+
+  ! Express the date as Y M D, where Y is the year, M is the month number
+  ! (Jan = 1, Feb = 2, etc.),and D is the day in the month.
+  Y = VAL(LEFT$(FN.DATE$,4))
+  M = VAL(MID$(FN.DATE$,5,2))
+  D = VAL(RIGHT$(FN.DATE$,2))
+
+  ! If the month is January or February, subtract 1 from the year to get a new
+  ! Y, and add 12 to the month to get a new M. (Thus, we are thinking of January
+  ! and February as being the 13th and 14th month of the previous year).
+  IF (M <= 2) THEN BEGIN
+    Y = Y - 1
+    M = M + 12
+  ENDIF
+
+  ! Dropping the fractional part of all multiplication and division results
+
+  A = INT%(Y / 100)
+  B = INT%(A / 4)
+  C = 2 - A + B
+  E = INT%(365.25 * (Y + 4716))
+  F = INT%(30.6001 * (M + 1))
+  JULIAN.DATE = INT%(C + D + E + F - 1524.5)
+
+END FUNCTION                                     ! end JULIAN.DATE
+!******************************************************************************
+
+
+!******************************************************************************
+! Function Name: GREGORIAN.DATE$
+! Description: This function converts the passed Julian Date to a Gregorian Date
+!              The Julian date should have been calculated by the matching
+!              algorithm
+!
+! Function algorithm:
+!
+! NOTE: This assumes the date is passed in with the .5 ending so we need to add
+!       1 instead of .5 for Z below.
+!
+! To convert a Julian Day Number to a Gregorian date, assume that it is for 0
+! hours, Greenwich time (so that it ends in 0.5). Do the following calculations,
+! again dropping the fractional part of all multiplications and divisions.
+! Note: This method will not give dates accurately on the Gregorian Proleptic
+! Calendar, i.e., the calendar you get by extending the Gregorian calendar
+! backwards to years earlier than 1582. using the Gregorian leap year rules.
+! In particular, the method fails if Y<400.
+!
+!   Z = JD+0.5  (ADD A FULL ONE SINCE WE DROP THE .5 IN THE JULIAN.DATE FUNC)
+!   W = (Z - 1867216.25)/36524.25
+!   X = W/4
+!   A = Z+1+W-X
+!   B = A+1524
+!   C = (B-122.1)/365.25
+!   D = 365.25xC
+!   E = (B-D)/30.6001
+!   F = 30.6001xE
+!   Day of month = B-D-F
+!   Month = E-1 or E-13 (must get number less than or equal to 12)
+!   Year = C-4715 (if Month is January or February) or C-4716 (otherwise)
+!
+! Example: Check the first calculation by starting with JD = 2299160.5
+!
+!   Z = 2299161
+!   W = 11
+!   X = 2
+!   A = 2299171
+!   B = 2300695
+!   C = 6298
+!   D = 2300344
+!   E = 11
+!   F = 336
+!   Day of Month = 15
+!   Month = 10
+!   Year = 1582
+!
+!******************************************************************************
+FUNCTION GREGORIAN.DATE$(JULIAN.DATE%)
+
+  STRING                               \
+         GREGORIAN.DATE$               ! Function return  CCYYMMDD
+
+  INTEGER*2                            \
+            DAY%,                      \
+            MONTH%,                    \
+            YEAR%                      !
+
+  INTEGER*4                            \
+            A,B,C,D,E,F,Z,W,X,         \ work variables
+            JULIAN.DATE%               ! Date passed to function in Julian
+
+  GREGORIAN.DATE$ = ""                           ! initialize function return
+  Z = JULIAN.DATE% + 1                           ! NOTE: see notes above
+  W = INT%((Z - 1867216.25) / 36524.25)
+  X = INT%(W / 4)
+  A = Z + 1 + W - X
+  B = A + 1524
+  C = INT%((B - 122.1) / 365.25)
+  D = INT%(365.25 * C)
+  E = INT%((B - D) / 30.6001)
+  F = INT%(30.6001 * E)
+  DAY% = B - D - F
+  IF (E > 13) THEN BEGIN
+    MONTH% = E - 13
+  ENDIF ELSE BEGIN
+    MONTH% = E - 1
+  ENDIF
+  IF (MONTH% < 3) THEN BEGIN
+    YEAR% = C - 4715
+  ENDIF ELSE BEGIN
+    YEAR% = C - 4716
+  ENDIF
+
+  GREGORIAN.DATE$ = RIGHT$("0000" + STR$(YEAR%),4)  \
+                  + RIGHT$("00" + STR$(MONTH%),2)   \
+                  + RIGHT$("00" + STR$(DAY%),2)
+
+END FUNCTION                                     ! end GREGORIAN.DATE
+!******************************************************************************
+
+
+!******************************************************************************
+! Function Name: DAY.OF.WEEK
+! Description: This function returns the day of the week.  It accepts a date and
+!              converts it to a numeric day of week.... 0=Sunday...6=Saturday
+!   Algorithm:
+!   This function uses Zeller's Congruence to calculate the day of the week
+!   on which any date falls.
+!   The following is an explanation of this algorithm
+!
+!   (1) Since February is the only month with a variable number of days, adjust
+!       the month and year so that January and February are the last months of
+!       the preceding year.
+!
+!   (2) Compute the contribution to the day of the week caused by the fact
+!       that the months have different numbers of days.  Let m be the adjusted
+!       month number, (from (1)), compute 26m - 2 and divide the result by 10,
+!       discarding the remainder.
+!
+!   (3) Compute the contribution to the day of the week caused by the year.
+!       Determine the century and the year within the century of the adjusted
+!       year. Add the following: the year within the century, the whole number
+!       part of the result of dividing the year within the century by 4, the
+!       whole number part of the result of dividing the century by 4, and
+!       5 times the century.
+!
+!   (4) Add the Day, the contribution from the month, and contribution from
+!       the year.  MOD this sum by 7 and the result will be the day of the
+!       week.
+!
+!   The day of the week is returned as 0 = sunday,1 = monday .... 6 = saturday.
+!******************************************************************************
+FUNCTION DAY.OF.WEEK(FN.DATE$)
+
+  STRING                               \
+         FN.DATE$                      ! Date passed to function  CCYYMMDD
+
+  INTEGER*2                            \
+            YEAR,                      \
+            MONTH,                     \
+            DAY,                       \
+            CENTURY,                   \
+            ADJMONTH,                  \
+            ADJYEAR,                   \
+            MONTHCORRECTION,           \
+            YEARCORRECTION,            \
+            LSTTWO,                    \
+            DAY.OF.WEEK                \ Function return  0=Sunday...6=Saturday
+
+  IF (LEN(FN.DATE$) <> 8) THEN BEGIN             ! if not valid length
+    DAY.OF.WEEK = -1                             ! this will cause an error
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if not valid length
+
+  YEAR = INT%(VAL(LEFT$(FN.DATE$,4)))
+  MONTH = INT%(VAL(MID$(FN.DATE$,5,2)))
+  DAY = INT%(VAL(RIGHT$(FN.DATE$,2)))
+
+  IF MONTH <= 2 THEN BEGIN
+    ADJMONTH = 10 + MONTH
+    ADJYEAR = YEAR - 1
+  ENDIF ELSE BEGIN
+    ADJMONTH = MONTH - 2
+    ADJYEAR = YEAR
+  ENDIF
+
+  MONTHCORRECTION = (26 * ADJMONTH - 2) / 10
+
+  CENTURY = ADJYEAR / 100
+  LSTTWO = MOD(ADJYEAR,100)
+  YEARCORRECTION = LSTTWO + (LSTTWO / 4) + (CENTURY / 4) + 5 * CENTURY
+
+  DAY.OF.WEEK = MOD((DAY + MONTHCORRECTION + YEARCORRECTION),7)
+
+END FUNCTION                                     ! end DAY.OF.WEEK
+!******************************************************************************
+
+
+!******************************************************************************
+! Function Name: DATE.TIME.VALID
+! Description: This function validates the passed date and time.
+!              The passed parameter should be in the form of CCYYDDMMhhmmss
+!******************************************************************************
+FUNCTION DATE.TIME.VALID(DATE.TIME$)
+
+  STRING                               \
+         DATE.TIME$                    ! Date/time passed to function
+
+  INTEGER*1                            \
+            DATE.TIME.VALID            ! function return
+
+  INTEGER*2                            \
+           YEAR%,                      \
+           MONTH%,                     \
+           DAY%,                       \
+           HOUR%,                      \
+           MINUTE%,                    \
+           SECOND%,                    \
+           VALID.HIGH.DAY
+
+  DATE.TIME.VALID = 0                            ! assume date and time no good
+
+  ON ERROR GOTO DATE.TIME.VALID.ERR              ! return invalid on any error
+
+  IF (LEN(DATE.TIME$) <> 14) THEN BEGIN          ! if not a valid length
+    EXIT FUNCTION                                ! go back
+  ENDIF                                          ! if not a valid length
+
+  ! test that string is numeric, should get error if not
+  YEAR% = VAL(LEFT$(DATE.TIME$,4))
+  MONTH% = VAL(MID$(DATE.TIME$,5,2))
+  DAY% = VAL(MID$(DATE.TIME$,7,2))
+  HOUR% = VAL(MID$(DATE.TIME$,9,2))
+  MINUTE% = VAL(MID$(DATE.TIME$,11,2))
+  SECOND% = VAL(RIGHT$(DATE.TIME$,2))
+
+  ! Validate that the times are valid
+  IF (HOUR% < 0) OR (HOUR% > 23) THEN BEGIN      ! if invalid hour
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid hour
+
+  IF (MINUTE% < 0) OR (MINUTE% > 59) THEN BEGIN  ! if invalid minute
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid minute
+
+  IF (SECOND% < 0) OR (SECOND% > 59) THEN BEGIN  ! if invalid second
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid second
+
+  ! Validate that the year is ok
+  IF (YEAR% < 2000) OR (YEAR% > 2099) THEN BEGIN ! if invalid year
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid year
+
+  ! Validate that the month is ok
+  IF (MONTH% < 1) OR (MONTH% > 12) THEN BEGIN    ! if invalid month
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid month
+
+  ! Validate low end of day
+  IF (DAY% < 1) THEN BEGIN                       ! if invalid day
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid day
+
+  ! Validate the high end of the day based on the month
+  IF (MONTH% = 2) THEN BEGIN                     ! if February
+    IF MOD(YEAR%,4) THEN BEGIN                   ! if not a leap year
+      VALID.HIGH.DAY = 28
+    ENDIF ELSE BEGIN                             ! else a leap year
+      VALID.HIGH.DAY = 29
+    ENDIF                                        ! if not a leap year
+  ENDIF ELSE BEGIN                               ! else not February
+    IF (MONTH% = 4) OR                           \ April
+       (MONTH% = 6) OR                           \ June
+       (MONTH% = 9) OR                           \ September
+       (MONTH% = 11)                             \ November
+    THEN BEGIN                                   ! if 30 day month
+      VALID.HIGH.DAY = 30
+    ENDIF ELSE BEGIN                             ! else must be 31 day month
+      VALID.HIGH.DAY = 31
+    ENDIF                                        ! if 30 day month
+  ENDIF                                          ! if February
+
+  IF (DAY% > VALID.HIGH.DAY) THEN BEGIN          ! if invalid day
+    EXIT FUNCTION                                ! get out
+  ENDIF                                          ! if invalid day
+
+  DATE.TIME.VALID = -1                           ! flag that the date/time is ok
+
+DATE.TIME.VALID.EXIT:
+  EXIT FUNCTION                                  ! we're done
+
+DATE.TIME.VALID.ERR:
+
+  DATE.TIME.VALID = 0                            ! make sure return is invalid
+
+  RESUME DATE.TIME.VALID.EXIT                    ! always resume from error
+
+END FUNCTION                                     ! end DATE.TIME.VALID
+!******************************************************************************
+
+
+!******************************************************************************
+! Routine Name: CONVERT.GMT.TO.LOCAL.TIME
+! Description: This routine converts the passed Greenwich Mean Time (GMT) to
+!              local time.  The date/time passed to the routine should be in
+!              form CCYYMMDDhhmmss.
+!
+! The function adds in the parameter set for time difference between local time
+! and GMT.  If the option is set to observe daylight savings time, an hour is
+! added back in after the time difference is subtracted out.  For example, if
+! the time difference is set to 5 and the DATE.TIME$ is at 6:00, then the time
+! is converted to 1:00, (note all the logic to handle month crossing, year
+! crossing is handled by changing the date to julian and then back to gregorian)
+! If observing daylight savings, then an hour is added back in so the time is
+! changed to 2:00.  To hopefully make it more clear, note that for eastcoast
+! time, the time difference is 5 hours but changes to 4 if daylight savings.
+!******************************************************************************
+SUB CONVERT.GMT.TO.LOCAL.TIME(DATE.TIME$,GMT.LOCAL.DIFF,DAYLIGHT.SAVINGS)
+
+  STRING                               \
+         HOUR$,                        \
+         MINUTE$,                      \
+         SECOND$,                      \
+         BEG.DAYLIGHT.SAVINGS$,        \ date daylight savings begins
+         END.DAYLIGHT.SAVINGS$,        \ date daylight savings ends
+         DATE.TIME$                    ! Date/Time passed to routine
+
+  INTEGER*1                            \
+            GMT.LOCAL.DIFF,            \ time diff between local and GMT time
+            DAYLIGHT.SAVINGS           ! flag if daylight savings time
+
+  INTEGER*2                            \
+            HR%                        ! Hour in integer format
+
+  INTEGER*4                            \
+            LOCAL.JUL.DATE,            \ local date in Julian
+            BEG.DAYLIGHT.SAVINGS%,     \ Begin daylight savings date in Julian
+            END.DAYLIGHT.SAVINGS%,     \ Ending daylight savings date in Julian
+            DATE%,                     \ Date in integer format
+            TIME%                      ! Time in integer format
+
+  ! This is only valid for dates west of Greenwich
+  IF (GMT.LOCAL.DIFF <= 0) THEN BEGIN            ! if no GMT diff time set up
+    EXIT SUB                                     ! get out
+  ENDIF                                          ! if no GMT diff time set up
+
+  IF (LEN(DATE.TIME$) <> 14) THEN BEGIN          ! if invalid date/time
+    EXIT SUB                                     ! get out
+  ENDIF                                          ! if invalid date/time
+
+  TS.ER.RETURN = -1                              ! return on an error
+
+  DATE% = VAL(LEFT$(DATE.TIME$,8))               ! get date in integer format
+
+  IF (TS.ER.RETURN = 0) THEN BEGIN               ! if an error validating date
+    EXIT SUB                                     ! get out, we're done
+  ENDIF                                          ! if an error validating date
+
+  TIME% = VAL(RIGHT$(DATE.TIME$,6))              ! get time in integer format
+
+  IF (TS.ER.RETURN = 0) THEN BEGIN               ! if an error validating time
+    EXIT SUB                                     ! get out, we're done
+  ENDIF                                          ! if an error validating time
+
+  TS.ER.RETURN = 0                               ! reset error flag
+
+  HOUR$ = MID$(DATE.TIME$,9,2)
+  MINUTE$ = MID$(DATE.TIME$,11,2)
+  SECOND$ = RIGHT$(DATE.TIME$,2)
+
+  ! get the local date in julian
+  LOCAL.JUL.DATE = JULIAN.DATE(LEFT$(DATE.TIME$,8))
+  HR% = VAL(HOUR$) - GMT.LOCAL.DIFF              ! get local hour by GMT diff
+
+  IF (HR% < 0) THEN BEGIN                        ! if gone in the previous day
+    HR% = 24 + HR%                               ! make  new time minus the diff
+    LOCAL.JUL.DATE = LOCAL.JUL.DATE - 1          ! move back a day
+  ENDIF                                          ! if gone in the previous day
+
+  IF DAYLIGHT.SAVINGS THEN BEGIN                 ! observing daylight savings
+
+    ! Prior to 2007,                             ! IO02996
+    ! Daylight savings begins on the first Sunday in April and ends on the last
+    ! Sunday in October.  Find the beginning and ending date for Daylight
+    ! savings based on the Year.
+!AIO02996 Daylight Savings time changes due to the "Energy Policy Act of 2005":
+    ! Beginning in 2007, Daylight savings begins on the second Sunday in March
+    ! and ends on the first Sunday in November.  Find the beginning and ending
+    ! date for Daylight savings based on the Year.
+
+    IF DATE% > 20070000 THEN BEGIN               ! 2007 or later
+      ! Set up first day in March that can be DST
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "0308"
+    ENDIF ELSE BEGIN                             ! else 2006 or before
+!EIO02996
+      ! Set up first day in April
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "0401"
+    ENDIF                                        ! IO02996
+    I% = DAY.OF.WEEK(BEG.DAYLIGHT.SAVINGS$)      ! Find first day of April
+    IF (I% > 0) THEN BEGIN                       ! if first day not on a Sunday
+!AIO02996 Daylight Savings time changes
+      IF DATE% > 20070000 THEN BEGIN             ! 2007 or later
+        K% = 15 - I%                             ! Find date of the previous Sunday
+      ENDIF ELSE BEGIN                           ! 2006 or before
+!EIO02996
+        K% = 8 - I%                              ! Find date of the previous Sunday
+      ENDIF                                      ! IO02996
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(BEG.DAYLIGHT.SAVINGS$,6)                   \
+                            + RIGHT$("00" + STR$(K%),2)
+    ENDIF                                        ! if first day not on a Sunday
+
+    BEG.DAYLIGHT.SAVINGS% = JULIAN.DATE(BEG.DAYLIGHT.SAVINGS$)
+
+!AIO02996 Daylight Savings time changes
+    IF DATE% > 20070000 THEN BEGIN               ! 2007 or later
+      ! Set up the last day in November that can be standard time cutover
+      END.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "1107"
+    ENDIF ELSE BEGIN
+!EIO02996
+      ! Set up the last day in October
+      END.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "1031"
+    ENDIF                                        ! IO02996
+    I% = DAY.OF.WEEK(END.DAYLIGHT.SAVINGS$)      ! last day that can be the day of change
+    IF (I% > 0) THEN BEGIN                       ! if last day not on a Sunday
+!AIO02996 Daylight Savings time changes
+      IF DATE% > 20070000 THEN BEGIN             ! 2007 or later
+        K% = 7 - I%                              ! Find date of previous Sunday
+      ENDIF ELSE BEGIN                           ! 2006 or before
+!EIO02996
+        K% = 31 - I%                             ! Find date of previous Sunday
+      ENDIF                                      ! IO02996
+      END.DAYLIGHT.SAVINGS$ = LEFT$(END.DAYLIGHT.SAVINGS$,6)                   \
+                            + RIGHT$("00" + STR$(K%),2)
+    ENDIF                                        ! if last day not on a Sunday
+
+    END.DAYLIGHT.SAVINGS% = JULIAN.DATE(END.DAYLIGHT.SAVINGS$)
+
+    IF (LOCAL.JUL.DATE >= BEG.DAYLIGHT.SAVINGS%) AND \
+       (LOCAL.JUL.DATE <= END.DAYLIGHT.SAVINGS%)     \
+    THEN BEGIN                                   ! if we're in daylight savings
+      IF (LOCAL.JUL.DATE = BEG.DAYLIGHT.SAVINGS%)    \
+      THEN BEGIN                                 ! if start of daylight savings
+        IF (HR% >= 2) THEN BEGIN                 ! if past 2:00 am
+          HR% = HR% + 1                          ! add in the extra hour
+        ENDIF                                    ! if past 2:00 am
+      ENDIF ELSE BEGIN                           ! else not beg daylight savings
+        IF (LOCAL.JUL.DATE = END.DAYLIGHT.SAVINGS%)  \
+        THEN BEGIN                               ! if end of daylight savings
+          IF (HR% < 2) THEN BEGIN                ! if before 2:00 am
+            HR% = HR% + 1                        ! add in the extra hour
+          ENDIF                                  ! if before 2:00 am
+        ENDIF ELSE BEGIN                         ! else end of daylight savings
+          HR% = HR% + 1                          ! add in hour
+        ENDIF                                    ! if end of daylight savings
+      ENDIF                                      ! if start of daylight savings
+    ENDIF                                        ! if we're in daylight savings
+
+    IF (HR% >= 24) THEN BEGIN                    ! if we've gone in the next day
+      HR% = HR% - 24                             ! make the new time
+      LOCAL.JUL.DATE = LOCAL.JUL.DATE + 1        ! move ahead a day
+    ENDIF                                        ! if we've gone in the next day
+
+    BEG.DAYLIGHT.SAVINGS$ = ""                   ! cleanup
+    END.DAYLIGHT.SAVINGS$ = ""
+
+  ENDIF                                          ! observing daylight savings
+
+  ! Build new date and time
+  DATE.TIME$ = GREGORIAN.DATE$(LOCAL.JUL.DATE)   \
+             + RIGHT$("00" + STR$(HR%),2)        \
+             + MINUTE$                           \
+             + SECOND$
+
+END SUB                                          ! end CONVERT.GMT.TO.LOCAL.TIME
+!******************************************************************************
+
+
+!******************************************************************************
+! Routine Name: CONVERT.LOCAL.TIME.TO.GMT
+! Description: Routine converts the passed local time to Greenwich Mean Time
+!              The date/time passed to the routine should be CCYYMMDDhhmmss.
+!
+!
+! The function subtracts the parameter set for time difference between local
+! time and GMT.  If the option is set to observe daylight savings time, an hour
+! is subtracted out after the time difference is added in.  For example, if the
+! time difference is set to 5 and the DATE.TIME$ is at 1:00, then the time is
+! converted to 6:00 (note all the logic to handle month crossing, year crossing
+! is handled by changing the date to julian and then back to gregorian).
+! If observing daylight savings, then an hour is subtracted out so the time is
+! changed to 5:00.
+! To hopefully make it more clear, note that for eastcoast time, the time
+! difference is 5 hours but changes to 4 if daylight savings.
+!******************************************************************************
+SUB CONVERT.LOCAL.TIME.TO.GMT(DATE.TIME$,GMT.LOCAL.DIFF,DAYLIGHT.SAVINGS)
+
+  STRING                               \
+         HOUR$,                        \
+         MINUTE$,                      \
+         SECOND$,                      \
+         BEG.DAYLIGHT.SAVINGS$,        \ date daylight savings begins
+         END.DAYLIGHT.SAVINGS$,        \ date daylight savings ends
+         DATE.TIME$                    ! Date/Time passed to routine
+
+  INTEGER*1                            \
+            GMT.LOCAL.DIFF,            \ time diff between local and GMT time
+            DAYLIGHT.SAVINGS           ! flag if daylight savings time
+
+  INTEGER*2                            \
+            HR%                        ! Hour in integer format
+
+  INTEGER*4                            \
+            GMT.JUL.DATE,              \ GMT date in Julian
+            BEG.DAYLIGHT.SAVINGS%,     \ Begin daylight savings date in Julian
+            END.DAYLIGHT.SAVINGS%,     \ Ending daylight savings date in Julian
+            DATE%,                     \ Date in integer format
+            TIME%                      ! Time in integer format
+
+  ! This is only valid for dates west of Greenwich
+  IF (GMT.LOCAL.DIFF <= 0) THEN BEGIN            ! if no GMT diff time set up
+    EXIT SUB                                     ! get out
+  ENDIF                                          ! if no GMT diff time set up
+
+  IF (LEN(DATE.TIME$) <> 14) THEN BEGIN          ! if invalid date/time
+    EXIT SUB                                     ! get out
+  ENDIF                                          ! if invalid date/time
+
+  TS.ER.RETURN = -1                              ! return on an error
+
+  DATE% = VAL(LEFT$(DATE.TIME$,8))               ! get date in integer format
+
+  IF (TS.ER.RETURN = 0) THEN BEGIN               ! if an error validating date
+    EXIT SUB                                     ! get out, we're done
+  ENDIF                                          ! if an error validating date
+
+  TIME% = VAL(RIGHT$(DATE.TIME$,6))              ! get time in integer format
+
+  IF (TS.ER.RETURN = 0) THEN BEGIN               ! if an error validating time
+    EXIT SUB                                     ! get out, we're done
+  ENDIF                                          ! if an error validating time
+
+  TS.ER.RETURN = 0                               ! reset error flag
+
+  HOUR$ = MID$(DATE.TIME$,9,2)
+  MINUTE$ = MID$(DATE.TIME$,11,2)
+  SECOND$ = RIGHT$(DATE.TIME$,2)
+
+  ! get the GMT date in julian
+  GMT.JUL.DATE = JULIAN.DATE(LEFT$(DATE.TIME$,8))
+  HR% = VAL(HOUR$) + GMT.LOCAL.DIFF              ! get GMT hour by adding diff
+
+  IF (HR% >= 24) THEN BEGIN                      ! if we've gone in the next day
+    HR% = HR% - 24                               ! make new time minus the diff
+    GMT.JUL.DATE = GMT.JUL.DATE + 1              ! move ahead a day
+  ENDIF                                          ! if we've gone in the next day
+
+  IF DAYLIGHT.SAVINGS THEN BEGIN                 ! observing daylight savings
+
+    ! Prior to 2007,                             ! IO02996
+    ! Daylight savings begins on the first Sunday in April and ends on the last
+    ! Sunday in October.  Find the beginning and ending date for Daylight
+    ! savings based on the Year.
+
+!AIO02996 Daylight Savings time changes due to the "Energy Policy Act of 2005":
+    ! Beginning in 2007, Daylight savings begins on the second Sunday in March
+    ! and ends on the first Sunday in November.  Find the beginning and ending
+    ! date for Daylight savings based on the Year.
+
+    IF DATE% > 20070000 THEN BEGIN               ! 2007 or later
+      ! Set up first day in March that can be DST
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "0308"
+    ENDIF ELSE BEGIN                             ! else 2006 or before
+!EIO02996
+      ! Set up first day in April
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "0401"
+    ENDIF                                        ! IO02996
+
+    I% = DAY.OF.WEEK(BEG.DAYLIGHT.SAVINGS$)      ! Find first day of April
+    IF (I% > 0) THEN BEGIN                       ! if first day not on a Sunday
+!AIO02996 Daylight Savings time changes
+      IF DATE% > 20070000 THEN BEGIN             ! 2007 or later
+        K% = 15 - I%                             ! Find date of the previous Sunday
+      ENDIF ELSE BEGIN                           ! 2006 or before
+!EIO02996
+        K% = 8 - I%                              ! Find date of the previous Sunday
+      ENDIF                                      ! IO02996
+      BEG.DAYLIGHT.SAVINGS$ = LEFT$(BEG.DAYLIGHT.SAVINGS$,6)                   \
+                            + RIGHT$("00" + STR$(K%),2)
+    ENDIF                                        ! if first day not on a Sunday
+
+    BEG.DAYLIGHT.SAVINGS% = JULIAN.DATE(BEG.DAYLIGHT.SAVINGS$)
+
+!AIO02996 Daylight Savings time changes
+    IF DATE% > 20070000 THEN BEGIN               ! 2007 or later
+      ! Set up the last day in November that can be standard time cutover
+      END.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "1107"
+    ENDIF ELSE BEGIN
+!EIO02996
+      ! Set up the last day in October
+      END.DAYLIGHT.SAVINGS$ = LEFT$(DATE.TIME$,4) + "1031"
+    ENDIF                                        ! IO02996
+    I% = DAY.OF.WEEK(END.DAYLIGHT.SAVINGS$)      ! Find last day of October
+    IF (I% > 0) THEN BEGIN                       ! if last day not on a Sunday
+!AIO02996 Daylight Savings time changes
+      IF DATE% > 20070000 THEN BEGIN             ! 2007 or later
+        K% = 7 - I%                              ! Find date of previous Sunday
+      ENDIF ELSE BEGIN                           ! 2006 or before
+!EIO02996
+        K% = 31 - I%                             ! Find date of the previous Sunday
+      ENDIF                                      ! IO02996
+      END.DAYLIGHT.SAVINGS$ = LEFT$(END.DAYLIGHT.SAVINGS$,6)                   \
+                            + RIGHT$("00" + STR$(K%),2)
+    ENDIF                                        ! if last day not on a Sunday
+
+    END.DAYLIGHT.SAVINGS% = JULIAN.DATE(END.DAYLIGHT.SAVINGS$)
+
+    IF (GMT.JUL.DATE >= BEG.DAYLIGHT.SAVINGS%) AND \
+       (GMT.JUL.DATE <= END.DAYLIGHT.SAVINGS%)     \
+    THEN BEGIN                                   ! if we're in daylight savings
+      IF (GMT.JUL.DATE = BEG.DAYLIGHT.SAVINGS%)    \
+      THEN BEGIN                                 ! if start of daylight savings
+        IF (HR% >= 2) THEN BEGIN                 ! if past 2:00 am
+          HR% = HR% - 1                          ! subtract the extra hour
+        ENDIF                                    ! if past 2:00 am
+      ENDIF ELSE BEGIN                           ! else not beg daylight savings
+        IF (GMT.JUL.DATE = END.DAYLIGHT.SAVINGS%)  \
+        THEN BEGIN                               ! if end of daylight savings
+          IF (HR% < 2) THEN BEGIN                ! if before 2:00 am
+            HR% = HR% - 1                        ! subtract the extra hour
+          ENDIF                                  ! if before 2:00 am
+        ENDIF ELSE BEGIN                         ! else not end daylight savings
+          HR% = HR% - 1                          ! subtract the extra hour
+        ENDIF                                    ! if end of daylight savings
+      ENDIF                                      ! if start of daylight savings
+    ENDIF                                        ! if we're in daylight savings
+
+    IF (HR% < 0) THEN BEGIN                      ! if in the previous day
+      HR% = 24 + HR%                             ! make time minus the diff
+      GMT.JUL.DATE = GMT.JUL.DATE - 1            ! move back a day
+    ENDIF                                        ! if in the previous day
+
+    BEG.DAYLIGHT.SAVINGS$ = ""                   ! cleanup
+    END.DAYLIGHT.SAVINGS$ = ""
+
+  ENDIF                                          ! observing daylight savings
+
+  ! Build new date and time
+  DATE.TIME$ = GREGORIAN.DATE$(GMT.JUL.DATE)     \
+             + RIGHT$("00" + STR$(HR%),2)        \
+             + MINUTE$                           \
+             + SECOND$
+
+END SUB                                          ! end CONVERT.LOCAL.TIME.TO.GMT
+!******************************************************************************
+
+!****************************** END DATEFUNC.J86 ******************************

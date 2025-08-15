@@ -1,0 +1,33 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMCSU01.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Electronic Marketing Solution.
+!
+ 
+!!***** CODE FOR COUPON LOGGING    *****
+!!*******************************************************************
+!!** INITIALIZE TRANSACTION WHICH CONTAINS COUPONS TO BE LOGGED    **
+!!*******************************************************************
+ 
+ IF (SL.HD.INDICAT1 AND 00000010H) AND  \ Logable coupons in
+     SL.HD.NUMSTRIN > 3 AND             \  Valid
+     SL.HD.TRANTYPE = 0 THEN BEGIN      !   Sales transaction
+   DIM EMSS.COUP.PTR(1)                 ! INITIAIZE COUPON POINTERS
+   EMSS.ITEM.PTR = 0                    ! INITIAIZE ITEM POINTER
+   IF SL.HD.NUMSTRIN > 500 THEN BEGIN   ! HUGE TRANSACTION
+     EMSS.ITEM.MAX = 2000               ! 50% BIGGER ITEM ARRAY
+     EMSS.COUP.MAX = 750                ! 50% BIGGER COUPON ARRAY
+   ENDIF ELSE BEGIN                     ! NORMAL TRANSACTION
+     EMSS.ITEM.MAX = 1300               ! BASE ITEM ARRAY < 32K
+     EMSS.COUP.MAX = 500                ! BASE COUPON ARRAY < 32K
+   ENDIF
+   DIM EMSS.ITEM.DATA(EMSS.ITEM.MAX,5)   ! INITIALIZE ITEM ARRAY
+   DIM EMSS.COUP.DATA(1,EMSS.COUP.MAX,7) ! INITIALIZE COUPON ARRAY
+ ENDIF ELSE BEGIN
+   SL.HD.INDICAT1 = SL.HD.INDICAT1 AND NOT 10H ! NO LOGGING
+ ENDIF
+ 

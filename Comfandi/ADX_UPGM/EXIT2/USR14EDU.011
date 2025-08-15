@@ -1,0 +1,22 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto de 1966                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR1408.011                                          **
+!   **    Inclu¡r en :  EAMTSU14.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   ***************************************************************************
+
+
+IF TS.IO.MOTORKEY = 80 	AND                           \!
+   (TS.IO.DEVICE  = 1   OR                            \!
+    TS.IO.DEVICE  = 3)  AND                           \!
+    LEN(TS.IO.DATA$(2)) > 28 THEN BEGIN                ! Es Key/ENTER
+    CALL U.IMPRIMIR(STR$(LEN(TS.IO.DATA$(2))),4100H)
+    CALL U.IMPRIMIR(TS.IO.DATA$(2),4100H)
+    ENDIF
+!----------------------------------------------------------------------------

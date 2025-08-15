@@ -1,0 +1,107 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSE14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Modulo de Lealtad en Linea usando*
+!		             ApplManager                      *
+!**************************************************
+!* Modificaciones:
+! Mod 27 Oct 2017
+! Se desarrolla control de captura de cliente para 
+! no ingreso con productos de precio techo a nits
+! desarrollado Grupo Retail - OVS
+!--------------------------------------------------
+
+If TS.IO.MOTORKEY = 89 Then Begin   																					    ! Tecla captura de cliente
+   IF Gr.Mrm.Cap% = -1 THEN BEGIN 
+      CALL VISOR.AND.BORRAR("NO SE PERMITE CAPTURA VECINO FIEL")
+      Dim TS.IO.KEYS(10)	      	             																    ! Limpio vectores
+      Dim TS.IO.DATA$(10)			     																						    ! de entrada     
+      TS.IO.MOTORKEY = 73																											    ! Simula tecla borrar
+      Exit Sub 																																    ! Sale de la rutina
+   ENDIF
+   GR.CLTE$ = ASIC.DATOS$("INGRESE DATO CLIENTE","O PRESIONE BORRAR")					    ! Captura dato de cliente
+   If GR.CLTE$ = "E" OR GR.CLTE$ = ""  Then Begin 						    								! Si cancela proceso
+      Call VISOR.AND.BORRAR("PROCESO CANCELADO    POR EL USUARIO Borr")
+      Dim TS.IO.KEYS(10)	      	             																    ! Limpio vectores
+      Dim TS.IO.DATA$(10)			     																						    ! de entrada     
+      TS.IO.MOTORKEY = 73																											    ! Simula tecla borrar
+      Exit Sub 																																    ! Sale de la rutina
+   EndIf 																																		     	!
+   IF Gr.Ptecho.InTrx% = -1 THEN BEGIN																						! SI ITEMS CON PRECIO TECHO
+      If Len(GR.CLTE$) = 9 Then Begin																		          ! Capturado un nit
+       If (Val(GR.CLTE$) >= 800000000) And 														           \! Si cliente es una empresa
+          (Val(GR.CLTE$) <= 999999999) Then Begin		  										        ! del programa lealtad
+         CALL Visor.And.Borrar("ITEMS CON PRECIO    TECHO EN TRX /Borrar")				!
+         Call Visor.And.Borrar("NO SE PERMITE VENTA A NITS       /Borrar")        ! Msg de alerta
+          Dim  TS.IO.KEYS(10)	    	             																  ! Limpio vectores
+          Dim TS.IO.DATA$(10)			     																					  ! de entrada     
+          TS.IO.MOTORKEY = 73																										  ! Simula tecla borrar
+   	      Exit Sub 																														    ! Sale del proceso
+       EndIf   																																    ! Fin valida cliente
+      EndIf
+
+      If (Val(GR.CLTE$) >= 8000000000) And 														     		   \! Si cliente es una empresa
+         (Val(GR.CLTE$) <= 9999999999) Then Begin														      ! del programa lealtad
+         CALL Visor.And.Borrar("ITEMS CON PRECIO    TECHO EN TRX /Borrar")				!
+         Call Visor.And.Borrar("NO SE PERMITE VENTA A NITS       /Borrar")        ! Msg de alerta
+         Dim  TS.IO.KEYS(10)	    	             																  ! Limpio vectores
+         Dim TS.IO.DATA$(10)			     																					  ! de entrada     
+         TS.IO.MOTORKEY = 73																										  ! Simula tecla borrar
+         Exit Sub 																															  ! Sale de la rutina
+      EndIf																																				!
+   ENDIF 																																					!
+   GR.LCL.PROCESA% = -1																												    ! Dato cliente capturado
+EndIf 																																				    !
+
+If USER.FBACT.READ = 0 Then 																								     \! Cliente no capturado
+ If (Len(TS.IO.DATA$(2)) = 13) AND                                               \! Es un EAN 13 con prefijo lealtad
+    (Left$(TS.IO.DATA$(2),2) = Left$(Gr.Lcl.Visita$,2)) Then Begin                ! Prefijo de cliente
+   GR.CLTE$ = Left$(TS.IO.DATA$(2),12)																				    ! Toma dato de cliente
+   GR.LCL.PROCESA% = -1																												    !
+ EndIf 																																				    !
+
+If GR.LCL.PROCESA% = -1 Then Begin    																				    ! Procesando captura de cliente
+   Gr.Lcl.ClteTmp$ = Str$(Val(GR.CLTE$))       																    ! Graba cliente capturado
+   Call Visores4690(1,"VALIDANDO CLIENTE",GR.CLTE$,0,"L")		    	    				    ! Validacion cliente en linea
+   Call Consulta.Cliente.Online          
+   IF TS.TEMP1I4    = -1 THEN BEGIN             															    ! Proceso Satisfactorio
+      Dim TS.IO.KEYS(10)	      	               															    ! Limpio vectores
+      Dim TS.IO.DATA$(10)			                 																	  ! de entrada     
+      TS.IO.KEYS(2)   =  80                     																	! Simula secuencia de 
+      TS.IO.DATA$(2) = Gr.Lcl.Visita$           																	! Tarjeta de cliente escaneada
+      TS.IO.MOTORKEY  = 80                      																	!
+      TS.IO.DEVICE    = 3                       																	!
+      TS.ERRDISP$ = "" : TS.ERRPTR = 1          																	! Purge errors
+      Dim TS.ERRLIST(10,8)                      																	! Purge errors
+      TS.GUIDANCE = 0  : TS11.OVRFLAG = 0       																	! Purge req for data
+      TS.ENTRY.POS = 0 : TS.ENTRY.KEY = 0       																	! Purge req for data
+      TS.ERRLIST(1,0) = -99                     																	! Purge override
+      TS.LINETYPE = 0                           																	! Reset line type   IR23848
+      USER.FBACT.READ = -1                      																	! Init variable de control
+      GR.LCL.PROCESA% = -2																												!
+      OP.NO.EXITS = 0 																														!
+      Gr.Lcl.Clte$ = GR.CLTE$                  																	  ! Graba cliente capturado
+      Gr.Lcl.Clte$ = Gr.Lcl.ClteTmp$
+      
+      !Gr.Lcl.Tipifica$ = "/VF"+Gr.Lcl.Tipifica$                                   !
+      
+      TS.TEMP5$ = "TIP:"+Gr.Lcl.Tipifica$																					!
+      TS.TEMP5$ = LEFT$(TS.TEMP1$+ STRING$(38," "),38)					                  !
+      CALL U.IMPRIME("CLTE:"+Gr.Lcl.Clte$,2100H)
+      CALL U.IMPRIME(TS.TEMP5$,2100H)
+      
+      CALL VISOR.AND.BORRAR("TIPIFICACION CLIENTE"+Gr.Lcl.Tipifica$)
+   ENDIF ELSE BEGIN 
+      Dim TS.IO.KEYS(10)	      	               																	! Limpio vectores
+      Dim TS.IO.DATA$(10)			                 																	  ! de entrada     
+      TS.IO.MOTORKEY = 73   
+      GR.LCL.PROCESA% = 0 
+
+!      If USER.FBACT.READ = 0 Then Begin																	          ! Si cliente no capturado anteriormente
+!         USER.FBACT.READ = 0                     																	! Init variable de control
+!      EndIf
+
+   ENDIF 
+EndIf 																																				    !

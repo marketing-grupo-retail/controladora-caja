@@ -1,0 +1,18 @@
+! CALLED AT TENDER VALIDATION
+! En la validacion de la forma de pago
+FUNCTION TSUPEC32(RISK) PUBLIC
+   INTEGER*1 RISK
+
+!call traceNUO( "UE32 1 RISK=[" + str$(RISK) + "]" )
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT32
+
+   !Pago Deuna
+   CALL PAGO.DEUNA(32)
+
+   !Pago Rappi
+   CALL PAGO.RAPPI(32)
+
+END FUNCTION
+

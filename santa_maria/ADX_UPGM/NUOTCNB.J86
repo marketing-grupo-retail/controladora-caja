@@ -1,0 +1,46 @@
+!-----------------------------------------------------------------------------
+! Modulo: NUOTCNB.BAS
+! Fecha : 29 de septiembre de 2020
+! Autor : Alejandro Farre P.
+! Modulo para cliente no bancario
+! cabeceras para incluir en otros modulos
+!------------------------------------------------------------------------------
+
+!------------------------------------------
+!Lectura de parametros del archivo PARGENER
+!------------------------------------------
+sub NUOTCNB07 external
+end sub
+
+!------------------------------------------------------------
+!CAPTURA TECLA(176) PARA FUNCIONALIDAD DE CLIENTE NO BANCARIO
+!CAPTURA 65 CONEX REIMPRESION DE COMPROBANTES CNB
+!CAPTURA 66 CONEX REVERSO DEPOSITO
+!------------------------------------------------------------
+sub NUOTCNB14 EXTERNAL
+end sub
+
+!-------------------------------------------------------------------
+! Detecta secuencia de tecla 65 Operador Reimpresion Comprobante CNB
+!-------------------------------------------------------------------
+function NUOTCNBsecuenciaReimprecionComprobante external
+   integer*1 NUOTCNBsecuenciaReimprecionComprobante
+end function
+
+!---------------------------------------------------------------
+! Detecta secuencia de tecla 66 Operador Anulacion Depositos CNB
+!---------------------------------------------------------------
+function NUOTCNBsecuenciaReversoDeposito external
+   integer*1 NUOTCNBsecuenciaReversoDeposito
+end function
+
+!------------------------------------------------------------
+! Detecta secuencia de tecla 176 acceso a las operaciones CNB
+! DEPOSITO
+! RETIRO
+! CONSULTA
+! AVANCE
+!------------------------------------------------------------
+function NUOTCNBsecuenciaTeclaCNB external
+   integer*1 NUOTCNBsecuenciaTeclaCNB
+end function

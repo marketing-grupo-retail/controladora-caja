@@ -1,0 +1,8 @@
+!-------------------------------------------------------
+! Despues de leer un registro de transaccion de no venta
+!-------------------------------------------------------
+!User exit called after read of summary log non-sales record
+FUNCTION CSUPEC02 PUBLIC
+
+
+END FUNCTION

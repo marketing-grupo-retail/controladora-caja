@@ -1,0 +1,8 @@
+! ------------------------------------------------------------------------------
+! Antes de grabar un registro al archivo de excepciones
+! ------------------------------------------------------------------------------
+!User exit called before writing exception log record
+FUNCTION CSUPEC11 PUBLIC
+
+
+END FUNCTION

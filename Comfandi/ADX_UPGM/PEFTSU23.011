@@ -1,0 +1,15 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : PEFTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+If Left$(TS.DISP1$,4) = "B008" Then Begin         													! En un proceso de autorizacion
+   Asc.Pef.InDevol% = -1
+Endif
+
+If Left$(TS.DISP1$,4) = "B060" Then Begin         													! En un proceso de autorizacion
+   Asc.Pef.InDevol% = -1
+Endif

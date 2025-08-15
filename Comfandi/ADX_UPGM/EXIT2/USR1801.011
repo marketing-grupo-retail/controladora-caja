@@ -1,0 +1,27 @@
+                                                                                
+!   ***************************************************************************
+!   **    Date       :  Novi. de 1998                                       **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR1801.011                                          **
+!   **    Inclu¡r en :  EAMTSU18.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  TECNICOS POS                                             **
+!   **                                                                       **
+!   **    Instrucciones para mostrar nombre operador en tira cliente         **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   **                                                                       **
+!   ***************************************************************************
+ LLAV1$ = TS.OPER$                                   ! Toma Cod. Operador      
+ IF LLAV1$ <> "" THEN                               \! Si Hay Llave            
+    READ FORM "C32 C20 C20";#44 KEY LLAV1$;         \! Lee EAMOPERA            
+               CE.NADA1$,NOMOPER$,CE.NADA2$          !                         
+ IF NOMOPER$  = "" THEN BEGIN                        ! Si no leyo nombre       
+    TS.DISP1$ = "CODIGO ARTICULO:"                   ! Modifica Linea 1        
+    TS2.DISP1$ = TS.DISP1$                           ! Modifica Linea 1 D2     
+ ENDIF                                                                         
+ OPE$  = STR$(VAL(UNPACK$(LLAV1$)))                  ! Guarda Cod Ope          
+ CAJA$ = TS.TERMINAL$                                ! Guarda No.Terminal      
+                                                                                

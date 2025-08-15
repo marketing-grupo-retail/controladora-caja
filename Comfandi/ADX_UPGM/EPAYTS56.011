@@ -1,0 +1,26 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYTS56.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 25 de 2.005                *
+!Observaciones : Pago Electronico                 *
+!**************************************************
+
+Asc.Pay.Impr%    = 0											! Init de variable control de franqueo
+Asc.Pay.InCambio% = 0                     ! Control intercambio medios de cambio
+Asc.Pay.NotaNul$ = ""                     ! Init de variable control de anulaciones
+Asc.Pay.NtCap%   = 0                      ! Control de notas capturadas
+Asc.Pay.Cambio%  = 0                      ! Intercambio medios de pago
+Asc.Pay.InDevol% = 0                      ! Control de autorizaciones por devolucion y pago
+Asc.Pay.NumNota$ = ""                     ! Temporal
+Asc.Pay.VlrDev$  = ""                     ! 
+Asc.Pay.NroBon%  = 0                      ! Nro bonos capturados
+DIM Asc.Pay.Vtabono$(60,5)                ! Init vector control bonos
+Asc.Pay.Recup% = 0                        ! Control recuperaciones
+Asc.Pay.Cambio% = 0                       ! Intercambios
+Asc.Pay.OptTrx$ = "00"
+Asc.Pay.Pago% = 0 
+!TO.CDLIMIT2 = Gr.Pay.CDLIMIT2%           ! VALOR LIMITE CASH DRAWER 
+
+Asc.Pay.VlrBono$ = "0"                    ! Init Valor del pago del Bono 22 Oct 2012 GR-OVS

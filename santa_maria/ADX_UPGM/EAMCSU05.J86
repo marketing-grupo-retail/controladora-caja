@@ -1,0 +1,9 @@
+!---------------------------------------------------------------------
+! Antes de escribir un registro al archivo de rendimiento de operador
+!---------------------------------------------------------------------
+!User exit called before writing operator performance record
+SUB CSUPEC05( PERFREC$ ) PUBLIC
+   STRING PERFREC$
+
+
+END SUB

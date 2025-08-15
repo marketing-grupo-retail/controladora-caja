@@ -1,0 +1,5 @@
+ EAMRPM1L = EAMRPM1C,
+            EAMMMCFC [S],
+            EAMRPCFC [S],
+           ADXACRCL.L86 [s],
+           ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

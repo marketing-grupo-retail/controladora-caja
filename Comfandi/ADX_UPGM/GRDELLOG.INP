@@ -1,0 +1,6 @@
+GRDELLOG.286= GRDELLOG.OBJ ,
+              ADX_UPGM:BASROUT.OBJ,
+              ADX_UPGM:ADXACRCL.L86,
+              ADX_UPGM:EAMCSASC.OBJ,
+              ADX_UPGM:ADXADMBL.L86
+

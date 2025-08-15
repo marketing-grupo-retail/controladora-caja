@@ -1,0 +1,116 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : Cnvmtsva.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 Ibm                   * 
+!Observaciones : Modulo De Eps / Convenios        *
+!**************************************************
+
+Integer*1 Global  Ue.Eps.Epss%		 ! Convenios / Eps
+
+Integer*1 Global	          \
+	Ue.Open.Convenio%,	      \	Maestra De Planes
+	Ue.Open.Benefic%,	        \	Maestra De Beneficiarios
+	Ue.Open.Medico%,	        \	Maestra De Medicos
+	Ue.Open.Ligconve%,	      \	Maestra De Convenios
+	Ue.Open.Diagnos%,	        \	Maestra De Diagnosticos
+	Ue.Open.Ips%,		          \	Maestra De Ips
+	Ue.Open.Plu%,		          \	
+	Ue.Epss.Coop%,	          \
+	Ue.Eps.Foto%,	            \
+	Ue.Eps.Devo%,	            \
+	Ue.Epss.Head,		          \
+	Ue.Epss.On,	              \
+	Ue.Epss.Ok
+
+Integer*2 Global	          \
+	Ue.Epss.Ask%,	            \
+	Ue.Eps.Line%,	            \
+	Ue.Eps.Pospago%,          \
+	Ue.Eps.Motora%
+
+Integer*4 Global	          \
+	Ue.Epss.Aux%,	            \
+	Ue.Eps.Precio%,	          \
+	Ue.Epss.Leido%
+
+String Global		            \
+	Ue.Eps.Vlrcopago$,	      \
+	Ue.Eps.Nconve$,	          \
+	Ue.Epss.Mnomb$,	          \
+	Ue.Epss.Inomb$,	          \
+  Ue.Epss.Dnomb$,           \
+	Ue.Eps.Parr(1),	          \
+	Ue.Epss.Desc(1),          \
+	Ue.Epss.Dat(1),	          \
+	Ue.Epss.Leido$,	          \
+	Ue.Epss.Dsctotrx$,	      \
+	Ue.Eps.Dsctotrx$,	        \
+	Ue.Eps.Error$,	          \
+	Ue.Eps.Tipo$,	            \
+	Ue.Eps.Vari$,	            \
+  Ue.Eps.TipoC$,            \ ! Add para control de capitaciones
+	Ue.Eps.VariC$,            \ ! Add para control de capitaciones
+	Ue.Eps.Dato$,	            \
+  Ue.Eps.Codalt$,           \
+  Ue.Eps.Valfac$,           \
+  Ue.Eps.Valben$,           \
+  Ue.Eps.Cod5$,             \
+	Ue.Eps.Cant$
+
+String Global		            \
+	Ue.Eps.Actfecha$,	        \
+	Ue.Epss.Medico$,	        \
+	Ue.Epss.Formula$,	        \
+	Ue.Epss.Ips$,	            \
+  Ue.Epss.Diag$,            \
+  Ue.Epss.Nodiag$,          \
+	Ue.Eps.Icod$,	            \
+	Ue.Eps.Mcod$
+
+String Global		            \
+	Ue.Eps.Ciprecio$,         \
+	Ue.Eps.Cifechi$,          \
+	Ue.Eps.Cifechf$,		      \
+	Ue.Eps.Nrmlocatal$,       \
+	Ue.Eps.Copagoless$,				\
+	Ue.Eps.Dsctless$(1)
+
+String Global		\
+	Ue.Eps.Bcod$,Ue.Eps.Btipo$,Ue.Eps.Bconvenio$,Ue.Eps.Bnomb$,	\
+	Ue.Eps.Bfechn$,Ue.Eps.Bcotiz$,Ue.Eps.Bparen$,Ue.Eps.Bestrato$,	\
+	Ue.Eps.Bfechi$,Ue.Eps.Bfechf$,Ue.Eps.Bplan$,Ue.Eps.Bempresa$,	\
+	Ue.Eps.Bestado$,Ue.Eps.Bprest$,Ue.Eps.Bcodprest$
+
+String Global		\
+	Ue.Eps.Ccod$,Ue.Eps.Cnomb$,Ue.Eps.Cfechi$,Ue.Eps.Cfechf$,	\
+	Ue.Eps.Ctot$,Ue.Eps.Cmax$,Ue.Eps.Cvmed$,Ue.Eps.Cvmerca$,	\
+	Ue.Eps.Cvips$,Ue.Eps.Ccalculo$,Ue.Eps.Cmp$(1),Ue.Eps.Cnit$,	\
+	Ue.Eps.Cvdiagnos$, Ue.Eps.Factura$
+
+String    Global Var1$,Var2$,Var3$,Var4$, \ !
+                 Ue.Old.Benef$,           \ ! Ultimo Beneficiario Capturado
+                 Ue.Old.Medico$,          \ ! Ultimo Medico Capturado
+                 Ue.Old.Formula$,         \ ! Ultima Formula Recibida
+                 Ue.Old.Plan$,            \ ! Ultimo Plan Capturado
+                 UE.EPS.CAPITACION$,      \ ! Si plan maneja capitaciOn
+                 Ue.Old.Ips$                ! Ultima Ips Capturada
+
+Integer*1 Global Ue.Eps.Grabastring%,     \ ! Grabacion String Dato Eps
+                 Ue.Cnv.AplicaCopago%       ! Si aplica Copago para control fiscal
+
+String Global Prtline
+Integer Global Sl.End, Arc%, Ue.Eps.Grb%, Ue.Eps.Copia%, Ue.Eps.Dato%, \
+               Ue.Error%, Ue.Llave.Puesta%, Uedlg.Leido%, Uedlg.Ok%,   \
+               Uepg.Borra%, Ue.Sl.Aux, Ue.Eps.Apertura%, Ue.Eps.Copagoaplicado%, \
+               Ue.Eps.Indpago%, Ue.Ctrl.Devo.Eps%
+Integer*2 Global Prt4610.Enable   ! Tipo De Impresora
+
+String Global Iopdata$,Bq$,Cq$,Dq$,Eq$,Fq$,	\	         		! De Io.Proc
+              Gq$,Hq$,Iq$,Jq$,Kq$
+              
+Integer   Global Asc.Cnv.Slend%                             ! Contador de Strings
+String    Global Asc.Cnv.Name$                              ! Nombre producto 
+String    Global Asc.Cnv.Line1$, Asc.Cnv.Line2$, Asc.Cnv.Tmp$
+Integer*4 Global Asc.Tmp.Apun%
+String    Global Ue.Cnv.Miscelaneo$

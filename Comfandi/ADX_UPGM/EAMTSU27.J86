@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC27 PUBLIC                                                        
+! TSUPEC27 - IO ERROR PROCESSING                                                
+
+%INCLUDE EAMTSE27.J86         ! EMS PRPQ
+CALL COMFTS27.011	      ! COMFANDI - CISA
+!CALL MKTPTS27.011                  ! MODULO PROMOCIONES
+
+END FUNCTION                                                                    
+                                                                                

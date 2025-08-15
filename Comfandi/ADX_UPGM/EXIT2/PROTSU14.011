@@ -1,0 +1,14 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : PROTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Captura de datos                 *
+!**************************************************
+
+IF UE.PROYECTO(UE.COMF.PROMO%) THEN BEGIN										! Proyecto activo
+  IF TS.IO.MOTORKEY = 81 AND (TS.IO.KEYS(1) = 70) THEN BEGIN                    ! Anular Transaccion
+     UE.COMF.INDIMP% = 0														! Evita impresion bono
+  ENDIF
+ENDIF

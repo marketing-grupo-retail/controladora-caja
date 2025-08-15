@@ -1,0 +1,7 @@
+     EAMDM11L     = EAMDM11C,
+                    EAMDMERC,
+                    EAMMMCFC[S],
+                    EAMMM18C,
+                    EAMPSDMK.L86 [S],
+                    ADXACRCL.L86 [s],
+                    ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

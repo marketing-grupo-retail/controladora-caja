@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : EDUTSU08.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+! Modificaciones:
+
+Asc.Edu.IndPrice% = 0
+If IR.ITEMCODE$ = Asc.Edu.PluPack$ Then Begin     ! Miscelaneo Colegios
+   Asc.Edu.IndPrice% = -1
+Endif

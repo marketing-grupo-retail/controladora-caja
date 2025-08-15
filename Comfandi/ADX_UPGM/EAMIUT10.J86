@@ -1,0 +1,25 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Function       : IRUEEC10                                                 *!
+!*                                                                           *!
+!* Description    : On error processing user exit.  Called from routines     *!
+!*                  in the item record file functions which have local       *!
+!*                  on error processing.                                     *!
+!*                                                                           *!
+!* Parameters     : None                                                     *!
+!*                                                                           *!
+!* Returns        : Action code                                              *!
+!*                   0 = default - allow the error handler to process        *!
+!*                   1 = RESUME                                              *!
+!*                   2 = RESUME RERTY                                        *!
+!*                   other = RESUME LABEL to exit the function               *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+FUNCTION IRUEEC10 PUBLIC
+  INTEGER*2 IRUEEC10
+END FUNCTION
+

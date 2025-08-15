@@ -1,0 +1,137 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1402.011
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Enero. 25 de 1996
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertan en la USER EXIT 14  para controlar los
+! datos  digitados  por  el  cajero  en el momento de Liquidar la
+! RETENCION en la FUENTE. Se manejan los siguientes Controles :
+!
+!    1 -  S¢lo se permite liquidarla UNA SOLA VEZ
+!
+!    2 -  Se Liquida SOLO si al ejecutar la secuencia
+!         RET/FTE ENTER, el Saldo a Pagar es MAYOR o IGUAL al
+!         Tope establecido en ADXALMA.DAT
+!
+!    3 -  El PORCENTAJE tambi‚n es modificable en ADXALMA.DAT
+!        
+!    4 -  Si por alguna raz¢n se produce ANULACION o DEVOLUCION 
+!         de art¡culos, SE DEBE REINTEGRAR el valor de RET/FTE
+!         liquidado con anticipaci¢n.
+!
+!    5 -  Las ventas sucesivas que cambien el SALDO a PAGAR, s¢lo
+!         permiten una nueva Liq. SIEMPRE y cuando se REEMBOLSE
+!         el Valor Liquidado anteriormente.
+!
+!    6 -  El sistema avisa el estado de la liquidaci¢n, lo efect£a
+!         y lo reversa AUTOMATICAMENTE.
+! 
+!    7 -  Al final se produce el resumen del Valor Liquidado, para
+!         claridad de la Operaci¢n.
+!
+!------------------------------------------------------------------
+
+AVISO$ = "SOLO PAGOS DESPUES   DE LIQ RET/FTE..!"   ! No puede Vender MAS
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN y 
+   TS.IO.KEYS(8)  = 67   AND                       \! y es Tecla REFUND
+   TS.IO.KEYS(2)  = 80   AND                       \! con ENTER(Sec RetFte)
+   TS.IO.DATA$(8) = ""   AND                       \! Sin dato en REFUND
+   TS.IO.DATA$(2) = ""   THEN BEGIN                 ! y sin dato en ENTER
+      IF VRLIQ%    <> 0  AND                       \! Ya Hubo Liquidac y
+         TS.BALDUE(0) = SALDLIQ% THEN BEGIN         ! No cambia Saldo
+            VRLIQ% = 0  :  YALIQ% = 0               ! Se detecta BORRAR
+      ENDIF                                         ! Fin de Intento Liq
+ENDIF                                               !
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN y 
+   TS.IO.KEYS(1)  = 70   AND                       \! y es Tecla REINTEGRO
+   TS.IO.KEYS(2)  = 80   AND                       \! con ENTER(Sec RetFte)
+   TS.IO.DATA$(2) = ""   THEN BEGIN                 ! y sin dato en ENTER
+      IF VRLIQ%   =  0   THEN BEGIN                 ! Si NO hay Liquidac
+         WRITE FORM "C40";#30;                     \! Avisa Error
+               "NO PUEDE REINTEGRAR "     +        \! de No tiene Derecho
+               " SIN LIQUIDACION..! "               ! Sin Liquidac
+            TS.IO.MOTORKEY = 0                      ! Minimiza Ejec
+      ENDIF                                         ! Fin de Intento Reintegro
+ENDIF                                               !
+
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN y 
+   TS.IO.KEYS(8)  = 67   AND                       \! y es Tecla REFUND
+   TS.IO.KEYS(2)  = 80   AND                       \! con ENTER(Sec RetFte)
+   TS.IO.DATA$(8) = ""   AND                       \! Sin dato en REFUND
+   TS.IO.DATA$(2) = ""   THEN BEGIN                 ! y sin dato en ENTER
+      IF VRLIQ%    <> 0  AND                       \! Ya Hubo Liquidac y
+         TS.IO.KEYS(1) = 70 THEN BEGIN              ! se va a REVERSAR.?
+            IF TS.PR.BALDUE = TS.TOTALS(0,0,0)     \! Saldo Impr = Total?
+               THEN BEGIN                           ! Si ya se tomo TOTAL
+               TS.IO.KEYS(5)  = 74                  ! Asigna Tecla PRECIO
+               TS.IO.DATA$(5) = STR$(VRLIQ%)        ! Asigna Vr Liq RetFte
+               TS.IO.DATA$(2) = "999915"            ! Asigna PLU de Refund
+               YALIQ%  = 0                          ! Restaura Flag Liq RetFte
+               VRLIQ%  = 0                          ! Restaura Vr Liq RetFte
+            ENDIF ELSE BEGIN                        ! Fin REVERS Liq RetFte
+               TS.GUIDANCE = 1020                   ! Total NO Tomado
+               TS.IO.MOTORKEY = 0                   ! Minimiza Ejec
+            ENDIF                                   ! Fin de No TOTAL
+      ENDIF ELSE BEGIN                              ! Fin de NO Revers
+         IF ABS(TS.BALDUE(0)) >= RETVAL% THEN BEGIN ! Si hay Saldo Liquidable
+            IF YALIQ% = 1  THEN BEGIN               ! y YA se Liquido
+               WRITE FORM "C32 PIC(###,###)";#30;  \! Avisa Error
+               "YA SE LIQUIDO RETFTEPOR VR DE: $", \! y Vr Liquidac RetFte
+                                        VRLIQ%      ! Muestra Base Liquid
+               TS.IO.MOTORKEY = 0                   ! Minimiza Proceso
+            ENDIF ELSE BEGIN                        ! Fin ERROR Liq Doble
+            IF TS.PR.BALDUE = TS.TOTALS(0,0,0)     \! Saldo Impr = Total?
+               THEN BEGIN                           ! Si ya se tomo TOTAL
+                  YALIQ%  = 1                       ! Flag de Liq RetFte
+                  TS.IO.KEYS(5)  = 74               ! Asigna Tecla PRECIO
+                  VRLIQ% = MEX.VAT.TOTAL(0)   +    \! Total Ivas MAS
+                           TS.TOTALS(0,0,0)   -    \! 
+                           TS.TOTALS(1,0,0)   -    \! 
+                           TS.TOTALS(2,0,0)   -    \! 
+                           TS.TOTALS(3,0,0)   -    \! 
+                           TS.TOTALS(4,0,0)   -    \! 
+                           TS.DISC.SAVE(0,0)        !
+                  SALDLIQ% = VRLIQ%                 ! Guarda Vr Saldo Liq
+                  WRITE FORM "C29 PIC(###,###-)";  \!
+                  #34;" *** BASE RETEFUENTE --->", \!
+                                 VRLIQ%             !
+                  VRLIQ% = VRLIQ% * RETPOR          ! Calcula % de BALDUE  
+                  TS.IO.DATA$(5) = STR$(VRLIQ%)     ! Asigna Vr Liq RetFte
+                  TS.IO.DATA$(2) = "999915"         ! Asigna PLU de Refund
+               ENDIF ELSE BEGIN                     ! Fin Cond Liqu OK.
+                  TS.GUIDANCE = 1020                ! TOTAL no  tomado
+                  TS.IO.MOTORKEY = 0                ! Minimiza Ejec
+               ENDIF                                ! Fi de No Total
+            ENDIF                                   ! Fin No Habia Liq
+         ENDIF ELSE BEGIN                           ! Fin NO hay Lugar a Liq
+           WRITE FORM "C11 PIC(#,###,###) C19";    \! Avisa Error
+                  #30;"BASE LIQ: $",RETVAL%,       \! de No tiene Derecho
+                   "   NO AUTORIZADO..!"            ! Muestra Base Liquid
+            TS.IO.MOTORKEY = 0                      ! Minimiza Ejec
+         ENDIF                                      ! Fin de No Autorizado
+     ENDIF                                          ! Fin de Autorizado
+ENDIF ELSE BEGIN                                    ! Fin Secuencia RetFte
+  IF YALIQ% = 1 THEN BEGIN                          ! Si ya Hubo Liq RetFte
+     IF TS.IO.MOTORKEY = 73   OR                   \! Si es Tecla BORRAR
+        TS.IO.MOTORKEY = 81   OR                   \! o es Tecla TOTAL 
+       (TS.IO.MOTORKEY = 80   AND                  \! o es Tecla ENTER
+        TS.IO.KEYS(10) = 63)  OR                   \! con ENTRADA DATOS
+       (TS.IO.MOTORKEY = 80   AND                  \! o es Tecla ENTER
+       (TS.IO.KEYS(10) = 80   OR                   \! con ENTER o
+        TS.IO.KEYS(10) = 79)) THEN BEGIN            ! con AUTORIZACION
+           YALIQ% = 1                               ! Flag de Liquidac
+     ENDIF ELSE BEGIN                               ! Fin de Teclas Aceptadas
+        !IF TS.IO.KEYS(7) < 91 THEN BEGIN            ! Si NO es Tipo Pago
+         !  WRITE FORM "C40";#30;AVISO$              ! Avisa Error
+          ! TS.IO.MOTORKEY = 0                       ! Minimiza Ejec
+         !ENDIF                                      ! Fin de Error Pagos
+     ENDIF                                          ! Fin de Verif Tecla
+  ENDIF                                             ! Fin de Liquidac
+ENDIF                                               ! Fin de Ret Fte
+!---------------------------------------------------------------------------

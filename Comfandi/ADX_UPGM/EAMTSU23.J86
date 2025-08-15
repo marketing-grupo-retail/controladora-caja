@@ -1,0 +1,33 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION TSUPEC23 PUBLIC
+!CALL SUBSTR(TS.DISP1$,8,"*EC*",0,4)
+!CALL SUBSTR(TS.DISP2$,8,"*23*",0,4)
+INTEGER*1 TSUPEC23                  ! define variable !IR89474
+
+!CALL EPAYMS23.011                   ! PAGO ELECTRONICO
+
+!-- Para el ambiente grafico 
+!IF LEFT$(TS.DISP1$,2) = "B0" THEN BEGIN 
+!   TO.MGRKEY = 0													! SIMULA LLAVE PUESTA
+!ENDIF 
+
+CALL PEFMTS23.011                   ! PAGO ELECTRONICO - FONEDE
+%INCLUDE EAMTSE23.J86               ! EMS PRPQ
+CALL LIBLINE(23,1)                  ! Modifica Linea IVA
+CALL LIBLINE(23,2)                  ! MEDICOS
+CALL LIBLINE(23,3)                  ! Muestra signo $,PLU,Descriptor, y/o Peso Grs
+CALL LIBLINE(23,4)                  ! Muestra Pago Efectivi Obligatorio
+CALL LIBLINE(23,5)                  ! VERIFICAR PRECIOS fruver ambos visores
+CALL EPSMTS23.011                   ! Modulo Convenios
+
+CALL IVATSU23.011                   ! IMPRESION DE IVAS
+CALL RECASRV(23,0)	   	            ! PAGO SERVICIOS PUBLICOS
+CALL PROMOCIONV2(23)                ! MOTOR PROMOCIONES V2
+CALL NOTASCREDITOPOS(23)            ! NOTAS CREDITO
+
+%INCLUDE UEECR123.U86               ! MODULO TEF REDEBAN
+
+END FUNCTION
+

@@ -1,0 +1,39 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : ENCSTSU07.011                    *
+!Autor         : Daniel Torres Fonseca            *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre 12 de 2.005           *
+!Observaciones : Carga Parametros de Encuestas    *
+!**************************************************
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 38																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Control Encuestas",1500,"L")			! Msg Alerta
+ Call Visores4690(1,"Modulo Encuestas   ","No Operativo",1500,"L")				! Msg Alerta
+ Asc.Proy.Encuesta% = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ IF END #38 THEN ENCUESTA.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #38; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[CONTROL DE ENCUESTAS]" Then Begin						   			!   Proyecto de Encuestas
+    Read #38; TS.TEMP1$																										! Lectura registro
+     Asc.Proy.Encuesta%   = Val(Mid$(TS.TEMP1$,30,2))				    					!   Proyecto activo
+    Read #38; TS.TEMP1$																										! Lectura registro
+     Asc.Base.Randon%     = Val(Mid$(TS.TEMP1$,30,2))				    					!   Base para el randon
+     Read #38; TS.TEMP1$																									! Lectura registro
+     Asc.Proy.Franqueo%   = Val(Mid$(TS.TEMP1$,30,2))				    					!   Franqueo activo
+    Read #38; TS.TEMP1$     																						  ! Lectura registro
+     Asc.Msg.Linea1$      =    (Mid$(TS.TEMP1$,30,2))            				  !   Mensaje1 de Encuesta
+    Read #38; TS.TEMP1$     																						  ! Lectura registro
+     Asc.Msg.Linea2$      =    (Mid$(TS.TEMP1$,30,2))            		    	!   Mensaje2 de Encuesta
+    Read #38; TS.TEMP1$     																						  ! Lectura registro
+     Asc.Msg.Linea3$      =    (Mid$(TS.TEMP1$,30,2))            		    	!   Mensaje3 de Encuesta
+     GoTo ENCUESTA.FINAL																									! Sale del ciclo de carga
+   Endif
+ Wend
+ ENCUESTA.FINAL:
+   Close 38																																! Cierra archivo
+Endif

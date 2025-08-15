@@ -1,0 +1,8 @@
+! After a "read" from the sequential file at retrieval time
+! Después de una "lectura" del archivo secuencial
+! en el momento de la recuperación de una transaccion suspendida
+FUNCTION TSUPEC57 PUBLIC
+
+!call traceNUO( "UE57 TS.RETV.IN.PROGRESS=" + str$(TS.RETV.IN.PROGRESS) + " TS.RECOVERY=" + str$(TS.RECOVERY) )
+
+END FUNCTION

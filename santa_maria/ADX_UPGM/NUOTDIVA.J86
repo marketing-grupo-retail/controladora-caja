@@ -1,0 +1,63 @@
+!-----------------------------------------------------------------------------
+! Modulo: NUOTDIVA.BAS
+! Fecha : 22 de junio de 2022
+! Autor : Alejandro Farre P.
+! Modulo para la devolucion de IVA a tercera edad y discapacitados 
+! cabeceras para incluir en otros modulos
+!------------------------------------------------------------------------------
+
+!-------------------------------------------------
+!Retorna el monto de IVA a devolver
+!-------------------------------------------------
+function NUOTDIVA.monto external
+   integer*4 NUOTDIVA.monto
+end function
+
+!-------------------------------------------------
+!Consulta si es beneficiario de devolucion de IVA
+!al ingresar Cedula/RUC
+!-------------------------------------------------
+sub NUOTDIVA.consulta(s$) external
+   string s$
+end sub
+
+!-------------------------------------------------
+!Genera linea con monto a devolver
+!Al imprimir el comprobante
+!-------------------------------------------------
+function NUOTDIVA.devolver external
+   string NUOTDIVA.devolver
+end function
+
+!------------------------------------------------------------------------
+!Elimina la condicion de beneficiario
+!------------------------------------------------------------------------
+sub NUOTDIVAanulaBeneficiario external
+end sub
+
+!------------------------------------------------------
+! Rutina debe llamarse en user 02
+!------------------------------------------------------
+sub NUOTDIVA02 external   
+end sub
+
+!------------------------------------------------------
+! Rutina debe llamarse en user 07
+!------------------------------------------------------
+sub NUOTDIVA07 external
+end sub
+!------------------------------------------------------
+! Rutina debe llamarse en user 14
+!------------------------------------------------------
+sub NUOTDIVA14 external  
+end sub
+!------------------------------------------------------
+! Rutina debe llamarse en user 20
+!------------------------------------------------------
+sub NUOTDIVA20 external
+end sub
+!------------------------------------------------------
+! En el calculo del saldo a pagar
+!------------------------------------------------------
+sub NUOTDIVA30 external
+end sub

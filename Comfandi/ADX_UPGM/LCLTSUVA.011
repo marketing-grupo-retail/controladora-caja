@@ -1,0 +1,64 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : LCLTSUVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion de variables          *
+!**************************************************
+!* Modificaciones:
+!
+!
+
+Integer*1 Global  Asc.Proy.Leal%,  \! Proyecto Lealtad Activado
+                  Gr.Lcl.PROCESA%, \! Procesa registro de cliente
+                  Gr.Lcl.Acumula%, \! Proceso de acumulacion de puntos 
+                  Gr.Lcl.OpenTmp%, \! Archivo temporal 
+                  Gr.Lcl.Online%,  \! Si Consulta en Linea -1 fuera de linea 0
+                  Gr.Lcl.Ctrl%      ! Variale de control
+
+String    Global  Gr.Lcl.Name$,   \! Nombre del tarjeta habiente
+                  Gr.Lcl.Points$, \! Puntaje del cliente
+                  Gr.Lcl.Pntrx$,  \! Puntaje obtenido en la transaccion
+                  Gr.Lcl.Rdtrx$,  \! Puntaje redimido en la transaccion
+                  Gr.Lcl.Cadena$, \! Codigo de la cadena
+                  Gr.Lcl.Appl$,   \! Codigo de la aplicacion
+                  Gr.Lcl.Clte$,   \! Codigo del cliente
+                  Gr.Lcl.Visita$, \! Cliente visitante
+                  Gr.Lcl.Msg$(1), \! Mensajes modulo
+                  Gr.Lcl.Tmp1$,   \! Temporal de trabajo
+                  Gr.Lcl.Tmp2$     ! Temporal de trabajo
+
+String  Global    Gr.Lcl.Autor$,  \! Asigna codigo de autorizacion
+                  Gr.Lcl.TpClte$, \! Tipo de cliente
+                  Gr.Lcl.TipClte$,\! Lista Tipificacion de clientes
+                  Gr.Lcl.ClteTmp$,\! Temporal captura y validacion cliente
+   		            Gr.Lcl.Idpos$    ! Asigna Identificacion del POS
+
+Integer*4 GLOBAL  Gr.Lcl.PTO1%,   \! 
+                  Gr.Lcl.PTO2%,   \!
+                  Gr.Lcl.PTO3%,   \!
+                  Gr.Lcl.PTO4%,   \!
+                  Gr.Lcl.Ptot%,   \!
+                  Asc.Tmp.Apun%    !
+
+String    Global  Gr.Lcl.Tipifica$
+
+!-- Variables adicionadas 19Oct2021
+
+String    Global  Gr.Lcl.Surnames$,  \! Apellidos del cliente
+                  Gr.Lcl.Address$,   \! Direccion del cliente
+                  Gr.Lcl.Phone$,     \! Telefono del cliente
+                  Gr.Lcl.IdClte$,    \! Tipo identificacion cliente
+                  Gr.Lcl.eMail$,     \! Correo Electronico
+                  Gr.Lcl.City$,      \! Ciudad
+                  Gr.Lcl.UID$         ! UID generado por LEAL
+
+!--- Variables integracion premios Leal
+
+Integer*1 Global  Gr.Lcl.PrmLeal%,   \! Control premios
+                  Gr.Lcl.CtlPago%,   \!
+                  Gr.Lcl.AnlPago%     !
+Integer*2 Global  Gr.Lcl.Motor%       ! Tecla motora redencion
+Integer*4 Global  Gr.Lcl.VlrBnf%      ! Valor beneficio puntos
+String    Global  Gr.Lcl.Premio$,    \! Codigo del premio                  
+                  Gr.Lcl.TVP$         ! Tipo variedad pago redenciones

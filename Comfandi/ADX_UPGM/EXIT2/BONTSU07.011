@@ -1,0 +1,34 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : BONTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Jilio 8 de 2.003                 *
+!Observaciones : Apertura proyecto de bonos       *
+!				                                  *  
+!**************************************************
+! Se define la apertura del proyecto y la carga    
+! de paramentros de este.
+
+UE.COMF.BONOS% = 03                       										! Manejo de bonos proy 3
+TS.ER.RETURN = -1                     											! Control errores
+DIM UE.PROYECTO(40)
+
+IF PRT4610.ENABLE <> 0 THEN UE.COMF.ALTA$ = CHR$(1BH)+CHR$(21H)+CHR$(20H)      \! Font A - Double Wide
+ELSE UE.COMF.ALTA$ = CHR$(27)+CHR$(14)                                          ! Impresora de matriz
+
+OPEN "R::CONTROL" KEYED RECL 104 AS 56   										! Abre archivo de control
+IF TS.ER.RETURN = -1 THEN BEGIN													! Apertura OK
+   CALL LECTURA.CONTROL(UE.COMF.BONOS%)											! Lectura Parametros
+   UE.COMF.SES1% = VAL(PAR.PROY$(1,1))											! Sesiones de apertura de archivos
+   UE.COMF.TIPO% = 90 + VAL(PAR.PROY$(1,2))                                     ! Tipo de pago
+   UE.COMF.VARI% = VAL(PAR.PROY$(1,3))                                          ! Variedad de pago
+   UE.COMF.NCHQ% = 0                                                            ! Numero de cheques recibidos
+   DIM UE.COMF.CHEQ$(100,2)														! Maximo 100 cheques  
+   CLOSE 56																	    ! Cierre control
+ENDIF ELSE BEGIN																! Error de apertura
+   CALL MSG.DISP("Proyecto Bonos","Cancelado..!!",30,1500,3)                    ! Msg alerta
+   UE.PROYECTO(UE.COMF.BONOS%) = 0                                              ! Cancela Proyecto
+ENDIF
+
+

@@ -1,0 +1,62 @@
+!IF TO.USEROPTS(9) <> 0 THEN BEGIN       		! TERMINAL USER OP 10 = Y
+
+!-----------------------------------------------------------
+!  SOBRE-ESCRIBE BUFFER DE IMPRESION PARA CORREGIR IVA EN CERO 
+!-----------------------------------------------------------
+!IF TS.LINETYPE = 7 AND TS.LINEDATA = 1 THEN  BEGIN ! Si es TOTAL y no FS TTL
+!   TS.PRTBUF$ = "**** SUBTOTAL/TOTAL >>>> $"+RIGHT$(TS.PRTBUF$,12)  
+!   TS.SJDATA$ = "**** SUBTOTAL/TOTAL >>>> $"+RIGHT$(TS.PRTBUF$,12)  
+!ENDIF
+!----------------------------------------------------------------
+! Editamos  @ -> x
+!----------------------------------------------------------------
+   TS.SJDATA$ = TRANSLATE$(TS.SJDATA$,"@","x") 
+   TS.PRTBUF$ = TRANSLATE$(TS.PRTBUF$,"@","x") 
+!if implu% = 1 then begin
+!  IF (TS.LINETYPE =1 OR TS.LINETYPE = 5) THEN BEGIN
+!      TS.PRTBUF$ =TS.PRINJ$   
+ !     TS.SJDATA$=ts.prinj$
+  !     call u.imprimir(ts.print$,2100h)
+ ! ENDIF
+!endif
+!-----------------------------------------------------------
+!  IMPRIME PLU EN TIRA DE CLIENTE Y TIRA DE AUDITORIA 
+!-----------------------------------------------------------
+!ENDIF 						! FIN USER OP 10 = Y
+
+
+!         CALL QXL.TSUPEC21(" LINE TYPE "+STR$(TS.LINETYPE))
+!         WRITE #34;" LINETYPE "+STR$(TS.LINETYPE)
+
+IF TS.LINETYPE = 1   THEN BEGIN                        ! Si es Item Sale
+  ! CALL SAVE.PRINT
+   IF RIGHT$(TS.PRTBUF$,6) <> STRING$(6," ") AND      \!
+      (LEN(STR$(VAL(UNPACK$(ITEMCODE$)))) > 6 OR      \!
+       LEFT$(TS.PRTBUF$,7) <> STRING$(7," ")) THEN BEGIN 
+         !CALL U.IMPRIMIR((RIGHT$(STRING$(12,"0") + STR$(VAL(UNPACK$(ITEMCODE$))),12)),2100H)
+   ENDIF ELSE BEGIN
+      IF RIGHT$(TS.PRTBUF$,6) <> STRING$(6," ") THEN BEGIN
+       IF IR.INDICAT1 AND 80H THEN                     \!  
+       TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                      " "+RIGHT$(TS.PRTBUF$,30)+ "A"  \!ncatena PLU y descripci¢n
+                      ELSE                             \! 
+                      IF IR.INDICAT1 AND 40H THEN      \!
+       TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                      " "+RIGHT$(TS.PRTBUF$,30)+ "B"  \!ncatena PLU y descripci¢n
+                      ELSE                             \! 
+                      IF IR.INDICAT1 AND 20H THEN      \!
+       TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                      " "+RIGHT$(TS.PRTBUF$,30)+ "C"  \!ncatena PLU y descripci¢n
+                      ELSE                             \! 
+                      IF IR.INDICAT1 AND 10H THEN      \!
+       TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                      " "+RIGHT$(TS.PRTBUF$,30)+ "D"  \!ncatena PLU y descripci¢n
+                      ELSE BEGIN 
+       TS.PRTBUF$ = RIGHT$(STRING$(6," ")+STR$(VAL(UNPACK$(ITEMCODE$))),6)+\ 
+                      " "+RIGHT$(TS.PRTBUF$,30)+ "*"  \!ncatena PLU y descripci¢n
+       TS.SJDATA$ = TS.PRTBUF$
+        ENDIF       
+      ENDIF
+   ENDIF
+  !CALL RESTORE.PRINT
+ENDIF							! FIN ITEM DE VENTA

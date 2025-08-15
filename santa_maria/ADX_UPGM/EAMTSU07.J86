@@ -1,0 +1,124 @@
+! CALLED AFTER OPENING ALL FILES
+! Despues de abrir todos los archivos
+FUNCTION TSUPEC07 PUBLIC
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC07
+
+!* The following sessions numbers are available for use :       *
+!*                                                              *
+!* 6, 7, 10, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23,            *
+!* 26, 28, 29, 38,                                              *
+!* 43, 45, 47, 48, 49, 50, 52, 53, 54, 55, 56, 57, 58,          *
+!* 59, 60                                                       *
+! QXL.SESS.NO = 18
+!Numero de sesion usadas en esta aplicacion
+! 38 archivo de operadores: "R::EAMOPERA"
+! 38 archivo de teclas: "R::ADX_UDT1:ALFANUM.DAT"
+! 47 complemento mensaje "R::C:/CNB/ELEC" + TS.TERMINAL$ + ".DAT" NUOTELEC.BAS
+! 47 complemento mensaje "R::C:/CNB/"+"CNBRS" + TS.TERMINAL$ + ".DAT" NUOTCNB.BAS
+! 57 pipe pi: usado en modulo de promociones
+! 58 pipe pi: usado en modulo de promociones
+! 59 pipe pi: usado en modulo de tarjetas bancarias
+! 60 pipe pi: usado en modulo de tarjetas bancarias
+! 80 archivo de parametros: R::$ARGENER -> R::ADXLXACN::ADX_UDT1:PARGENER.DAT
+! 80 archivo de parametros: R::$ARESTAB -> R::ADXLXACN::ADX_UDT1:PARESTAB.DAT
+! 83 parametros de terminal R::$ARTERMI -> R::ADXLXACN::ADX_UDT1:PARTERMI.DAT
+! 84 archivo de clientes: "R::$LIENTES"
+! 85 archivo de pasaportes: R::$ASAPORT
+! 86 archivo de correos: R::$ORREOS
+! 93 archivo de vouchers "R::ADX_UDT1:VO" + left$(DATE$,6) + "." + right$("000"+str$(SL.HD.TERMINAL),3)
+!100 PipeSess sesion para el PRS "F" por donde se reciben todos los mensajes del agente
+!             los mensajes se envian al agente por el PIPE "Z"
+!103 Achivo trace: archivoTraceNUO$ = "R::C:/TRACE/" + TS.TERMINAL$ + ".TXT"
+!    si no existe el directorio TRACE se graba en la raiz del disco C
+
+   !Inicializacion
+   call NUOTRUTI07
+
+   !imprime fecha y hora de compilacion
+   TS.TEMP1$ = "COMPILACION"
+   %INCLUDE MSMTVERS.J86
+   call imprimeCJ( TS.TEMP1$ )
+
+   !graba fecha y hora de compilacion en archivo trace
+   call traceNUO( TS.TEMP1$ )
+
+   !Facturacion MSM
+   call MSMTFACT07
+
+   !Promociones
+   call NUOTPROM07
+
+   ! Devolucion de IVA
+   call NUOTDIVA07
+
+   ! Informacion Electoral
+   call NUOTELEC07
+
+   !Cliente no bancario
+   call NUOTCNB07
+
+   ! Credito Institucional
+   call MSMTINST07
+   
+   ! Tarjeta de REGALO
+   call MSMTGIFT07
+
+   ! Tarjets Bancarias
+   call MSMTTARB07
+
+   ! Recargas Electronicas
+   call MSMTREC07
+
+   ! Nota de Credito
+   call MSMTNCRE07
+
+   ! Clientes y Fidelidad
+   call MSMTCLIE07
+
+   ! Cheques
+   call MSMTCHEQ07
+
+   ! Retenciones
+   call MSMTRETE07
+   
+   !Inventario
+   call MSMTINVE07
+
+   !Remates
+   Call GRREMATES(07)
+
+   !Deliverys
+   CALL GRDOMICILIOS(07)
+
+   !Cupones tienda
+	 CALL GRCUPONES(07)
+
+   !Pago Deuna
+   CALL PAGO.DEUNA(07)
+
+   !Pago Rappi
+   CALL PAGO.RAPPI(07)
+   
+   !Claves Autorizacion
+   CALL GRCLVAUT(07)
+
+   !imprime fecha y hora
+   TS.TEMP1$ = "FECHA: " + \
+      mid$(date$, 5, 2) + TS.DATESEP$ + \
+      mid$(date$, 3, 2) + TS.DATESEP$ + \
+      mid$(date$, 1, 2) + " " + \
+      mid$(time$, 1, 2) + TS.TIMESEP$ + \
+      mid$(time$, 3, 2) + TS.TIMESEP$ + \
+      mid$(time$, 5, 2)
+   call imprimeCJ( TS.TEMP1$ )
+   write #34; NUO.SaltaLineas$ + chr$( 2 ) + NUO.CortaPapel$
+
+   !graba fecha y hora en archivo de trace
+   call traceNUO( TS.TEMP1$ )
+   
+   !close 34
+   !create "r::adx_udt1:tiquete.txt" as 34
+   
+END FUNCTION

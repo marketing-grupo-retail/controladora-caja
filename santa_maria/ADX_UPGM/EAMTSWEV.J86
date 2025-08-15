@@ -1,0 +1,102 @@
+\/*********************************************************************/
+\/*                                                                   */
+\/*      MODULE NAME: EAMTSWEV.J86                                    */
+\/*                                                                   */
+\/*      DESCRIPTIVE NAME: WIC EBT SMARTCARD VARIABLE DECLARATIONS    */
+\/*                                                                   */
+\/*      COPYRIGHT:                                                   */
+\/*      5799-QZH THIS MODULE IS "RESTRICTED MATERIALS OF IBM"        */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED        */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT      */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                           */
+\/*                                                                   */
+\/*      STATUS: RELEASE 1 LEVEL 0                                    */
+\/*                                                                   */
+\/*                                                                   */
+\/*      PERSON RESPONSIBLE = Tom Gaskill                             */
+\/*                                                                   */
+\/*      WE = WIC EBT                                                 */
+\/*                                                                   */
+\/*      CHANGE ACTIVITY: LEVEL 0                                     */
+\/*                                                                   */
+\/*                                                                   */
+\/* IO05348 - AE IO03864.  The LocalXactionDateTime field of the      */
+\/*           D4 WIC Claim File Detail Record is sometimes wrong.     */
+\/*           IO03864 attempted to fix a problem with transactions    */
+\/*           that span the time period involving the exact           */
+\/*           expiration date and time, but caused a new problem.     */
+\/*           To properly fix this problem, the design is being       */
+\/*           changed.  A new field is added to the 80:02 t-log       */
+\/*           string.  This field contains the date and time that     */
+\/*           the WIC EBT card was queried for benefits.              */
+\/*           Checkout Support uses this new field in the D4 record.  */
+\/*           GGK IBM 10Oct2006                                       */
+\/*                                                                   */
+\/* IO10545 - Add base code hooks for WIC Online Support,             */
+\/*           created and supported by the NRSC.                      */
+\/*           TAL/GGK IBM 04Jun2009                                   */
+\/*                                                                   */
+\/* END-OF-SPECIFICATIONS *********************************************/
+
+STRING GLOBAL                          \
+       WE.BENFT.RDMPT.RCPT$(1),        \ buffer holds benefit/redempt printlines
+       WE.BENFT.RDMPT.FRMT$(1),        \ buffer holds benefit/redempt formats
+       WE.PRN.PAN$,                    \ Masked PAN number for printing
+       WE.PRN.START.DATE$,             \ Formatted start date of prescription for printing
+       WE.PRN.END.DATE$,               \ Formatted end date of prescription for printing
+       WE.PRN.PRSCRPT.QTY$,            \ Benefit quantity from the prescription for printing
+       WE.PRN.PRSCRPT.UNIT$,           \ Unit descriptor of the item (jar,can,etc.) found in prescription
+       WE.PRN.PRSCRPT.DESC$,           \ Descriptor from the prescription (base on subcategory)
+       WE.PRN.DEBIT.QTY$,              \ Debit quantity for printing
+       WE.PRN.ITEM.UNIT.DESC$,         \ Item unit descriptor
+       WE.PRN.ITEM.QTY$,               \ Item quantity
+       WE.PRN.ITEM.DESC$,              \ Item descriptor
+       WE.PRN.ITEM.PRICE$,             \ Item price
+       WE.PRN.CPN.DESC$,               \ Coupon descriptor
+       WE.PRN.CPN.QUANTITY$,           \ Coupon quantity
+       WE.PRN.CPN.PRICE$,              \ Coupon price
+       WE.SL.AGENCY.ID$,               \ Two character Agency ID to log in 0x80 Tlog string
+       WE.SL.PAN$,                     \ PAN number to log in 0x80 Tlog string
+       WE.SL.PAN.LEN$,                 \ Length of PAN number to log in 0x80 Tlog string
+       WE.SL.ERR.CODE$,                \ Error return code to log
+       WE.SL.CLAIM.AMOUNT$,            \ Total WIC EBT tender amount
+       WE.SL.POS.DATA.CODE$,           \ Not currently used but we log it
+       WE.SL.ISSUING.AGENCY$,          \ ID of entity
+       WE.SL.FIRST.DATE.SPEND$,        \ Start date of this benefit period
+       WE.SL.LAST.DATE.SPEND$,         \ End date of this benefit period
+       WE.SL.DISCOUNT.AMOUNT$,         \ total discount amount
+       WE.SL.TRNX.SIGNATURE$,          \ Cryptographic security information
+       WE.SL.TAX$(1),                  \ tax values to log for recovery
+\AIO10545 Add Base Code hooks for WIC Online
+       WE.SL.ITEM.ORIG.UPC$,           \ original upc/plu code for item entry
+                                       \   if mapped code used for APL lookup
+       WE.SL.ITEM.UPC.PLU.IND$,        \ upc/plu indicator ('1' if PLU)
+\EIO10545
+       WE.SL.ITEM.CATEGORY$,           \ category of item to log in Tlog
+       WE.SL.ITEM.SUBCATEGORY$,        \ subcategory of item to log in Tlog
+       WE.SL.ITEM.BENEFIT.QTY$,        \ amount of benefit debited for single
+       WE.SL.ITEM.N.PURCH.QTY$,        \ purchase qty for non-zero categories
+       WE.SL.ITEM.0.PURCH.QTY$,        \ purchase qty for zero categories
+       WE.SL.ITEM.N.COST$,             \ cost of the total quantity of nonzero
+       WE.SL.ITEM.0.COST$,             \ cost of the total quantity of zero
+       WE.SL.ITEM.TLOG.INDEX$,         \ index into transaction entry array
+       WE.SL.ITEM.UPC$,                \ items UPC with trailing check digit
+       WE.SL.ITEM.N.COUPON$,           \ coupon information for non-zero item
+       WE.SL.ITEM.0.COUPON$,           \ coupon information for zero item
+       WE.SL.TENDER.TIMEDATE$,         \ WICReadBalance time, for 80:02 tlog IO05348
+       WE.SL.ITEM.N.CHILD.ARRAY$,      \ Bit array for nonzero category items
+       WE.SL.ITEM.0.CHILD.ARRAY$       ! Bit array for zero category items
+
+INTEGER*1 GLOBAL                       \
+          WE.BUFFER.BR.RECEIPT,        \ flag buffering benft/rdmpt print lines
+          WE.BUFFER.BR.ONLY,           \ flag if only to buffer benft/rdmpt line
+          WE.TENDERING,                \ flag this is a WIC EBT tender
+          WE.SL.IDENTIFIER,            \ Identifier flag for logging to summary log
+          WE.SL.ICC.CODE               ! ICC System code to log in 0x80 0x03 string
+
+INTEGER*2 GLOBAL                       \
+          WE.TENDER.TYPE,              \ Tender type for the EBT WIC tender
+          WE.TENDER.VARIETY,           \ Tender variety for the EBT WIC tender
+          WE.BENFT.RDMPT.IDX           ! index into benefit/redempt buffer
+
+!****************************** END EAMTSWEV.J86 ******************************

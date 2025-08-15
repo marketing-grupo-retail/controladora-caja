@@ -1,0 +1,36 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU23.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!  IR46321 - Add function for new 'Could haved saved' algorithm.
+!            CMJ MGVA 08/01/01
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+%INCLUDE EAMTSC23.J86      ! COUPON ENHANCEMENT CODE
+
+CALL TSU23.FB
+
+!AIR46321
+  !!*******************************************************************
+  !!** AVOID DISPLAY OF COUPONS REPLAYED JUST FOR COULD SAVE TOTAL   **
+  !!*******************************************************************
+   IF SPCS.COULDSAV AND                        \ FALSE REPLAY
+      EMSS.PANEL.TRANS AND                     \ PREFERRED CUSTOMER
+      EMSS.COUP.REPLAY THEN BEGIN              ! IN REPLAY
+    TS.DISP1$ = TS.SAVDISP1$                   ! REDISPLAY LAST
+    TS.DISP2$ = TS.SAVDISP2$                   ! REDISPLAY LAST
+    IF TS.ALPHA2 THEN BEGIN                    ! 2ND ALPHA DISPLAY
+      TS2.DISP1$ = TS.DISP1$                   ! REFLECT EXIT CHANGES
+      TS2.DISP2$ = TS.DISP2$                   !  ON SECOND DISPLAY
+    ENDIF                                      ! 2ND ALPHA DISPLAY
+   ENDIF                                       ! FALSE REPLAY
+
+!EIR46321
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

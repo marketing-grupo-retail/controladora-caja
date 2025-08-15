@@ -1,0 +1,109 @@
+!**************************************************
+!Empresa       : ASIC CONSULTING GROUP S.A. RETAIL*
+!Programa      : CNVTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Septiembre de 2004               *
+!Observaciones : Modulo Control Convenios         *
+!**************************************************
+
+UE.OPEN.MEDICO%   = 81
+UE.OPEN.IPS% 	    = 82
+UE.OPEN.CONVENIO% = 83
+UE.OPEN.BENEFIC%  = 84			! 66,65, 64 NO SIRVE
+UE.OPEN.PLU%	    = 22
+UE.OPEN.DIAGNOS%  = 88
+UE.OLD.BENEF$     = ""
+UE.OLD.MEDICO$    = ""
+UE.OLD.FORMULA$   = ""
+UE.OLD.IPS$       = ""
+UE.EPS.COPAGOAPLICADO% = 0
+Ue.Cnv.AplicaCopago% = 0 
+UE.EPS.GRABAString% = 0
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN Begin																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Modulo Convenios",1500,"L")    		! Msg Alerta
+ Call Visores4690(1,"Mod. Convenios","No Operativo",1500,"L")			      	! Msg Alerta
+ Call U.Imprime("Error Carga Modulo Convenios ",2100H)								  	! Rastro en SJ
+ UE.EPS.EPSS%       = 00                                                  ! Modulo activo
+EndIf Else Begin									      																	! Apertura OK
+ If END #94 THEN UE.EPS.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    If TS.TEMP1$ = "[CONVENIOS]" Then Begin		              							! Proyecto Convenios
+     Read #94; TS.TEMP1$																									! Lectura registro
+     UE.EPS.EPSS%      = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     UE.EPSS.DSCTOTRX$ = Mid$(TS.TEMP1$,30,2)				    								  ! Grupo de descuento
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,2)                   				  ! Tipo y variedad de pago
+     UE.EPS.TIPO$ = Left$(TS.TEMP1$,1)                                    ! Tipo de pago
+     UE.EPS.VARI$ = Right$(TS.TEMP1$,1)                                   ! Variedad de Pago
+!--- ADD para manejo de capitaciones OVS 10 mayo 2005
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,2)                   				  ! Tipo y variedad de pago
+     UE.EPS.TIPOC$ = Left$(TS.TEMP1$,1)                                   ! Tipo de pago capitacion
+     UE.EPS.VARIC$ = Right$(TS.TEMP1$,1)                                  ! Variedad de Pago capitacion
+     Read #94; TS.TEMP1$    																							! Lectura registro
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,3)                   				  ! Tipo y variedad de pago
+     Ue.Eps.Motora%    = Val(Ts.Temp1$)                                   ! Tecla Motora
+     TS.TEMP1$         = Mid$(TS.TEMP1$,30,3)                   				  ! Departamento Misc 
+     Ue.Cnv.Miscelaneo$= Ts.Temp1$                                        ! para capitacion
+     To.LOGLIMITS(4) = 99999999																						! Modificacion controles
+     To.LOGLIMITS(5) = 99999999																			      ! Miscelaneos Base SMA 
+     To.MISCMAX      = 99999999																						!
+     To.MISCREF      = 99999999																						!
+     To.MISCQTY      = 9999																							  !
+     GoTo UE.EPS.FINAL																									  ! Sale del ciclo de carga
+   EndIf
+ Wend
+ UE.EPS.FINAL:
+   Close 94												        																! Cierra archivo
+EndIf
+
+If UE.EPS.EPSS% = -1 Then 	\	     ! Si proyecto activo
+   Begin
+	DIM UE.EPSS.DESC(4)
+	DIM UE.EPS.CMP$(5)
+  DIM UE.EPS.DSCTLESS$(5)
+	DIM UE.EPSS.DAT(7)
+  TS.ER.RETURN = -1
+  If UE.EPS.APERTURA% <> -1 Then Begin
+     OPEN "R::MEDICO" KEYED   RECL 58 AS UE.OPEN.MEDICO%
+     If TS.ER.RETURN NE -1 Then GOTO NO.EPS
+     OPEN "R::IPS" KEYED      RECL 54 AS UE.OPEN.IPS%
+     If TS.ER.RETURN NE -1 Then GOTO NO.EPS
+     OPEN "R::CONVENIO" KEYED RECL 105 AS UE.OPEN.CONVENIO%
+     If TS.ER.RETURN NE -1 Then GOTO NO.EPS
+     OPEN "R::BNEFICIA" KEYED RECL 101 AS UE.OPEN.BENEFIC%
+     If TS.ER.RETURN NE -1 Then GOTO NO.EPS
+     OPEN "R::DIAGNOST" KEYED RECL 55 AS UE.OPEN.DIAGNOS%
+     If TS.ER.RETURN NE -1 Then GOTO NO.EPS
+     UE.EPS.APERTURA% = -1
+  EndIf
+
+  UE.EPSS.DESC(0) = "Dialogo 0           "
+  UE.EPSS.DESC(1) = "DIGITE CODIGO PLAN ?"
+  UE.EPSS.DESC(2) = "NRO. FORMULA MEDICA?"
+  UE.EPSS.DESC(3) = "COD. BENEFICIARIO..?"
+  UE.EPSS.DESC(4) = "Dialogo 4           "
+	      
+	UE.EPS.POSPAGO% = 0
+	For J% = 1 TO TO.NUMTNDR
+	 If VAL(UE.EPS.TIPO$+UE.EPS.VARI$) = VAL(STR$(TO.TENDOPTS(J%,0))+\
+	    STR$(TO.TENDOPTS(J%,1))) Then Begin
+	    UE.EPS.POSPAGO% = J%			! No. Pago Valido
+	 EndIf
+	Next J%
+EndIf
+Call U.Imprime("Modulo de Convenios Ver. 1.4 OK",2100H)
+Exit Sub
+NO.EPS:
+	   Call Visores4690(1,"ERROR APERTURA","ARCHIVOS MAESTROS",2000,"C")   	
+	   Call Visores4690(1,"MOD  CONVENIOS","** CANCELADO **",2000,"C")   		   
+	   Call U.Imprime("Error Carga Convenios Aperturas",2100H)								  	! Rastro en SJ
+     UE.EPS.EPSS% = 0                    ! Desactivo proyecto
+     

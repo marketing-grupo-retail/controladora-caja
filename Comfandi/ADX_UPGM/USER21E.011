@@ -1,0 +1,24 @@
+
+  IF TS.LINETYPE = 25 THEN       \           ! START OF EXIT TRAINING ?
+   IF NOT Training.Exit THEN BEGIN             ! YES...
+    CALL QXL.TSUPEC01
+    Training.Exit = -1
+   ENDIF
+
+PrtLine = ts.prtbuf$                          ! Pass the current line
+
+i = MATCH(CHR$(27)+CHR$(69),PrtLine,1)
+if i <> 0 then begin                          !
+  PrtLine = LEFT$(PrtLine,i-1) + RIGHT$(PrtLine,LEN(PrtLine)-i-1)
+endif
+
+PrtLine = Journal(PrtLine)                      !
+if PrtLine = "" then begin                      ! returns a null, then
+  ts.sjdata$ = string$(len(ts.sjdata$)," ")     ! don't print this line
+  ts.prtbuf$ = string$(len(ts.prtbuf$)," ")     ! on the paper journal
+endif                                           !
+
+  IF TS.LINETYPE = 23 THEN BEGIN                !END OF SIGNOFF TRANS
+    CALL QXL.TSUPEC02
+    Training.Exit = 0
+  ENDIF

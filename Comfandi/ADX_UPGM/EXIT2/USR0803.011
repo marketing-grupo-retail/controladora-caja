@@ -1,0 +1,43 @@
+!   ***************************************************************************
+!   **    Date       :  Junio de 1996                                        **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USR0803.011                                          **
+!   **    Inclu¡r en :  EAMTSU08.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones  para  verificacion y toma de Datos de algunos       **
+!   **    documentos que sirven de Medios de Pago                            **
+!   ***************************************************************************
+! 
+ PLUPAGO% = VAL(UNPACK$(IR.ITEMCODE$))            ! Toma Cod PLU
+ IF PLUPAGO% > 999999910 AND                     \! Si esta en Rango
+    PLUPAGO% < 999999969 THEN BEGIN               ! de Plus de Pago
+           TS.PURGE.ERR      = -1                 ! Ignora Error Anter
+           TS.PC.PM      = IR.PRICING.METHOD      ! Inicializacion 
+           TS.PC.PRICE1  = IR.PRICE1              !  Especial de
+           TS.PC.PRICE2  = IR.PRICE2              !   Variables de
+           TS.PC.QTY$    = UNPACK$(IR.SALEQUAN$)  !    Reg de Plus
+           TS.PC.OPRICE1 = IR.PRICE1              !     para ver las
+           TS.PC.OPRICE2 = IR.PRICE2              !      lineas de 
+           TS.PC.OQTY$   = TS.PC.QTY$             !       verificacion
+           IF VAL(TS.PC.QTY$) > 1 AND            \!        de Precios
+              TS.PC.PM < 2 THEN TS.PC.SPLIT = -1 \!
+           ELSE TS.PC.SPLIT = 0                   !
+                                                  !
+           TS.LINETYPE    = 11                    ! Despliega
+           TS.LINEDATA    = 0                     ! Item Verificado
+           TS.STACKERR(0) = 5                     ! Estado #CTA/REQUERIDO
+           I$             = TS.SAVDISP1$          ! Salva despliegue
+           J$             = TS.SAVDISP2$          ! para borrar
+           CALL TSCSEC03                          ! Despliega Error
+           TS.SAVDISP1$   = I$                    ! Restaura despliegue
+           TS.SAVDISP2$   = J$                    ! Salvado para Borrar
+                                                  !
+           USER.VERIFY.CHEQ = -1                  ! Flag de Verif de CHEQUE
+           USER.SAVE.ITEM$  = TS.IO.DATA$(2)      ! Salva Plu Digitado
+           FAST.EXIT        = -1                  ! y no mas Proceso
+    ENDIF                                         ! Fin de Verific de Plu
+!-------------------------------------------------------------------------

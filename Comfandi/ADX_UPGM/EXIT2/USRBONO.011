@@ -1,0 +1,68 @@
+
+!   ***************************************************************************
+!   **    Date       :  ABRIL DE 2003                                        **
+!   **    Project    :  DESARROLLO TECNOLOGICO COMFANDI                      **
+!   **    User Exit  :  USRBONO.011                                          **
+!   **    Inclu¡r en :  EAMTSU14.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  JORGE LOSADA                                         **
+!   **                                                                       **
+!   **    Code for tenfer exchange BONOS COMFANDI A EFECTIVO   .             **
+!   ***************************************************************************
+
+!WRITE #34;" MGR "+STR$(TO.MGRKEY) 
+!WRITE #34;" STADO "+STR$(TS.IO.STATE) 
+
+IF TS.IO.STATE      = 10 AND                            \!  MAIN?
+   TS.BALDUE(0)     = 0  AND                            \!
+   TS.IO.KEYS(2)    = 80 AND                            \!  INTRO?
+   LEN(TS.IO.DATA$(2))   = 20 AND                       \!  BARRAS DE 20?
+   TS.IO.KEYS(10)     = 63  THEN BEGIN                   !  DATA ENTRY
+   CAMBIO% = 1                                           !  PRENDE FLAG
+   BONO$ = TS.IO.DATA$(2)                                !  GUARDA No BONO
+   TO.MGRKEY = 0
+   TS.IO.STATE = 20 
+   TS.IO.MOTORKEY = 61
+   TS.IO.DATA$(5) = "1"
+   TS.IO.MOTORKEY = 73
+   CALL U.IMPRIMIR(" BONO No. "+ BONO$,2100H)
+ENDIF
+ 
+
+IF TS.IO.KEYS(5)  = 61    AND                           \!  
+   TS.IO.DATA$(5) = "1"   AND                           \!
+   CAMBIO% = 1             THEN BEGIN                    !
+   BONO%  = 1
+   TO.MGRKEY = -1
+ENDIF   
+
+IF TS.IO.KEYS(5)  = 61    AND                           \!  
+   TS.IO.DATA$(5) = "2"   AND                           \!
+   CAMBIO% = 1             THEN BEGIN                    !
+   BONO% = 1  
+ENDIF 
+
+IF CAMBIO%          = 1   AND                            \!
+   BONO%            = 1   AND                            \!
+   TS.IO.KEYS(3)    = 78  AND                            \!
+   TS.IO.DATA$(3)   = "4" AND                            \!
+   TS.IO.KEYS(7)    = 93 THEN BEGIN                      !
+   TS.IO.DATA$(7)   = RIGHT$(BONO$,9)                    !
+   TS.IO.DATA$(9)   = LEFT$(BONO$,11)                    !
+      LOCATE #30;1,1,OFF                                 ! Ubica Cursor
+      WRITE FORM                                        \! Muestra Venta
+      "C8 PIC($$##,###,###) C9 PIC($$##,###,###)";      \! segun formato
+       #30;"Vr Bono:",VAL(TS.IO.DATA$(7)) !"Efectivo:", \!
+       !VAL(TS.IO.DATA$(7))                               !     
+       WAIT; 2500                                        !
+   CAMBIO%          = 0                                  !
+   BONO%            = 0                                  !
+ENDIF ELSE BEGIN
+IF CAMBIO%          = 1   AND                            \!
+   BONO%            = 1   AND                            \!
+   TS.IO.KEYS(3)    = 78  AND                            \!
+   TS.IO.DATA$(3)   <> "4" THEN BEGIN    
+   TS.IO.MOTORKEY = 0
+ENDIF 
+ENDIF

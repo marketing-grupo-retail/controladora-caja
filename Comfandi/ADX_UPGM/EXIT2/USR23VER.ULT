@@ -1,0 +1,92 @@
+!   ***************************************************************************
+!   **    Date       :  Feb. de 1999                                         **
+!   **    Project    :  IBM -                                                **
+!   **    User Exit  :  UT2301A.VTA                                          **
+!   **    Inclu¡r en :  EAMTSU23.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones para editar la Linea de Peso en Gramos  y Vr del     **
+!   **    Kg en los visores de la Terminal                                   **
+!   **                                                                       **
+!   **    Si se va a desplegar linea de precio de articulo ENTONCES, se      **
+!   **    agrega signo pesos a la segunda linea.                             **
+!   **                                                                       **
+!   **    Variables:                                                         **
+!   **                                                                       **
+!   **         TS.LINETYPE:  Tipo de display.  1 ==> Item                    **
+!   **         TS.DISP2$:    Segunda linea de despliegue                     **
+!   **                                                                       **
+!   ***************************************************************************
+
+   LINPESO$ = ""                                 !
+   IF (IR.INDICAT0 AND 01000000B) AND           \! Si PLU con Ind Peso
+      SL.IE.QTYORWGT <> 0 THEN BEGIN             ! y hay Peso en Balanza
+      IF ANUL% = 0 THEN ANUL% = 1                ! Si no hubo ANUL es (+)
+      LINPESO$ = STR$(FLOAT(SL.IE.QTYORWGT)/1000)+"Kx"  ! Arma despliegue de
+      VTADESC% = VAL(UNPACK$(IR.SALEPRIC$))      ! el Vr del KILO
+      LINPESO$ = LINPESO$ + STR$(VTADESC%)       ! GRS x Vr KILO
+      LINPESO$ = LINPESO$ + "=$"      +         \! y Vr Total (+)
+                 STR$(SL.IT.XPRICE * ANUL%)      ! ¢ (-) 
+      LINPESO$ = RIGHT$(STRING$(20," ")  +      \! Justifica Vr
+                 LINPESO$,20)                    ! a la derecha
+   ENDIF                                         ! fin de datos Grs
+
+   IF TS.LINETYPE    = 1 AND                    \! Si linea PLU
+      MID$(TS.DISP2$,5,4) <> "*VF*" THEN BEGIN   ! y no verificacion de precio
+    IF LINPESO$ <> "" THEN BEGIN                 ! con dato de peso
+      TS.DISP2$    = LINPESO$                    ! Cambia despliegue
+    ENDIF  					 !
+    TS2.DISP2$   = TS.DISP2$                     ! Cambia Visor cliente
+   ENDIF                                         ! Fin de Condicion
+
+   IF MID$(TS.DISP2$,5,4) = "*VF*" THEN BEGIN    ! Verificacion de precio
+      TS2.DISP1$  = TS.DISP1$                    ! Asigna mensaje al visor
+      TS2.DISP2$  = TS.DISP2$                    ! del cliente
+   ENDIF
+
+   LINPESO$ = "  "                               !
+   IF RIGHT$(TS.DISP2$,2) = "PS" OR             \! Si es Linea de Peso
+      RIGHT$(TS.DISP2$,2) = "WT" THEN BEGIN      ! Si Linea de Weight
+      LINPESO$="vf "+STR$(FLOAT(KGCM%)/1000)+"Kx"! Arma despliegue de
+      LINPESO$ = LINPESO$ +                     \!
+      STR$(VAL(UNPACK$(IR.SALEPRIC$)))           ! GRS x Vr KILO
+      LINPESO$ = LINPESO$ + "=$"      +         \! y Vr Total (+)
+      STR$(INT(VAL(UNPACK$(IR.SALEPRIC$)) *     \!
+           ANUL% * KGCM% / 1000))                !
+      LINPESO$ = RIGHT$(STRING$(20," ")  +      \! Justifica Vr
+                 LINPESO$,20)                    ! a la derecha
+      TS.DISP2$  = LINPESO$                      ! Cambia Lin 2 Visor Op
+      TS2.DISP2$ = TS.DISP2$                     ! Cambia Lin 2 Visor Cli
+!      KGCM% = 0  :  QUEPESA% = 0                 !
+   ENDIF                                         ! Fin de Condic
+   IF USER.VERIFY.ITEM = -1 OR                  \! ¢ Flag Ind/Ver/Prec
+      MID$(TS.DISP2$,5,4) = "*VF*" THEN         \!
+         LINPESO$ = "vf "                        ! Si es Linea de Verif
+   
+   IF USER.VERIFY.ITEM  = -1 AND                \!
+      KGCM% > 1              AND                \! 
+      MID$(TS.DISP2$,5,4) = "*VF*" THEN BEGIN    ! Si es Linea de Verif
+      IF MEDIBLE% = 1 THEN BEGIN                 !
+         LINPESO$ = LINPESO$ +                  \! Arma despliegue de
+                    STR$(FLOAT(KGCM%)/100)+"Mx"  ! Arma despliegue de
+      ENDIF ELSE BEGIN                           !
+         LINPESO$ = LINPESO$+STR$(KGCM%)+"x"     ! Arma despliegue de
+      ENDIF                                      !
+      LINPESO$ = LINPESO$ +                     \!
+      STR$(VAL(UNPACK$(IR.SALEPRIC$))) + "=$"    ! Gr*VrKg ¢ Cm*VrMt
+      IF MEDIBLE% = 1 THEN BEGIN                 !
+         LINPESO$=LINPESO$+STR$(INT(VAL(UNPACK$ \!
+               (IR.SALEPRIC$))*ANUL%*KGCM%/100)) !
+      ENDIF ELSE BEGIN                           !
+         LINPESO$=LINPESO$+STR$(INT(VAL(UNPACK$ \!
+               (IR.SALEPRIC$))*ANUL%*KGCM%))     !
+      ENDIF                                      !
+      LINPESO$ = RIGHT$(STRING$(20," ")  +      \! Justifica Vr
+                 LINPESO$,20)                    ! a la derecha
+      TS.DISP2$  = LINPESO$                      ! Cambia Lin 2 Visor Op
+      TS2.DISP2$ = TS.DISP2$                     ! Cambia Lin 2 Visor Cli
+      KGCM% = 0
+   ENDIF                                         ! Fin de Condic
+                                                 !  ** Con ENTER lo REGISTRA **

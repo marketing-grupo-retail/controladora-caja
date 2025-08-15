@@ -1,0 +1,115 @@
+!At Processing of an I/O Error
+!Al procesar un error de entrada salida
+!****************************************************************
+!  TSUPEC27         : CALLED AT PROCESSING OF AN I/O ERROR
+!  --------
+!  TYPE             : FUNCTIONAL PROCESSING EXIT
+!
+!  INPUT PARMS.     : NONE
+!
+!  OUTPUT PARMS.    : NONE
+!
+!  GLOBALS FOR
+!  REFERENCE ONLY   : TE.TR.TERMINAL$
+!                     TE.TR.OPERATOR$
+!                     TE.TR.TRANSNUM$
+!                     TS.INTRX
+!                     TS.PROCEDURE
+!                     TS.STANDALONE
+!                     TS.SPEC.SIGN.OFF
+!                     TS.SIGNED.ON
+!                     ERRN
+!                     ERR
+!                     ERRF%
+!                     TS.ER.RETURN
+!                     ASYNC.ERRN
+!                     DVICE
+!                     TER
+!                     ERR27.ROUTINE
+!
+!  GLOBALS FOR
+!  UPDATE           : BYPASS.REPRINT% IR92088 ADDED "%" TO COMMENT
+!
+!  COMMENTS         : GLOBAL VARIABLES LISTED AS REFERENCE ONLY
+!                     SHOULD NOT BE CHANGED.
+!****************************************************************
+FUNCTION TSUPEC27 PUBLIC
+   string tsu27.msg$
+   
+   exit function 
+   
+   !Si esta en IPL puede haber dispositivos no inicializados
+   if TS.IN.IPL then goto fin.tsu27
+  
+   tsu27.msg$ = err + hexanum$(errn) + " Ses: " + str$( errf% ) + " linea " + str$(errl)
+
+   !Control de errores asincronicos
+   !ERR27.ROUTINE% = 0 if Exit 27 called from ON ERROR
+   !               = 1 if Exit 27 called from ON ASYNC
+   if ERR27.ROUTINE% = 1 then begin
+      call traceNUO("UE27 DVICE=" + str$(DVICE) + " ASYNC.ERRN=" + hexanum$(ASYNC.ERRN))
+      !call QXL.TSUPEC21("DVICE=" + str$(DVICE) + " ASYNC.ERRN=" + hexanum$(ASYNC.ERRN))
+   endif
+
+!   if err = "*I" then begin
+!      call traceNUO("UE27 " + time$ + " " + tsu27.msg$)
+!      !call QXL.TSUPEC21("UE27 " + tsu27.msg$)
+!      !call traceNUO( "UE27 DVICE=" + str$(DVICE) + " ASYNC.ERRN=" + hexanum$( ASYNC.ERRN ) )
+!      wait; 200
+!      exit function
+!   endif
+
+   !Para no imprimir error de balanza cuando no tiene balanza
+   if (errf% = 39) and not MSMTFACT27 then begin
+      goto fin.tsu27
+   endif
+
+   !Para controlar error de la balanza
+   if (errf% = 39) and not JAVA.INIT then begin
+      call traceNUO( "UE27 ERROR BALANZA TS.TEMP1I4=" + str$(TS.TEMP1I4) + " " + tsu27.msg$ )
+      !TS.TEMP1I4 = -1
+      goto fin.tsu27
+   endif
+
+   !Para no imprimir error de algunas sesiones
+   if ( errf% = 42 ) or ( errf% = 3 ) then begin
+!      call traceNUO("UE27 " + time$ + " " + tsu27.msg$)
+      goto fin.tsu27
+   endif
+
+   ! para el manejo de lector de banda magnetica
+   !if ( ( err = "NR" ) or ( err = "BO" ) ) and ( errf% = 41 ) then begin
+   !   call muestraBorrar( "ERROR EN LA LECTURA", "DESLICE NUEVAMENTE " )
+   !   UNLOCKDEV 41
+   !   TS.USER.RETURN = -1
+   !   goto fin.tsu27
+   !endif
+
+   !Control de errores de la impresora
+   if ( errn and 0FFFF0000H ) = 80900000H then begin
+
+      !Error de Document insert
+      if err = "DI" then begin
+         call traceNUO( "UE27 ERROR DOCUMENT INSERT " + tsu27.msg$ )
+         !call QXL.TSUPEC21( "ERROR DOC INSERT " + tsu27.msg$ )
+         !call muestraBorrar( "PROBLEMAS CON DOCUM", "INSERT " + left$( tsu27.msg$, 10 ) )
+         goto fin.tsu27
+      endif
+
+      !Otro error de la impresora
+      call traceNUO( "UE27 ERROR IMPRESORA " + tsu27.msg$ )
+      !call QXL.TSUPEC21( "ERROR IMPRESORA " + tsu27.msg$ )
+      !call muestraBorrar( "PROBLEMAS CON LA", "IMPRESORA " + left$( tsu27.msg$, 10 ) )
+      goto fin.tsu27
+
+   endif
+
+   !Otros errores
+   !if not JAVA.INIT then call traceNUO( "UE27 ERROR " + tsu27.msg$ )
+   Call traceNUO( "UE27 " + time$ + " " + tsu27.msg$ )
+   !call QXL.TSUPEC21( "UE27 ERROR " + tsu27.msg$ )
+
+   fin.tsu27:
+   BYPASS.REPRINT% = 1
+
+END FUNCTION

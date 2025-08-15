@@ -1,0 +1,45 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSU07.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo de Colegios      *
+!**************************************************
+! Modificaciones:
+
+
+TS.ER.RETURN = -1																													! Ctrl Errores
+OPEN "R::ASCNTRL" AS 94																										! Apertura archivo parametrizacion
+If TS.ER.RETURN <> -1 THEN BEGIN																					! Error en la apertura
+ Call TSHIECET																														! Tono de Alerta
+ Call Visores4690(1,"Error Parametros","Modulo Recaudo Col.",1500,"L")		! Msg Alerta
+ Call Visores4690(1,"Mod. Recaudo Coleg.","No Operativo",1500,"L")				! Msg Alerta
+ Call U.Imprime("Error Carga Recaudo Colegios ",2100H)			  						! Rastro en SJ
+ Asc.Col.Line%      = 00 																									! Proyecto desactivado
+EndIf Else Begin									      																	! Apertura OK
+ IF END #94 THEN UE.Col.FINAL		       																	  ! Si es EOF
+  While (1)															  																! Recorre archivo
+    Read #94; TS.TEMP1$			       																				! Lectura registro
+    IF TS.TEMP1$ = "[RECAUDO COLEGIOS]" Then Begin					  						! Proyecto de Lealtad
+     Read #94; TS.TEMP1$																									! Lectura registro
+     Asc.Col.Line%     = Val(Mid$(TS.TEMP1$,30,2))				    						! Proyecto activo
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     Asc.Col.Tecla$    = Mid$(TS.TEMP1$,30,3)				    								  ! Tecla Validacion
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     Asc.Col.Item$     = Mid$(TS.TEMP1$,30,12)    	    								  ! Item Miscelaneo de venta
+     Asc.Col.PluPack$  = Str$(Val(Asc.Col.Item$))													!
+     Asc.Col.PluPack$  = Pack$(Right$("000000000000"+Asc.Col.PluPack$,12))!
+     Read #94; TS.TEMP1$                    															! Lectura registro
+     Asc.Col.Fran%     = Val(Mid$(TS.TEMP1$,30,2))      								  ! Numero de Franqueo a utilizar
+     GoTo UE.Col.FINAL																									  ! Sale del ciclo de carga
+   Endif
+ Wend
+ UE.Col.FINAL:
+   Close 94																																			! Cierra archivo
+   If Asc.Col.Line% = -1 Then                                                  \! Proyecto Activo
+      CALL U.IMPRIME("MODULO RECA. COLEGIOS  ON 30/Ago/2011",2100H) Else     \! Msg Proyecto Cargado
+      CALL U.IMPRIME("MODULO RECA. COLEGIOS OFF 30/Ago/2011",2100H)           ! Msg Proyecto Cargado
+
+Endif
+

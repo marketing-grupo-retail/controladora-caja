@@ -1,0 +1,66 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMTSU57.J86 ************************************!!
+! TITLE: Electronic Marketing Suppport
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!
+\/**CHANGE ACTIVITY***************************************************/
+\/*                                                                  */
+\/* IR42828 - With EM option 19.5 ON an extra raincheck ID was logged*/
+\/*           into Tlog after suspension and retrieval of the        */
+\/*           transaction.                                           */
+\/*           LLU MGVA 20Apr2000                                     */
+\/*                                                                  */
+!!**END-OF-SPECIFICATIONS*********************************************/
+
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+
+!********************************************************************
+!*    IMPROVE EOT PRINTING PERFORMANCE BY DELAYING HEADER PRINTING  *
+!********************************************************************
+ IF NOT EMSS.HEADER.PRINTED THEN BEGIN ! Header not yet printed
+   TS.SAVPRT$ = " "                    ! Force head home
+   TS.SAVPRT.OPT = 4100H               ! WRITE TO RECEIPT
+   TS.LINETYPE = 29                    ! PRINT TS.SAVEPRT$ AS IS
+   CALL TSPREC01                       ! CALL PRINT ROUTINE
+   TS.LINETYPE = 18                    ! PRINT HEADER
+   TS.LINEDATA = 1                     ! PRINT HEADER ONLY
+   CALL TSPREC01                       ! Call Print routine
+ ENDIF
+ EMSS.PMSG$ = ""                       ! CLEAR PERSONALIZED DISPLAY
+
+!********************************************************************
+!*    MAKE ALL CUSTOMERS RAINCHECK CUSTOMERS IF OPTION SELECTED     *
+!********************************************************************
+!AIR42828 Remove following code and do not log Raincheck ID again since 
+!         Raincheck ID or customer ID has been saved during the trx   
+!         suspension and will be retrieved during the retrieval process.
+!
+!IF OP.ALL.RC.CUST THEN BEGIN          ! ALL ARE RAINCHECK
+!  IF NOT EMSS.PANEL.TRANS AND         \ NOT ALREADY PREFERRED
+!     NOT EMSS.PC.KIOSK THEN BEGIN     ! NOT KIOSK MODE
+!    FOR I% = 0 TO 10
+!      TS.IO.PREV.KEYS(I%) = TS.IO.KEYS(I%)   ! SAVE KEYED DATA
+!       TS.IO.PREV.DATA$(I%) = TS.IO.DATA$(I%) ! SAVE KEYED DATA
+!    NEXT I%
+!    DIM TS.IO.KEYS(10)                       ! CLEAR KEYED DATA
+!    DIM TS.IO.DATA$(10)                      ! CLEAR KEYED DATA
+!    TS.IO.KEYS(10) = 63                      ! Data entry key
+!    TS.IO.KEYS(4) = 100                      ! No-sale key
+!    TS.IO.DATA$(2) = UNPACK$(OP.RC.ID$)      ! Customer number
+!    CALL TSU14.FB                            ! Process cust. entry
+!    TS.TEMP1I1 = 11                          ! Data entry
+!    CALL TSTPEC01                            ! Process data entry
+!    FOR I% = 0 TO 10
+!      TS.IO.KEYS(I%) = TS.IO.PREV.KEYS(I%)   ! RESTORE KEYED DATA
+!      TS.IO.DATA$(I%) = TS.IO.PREV.DATA$(I%) ! RESTORE KEYED DATA
+!    NEXT I%
+!  ENDIF                               ! NOT PREFERRED OR KIOSK
+!ENDIF                                 ! ALL ARE RAINCHECK
+!EIR42828
+
+ENDIF                      ! EM PROCESSING IS ACTIVE

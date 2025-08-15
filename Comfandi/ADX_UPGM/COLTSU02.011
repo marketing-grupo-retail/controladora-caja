@@ -1,0 +1,18 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : COLTSU02.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Recaudo Colegios         *
+!**************************************************
+If  Asc.Col.Impr% = -1 Then Begin         ! Si franqueo de documentos
+    CALL FRANQUEO.BONOS										! Franquea bonos capturados
+EndIf
+
+ Asc.Col.Impr% = 0												                                   ! Init de variable control de franqueo
+ Asc.Col.Lista$     = "" 																										 ! Lista de bonos a pagar
+ Asc.Col.NotaNul$  = "" 																										 ! Lista de Bonos Anulado
+ Asc.Col.VlrBono$   = "0"																										 ! Valor del Bono
+ Asc.Col.IndPrice%  = 0
+ Asc.Col.Devol%     = 0

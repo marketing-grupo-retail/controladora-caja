@@ -1,0 +1,5 @@
+INMOVSLD.286= INMOVSLD.OBJ ,
+              BASROUT.OBJ,
+              ADXACRCL.L86,
+              EAMCSASC.OBJ,
+              ADXADMBL.L86

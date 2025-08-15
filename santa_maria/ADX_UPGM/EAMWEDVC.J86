@@ -1,0 +1,318 @@
+\/* TIME STAMP BLOCK-************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMWEDVC.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: EXTERNALS for WIC Smartcard Support     */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 2004 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      STATUS: RELEASE 2 LEVEL 0                                 */
+\/*                                                                */
+\/*      PERSON RESPONSIBLE = LOCHNER, TERRY                       */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE ACTIVITY: LEVEL 0                                  */
+\/*                                                                */
+\/*                                                                */
+\/*                                                                */
+\/*                                                                */
+\/*      CHANGE DATE:                                              */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+!*******************  Initialize (_00) **************************
+!Inputs:
+!- Max buffer size
+!- Processing mode
+!  0 = Normal
+!  1 = Training
+!  2 = Certification
+!  3 = Certification Training
+!- State codes, concatenation of 2-character state codes for each state 
+!  supported (e.g. TXARLA, for Texas, Arkansas, Louisiana) 
+!
+!Outputs:
+!- 4-digit Error code
+!- State codes activated (e.g. TXARLA)
+!- Version number for each state code
+!  "FF" means not found
+!  e.g.  "01FF01" implies TX=01, AR=not found, LA=01
+!
+!Implementation notes:
+!- Message to pinpad includes current date/time
+!- Number of valid states in message to pinpad is determined by taking the 
+!  length of the string of state codes divided by 2. 
+!
+!Description:
+!- Format a message: _00yyyymmddhhmmssmmmppnnaabb..cc
+!  yyyymmddhhmmss is current date/time
+!  mmm is the maximum buffer size, with leading zeroes (MaxBufSize)
+!  pp is the processing mode, with leading zero (ProcMode)
+!  nn is the number of 2-character state codes to follow
+!  aabb..cc are the valid state codes (States$)
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_01", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _01EEEEnnaabbcc...rarbrc...
+!  EEEE is the error code (ErrCode$)
+!  nn is the number of 2-character state codes to follow
+!  aabbcc are the valid state codes (States$)
+!  rarbrc are the version numbers for the respective state codes (StatesVer$)
+
+SUB WICInitialize(MaxBufSize, ProcMode, States$, ErrCode$, StatesVer$) EXTERNAL
+   INTEGER*2   MaxBufSize
+   INTEGER*1   ProcMode
+   STRING   States$, ErrCode$, StatesVer$
+END SUB
+
+!*******************  Get PAN (_10) **************************
+!Inputs:
+!- Processing mode (see Initialize for values)
+!
+!Outputs:
+!- 4-digit Error code
+!- State code for which the card is active (e.g. TX)
+!- PAN (Personal Account Number)
+!- Issuer (Benefits Issuing Entity, to be logged in Claims File)
+!
+!Implementation notes:
+!- Message to pinpad includes current date/time
+!
+!Description:
+!- Format a message: _10yyyymmddhhmmsspp
+!  yyyymmddhhmmss is current date/time
+!  pp is the processing mode with leading zero (ProcMode)
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_11", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _11EEEESSllp...pa...a
+!  EEEE is the error code (ErrCode$)
+!  SS is the state for which the card is valid (State$)
+!  ll is the length of the PAN
+!  p...p is the PAN (PAN$)
+
+SUB WICGetPAN(ProcMode, ErrCode$, State$, PAN$) EXTERNAL
+   STRING   ErrCode$, State$, PAN$, Issuer$
+   INTEGER*1   ProcMode
+END SUB
+
+\ REM!!*******************  Read Balance (_20) **************************
+!Inputs:
+!- State code
+!
+!Outputs:
+!- 4-digit Error code
+!- State code for which the card is active (e.g. TX)
+!- Last date to spend (to print on the Current Balance receipt)
+!- First date to spend (to be logged in the Claims File)
+!- WIC Items (a string of 10-byte WIC items concatenated)
+!
+!Implementation notes:
+!- Message to pinpad includes current date/time
+!
+!Description:
+!- Format a message: _20SSyyyymmddhhmmss
+!  SS is the state for which the card is valid (State$)
+!  yyyymmddhhmmss is current date/time
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_21", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _21 EEEESScyyyymmddyyyymmddb...bssmmnniiii...ii
+!  EEEE is the error code (ErrCode$)
+!  SS is the state for which the card is valid (State$)
+!  c is 0 if this is the last message of items, 1 if more messages to follow
+!  yyyymmdd is the last date to spend (LastDate$)
+!  yyyymmdd is the first date to spend (FirstDate$)
+!  b...b is the 15-character Benefits Issuing Entity (Issuer$)
+!  ss is sequential block number
+!  mm is the total number of items in the balance
+!  nn is the number of items in the current block
+!  iiii...ii is a concatenated string of 10-byte WIC items (WICItems$)
+!- If more records are expected, read again until a response is received.  Parse 
+!  it as described above and append the additional items to WICItems$.  Continue 
+!  until the last record is received.  
+
+SUB WICReadBalance(State$, ErrCode$, LastDate$,                                \
+                   FirstDate$, Issuer$, WICItems$) EXTERNAL 
+   STRING   State$, ErrCode$, LastDate$, FirstDate$, WICItems$
+END SUB
+
+!*******************  Decrement Redeemed Benefits (_30) ************************
+!Inputs:
+!- State code for which the card is valid (e.g. TX)
+!- WIC Items to be debited from balance (a string of 10-byte WIC items 
+!  concatenated) 
+!
+!Outputs:
+!- 4-digit Error code
+!- State code for which the card is valid (e.g. TX)
+!- Transaction signature (to be logged in the Claims File)
+!
+!Description:
+!- Format a message: _30 SScssmmnni...i
+!  SS is the state for which the card is valid (State$)
+!  c is 0 for the last message of items, 1 is more messages to follow
+!  ss is sequential block number
+!  mm is the total number of items in the balance
+!  nn is the number of items in the current block
+!  i...i is a concatenated string of 10-byte WIC items (WICItems$)
+!- Send the message.
+!- If more records need to be sent because the record size would exceed the 
+!  maximum buffer size, format it as described above for the additional items.  
+!  Continue until the last record is sent.  
+!- Wait for a response.
+!- If the response string is NULL or it does not begin with "_31", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _31EEEESSllt...t
+!  EEEE is the error code (ErrCode$)
+!  SS is the state for which the card is valid (State$)
+!  ll is the length of the transaction signature
+!  t...t is the transaction signature (Signature$)
+
+SUB WICDebitBalance(State$, WICItems$, ErrCode$, Signature$) EXTERNAL
+   STRING   State$, WICItems$, ErrCode$, Signature$
+END SUB
+
+!*******************  Block Card (_40) **************************
+!Inputs:
+!- State code for which the card is valid (e.g. TX)
+!- Date/Time of card block from hot card list (YYYYMMDDHHMMSS)
+!- Reason Code from hot card list
+!
+!Outputs:
+!- 4-digit Error code
+!- State code for which the card is valid (e.g. TX)
+!
+!Description:
+!- Format a message: _40SSyyyymmddhhmmssrrrr
+!  SS is the state for which the card is valid (State$)
+!  yyyymmddhhmmss is the date/time of the card block from the hot card list file 
+!  (BlockDateTime$) 
+!  rrrr is the Reason Code from hot card list (Reason$)
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_41", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _41EEEESS
+!  EEEE is the error code (ErrCode$)
+!  SS is the state for which the card is valid (State$)
+
+SUB WICBlockCard(State$, BlockDateTime$, Reason$, ErrCode$) EXTERNAL
+   STRING   State$, BlockDateTime$, Reason$, ErrCode$
+END SUB
+
+!*******************  End Transaction (_50) **************************
+!Note: This command does not appear to be used by ACE.
+!
+!Inputs:
+!- State code for which the card is valid (e.g. TX)
+!
+!Outputs:
+!- 4-digit Error code
+!- State code for which the card is valid (e.g. TX)
+!
+!Implementation notes:
+!- Message to pinpad includes current date/time
+!
+!Description:
+!- Format a message: _50SSyyyymmddhhmmsszz
+!  SS is the state for which the card is valid (State$)
+!  yyyymmddhhmmss is the current date/time
+!  zz is a 2-digit completion code that may be used to display text at pinpad.
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_51", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _51EEEESS
+!  EEEE is the error code (ErrCode$)
+!  SS is the state for which the card is valid (State$)
+
+SUB WICEndTransaction(State$, CompCode$, ErrCode$) EXTERNAL
+   STRING   State$, CompCode$, ErrCode$
+END SUB
+
+!*******************  Authenticate User (_60) **************************
+!Inputs:
+!- State code for which the card is valid (e.g. TX)
+!- Number of PIN retries allowed
+!
+!Outputs:
+!- 4-digit Error code
+!- Authentication result code
+!  "00" = PIN entry successful
+!  "FF" = PIN entry unsuccessful but card not locked
+!  "LL" = PIN locked during PIN entry
+!  "PP" = PIN locked prior to current attempts
+!
+!Note: The caller must keep track of the return codes from each attempt in order 
+!      to differentiate between a card that locked during this set of PIN 
+!      entries and one that was already locked before the recent attempt was 
+!      made.   
+!
+!Description:
+!- Format a message: _60SSaa
+!  SS is the state for which the card is valid (State$)
+!  aa is the number of PIN attempts allowed with a leading 0 (MaxRetries)
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_61", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _61EEEErr
+!  EEEE is the error code (ErrCode$)
+!  rr is the result of the authentication (AuthRC$)
+
+SUB WICAuthenticate(State$, MaxRetries, ErrCode$, AuthRC$) EXTERNAL
+   STRING      State$, ErrCode$, AuthRC$
+   INTEGER*1   MaxRetries
+END SUB
+
+!*******************  Deactivate (_70) **************************
+!Note: This command does not appear to be used by ACE.
+!
+!Inputs:
+!- None
+!
+!Outputs:
+!- 4-digit Error code
+!
+!Description:
+!- Format a message: _70
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_71", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+!- Parse the return string: _71EEEE
+!  EEEE is the error code (ErrCode$)
+
+SUB WICDeactivate(ErrCode$) EXTERNAL
+   STRING   ErrCode$
+END SUB
+
+\ REM!!*******************  Remove Card (_80) **************************
+!Inputs:
+!- None
+!
+!Outputs:
+!- 4-digit Error code
+!
+!Description:
+!- Format a message: _80
+!- Send the message and wait for a response
+!- If the response string is NULL or it does not begin with "_81", there was a 
+!  problem communicating with the pinpad.  Return ErrCode$= "FFFF" for the 
+!  application to handle appropriately.  
+
+SUB WICRemoveCard(ErrCode$) EXTERNAL
+   STRING   ErrCode$
+END SUB
+

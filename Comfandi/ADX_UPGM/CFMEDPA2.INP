@@ -1,0 +1,7 @@
+CFMEDPA2.286 = CFMEDPA2.OBJ,
+               BASROUT.OBJ,
+               intrxtdc.obj,
+               ADXACRCL.L86,
+               EAMCSASC.OBJ,
+               ADXADMBL.L86
+               

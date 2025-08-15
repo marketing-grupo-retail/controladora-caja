@@ -1,0 +1,6 @@
+EPSP0404.286  = EPSP0404.OBJ,    
+              ADX_UPGM:BASROUT.OBJ,
+              ADX_UPGM:ADXACRCL.L86,
+              ADX_UPGM:EAMCSASC.OBJ,
+              ADX_UPGM:ADXADMBL.L86,
+              ADX_UPGM:LECTRLCC.OBJ 

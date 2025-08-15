@@ -1,0 +1,11 @@
+!USER EXIT CALLED AFTER ENDING ANY NON-SALES TRANSACTION
+!Despues de completar una transaccion de no venta
+FUNCTION TSUPEC05 PUBLIC
+
+   !JOURNAL ELECTRONICO
+   call QXL.TSUPEC05
+   
+   ! Tarjeta de REGALO
+   call MSMTGIFT05
+
+END FUNCTION

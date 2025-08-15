@@ -1,0 +1,49 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2302.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Exit que agrega signo pesos al precio de un articulo.      
+!
+!     Algoritmo:                                                 
+!               Si se va a desplegar linea de precio de articulo 
+!               ENTONCES, se agrega signo pesos a la segunda linea.           
+!     Variables:                                                 
+!              TS.LINETYPE:  Tipo de display.  1 ==> Item                 
+!              TS.DISP2$:    Segunda linea de despliegue                  
+!------------------------------------------------------------------------
+   LINPESO$ = "  "                               !
+   IF (IR.INDICAT0 AND 01000000B) AND           \! Si PLU con Ind Peso
+      SL.IE.QTYORWGT <> 0 THEN BEGIN             ! y hay Peso en Balanza
+      LINPESO$ = STR$(SL.IE.QTYORWGT) + "GRx"    ! Arma despliegue de
+      LINPESO$ = LINPESO$+STR$(SL.IE.SALEPRIC)   ! GRS x Vr KILO
+      LINPESO$ = LINPESO$+"= $ " +              \! y valor Total
+      STR$(SL.IE.QTYORWGT * SL.IE.SALEPRIC      \! con signo $
+           / 1000 * ANUL%)                       ! y si hay VOID (-)
+      LINPESO$ = RIGHT$(STRING$(20," ")  +      \! y justificando
+                 LINPESO$,20)                    ! a la derecha
+   ENDIF                                         ! fin de datos Grs
+   IF TS.LINETYPE = 1 THEN BEGIN 	         ! Si es Linea de PLU
+      TS.DISP2$   = LEFT$(TS.DISP2$,8) +        \! Inserte signo $ Vsr1
+                 "$" + RIGHT$(TS.DISP2$,11)      ! con el valor
+      TS2.DISP2$   = LEFT$(TS2.DISP2$,8) +      \! Inserte signo $ Vsr2
+                 "$" + RIGHT$(TS2.DISP2$,11)     ! con el valor
+   ENDIF                                         ! Fin de Condic
+   IF TS.LINETYPE = 1 AND                       \! Si es Linea de PLU
+      LINPESO$ <> "  " THEN BEGIN                ! con dato de peso
+      TS.DISP2$   = LINPESO$                     ! Cambia despliegue
+      TS2.DISP2$   = TS.DISP2$                   ! Cambia Visor 2
+   ENDIF                                         ! Fin de Condic
+   IF PLUPAGO% > 999999910 AND                  \! Si es Plu de Verif/Pg
+      PLUPAGO% < 999999969 AND                  \! dentro de un Rango
+      TS.LINETYPE = 12 THEN BEGIN                ! y es linea de Verif
+         IS% = VAL(STR$(INDS%)+STR$(DSCR%))      ! Obtiene Indice Descrip
+         TS.DISP1$ = DSPG$(IS%)                  ! Recup Descrip. para Despl
+         TS.DISP2$ = "    "                      ! Borra el 2o. Despl
+   ENDIF                                         ! Fin de Condic
+!------------------------------------------------------------------------
+

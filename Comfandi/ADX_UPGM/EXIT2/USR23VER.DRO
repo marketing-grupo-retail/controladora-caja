@@ -1,0 +1,48 @@
+!   ***************************************************************************
+!   **    Date       :  Feb. de 1999                                         **
+!   **    Project    :  IBM -                                                **
+!   **    User Exit  :  UT2301A.VTA                                          **
+!   **    Inclu¡r en :  EAMTSU23.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Instrucciones para editar la Linea de Peso en Gramos  y Vr del     **
+!   **    Kg en los visores de la Terminal                                   **
+!   **                                                                       **
+!   **    Si se va a desplegar linea de precio de articulo ENTONCES, se      **
+!   **    agrega signo pesos a la segunda linea.                             **
+!   **                                                                       **
+!   **    Variables:                                                         **
+!   **                                                                       **
+!   **         TS.LINETYPE:  Tipo de display.  1 ==> Item                    **
+!   **         TS.DISP2$:    Segunda linea de despliegue                     **
+!   **                                                                       **
+!   ***************************************************************************
+
+   LINPESO$ = ""                                 !
+   IF (IR.INDICAT0 AND 01000000B) AND           \! Si PLU con Ind Peso
+      SL.IE.QTYORWGT <> 0 THEN BEGIN             ! y hay Peso en Balanza
+      IF ANUL% = 0 THEN ANUL% = 1                ! Si no hubo ANUL es (+)
+      LINPESO$ = STR$(FLOAT(SL.IE.QTYORWGT)/1000)+"Kx"  ! Arma despliegue de
+      VTADESC% = VAL(UNPACK$(IR.SALEPRIC$))      ! el Vr del KILO
+      LINPESO$ = LINPESO$ + STR$(VTADESC%)       ! GRS x Vr KILO
+      LINPESO$ = LINPESO$ + "=$"      +         \! y Vr Total (+)
+                 STR$(SL.IT.XPRICE * ANUL%)      ! ¢ (-) 
+      LINPESO$ = RIGHT$(STRING$(20," ")  +      \! Justifica Vr
+                 LINPESO$,20)                    ! a la derecha
+   ENDIF                                         ! fin de datos Grs
+
+   IF TS.LINETYPE    = 1 AND                    \! Si linea PLU
+      MID$(TS.DISP2$,5,4) <> "*VF*" THEN BEGIN   ! y no verificacion de precio
+    IF LINPESO$ <> "" THEN BEGIN                 ! con dato de peso
+      TS.DISP2$    = LINPESO$                    ! Cambia despliegue
+    ENDIF  					 !
+    TS2.DISP2$   = TS.DISP2$                     ! Cambia Visor cliente
+   ENDIF                                         ! Fin de Condicion
+
+   IF MID$(TS.DISP2$,5,4) = "*VF*" THEN BEGIN    ! Verificacion de precio
+      TS2.DISP1$  = TS.DISP1$                    ! Asigna mensaje al visor
+      TS2.DISP2$  = TS.DISP2$                    ! del cliente
+   ENDIF
+

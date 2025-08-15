@@ -1,0 +1,24 @@
+\------------------------------------------------------------------------------
+\                   NOMBRE DEL MODULO : RTITSUSU.011      
+\          Modulo de Definici¢n de Subrutinas - Retencion en la Fuente IVA
+\  
+\               VERSION : General Consolidada Marzo 2001
+\
+\       Primer Revision : Indata Ltda
+\  
+\    Resumen de Cambios : 
+\ 
+!------------------------------------------------------------------------------
+!             Subrutinas para Retencion de IVA Pagos electronicos
+!------------------------------------------------------------------------------
+SUB VER EXTERNAL                                       ! Muestra IOPROC
+END SUB                                                !
+SUB RTITSU02.011 EXTERNAL                              ! Reset Variables
+END SUB                                                !
+SUB RTITSU07.011 EXTERNAL                              ! Toma Cond PLU 3xMIL
+END SUB                                                !
+SUB RTITSU14.011 EXTERNAL                              ! Reporta IVA a declarar
+END SUB                                                !
+SUB RTITSU20.011 EXTERNAL                              ! Guarda String IVA RTI
+END SUB                                                !
+!------------------------------------------------------------------------------

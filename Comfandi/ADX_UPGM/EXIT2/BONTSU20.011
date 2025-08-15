@@ -1,0 +1,25 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : BONTSU20.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Validacion e Impresion bonos     *
+!				 ganadores                        *  
+!**************************************************
+
+IF UE.PROYECTO(UE.COMF.BONOS%) THEN BEGIN										! Proyecto activo
+IF TS.INTRX THEN \                                                              ! Si esta dentro de una trx
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN                         ! Si final de trx
+ IF (TS.TOTALS(0,0,0) > 0) AND (UE.COMF.NCHQ% > 0) THEN BEGIN                   ! hay venta y bonos
+  TS.ER.RETURN = -1                                                             ! Control errores
+  OPEN "R::GANABONO" KEYED RECL 9 AS UE.COMF.SES1%			        ! Apertura archivo
+  IF TS.ER.RETURN = -1 THEN BEGIN												! Si apertura OK
+     CALL IMPRIMA.BONO.GANADOR                                                  ! Imprima bono
+	 CLOSE UE.COMF.SES1%                                                        ! Cierre archivo
+  ENDIF ELSE CALL MSG.DISP("ERROR EN VALIDACION","DE GANADORES...!",30,1500,3)  ! Mensaje de alerta
+  UE.COMF.NCHQ% = 0                                                             ! Cierra acceso
+ ENDIF
+ENDIF
+ENDIF
+

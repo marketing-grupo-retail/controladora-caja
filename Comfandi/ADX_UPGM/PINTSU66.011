@@ -1,0 +1,14 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DVLTSU23.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Devolucion en Linea      *
+!**************************************************
+
+If X.Callparm = -1 Then Begin										! Si autorizacion correcta
+   IF Ue.Pin.AutAnul% = 2 THEN BEGIN  					! SI TELEFONOS NO RECARGADOS
+      %INCLUDE ADX_UPGM:PINTSU01.011
+   ENDIF 
+Endif

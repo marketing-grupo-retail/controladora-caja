@@ -1,0 +1,43 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!
+!THIS INCLUDE FILE PROVIDES A PLACE FOR THE USER TO DEFINE SUBROUTINES
+!WHICH ARE COMMON TO SEVERAL OF HIS USER EXIT FUNCTIONS IN EAMTSUPC.
+! virtual
+!
+%INCLUDE LCLTSUSU.011              ! Modulo Lealtad Cliente Online
+%INCLUDE MKTTSUSU.011              ! MODULO PROMOCIONES
+%INCLUDE EAMTSESU.J86              ! EMS PRPQ
+%INCLUDE JOURTSSU.011              ! EJ V2
+%INCLUDE EXIT2\COMFTSSU.011        ! COMFANDI - CISA
+%INCLUDE FDEMTSSU.011              ! Fondo de empleados
+%INCLUDE RECASRSU.011              ! Recaudo Servicios Publicos
+%INCLUDE CFTSUSU.011               ! Modulo ofertas 
+%INCLUDE RTITSUSU.011              ! Salva y restaura consulta iva 
+%INCLUDE COLMTSSU.011              ! RECAUDO COLEGIOS
+%INCLUDE EDUMTSSU.011              ! RECAUDO SIEMPRE EDUCANDO
+!%INCLUDE EPAYTSSU.011              ! PAGO ELECTRONICO
+
+%INCLUDE DOMITSSU.011              ! MODULO DOMICILIOS 
+%INCLUDE PTOMTSSU.011              ! PUNTOS ADICIONALES
+%INCLUDE PINTSUSU.011              ! RECARGAS ONLINE
+%INCLUDE PEFTSUSU.011              ! PAGO ELECTRONICO - FONEDE
+
+%INCLUDE CNVTSUSU.011              ! PAGO ELECTRONICO - FONEDE
+
+%INCLUDE GRFTSUSU.011              ! Modulo Fiscal
+%INCLUDE GRRUTINA.011              ! Rutinas Grupo Retail
+
+%INCLUDE UEECR1SU.U86              ! MODULO TEF REDEBAN
+
+Sub VISOR.AND.BORRAR(X.MSG$) EXTERNAL
+END SUB 
+
+!FUNCTION ENTRAPDF(UMSG1$,UMSG2$) external   								! Captura de datos
+!STRING UMSG1$, UMSG2$                    						        ! Definicion de variables
+!STRING ENTRAPDF               
+!end function 
+
+Sub SIMULAR.VENTA.POS(Xopt%) External
+Integer*4 Xopt%, Gri%
+End Sub 

@@ -1,0 +1,9 @@
+!--------------------------------------------------------------
+! Antes de escribir un registro al archivo de listado de pagos
+!--------------------------------------------------------------
+!User exit called before writing tender listing record
+FUNCTION CSUPEC07 (P1) PUBLIC
+   INTEGER*2 P1
+
+
+END FUNCTION

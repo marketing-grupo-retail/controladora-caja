@@ -1,0 +1,69 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril de 2001                                        **
+!   **    Proyecto   :  CASA INFORMATICA S.A                                 **
+!   **    User Exit  :  CELLTS20.011                                         **
+!   **    Inclu¡r en :  EAMTSU20.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   ** 	  Responsable:  UNIDAD RETAIL                      		     **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+IF TS.LINETYPE = 22 AND UE.CELL.ANTRX% = -1 THEN BEGIN       	! Si efectivamente se realizo anul/total
+     UE.CELL.SALE% = 0						! No imprime pines
+     UE.CELL.ANTRX% = 0						! 
+     DIM UE.VTAPIN$(60,2)					! Dimenciona vector
+ENDIF
+
+IF TS.LINETYPE = 1 AND SL.IT.INDICAT3A <> 7 THEN BEGIN
+ IF (TS.LINEDATA = 1 ) AND (RIGHT$(TS.PRTBUF$,4)="    ") THEN GOTO UE.SIGA.CELL	! PARA EVITAR DUPLICIDAD DE ACUMULACION
+ UE.CELL.SW = ITEM.CELLSTAR														! Busca item en cadena
+ IF (SL.IT.INDICAT2 AND 80H) OR (SL.IT.INDICAT2 AND 40H) THEN BEGIN
+    IF UE.CELL.SW THEN BEGIN													! Si es un pin
+       IF TS.IO.DATA$(6) = "" THEN UE.CELL.TMP% = 1 ELSE \						! Qty digitada
+          UE.CELL.TMP% = VAL(TS.IO.DATA$(6)) 									!
+  	   UE.CELL.VALOR$ = STR$(SL.IT.XPRICE)										! Precio de venta
+       IF UE.PLU.ALT$ = "" THEN 			       							   \! Si vendio con EAN
+          UE.CELL.ITEM$  = SL.IT.ITEMCODE$ ELSE 	                       	   \! Asigno EAN
+          UE.CELL.ITEM$  = UE.PLU.ALT$	 	        							! Asigno alterno
+       CALL REVERSA.PIN					! Reversa venta pines
+    ENDIF
+ ENDIF ELSE \
+     IF UE.CELL.SW THEN BEGIN													! Si es un pin
+        IF UE.PLU.ALT$ = "" THEN 			       							   \! Si vendio con EAN
+           UE.CELL.ITEM$  = SL.IT.ITEMCODE$ ELSE 	       				       \! Asigno EAN
+           UE.CELL.ITEM$  = UE.PLU.ALT$	 	        					    	! Asigno alterno
+ 	         UE.CELL.VALOR$ = STR$(SL.IT.XPRICE)										! Asigno precio
+           IF TS.IO.DATA$(6) = "" THEN UE.CELL.TMP% = 1 ELSE \						! Asigna Qty digitada
+              UE.CELL.TMP% = VAL(TS.IO.DATA$(6))									! 
+	         TS.ENTRY.REPEATABLE = 0													!
+	  
+           OPEN "R::CELLSTAR" KEYED RECL 55 AS UE.PIN.SES1%						!	  
+   	       CALL SEPARA.PIN															! Separa pin
+	         CLOSE UE.PIN.SES1%
+	  
+     ENDIF
+ENDIF
+
+IF MATCH("/",TS.PRTBUF$,1) > 0 THEN 										   \! Asigno registro de venta OVS
+   UE.CELL.TAYLR$ = TS.PRTBUF$
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN         ! Ya totalizada 
+ IF (UE.CELL.SALE% = 2) THEN BEGIN  				! con venta y pines
+	CALL IMPRIMA.CELLSTAR
+        UE.CELL.SALE% = 0
+ ENDIF																			!
+ENDIF																			!
+
+IF (TS.LINETYPE = 18) AND (TS.LINEDATA = 99) THEN BEGIN         				! Ya totalizada 
+! IF (TS.TOTALS(0,0,0) < 0 ) AND (UE.CELL.ANUL% = -1) THEN BEGIN  				! con venta y pines
+ IF  (UE.CELL.ANUL% = -1) THEN BEGIN  				! con venta y pines
+    CALL GRABE.DEVOLUCION          
+    UE.CELL.ANUL% = 0
+ ENDIF																			!
+ENDIF																			!
+
+
+UE.SIGA.CELL:

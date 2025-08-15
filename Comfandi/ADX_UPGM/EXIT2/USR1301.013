@@ -1,0 +1,407 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1301.011 
+!     Punto de Entrada   =  EAMTSU13.J86
+!     Fecha de Revisi¢n  =  Oct. 27 de 1997
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertaran en el archivo EAMTSU13.J86
+! a manera de INCLUDE para recuperar el MONTO acumulado
+! de viveres, y calcular el CUPO DISPONIBLE, basado  en
+! el MONTO MAXIMO por transaccion.
+!
+! Produce el TIQUETE de CUPO con las compras y personas
+! autorizadas.
+!
+! Lee el archivo de CUPOS para salvar los Nombres y N¦'s
+! de Identidad del Beneficiario y personas autorizadas.
+!-----------------------------------------------------------
+! Mod26Mzo2006
+! Se adiciona la impresion de trailer de la trx en las copias de los documentos
+! desarrollado por Oscar Valencia 29 Mzo 2006 - ASIC
+!--------------------------------------------------------------
+! Mod27Nov2018
+! Se activa nuevamente la impresion de ivas en tiquete de constacia 
+! de recibo para mini facturas, solicitiado por Freddy Guerrero
+! desarrollado por Grupo Retail - OVS
+!--------------------------------------------------------------
+
+RESW% = 0
+!ON ERROR GOTO ERRORES
+
+IF UE.EPSS.ON = -1 THEN BEGIN                         ! Si nuevo modulo de convenios
+ IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "36" THEN BEGIN    ! FORMA DE PAGO CONVENIOS 
+    EXIT SUB
+ ENDIF 
+ENDIF 
+
+
+IF PRT4610.ENABLE NE 0 THEN BEGIN 
+   FINLIN$ = CHR$(0DH)
+   LFEED$  = CHR$(0DH)
+   FONPH$  = CHR$(1BH)+CHR$(47H)+CHR$(1)
+   FONPHN$ = CHR$(1BH)+CHR$(47H)+CHR$(00)
+ENDIF ELSE BEGIN
+   FINLIN$ = CHR$(13) + CHR$(10)
+   LFEED$  = CHR$(13) + CHR$(10)
+   FONPH$  = ""
+   FONPHN$ = ""
+ENDIF    
+
+PAGO.CH% = 0                                           ! Reset de Verificacion
+IF TS.IO.STATE = 10 THEN BEGIN                         ! Si el Estado = MAIN
+!-- Lineas comentareadas 17Nov2022 - GR OVS
+!   IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "36" OR          \! Si ec CR COMFANDI
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "61" OR          \! Si ec CR Medic Comf
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "62" OR          \! o Temporada Escolar
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "63" OR          \! o Credito interno
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "64" OR          \! o Credito Especial
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "65" OR          \! o C.V.C. 60%
+!      LEFT$(UNPACK$(TS.VF.KEY$),2) = "66" THEN BEGIN   ! o Cr sin Factura   
+
+   IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "36" OR          \! Si ec CR COMFANDI
+      LEFT$(UNPACK$(TS.VF.KEY$),2) = "61" THEN BEGIN   ! Si ec CR Medic Co
+         LLAV1$ = RIGHT$(TS.VF.KEY$,8)                 ! Arma la Llave
+!         call save.print
+         ERRORCOD$ = "  "                              ! Inicia Lectura
+         DIGW$     = " "                               ! Posic de Digito
+         NITW$     = STR$(VAL(UNPACK$(LLAV1$)))        ! Desempaq llave
+         NITEW$    = NITW$                             ! Guarda NIT
+         IF LEN(NITW$) < 7 THEN BEGIN                  ! Si tiene menos de 7 dig
+            NITW$ = RIGHT$("      "+NITW$, 6)          ! Lo ajusta a 6 posic
+         ENDIF                                         ! Fin de Long NIT
+         IF LEN(NITW$) > 8 THEN BEGIN                  ! Si es NIT
+            DIGW$  = "-"+RIGHT$(NITW$,3)               ! Toma el Dig d Ctrl
+            NITW$  = LEFT$(NITW$, LEN(NITW$)-3)        ! y parte Izq del NIT
+            NITEW$ = NITW$                             ! Giarda NIT
+         ENDIF                                         ! Fin de long NIT
+         TO.USEREXIT(20) = 0
+         TO.USEREXIT(60) = 0
+         PRTLINE = "        ** NIT AFILIADO: "+NITW$+DIGW$!
+         !CALL U.IMPRIME(PRTLINE,4100H)
+         
+   IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "64" THEN BEGIN   ! o Credito Interno
+         PRTLINE =(" ** No. CREDITO :"+FAC$)
+         CALL U.IMPRIME(PRTLINE,4100H)
+   ENDIF ELSE BEGIN                                    ! en Tira Cliente
+         IF LEN(CEDU$) > 9 THEN CEDU$=RIGHT$(CEDU$,9)  ! Controla Edicion
+         PRTLINE = LEFT$(("** cc Comprador:"+CEDU$)+STRING$(38," "),38) ! en Tira Cliente
+         CALL U.IMPRIME(PRTLINE,4100H)
+   ENDIF 
+!--- Lineas adicionadas 2Mzo2017   
+   PRTLINE = LEFT$("Emp: "+NOEM$+STRING$(38," "),38)                       				! Entidad Afiliada
+   CALL U.IMPRIME(PRTLINE,4100H)
+   PRTLINE = LEFT$("Nit: " + NITW$+STRING$(38," "),38)                   			! Nit y Fecha Rem
+   CALL U.IMPRIME(PRTLINE,4100H)
+   
+         PRTLINE = LEFT$(" Vend: "+NO.VEN$+" " +NOM.OPER$+STRING$(38," "),38)
+         CALL U.IMPRIME(PRTLINE,4100H)
+         TIPO$ = LEFT$(TS.VF.KEY$ , 1)                 ! Toma Tipo y Variedad
+         IF TI61% = 1 THEN TIPO$ = PACK$("61")         ! Cambia Tip/Vrdad
+         IF TI65% = 1 THEN TIPO$ = PACK$("65")         ! Cambia Tip/Vrdad
+         LLAV1$ = TIPO$ + RIGHT$(TS.VF.KEY$,7)         ! Arma la Llave
+         IF UNPACK$(TIPO$) <> "36" THEN BEGIN          ! Si no es Minifac
+            READ FORM "C8 C30 2C3 C1";#71 KEY LLAV1$; \! y lee EMPRE Benef
+                  COD$,NOEM$,FECRE$,FEMOD$,NOVE$       ! 
+                  
+
+!-- Lineas Propias de Comfandi
+    Call U.IMPRIME(TS.TEMP1$,6100H)
+    IF Len(vend.medica$) > 1 THEN BEGIN
+       Call U.IMPRIME("Despacho: " +" "+vend.medica$+" "+nom.oper$,6100H)
+    EndIf   
+
+!--- Fin de lineas adicionadas         
+
+!--- Lineas adicionadas 21Ene2010 - GR                 
+         !CALL U.IMPRIME("C O P I A  --  T  I Q U E T E",4100H)
+         CALL U.IMPRIME("--- CONSTANCIA DE RECIBO  ---",4100H) ! Mod 02Mzo2017 OVS-GR
+         TS.TEMP1$ = LINEA.DETALLE(38)                  ! Mod26Mzo2006 OVS - ASIC
+         CALL U.IMPRIME(TS.TEMP1$,4200H)                ! Mod26Mzo2006 OVS - ASIC
+         
+!         CALL Impresion.Detalle.Iva                     ! Mod27Nov2018 OVS - GR
+         
+         GoTo PASA.PROCESO         
+         
+         FOR UE.II% = 1 TO 4                        !
+            IF UE.II% = 1 THEN IC% = IPOT16%        ! Impo Consumo Plan A
+            IF UE.II% = 2 THEN IC% = IPOT20%        ! Impo Consumo Plan B
+            IF UE.II% = 3 THEN IC% = IPOT35%        ! Impo Consumo Plan C
+            IF UE.II% = 4 THEN IC% = IPOTDD%        ! Impo Consumo Plan D
+            IF UE.II% = 1 AND                      \!
+              (TS.TOTALS(1,0,0) <> 0 OR            \!
+               TS.TOTALS(2,0,0) <> 0 OR            \!
+               TS.TOTALS(3,0,0) <> 0 OR            \!
+               TS.TOTALS(4,0,0) <> 0) THEN BEGIN    !
+               
+                  AUX$ = "       "   +             \!
+                         "** DETALLE DEL IVA **"
+                  TS.TEMP3$  = AUX$ 
+                  CALL U.IMPRIME(TS.TEMP3$,4100H)
+                  !write #34;aux$ 
+                  AUX$ = "Tarifa     Compra  "  +  \!
+                         "Base/Imp.    IVA"
+                  TS.TEMP3$  = AUX$ 
+                  CALL U.IMPRIME(TS.TEMP3$,4100H)       
+            ENDIF                                   !
+            IF UE.II% = 4 AND                      \!
+               MEX.VAT.TOTAL(0) = 0 THEN BEGIN      ! Si no Hay IVA's, evita
+                  AUX$ = "   ** VENTA TOTAL EXCLUIDA DE IVA **"
+                  TS.TEMP3$  = AUX$ 
+                  CALL U.IMPRIME(TS.TEMP3$,4100H) 
+            ENDIF                                   !
+            IF TS.TOTALS(UE.II%,0,0) <> 0 AND         \!
+                 MEX.VAT.TOTAL(0) <> 0 THEN BEGIN   !
+                 AUX$ = CNV$(UE.II%)+STR$(MEX.VAT.TAB(UE.II%))+"%"
+
+            CALL FORMAT.AMOUNT(TS.TOTALS(UE.II%,0,0))! Format va return TS.TEMP1$
+               USR.PAGO$ = TS.TEMP1$                !
+               USR.PAGO$ = RIGHT$("          " +   \!
+                           USR.PAGO$,10)            !
+            CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(UE.II%))! Format va return TS.TEMP1$
+               USR.BASE$ = TS.TEMP1$                !
+               USR.BASE$ = RIGHT$("          " +   \!
+                           USR.BASE$,10)            !
+            USR.IVA$ = STR$(TS.TOTALS(UE.II%,0,0)  \!
+                             - IC%                 \!
+                             - MEX.VAT.TOTAL(UE.II%))  ! Format va return TS.TEMP1$
+            CALL FORMAT.AMOUNT(TS.TOTALS(UE.II%,0,0) \!
+                             - IC%                 \!
+                             - MEX.VAT.TOTAL(UE.II%))  ! Format va return TS.TEMP1$
+               USR.IVA$ = TS.TEMP1$                 !
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+
+                  PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+                  CALL U.IMPRIME(PRTLINE,4100H)
+
+         ENDIF                                      ! End if printing line
+         IF UE.II% = 4 THEN BEGIN                   !
+           AUX$ = "*SIN IVA"                        !
+           SIN.IVA.TOTALS=       TS.TOTALS(0,0,0)  \! Compra Exenta = Pago Total -
+                                - TS.TOTALS(1,0,0) \! IVA 1 de la Compra -
+                                - TS.TOTALS(2,0,0) \! Iva 2 de la Compra -
+                                - TS.TOTALS(3,0,0) \! Iva 3 de la Compra
+                                - TS.TOTALS(4,0,0) \! Iva 4 de la Compra
+                                + VRLIQ%            !
+            CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(UE.II%)) ! Format va return TS.TEMP1$
+               USR.IVA$ = TS.TEMP1$                 !
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+            CALL FORMAT.AMOUNT(SIN.IVA.TOTALS)      ! Format va return TS.TEMP1$
+               TS.TEMP1$ = RIGHT$("          " +   \!
+                           TS.TEMP1$,10)            !
+               TS.TEMP3$  = AUX$+TS.TEMP1$
+               CALL U.IMPRIME(TS.TEMP3$,4100H)
+
+            IF VRLIQ% <> 0 THEN BEGIN               !
+               CALL FORMAT.AMOUNT(VRLIQ% * -1)      ! Format va return TS.TEMP1$
+               TS.TEMP1$ = RIGHT$("          " +   \!
+                           TS.TEMP1$,10)            !
+               AUX$ = "*R/FTE =" +TS.TEMP1$ 
+               TS.TEMP3$  = AUX$ 
+               CALL U.IMPRIME(TS.TEMP3$,4100H)
+                  !write #34;aux$+TS.TEMP1$+FINLIN$
+             
+            ENDIF                                   !
+            IF MEX.VAT.TOTAL(0) <> 0 THEN BEGIN     ! Si no Hay IVA's, evita
+               AUX$ = "TOTAL ="                     ! Impresion de Datos CERO
+               CALL FORMAT.AMOUNT(TS.TOTALS(0,0,0)) ! Format va return TS.TEMP1$
+               USR.PAGO$ = TS.TEMP1$                !
+               USR.PAGO$ = RIGHT$("          " +   \!
+                           USR.PAGO$,10)            !
+               CALL FORMAT.AMOUNT(MEX.VAT.TOTAL(0)) ! Format va return TS.TEMP1$
+               USR.BASE$ = TS.TEMP1$                !
+               USR.BASE$ = RIGHT$("          " +   \!
+                           USR.BASE$,10)            !
+               IC%=IPOT16%+IPOT20%+IPOT35%+        \!
+                   IPOTDD%+((VRLIQ%)*-1)            ! Sumatoria de los Ivas
+               CALL FORMAT.AMOUNT(TS.TOTALS(0,0,0) \! Total de la Compra -
+                             - IC%                 \! Suma del Imp Consumo
+                             - SIN.IVA.TOTALS      \! Total Exento       -
+                             - MEX.VAT.TOTAL(0))    ! Base Imponible         
+               USR.IVA$ = TS.TEMP1$                 ! Iva Causado
+               USR.IVA$  = RIGHT$("          " +   \!
+                           USR.IVA$ ,10)            !
+               IVAS$    = TS.TEMP1$                 !
+
+               PRTLINE=AUX$+USR.PAGO$+USR.BASE$+USR.IVA$
+               TS.TEMP3$  = prtline 
+               CALL U.IMPRIME(TS.TEMP3$,4100H)
+            ENDIF                                   ! Fin de Tot Vta Excluida
+               CALL FORMAT.AMOUNT(IPOT00%)          ! Formato SIN IVA
+               USR.IP00$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT16%)          ! Formato 16%
+               USR.IP16$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT20%)          ! Formato 20%
+               USR.IP20$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOT35%)          ! Formato 35%     
+               USR.IP35$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+               CALL FORMAT.AMOUNT(IPOTDD%)          ! Formato Plan DD%
+               USR.IPDD$ = RIGHT$("         " +    \!
+                           TS.TEMP1$,8)             !
+            IF IPOT00% > 0        THEN BEGIN        ! Si ha Imp Consumo
+               AUX$  = "ImpoC '*'="+USR.IP00$ 
+               CALL U.IMPRIME(aux$,4100H)
+            ENDIF                                   !
+            IF IPOT16% > 0 OR IPOT20% > 0 THEN BEGIN! Si hay Imp Consumo
+               AUX$  = "ImpoC *A*="+USR.IP16$+" "+"ImpoC *B*="+USR.IP20$         
+               CALL U.IMPRIME(aux$,4100H)
+            ENDIF                                   ! 
+            IF IPOT35% > 0 OR IPOTDD% > 0 THEN BEGIN! Si ha Imp Consumo
+               AUX$  = "ImpoC *C*="+USR.IP35$+" "+"ImpoC *D*="+USR.IPDD$         !
+               CALL U.IMPRIME(Aux$,4100H)
+            ENDIF                                   !
+            
+            AUX$  = "LE ATENDIO CON GUSTO:  " +   \!              
+             " "+NOMOPER$
+            IF PRT4610.ENABLE = 0 THEN \
+               AUX$ = LEFT$(AUX$,37)
+               CALL U.IMPRIME(aux$,4100H)
+
+               IF PRT4610.ENABLE  = 0 THEN BEGIN 
+                  CALL U.IMPRIME("Somos Autoretenedores Segun Resolucion",4100H)
+                  CALL U.IMPRIME("Numero 1660 de marzo 7 de 2000",4100H)
+                  CALL U.IMPRIME("Somos grandes contribuyentes segun",4100H)
+                  CALL U.IMPRIME("Resolucion 7029 de Nov-22 de 1996",4100H)
+               ENDIF ELSE BEGIN 
+                  CALL U.IMPRIME(" ",4100H)
+                  CALL U.IMPRIME("Autoretenedores S/Res.No.1660 de marzo 7/2000",4100H)
+                  CALL U.IMPRIME("Grandes Contribuyentes S/Res.No.7029 de Nov-22/1996",4100H)
+               ENDIF                
+               
+               !CALL U.IMPRIME("C O P I A  --  T  I Q U E T E",4100H)               
+               CALL U.IMPRIME("--- CONSTANCIA DE RECIBO  ---",4100H) ! Mod 02Mzo2017 OVS-GR
+               TS.TEMP1$ = LINEA.DETALLE(38)                  ! Mod26Mzo2006 OVS - ASIC
+               CALL U.IMPRIME(TS.TEMP1$,4200H)               ! Mod26Mzo2006 OVS - ASIC               
+
+               IPOT16% = 0  : IPOT20% = 0              !
+               IPOT35% = 0  : IPOTDD% = 0 : IPOT00% = 0!
+               CALL FORMAT.AMOUNT(TS.TOTALS(4,0,0)    \! Total Exento   +
+                             + MEX.VAT.TOTAL(0)    \! Base Imponible +
+                             + VRLIQ%              \! Retencion Fte  +
+                             + PEAJES%)             ! Peajes pagados  
+                SUBT$    = TS.TEMP1$                 ! Subtotal sin Iva
+         ENDIF                                      !
+        
+         NEXT UE.II%                                !
+         
+         PASA.PROCESO:
+            IF ERRORCOD$ <> "  " THEN BEGIN            ! Si no existe Key
+               KODEM$= STRING$(7," ")                  ! Reset Cod Empresa
+               NOM$ = "*                  *"           ! Borra Nombre Ant
+               NOEM$ = NOM$                            ! Guarda Nombre
+            ENDIF                                      ! Fin de Lect
+            NOM$ = NOEM$                               ! Guarda Nombre 
+            LOCATE #30;1,1,OFF                         ! Cursor Video Disp
+            WRITE FORM "C20 C4 PIC(###,###,###) C4";  \! Despliega nombre
+                 #30;NOM$,"NIT ",VAL(NITW$),DIGW$      ! y Nit empresa
+            WAIT;2000                                  ! Espera 2 seg
+            KODEM$ = RIGHT$(UNPACK$(LLAV1$),12)        ! Toma Cod Empresa
+            NOEM$ = LEFT$(NOEM$,25)                    ! Toma Nombre Emp
+            ROTUL$ = KODEM$ + " " + NOEM$              ! Arma Letrero
+            !CALL U.IMPRIME(FONPH$,4100H)
+ !           call restore.print
+         ENDIF                                            !
+   ENDIF                                                  ! Fin de Verif
+   TO.USEREXIT(20) = -1
+   TO.USEREXIT(60) = -1  
+ENDIF                                                     !Fin de Estado Main
+
+IF TS.BALDUE(0)  < 1  AND                                \! Si no hay COMPRAS 
+   TS.BALDUE(1)  < 1  AND                                \! ni Tax/Dsct/etc
+   TS.IO.STATE   = 10 AND                                \! y Estado = MAIN
+   TS.IO.KEYS(4) = 100   THEN BEGIN                       ! y Tecla NO VENTA
+   
+      TO.USEREXIT(20) = 0
+      TO.USEREXIT(60) = 0
+   
+     TS.TEMP3$ ="*VERIFICACION DE CUPO DE EMPRESAS***"   ! de Cupo del Afiliado
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     LETCUPO$ = STRING$(20," ")                                !
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "61" THEN        \! Si Medicam Empresas
+         LETCUPO$ ="-MEDICAMENTOS EMPRESAS-"  ELSE       \!
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "62" THEN        \! Si es Temporada Escol
+         LETCUPO$ =" -TEMPORADA ESCOLAR -"    ELSE       \!
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "63" THEN        \! Si es Credito Interno
+         LETCUPO$ ="  - CREDITO INTERNO -"    ELSE       \!
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "64" THEN        \! Si es Espec Empresas 
+         LETCUPO$ =" -CR/ESPECIAL EMPRESAS-"  ELSE       \!
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "65" THEN        \! Si es Credito CVC
+         LETCUPO$ ="  - CREDITO  C.V.C. -"    ELSE       \!
+      IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "66" THEN        \! Si Cred sin Facturas
+         LETCUPO$ =" -CREDITO SIN FACTURAS- "             !
+
+     TS.TEMP3$ = LETCUPO$                                 !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = ROTUL$                                   !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     ROTUL$ = "   "                                           ! y Borra 
+     TS.TEMP3$ = " -------------------------------------" ! Calcula Vrs CUPO 
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     CUPOA$ = RIGHT$("       " +                             \! Acum y lo Imprime
+           STR$(TS.VF.LIMTRANS+TS.USEREXIT),8)             !
+     TS.TEMP3$ = "    CUPO AUTORIZADO ="+CUPOA$              !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     READ FORM "C13 2I4 I2 I4 C1";#38 KEY TS.VF.KEY$;        \! Lee Cust.Acc.Stat y
+             CE.LLAVE$,CE.RESTA%,CE.VRACUM%,              \! toma Vr de Compras
+             CE.NUM%,CE.USER%,CE.CARAC$                    ! Acum del Periodo
+     ACUMQ$ = RIGHT$("       "+STR$(TS.USEREXIT),8)           !
+     COMPH$ = RIGHT$("       "+STR$(CE.VRACUM%),8)            !
+     UTILI$ = RIGHT$("       "+                              \!
+           STR$(CE.VRACUM%+TS.USEREXIT),8)                 !
+     IF LEFT$(UNPACK$(TS.VF.KEY$),2) = "61" THEN             \! Si son Lib.COMFAM
+        TS.TEMP3$ =  "      ACUM/QUINCENA ="+ACUMQ$             \!
+        :CALL U.IMPRIME(TS.TEMP3$,4100H) \
+     ELSE                                                    \!
+        TS.TEMP3$ =    "       ACUM/COMPRAS ="+ACUMQ$      :   \ !
+        CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ =  "        COMPRAS HOY ="+COMPH$         !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = "          UTILIZADO ="+UTILI$          !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     IF CE.VRACUM%  > TS.VF.LIMTRANS THEN                    \! Si Compras se Exceden
+        CE.DISPON% = 0           ELSE                     \! DISPONIBLE = 0
+        CE.DISPON% = TS.VF.LIMTRANS - CE.VRACUM%                 ! Calcula CUPO Disp.
+     DISPO$ = RIGHT$("     $ "+STR$(CE.DISPON%),8) + " **"    !
+     TS.TEMP3$ ="    DISPONIBLE --->" +DISPO$                !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = " -------------------------------------"  !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = LEFT$(NOEM$,25)+ RIGHT$("        "+      \!
+                  UNPACK$(TS.VF.KEY$),12)                   !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TS.TEMP3$ = " -------------------------------------"  !
+     CALL U.IMPRIME(TS.TEMP3$,4100H)
+     TO.USEREXIT(20) = -1
+     TO.USEREXIT(60) = -1
+ENDIF                                                  ! Fin si No Venta
+RESW% = 1                                              !
+!------------------------------------------------------------
+!                RUTINA PARA ERRORES                      
+!------------------------------------------------------------
+ERRORES:                                !
+!IF RESW% = 0 THEN BEGIN                 !
+!    HX% = ERRN                          !
+!    ERRFX$=""                           !
+!    FOR S% = 28 TO 0 STEP -4            !
+!        SX% = SHIFT(HX%,S%)             !
+!        SUM% = SX% AND 000FH            !
+!        IF SUM% > 9 THEN               \!
+!           SUM% = SUM% + 55            \!
+!        ELSE                           \!
+!           SUM% = SUM% + 48             !
+!        Z$ = CHR$(SUM%)                 !
+!        ERRFX$ = ERRFX$ + Z$            !
+!    NEXT S%                             !
+!    IF ERR = "EF" THEN ERRORCOD$="EF"   ! Fin de Archivo
+!    IF ERR = "OE" THEN ERRORCOD$="OE"   ! No Existe el Archivo
+!    RESUME                              !
+!ENDIF                                   !
+! ---------------------FIN DEL PROGRAMA-------------------------

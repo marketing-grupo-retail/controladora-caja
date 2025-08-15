@@ -1,0 +1,35 @@
+
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR14VE.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  FEBRERO DE 2005
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Estas lineas se insertaran en el archivo EAMTSU14.J86
+! a manera de INCLUDE para OBLIGAR A IMPRIMIR el 
+! codigo y nombre del vendedor de medicamentos que despacha la formula
+! Lee el archivo de OPERADORES para por tanto los vendedores deben estar 
+! matriculados. como operadores del pos perfil 3       
+!-----------------------------------------------------------
+
+
+
+IF  TO.USEROPTS(5) <> 0  and                         \!  opcion encendida
+   TS.IO.STATE        = 10 AND                       \! Si esta en MAIN y se
+   TS.BALDUE(0)       > 0  AND                       \! digita codigo de variedad,
+   NOM.OPER$ =          "" AND                       \! digita codigo de variedad,
+   (TS.IO.KEYS(7)     = 91   OR                      \! a EFECTIVO con o sin Factura, o
+    TS.IO.KEYS(7)     = 92   OR                      \! CHEQUE con o sin Factura, se
+    TS.IO.KEYS(7)     = 93   OR                      \! OTROS PAGOS 
+    TS.IO.MOTORKEY    = 255  OR                      \! CONVENIOS
+    TS.IO.KEYS(7)     = 94   OR                      \! T.CREDITO  o sin Factura, se
+    TS.IO.KEYS(7)     = 95)   THEN BEGIN              ! T. DEBITO  o sin Factura, se
+AVISO$ = " NO OLVIDE DIGITAR EL   "      +           \! Aviso
+ " VENDEDOR  "
+WRITE FORM "C40";#30;AVISO$
+WAIT;500
+TS.IO.MOTORKEY = 0
+ENDIF                                                 !

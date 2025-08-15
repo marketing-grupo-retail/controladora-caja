@@ -1,0 +1,28 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*****************************************************************************!
+!* Subroutine     : IRUEEC02                                                 *!
+!*                                                                           *!
+!* Description    : OPEN user exit                                           *!
+!*                                                                           *!
+!* Parameters     : EAMITEMR$       String with the filename                 *!
+!*                  SESS.NO         Session number being used                *!
+!*                  OPEN.MODE       Type of open being performed             *!
+!*                                   1  = Read/Write access                  *!
+!*                                   2  = Only Read access                   *!
+!*                                   -1 = Terminal specific priority open    *!
+!*                                                                           *!
+!* Variables      : IRUE.BYPASS     Allows user to bypass file open by       *!
+!*                                  setting this variable to any non-zero    *!
+!*                                  value.                                   *!
+!*                                                                           *!
+!* Notes          :                                                          *!
+!*                                                                           *!
+!*****************************************************************************!
+SUB IRUEEC02(EAMITEMR$, SESS.NO, OPEN.MODE) PUBLIC
+  STRING    EAMITEMR$
+  INTEGER*2 SESS.NO
+  INTEGER*2 OPEN.MODE
+END SUB
+

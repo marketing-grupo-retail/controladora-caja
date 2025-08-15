@@ -1,0 +1,8 @@
+     EAMDMIPL     = EAMDMIPC,
+                    EAMDMCFC[S],
+                    EAMMMCFC[S],
+                    EAMPSDMK.L86[S],
+                    EAMGAFPK.L86[S],
+                    EAMGASCK.L86[S],
+                    ADXACRCL.L86 [s],
+                    ADXADMBL.L86 [S,LI,LO,M,STACK[MAX[200]]]

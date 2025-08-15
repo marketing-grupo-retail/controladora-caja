@@ -1,0 +1,19 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** USERRADF.J86 ******************************************!
+! TITLE: Electronic Marketing Redemption Audit file definition
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!*******************************************************************
+!!** DEFINE VARIABLES FOR THE REDEMPTION AUDIT FILE                **
+!!*******************************************************************
+ STRING GLOBAL              \
+         RA.DATA$,          \         TOTAL RECORD DATA
+         RA.DATETIME$,      \         DATE AND TIME OF REDEMPTION
+         RA.POINTSP$,       \         POSITIVE POINTS
+         RA.POINTSN$        !         NEGATIVE POINTS
+ 
+ INTEGER GLOBAL USER.FBAUD.OPEN       ! Flag file open

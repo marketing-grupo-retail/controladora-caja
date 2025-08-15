@@ -1,0 +1,28 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR1400.011 
+!     Punto de Entrada   =  EAMTSU14.J86
+!     Fecha de Revisi¢n  =  Ene 23 de 1999
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!------------------------------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+! Verifica los Codigos 128 de Comfandi (Plu Precio) en las Versiones 5/7
+! y 6/6 para eliminar la verificacion, antes del manejo de Cliente Frecuente
+!
+!------------------------------------------------------------------------------
+
+VERIFICA% = 1                                       ! No Verificar
+IF TS.IO.STATE    = 10   AND                       \! Si esta en MAIN 
+   TS.IO.KEYS(2)  = 80   AND                       \! Si hay ENTER
+   LEN(TS.IO.DATA$(2)) = 12 THEN BEGIN              ! Si Long = 12
+   IF MID$(TS.IO.DATA$(2),6,1) = " " THEN BEGIN     ! y trae PLU/PREC
+      TS.IO.DATA$(2) = "0" + TS.IO.DATA$(2)         ! agrega un CERO
+      VERIFICA% = 0                                 ! Si Lect PLU/PRECIO
+   ENDIF ELSE BEGIN                                 !
+      TS.IO.DATA$(2) = "1" + TS.IO.DATA$(2)         ! agrega Dato Literal
+      VERIFICA% = 0                                 ! Si Lect PLU/PRECIO
+   ENDIF                                            ! Fin de Condic
+ENDIF                                               ! Fin de Condic
+
+!------------------------------------------------------------------------------

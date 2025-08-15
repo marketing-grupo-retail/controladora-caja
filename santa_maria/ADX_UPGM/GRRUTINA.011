@@ -1,0 +1,35 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : GRRUTINA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Definicion librerias Grupo       *
+!                Retail                           *
+!**************************************************
+!Observaciones:
+
+Sub GRREMATES(Xopt%) External																							  ! Modulo remates
+Integer*4 Xopt%            																								  ! UE ejecutar
+End Sub
+
+! Deliverys OV 13112023
+SUB GRDOMICILIOS(Xopt%) External 																						! Modulo de domicilios
+Integer*4 Xopt% 																														! UE ejecutar 
+END SUB
+
+! Cupones Tienda 10122023
+Sub GRCUPONES(Xopt%) EXTERNAL 																					   	! Modulo de Cupones Tienda
+Integer*4 Xopt% 																														! UE ejecutar 
+END SUB
+
+Sub PAGO.DEUNA(Xopt%) External																			  			! Modulo Pago De Una
+Integer*4 Xopt%
+End Sub 
+
+Sub PAGO.RAPPI(Xopt%) External																			  		  ! Modulo Pago Rappi
+Integer*4 Xopt%
+End Sub 
+
+Sub GRCLVAUT(Xopt%) External																						    ! Modulo Claves Autorizacion
+Integer*4 Xopt%            																								  ! UE ejecutar
+End Sub 

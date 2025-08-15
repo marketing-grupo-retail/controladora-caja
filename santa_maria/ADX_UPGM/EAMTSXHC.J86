@@ -1,0 +1,101 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+!!********************************************************************!!
+!!                                                                    !!
+!!      HEADER NAME: EAMTSXHC                                         !!
+!!                                                                    !!
+!!      DESCRIPTIVE NAME: SUMMARY LOG ARRAY ROUTINES DECLARATIONS     !!
+!!                                                                    !!
+!!      COPYRIGHT:                                                    !!
+!!          5696-536 THIS HEADER IS "RESTRICTED MATERIALS OF IBM"     !!
+!!          (c) COPYRIGHT IBM CORP 1986,1993                          !!
+!!              ALL RIGHTS RESERVED LICENSED                          !!
+!!          MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT            !!
+!!          INSTRUCTIONS FORM NUMBER G120-2083                        !!
+!!                                                                    !!
+!!      STATUS: RELEASE 1 LEVEL 0                                     !!
+!!                                                                    !!
+!!      PERSON RESPONSIBLE = NIGEL HUBBARD                            !!
+!!                                                                    !!
+!!      FUNCTION: EAMTSXHC                                            !!
+!!          THIS HEADER FILE CONTAINS THE DECLARATIONS FOR THE        !!
+!!          FUNCTIONS DEFINED IN 'EAMTSX0C.BAS' AND THEIR             !!
+!!          COMPANIONS IN 'EAMTSX1C.BAS'.                             !!
+!!                                                                    !!
+!!      NOTES: THIS HEADER WAS ADDED AS PART OF IR83368               !!
+!!                                                                    !!
+!!      CHANGE ACTIVITY: NONE                                         !!
+!!                                                                    !!
+!!* END-OF-SPECIFICATIONS ********************************************!!
+
+!!********************************************************************!!
+!!                                                                    !!
+!!      FUNCTION DECLARATIONS                                         !!
+!!                                                                    !!
+!!********************************************************************!!
+
+! dimension summary log array
+FUNCTION DIM.SL.STR(SIZE.OF) EXTERNAL
+INTEGER*2 DIM.SL.STR
+INTEGER*2 SIZE.OF
+END FUNCTION
+
+! dimension summary log array for price change strings
+FUNCTION DIM.PC.STR(SIZE.OF) EXTERNAL
+INTEGER*2 DIM.PC.STR
+INTEGER*2 SIZE.OF
+END FUNCTION
+
+! read entry from summary log array
+FUNCTION READ.SL.STR$(INDEX) EXTERNAL
+STRING READ.SL.STR$
+INTEGER*2 INDEX
+END FUNCTION
+
+! write entry to summary log array
+FUNCTION WRITE.SL.STR(INDEX, SOURCE$) EXTERNAL
+INTEGER*2 WRITE.SL.STR
+INTEGER*2 INDEX
+STRING SOURCE$
+END FUNCTION
+
+! open file for write matrix
+FUNCTION OPEN.FOR.SL.STR(NAME$, SESS.NO) EXTERNAL
+INTEGER*2 OPEN.FOR.SL.STR
+STRING NAME$
+INTEGER*2 SESS.NO
+END FUNCTION
+
+! close file for write matrix
+FUNCTION CLOSE.FOR.SL.STR(SESS.NO) EXTERNAL
+INTEGER*2 CLOSE.FOR.SL.STR
+INTEGER*2 SESS.NO
+END FUNCTION
+
+! write series of array entries to file
+FUNCTION WRITE.MATRIX.SL.STR(SESS.NO, INDEX, ELEMENTS) EXTERNAL
+INTEGER*2 WRITE.MATRIX.SL.STR
+INTEGER*2 SESS.NO
+INTEGER*2 INDEX
+INTEGER*2 ELEMENTS
+END FUNCTION
+
+! determine size for summary log array
+FUNCTION SIZE.OF.SL.STR EXTERNAL
+INTEGER*2 SIZE.OF.SL.STR
+END FUNCTION
+
+! determine size for array used for price change strings
+FUNCTION SIZE.OF.PC.STR EXTERNAL
+INTEGER*2 SIZE.OF.PC.STR
+END FUNCTION
+
+! has summary log array reached warning level
+FUNCTION IS.WARN.SL.STR EXTERNAL
+INTEGER*2 IS.WARN.SL.STR
+END FUNCTION
+
+! is summary log array full
+FUNCTION IS.FULL.SL.STR EXTERNAL
+INTEGER*2 IS.FULL.SL.STR
+END FUNCTION

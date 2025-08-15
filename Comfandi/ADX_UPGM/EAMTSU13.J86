@@ -1,0 +1,16 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC13 PUBLIC                                                        
+! TSUPEC13 - AFTER TV READ                                                      
+
+!If (Ue.Cnv.Fiscal% = -1) Then \!
+
+CALL LIBLINE(13,1)           ! Produce Tiquete de Cupos. Cliente y Vendedor
+
+!CALL EPAYMS13.011              ! PAGO ELECTRONICO
+
+%INCLUDE UEECR113.U86          ! MODULO TEF REDEBAN
+
+END FUNCTION                                                                    
+                                                                                

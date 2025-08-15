@@ -1,0 +1,86 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DMPTSU14.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Dialogo Medios de Pago           *
+!**************************************************
+! Modificaciones:
+
+IF TS.IO.MOTORKEY >= 91 AND TS.IO.MOTORKEY <= 96 THEN BEGIN              ! Si es una forma de pago
+   IF MATCH(TS.IO.DATA$(3),"123456",1) <= 0 THEN \                       ! Si entra secuencia default
+      TS.IO.DATA$(3) = "1"                                               ! Asigna la variedad uno
+  TS.TEMP1$ = STR$(TS.IO.MOTORKEY)    
+  FOR XI% = 1 TO TO.NUMTNDR		                                           ! Revisa pagos definidos
+    IF TO.TENDOPTS(XI%,0) = VAL(Right$(TS.TEMP1$,1)) THEN BEGIN          ! Valido Tipo
+     IF (TO.TENDOPTS(XI%,1) = VAL(TS.IO.DATA$(3))) THEN BEGIN            ! Valida variedad
+       TS.TEMP1I4 = 1                                                    ! Pago Activo
+       XA$ = Right$(TS.TEMP1$,1) + TS.IO.DATA$(3)                        ! Tipo y variedad
+       XI% = TO.NUMTNDR + 10
+     ENDIF
+    ENDIF
+  NEXT XI%
+  
+  IF TS.TEMP1I4 = 1 THEN BEGIN                                           ! Pago activo
+   For XI% = 1 TO 36                                                     ! Recorre medios de pago
+    If DMedios$(XI%,0) = XA$ Then Begin                                  ! Encontro Medio de Pago
+      DIM ED$(5)                                                         ! Captura entrada de datos
+     IF VAL(DMedios$(XI%,1)) = -1 THEN BEGIN                             ! Captura ID del cliente
+         TS.TEMP1$ =  ASIC.DATOS$("ID DEL CLIENTE?","")                  ! Captura informacion
+         IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     ! No se capturo dato
+          CALL VISOR.AND.BORRAR("PROCESO CANCELADO   POR EL USUARIO")    !
+          DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)											 ! Init vectores de aplicacion
+          TS.IO.MOTORKEY = 73                                            !
+          EXIT SUB 
+         ENDIF                                                           !
+         ED$(1) = TS.TEMP1$                                              ! Asigna dialogo
+         TS.IO.DATA$(9) = TS.TEMP1$                                      ! Asigna numero a cliente
+      ENDIF ELSE ED$(1) = "000000"   
+
+      IF VAL(DMedios$(XI%,2)) = -1 THEN BEGIN                            ! Captura Nro Cheque
+         TS.TEMP1$ =  ASIC.DATOS$("CODIGO DEL BANCO?","")                ! Captura informacion
+         IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     ! No se capturo dato
+          CALL VISOR.AND.BORRAR("PROCESO CANCELADO   POR EL USUARIO")    !
+          DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)											 ! Init vectores de aplicacion
+          TS.IO.MOTORKEY = 73                                            !
+          EXIT SUB 
+         ENDIF                                                           !
+         ED$(2) = TS.TEMP1$                                              ! Asigna dialogo
+      ENDIF ELSE ED$(2) = "000000"
+      
+      IF VAL(DMedios$(XI%,3)) = -1 THEN BEGIN                            ! Captura Nro Autorizacion
+         TS.TEMP1$ =  ASIC.DATOS$("NUM.AUTOR/DOCUMENTO?","")             ! Captura informacion
+         IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     ! No se capturo dato
+          CALL VISOR.AND.BORRAR("PROCESO CANCELADO   POR EL USUARIO")    !
+          DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)											 ! Init vectores de aplicacion
+          TS.IO.MOTORKEY = 73                                            !
+          EXIT SUB 
+         ENDIF                                                           !
+         ED$(3) = TS.TEMP1$                                              ! Asigna dialogo
+      ENDIF ELSE ED$(3) = "000000"      
+      
+      IF VAL(DMedios$(XI%,4)) = -1 THEN BEGIN                            ! Captura Nro Telefono
+         TS.TEMP1$ =  ASIC.DATOS$("NUMERO TELEFONO?","")                 ! Captura informacion
+         IF (TS.TEMP1$ = "") OR (TS.TEMP1$ = "E") THEN BEGIN				     ! No se capturo dato
+          CALL VISOR.AND.BORRAR("PROCESO CANCELADO   POR EL USUARIO")    !
+          DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)											 ! Init vectores de aplicacion
+          TS.IO.MOTORKEY = 73                                            !
+          EXIT SUB 
+         ENDIF                                                           !
+         ED$(3) = TS.TEMP1$                                              ! Asigna dialogo
+      ENDIF ELSE ED$(4) = "000000"      
+
+      TS.TEMP1$ = ED$(1) + ":" + ED$(2) + ":" + ED$(3) + ":" +          \! Arma string grabacion
+                  ED$(4) + ":" + "00"                                    ! dialogo medios de pago
+  		Call Grabacion.Cadena.Usuario("20060328",TS.TEMP1$)                ! Graba String usuario
+
+      XI% = 100
+    EndIf 
+   Next XI%    	
+
+  ENDIF ELSE BEGIN                                                       ! Pago no habilitado
+   DIM TS.IO.DATA$(10) : DIM TS.IO.KEYS(10)                              ! Inicializa vectores
+   TS.IO.MOTORKEY = 0  : TS.GUIDANCE = 1034                              ! Reporta error en sec. de pago
+  ENDIF 
+
+ENDIF 

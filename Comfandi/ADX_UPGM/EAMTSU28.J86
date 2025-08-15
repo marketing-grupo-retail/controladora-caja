@@ -1,0 +1,9 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+                                                                                
+FUNCTION TSUPEC28 PUBLIC                                                        
+! TSUPEC28 - SIGNON VALIDATION                                                  
+%INCLUDE EAMTSE28.J86        ! EMS PRPQ
+CALL IVATSU28.011                  ! IMPRESION DE IVAS
+END FUNCTION                                                                    
+                                                                                

@@ -1,0 +1,185 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Included in EAMTSUVA.J86 ***********************************!!
+! TITLE: Coupon Processing Enhancements
+!
+!!  The following code is from the "Coupon Processing Enhancements with
+!!  Item Record Report" PRPQ known as P85104 or 5799-DCB.  This PRPQ code
+!!  is automatically included within the Preferred Customer Solution.
+!
+\/* CHANGE ACTIVITY                                                 */
+\/* IR96891 - Correct problem with an incorrect amount printing on  */
+\/*           the summary journal when a coupon is doubled past the */
+\/*           store coupon printing limit and the double amount is  */
+\/*           restricted by the coupon option, "DOUBLED COUPON      */
+\/*           VALUE LIMIT".                                         */
+\/*           PCE J03 2/04/92                                       */
+\/*                                                                 */
+\/* IR98763 - Correct problem with the value of a scanned coupon    */
+\/*           with the value in the UPC using the value in the      */
+\/*           item record. (other than category 5)                  */
+\/*           MWD MGVA 9/25/92                                      */
+\/*                                                                 */
+\/* IR23664 - The price/lb for a net value weight item coupon       */
+\/*           printed on the receipt is the calculated discount     */
+\/*           instead of the final selling price/lb.                */
+\/*           BAH MGVA 9/14/93                                      */
+\/*                                                                 */
+\/* IR29835 - Set foodstampability of coupons validated by          */
+\/*           sub-total group.                                      */
+\/*           JEO MGVA  6/27/95                                     */
+\/*                                                                 */
+!!*******************************************************************
+!!** DEFINE VARIABLES NEEDED FOR COUPON PROCESSING                 **
+!!*******************************************************************
+!!***** CODE FOR COUPON LOGGING
+ STRING  GLOBAL \
+         EMSS.CAMPAIGN.NUM$       ! CAMPAIGN NUMBER FOR COUPON LOGGING
+ INTEGER GLOBAL \
+         EMSS.LOG.FLAGS           ! FLAGS FOR COUPON LOGGING
+!!                              X"8000" CANNOT BE USED
+!!                              X"4000" KEYED VALUE LIMIT CHECK
+!!                              X"2000" COUPON VALUE EXCEEDS ITEM VALUE
+!!                              X"1000" QUANTITY NOT SATISFIED FOR COUP
+!!                              X"0800" TOO MANY COUPONS FOR SALES
+!!                              X"0400" LIMITED COUPONS PER ORDER
+!!                              X"0200" COUPON HAS EXPIRED
+!!                              X"0100" MINIMUM PURCHASE NOT SATISFIED
+!!                              X"0080" FREE ITEM COUPON
+!!                              X"0040" OPERATOR'S OVERRIDE REQUIRED
+!!                              X"0020" MANAGER'S OVERRIDE REQUIRED
+!!                              X"0010" NO VALIDATION PERFORMED
+!!                              X"0008" ONLY SUPERGROUP IS VALID
+!!                              X"0004" ONLY MANUFACTURER IS VALID
+!!                              X"0002" ONLY DEPARTMENT IS VALID
+!!                              X"0001" NO MATCH FOUND
+
+!!***** CODE FOR COUPON ITEM DATA
+ STRING  GLOBAL \
+         EMSS.SAVE.ITEMCODE$       ! SAVE LAST ITEM CODE
+
+!!***** CODE FOR STORE COUP SCANNING****
+ STRING  GLOBAL \
+         EMSS.UPC.MFR.NUM$         !  MFR NUMBER FROM UPC
+ INTEGER GLOBAL \
+         EMSS.UPC.SEQUENCE         !  SEQ NUMBER FROM UPC
+ INTEGER*1 GLOBAL \
+         EMSS.COUPON.UPC,          \  COUPON UPC INPUT FLAG
+         EMSS.ALTERED.UPC          !  ALTERED.UPC INPUT FLAG
+
+!!***** CODE FOR COUP. MULT. LIMIT *****
+ INTEGER GLOBAL \
+         EMSS.COUP.MULT.COUNT      !  COUPON MULTIPICATION COUNT
+
+!!***** CODE FOR VALIDATION BY DEPT SUBTOTAL GROUP  *****
+ INTEGER GLOBAL \
+         EMSS.MINDEP,              \  MIN DEPT NUMBER
+         EMSS.MAXDEP,              \  MAX DEPT NUMBER
+         EMSS.NUMGRP,              \  NUMBER OF SUBTOTAL GROUPS
+         EMSS.DEPTGRP(1),          \  DEPT TO GROUP TRANSLATION
+         EMSS.COUP.CNT(2)          !  ITEM/CPN COUNTS BY GROUP
+ INTEGER*4 GLOBAL \
+         EMSS.GRP.AMT(1)           !  ITEM AMOUNTS BY GROUP
+
+ INTEGER*4 GLOBAL \                !                           !IR29835
+         EMSS.GRP.NONFS(1)         !  NON-FS AMOUNTS BY GROUP  !IR29835
+
+!!***** CODE FOR UPC E STORE COUPONS ***
+ INTEGER GLOBAL \
+         EMSS.XLAT.LMT,          \ Size of translation array
+         EMSS.XLAT.PTR           ! Pointer into translation array
+ INTEGER*4 GLOBAL \              ! (Changed to I4 to handle EAN 99)
+         EMSS.XLAT2(1)           ! Array of input UPC mfr numbers
+ INTEGER*4 GLOBAL \
+         EMSS.XLAT4(1)           ! Array of xlated UPC numbers
+                                                                 !
+!!***** CROSS ITEM PROMOTIONS     ******
+ INTEGER*1 GLOBAL \
+         EMSS.NOVAL.CPN           ! FLAG COUPON WITH NO VALUE
+
+!!***** MANUAL COUPON MULTIPLICATION ******
+ INTEGER*1 GLOBAL \
+         EMSS.MANUAL.DBL          !  MANUAL DOUBLE COUPON
+
+!!*******************************************************************
+!!** DEFINE VARIABLES NEEDED FOR COUPON UNIQUE ITEM RECORD DATA    **
+!!*******************************************************************
+
+!!***** CODE FOR MFR# IN COUPON IR *****
+ STRING  GLOBAL \
+         EMSS.IR.MFR.NUM$          !  MFR NUMBER FROM ITEM RECORD
+
+!!***** CODE FOR SEQ# IN COUPON IR *****
+ INTEGER GLOBAL \
+         EMSS.IR.SEQUENCE          !  COUPON SEQUENCE NUMBER
+
+!!***** CODE FOR MINIMUM PURCHASE  *****
+ INTEGER*4 GLOBAL \
+         EMSS.IR.ITEMS.EXCLUDED,   \  COUPON ITEMS EXCLUDED FROM LIMIT
+         EMSS.IR.MIN.PURCHASE      !  MINIMUM PURCHASE AMOUNT
+ INTEGER GLOBAL \
+         EMSS.SAVE.RETURN          !  SAVE VALIDATION RETURN
+
+!!***** CODE FOR TRANSACTION LIMIT *****
+ INTEGER GLOBAL \
+         EMSS.IR.TRANS.LMT         !  COUPON COUNT LIMIT PER TRANSACTION
+
+!!***** CODE FOR PURCHASE QUANTITY *****
+ INTEGER GLOBAL \
+         EMSS.IR.ITEMS.PER         !  ITEMS REQUIRED PER COUPON
+
+!!***** MIN PURCHASE BY DEPT OR MFR*****
+ INTEGER*1 GLOBAL \
+         EMSS.IR.DEPT.VAL,         \  VALIDATE BY DEPARTMENT
+         EMSS.IR.DEPT.MIN,         \  MINIMUM PURCHASE BY DEPT
+         EMSS.IR.MFR.MIN           !  MINIMUM PURCHASE BY MFR
+
+!!***** COMPUTE DISCOUNT FOR NET   *****
+ INTEGER*1 GLOBAL \
+         EMSS.IR.COM.DISC,         \  COMPUTE NEEDED DISCOUNT
+         EMSS.IR.VAL.DISC          !  DISCOUNT BASED ON VALIDATION TOTAL
+ INTEGER*2 GLOBAL \
+         EMSS.IR.COM.PCNT          !  DISCOUNT PERCENTAGE
+ INTEGER*4 GLOBAL \
+         EMSS.IE.SALEPRIC,         \ SAVE WEIGHT COUPON FINAL PRICE/LB   IR23664
+         EMSS.IT.XPRICE            ! SAVE PRICE FOR PRINTING
+
+!!*******************************************************************
+!!** DEFINE EXTRA BASE VARIABLES NEEDED FOR COUPON PROCESSING      **
+!!*******************************************************************
+
+!!***** CODE FOR FREE COUPON PROMPT*****
+ INTEGER*4 GLOBAL                \
+        IR.PRICE1                !
+ INTEGER*2 GLOBAL                \
+        TS.SV.LINETYPE           !
+
+!!***** CODE FOR COUPON ITEM DATA  *****
+ STRING GLOBAL                   \
+        SAVE.PRICE$              !
+ INTEGER*4 GLOBAL                \
+        IR.PRICE2                !
+ INTEGER*2 GLOBAL                \
+        IR.ITEMTYPE,             \
+        IR.PRICING.METHOD        !
+ INTEGER GLOBAL FAST.EXIT        ! Access base variable
+ INTEGER GLOBAL IR.FAMILYNU1     ! Access base variable
+
+!!***** CODE FOR MFR# IN COUPON IR *****
+ STRING GLOBAL                   \
+        ITEMCODE.UNPACKED$       !
+ INTEGER GLOBAL SL.END           !
+ INTEGER GLOBAL TS11.OVRFLAG     !
+ INTEGER GLOBAL SCANNED.PRICE    !                               IR98763
+
+!!***** CODE FOR COUPON LOGGING    *****
+ INTEGER GLOBAL LEVEL.OF.VALIDATION
+
+!!***** CODE FOR PENDING OVERRIDE  *****
+ INTEGER GLOBAL PENDING.OVERRIDE
+
+!!***** CODE FOR COUPON PRINTING   *****                         IR96891
+ INTEGER GLOBAL PRINTPOS         ! RECEIPT PRINT COUPONS FIRST   IR96891
+
+!!***** CODE FOR WEIGHT PROCESSING *****
+ INTEGER*4 GLOBAL WEIGHT.MULTIPLYER

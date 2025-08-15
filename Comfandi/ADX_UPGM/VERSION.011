@@ -1,0 +1,779 @@
+!**************************************************
+!Empresa       : Grupo Retail - Comfandi          *
+!Programa      : VERSION.011                      *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Control Versionamiento Terminal  *
+!**************************************************
+
+!CFVERSION$ = "COMPILACION TERMINAL 15-Ago-2013" ! Fecha Compilacion
+!
+!Ajuste modulo recaudos actulizacion reservas Sep-3-2013
+!Adicion modulo credito empresarial           Sep-6-2013
+!Ajuste crd empresas manejo susp/ret          Sep-30-2013
+!Ajuste recaudos impresion datos reserva
+!en recaudo siempre                           Sep-30-2013
+!Adicion rastreo auditoria procesos java
+!recaudos a terceros                          Oct-02-2013
+!Adicion en la impresion de creditos empresas
+!el numero del crédito                        Oct-03-2013
+!Se modifica control consecutivo creditos
+!empresariales definiendolos por tienda       Oct-30-2013
+!Se retira impresion fondecom cuando se 
+!presionaba la tecla de comsulta de cupo      Nov-08-2013
+!Se inicializa variable control mensaje 
+!recaudos hoteleros para otros recuados       Dic-16-2013
+!Captura tipo de credito, creditos empresas   Dic-19-2013
+!Control total en aplicacion bonos fidelidad  Feb-27-2014
+!Modificacion bono recompra reimpresion fecha Mar-27-2014
+!Modificacion modulo bonos recompra           Abr-11-2014
+!Modificacion modulo recaudos terceros        Abr-11-2014
+!Reverso cambios bono compra                  Abr-23-2014
+!Activacion Nuevo modulo Bonos recompra       Abr-24-2014
+!Se ajusta proceso de lealtad de cliente
+!controlando que si ya capturado se ingresa
+!nuevo cliente mantenga los datos ya captura-
+!dos con anterioridad y almacene los puntos   May-21-2014
+!Se optimizan programas para funcionamiento
+!caida de servidor funcionando con alterno    May-21-2014
+!Implementacion Subsidio MPAC                 Jun-16-2014
+!Ajuste modulo recaudos, control de registro
+!con productos simultaneos y evitar salida de
+!compras sin numeracion fiscal                Jul-31-2014
+!Implementacion control de cambios modulo
+!recaudo simple                               Ago-14-2014
+!Control de un solo franqueo para los recaudo
+!planilla simple                              Ago-25-2014
+!Modificacion modulo recaudos terceros para
+!eliminacion impresion de tirilla segun 
+!parametro en el TFP0005                      Sep-25-2014
+!Implementacion recaudo colegios con manejo
+!de web service                               Oct-3-2014
+!Ajuste control de fecha recibos recaudo
+!para validar antes de procesos en linea      Oct-28-2014
+!Control proceso de caidas de terminal en
+!proceso de recaudos                          Oct-31-2014
+!Se ajusta modulo lealtad, error grabacion
+!id del cliente en secuencia errona
+!Se ajusta modulo recaudos para validacion
+!correcta recaudos Emcali y actualizacion
+!recaudos colegios ws                         Nov-27-2014
+!Presentacion tipificaciones cliente en 
+!visor de cajero                              Dic-16-2014
+!Control valor recuados  no permite valores
+!inferiores a 50 pesos                        Feb-09-2015
+!Ajuste modulo convenios para validacion      Feb-09-2015
+!en linea de los productos y no tomar 
+!tabla local, si falla comunicacion no 
+!permite la venta del prodcuto
+!Se controla grabacion valor credito modulo
+!creditos empresariales                       Mar-02-2015
+!Se controla que no permita manejo de 
+!recaudos en entrenamiento                    Mar-05-2015
+!Control de numero de recaudos por trx 
+!si es movimiento exclusivo o no y 
+!control de operaciones de entrenamiento en 
+!caja                                         Abr-14-2015
+!Se retira el control de recaudo en entrena-
+!miento y se deja rastro de que el proceso 
+!esta fuera de venta, ademas coloca todos
+!los recaudos por un valor de 1000            Abr-15-2015
+!Se activa validacion local de productos
+!convenios                                    Abr-23-2015
+!Se ajusta modulo calculo de ivas para 
+!manejo correcto reintegros de miscelaneos    Jul-29-2015
+!Se implementa control cambios modulo recaudo
+!colegios Click para validacion fecha del
+!recibo                                       Jul-30-2015
+!Se ajusta modulo de recaudos para evitar
+!que estos se ejecuten en una remision        Jul-31-2015
+!Se ajusta modulo recaudo terceros para 
+!control cambios solicitado Comfandi          Sep-25-2015
+!Se adiciona manejo de contingencia para 
+!manejo bonos recompra                        Oct-20-2015
+!Se adiciona el modulo de credito social      Nov-03-2015
+!Se adiciona el modulo PES SAP-CORE           Dic-17-2015
+!Se ajusta version modulo anterior recuados
+!sin los ajustes de simple                    Ene-03-2016
+!Se adicionan los siguientes modulos:
+!  -- Pago Fosfec
+!  -- Bono recompra forma de pago
+!  -- Ajuste pes montos devolucion efecivo 
+!  -- Auste recaudos para aceptacion credito
+!     Social en pagos recuados comfandi
+!                                             Feb-04-2016  
+!Se retira aplicacion de pago con credito
+!social a recaudos siempre educando           Feb-17-2016
+! Se ajusta modulo sapcore retirando el 
+! control de # de trx solicitado              Mzo-09-2016
+! Ajuste modulo GRSAPCOR en conflicto con
+! modulo recaudos                             Mzo-11-2016
+! Se permite pago recaudos de comfandi con
+! Credito social excepto recaudo crd social   Mzo-29-2016
+! Nueva parametrizacion formas pago y 
+! Plantilla Financiera                        Abr-05-2016
+! Se retira generación de multiples boletas
+! en el proceso de compra minina              Abr-20-2016
+! Ajuste datos tiquete recaudo simple         Jun-07-2016
+! Ajuste modulo crd social para toma del nom-
+! bre del almacen del archivo adxalma.dat     Jun-09-2016
+! Se ajusta modulo recaudo terceros para no 
+! validar en ingreso manual los recaudos de 
+! credito social la longitud del documento    Jun-10-2016
+! Adicion tecla 248 para recaudo credito 
+! social                                      Ago-11-2016
+! Ajuste en registro de formas de pago en 
+! pes y fosfec para uno restrigido de las 
+! formas de pago parametrizadas               Sept-21-2016
+! Se retira la funcionalidad de recaudo de
+! fomento                                     Sept-23-2016
+! Ajuste modulo numeracion fiscal new resol
+! Control consecutivos crd empleado
+! Ajuste lealtad para numero cliente bonos
+! Control consecutivo para creditos empleados
+! Prioridad impresion bono sobre rifas
+!                                             Novi-03-1016
+! Se reverda ajustes consecutivos para crd 
+! empleados y control de modulo lealtad para
+! salida produccion emergencia, solicitado por 
+! Comfandi para implementar numeracion fiscal
+! con nueva resolucion de 14 caracteres       Nov-04-2016
+! Control lectura registro consecutivos
+! creditos empleados y activacion desarrollos            
+! Lealtad, tecla rec. crd soc                 Dic-02-2016
+! Se activa dialogo recaudo fomento con 
+! saleforce                                   Ene-11-2017
+! Instalacion cuenta transioria
+! - Validacion remisiones de Mcia - Saleforce
+! - Validacion empleados comfandi minifactura
+! - Actualizacion saleforce remisiones        Ene-30-2017
+! Se comentarean los desarrollos de cuenta 
+! transitoria y recaudo fomento por salida de 
+! emergencia tiquete, parte fiscal minifactura 
+!                                             Mzo-03-2017
+! Control en bonos recompra maximo valor para 
+! generar 400.000 solicitado por Freddy Guerrero
+!                                             Mzo-22-2017
+! Se activa dialogo recaudos fomento          Mzo-28-2017
+! Liberación de los siguientes modulos
+! -- Cuenta Transitoria
+! -- Recaudo fomento 
+! -- Ajustes lealtad y recaudos  
+!                                             Abr-04-2017
+! Ajuste remision y canastas eliminando 
+! caracteres especiales al grabar descripcion
+! del Item                                    Abr-12-2017
+! Ajuste modulos bonos recompra, valor maximo
+! del bono por parametro                      May-04-2017
+!
+! Implementacion ajustes a los modulos
+! -- Recaudo de terceros - Simple
+! -- Manejo de remisones - nueva user data
+! -- Calculo descuento escalonado
+!                                             Jun-08-2017
+!
+! Implementacion Descuento Escalonado Abbot   Jul-08-2017
+! Ajuste modulos dscto escalonado y Abbot     Ago-16-2017
+!
+! Implementacion control precio techo         Nov-16-2017
+!
+! Se ajusta en modulo bonos recompra el calculo
+! de impuestos para excentos y excluidos      Dic-22-2017
+! 
+! Instalacion ajustes solicitados por Comfandi
+! para manejo de precio techo:
+! - No permite venta en remisiones
+! - No venta en minifacturas
+! - Msg adicional en la venta 
+! - Registro del producto al precio en el 400
+! - Cambio mini factura del mensaje Linea de 
+!   credito por LC
+!                                             Ene-12-2018
+! Ajuste precio techo, tomando precio del
+! eamitemr si precio menor o igual al 400     Ene-17-2018
+!
+! Se ajusta modulo de terminal, permitiendo
+! registro de p/techo en minifactura pero 
+! controlando no ingreso nits en beneficiario
+! Se reira control de verificación de precio
+! para medicamentos y papeleria               Ene-23-2018
+!
+! Ajuse modulos fosfec e implementacion 
+! captura Imei venta celulares                Feb-13-2018
+!
+! Se adiciona nueva libreria modulo TEF II 
+! desarrollado por Lineadatascan              Mzo-02-2018
+!
+! Se ajusta bug modulo precio techo           Mzo-12-2018
+!
+! Ajuste modulo recaudos corrige bugs:
+! - Reporte numero de reserva
+! - Reporte valor en simple
+! Ajuste impresion minifactura retiro mensaje
+! PASELA en linea LC                          Abr-02-2018
+!--------------------------------------------------------
+! Ajuste modulo recaudos no permita envio de 
+! movimientos de simple a serviref en procesos
+! de entrenamiento.                           Abr-03-2018
+!--------------------------------------------------------
+! Pruebas Modulo TEF 8 Mayo 2018              May-08-2018
+!--------------------------------------------------------
+! Modulo ajuste secuencia susp/ret en 
+! remisiones                                  May-28-2018
+! Instalacion Motor Promociones               Jun-05-2018
+!--------------------------------------------------------
+! Activación nueva version de TEF             Jul-23-2018
+! Instalacion soporte PDF417 PES              Jul-26-2018
+! Ajustes motor promociones                   Sep-27-2018
+!--------------------------------------------------------
+! Control captura bono lealtad
+! Control captura recaudos 1 recibo x trx     02-Nov-2018
+!--------------------------------------------------------
+! Control cambios credito social              15-Nov-2018
+! Captura y validacion tipos de credito       
+! ajuste motor promociones validacion tipificacion
+! de una sola letra.
+!--------------------------------------------------------
+! Generación tipo credito en tiquete y voucher
+! credito social.
+! Impresion dato iva en tirilla constancia entrega
+! minifactura
+! Cambio proceso numeracion fiscal para manejo
+! fecha vencimiento numeracion                29-Nov-2018
+!---------------------------------------------------------
+! Implementacion numeracion fiscal anterior para 
+! liberación de carga.
+! solicitado por Comfandi                     13-Dic-2018
+!---------------------------------------------------------
+! Implementacion ajustes numeracion fiscal
+! Grabacion venta y qty items en string promociones
+! Generación tipo credito en tiquete y voucher
+! credito social.
+! Impresion dato iva en tirilla constancia entrega
+! solicitado Comfandi                         18-Dic-2018
+!---------------------------------------------------------
+! Modificacion presentacion Ivas tiquete
+! Generación Voucher recompra
+! Generación Control numeracion fiscal 15 dias 13 Mz 19
+!----------------------------------------------------------
+! Modificacion modulo Fosfec (bono alimento) para pago por cedula, 
+! cedula extranjeria y permiso de permanencia validando 
+! en llínea                                    09-abr-2019
+!----------------------------------------------------------
+! Se ajusta formato impresion voucher pes      07-May-2019
+! Ajuste grabacion string motor promociones  
+!----------------------------------------------------------
+! Se retira desarrollo de fosfec, se coloca
+! modulo anterior                              21-May-2019
+!----------------------------------------------------------
+! Se activa nuevamente control cambios Fosfec  23-May-2019
+!----------------------------------------------------------
+! Se ajusta bug modulo Fosfec                  12-Jun-2019
+! Se retira impresion boletas rifa en los 
+! registros bajo entrenamiento
+!----------------------------------------------------------
+! Se retira nuevo modulo Fosfec y se regresa 
+! a version anterior                           13-Jun-2019
+!----------------------------------------------------------
+! Se ajusta modulo pes almacenando como referencia
+! en el pago nit comfandi para problemas de la 
+! checkout                                     05/Jul/2019
+!----------------------------------------------------------
+! Se activa version Fosfec pago bono alimento
+!                                              23/Jul/2019
+!----------------------------------------------------------
+! Se activa version Fosfec sin bono alimento
+!                                              29/Jul/2019
+!----------------------------------------------------------
+! Se modifica libreria impresion peso tiquete para reporte
+! peso en Kg y /Kg segun requerimiento del Consorcio 
+! Verificación Metrológica SGS-CLM             14/Ago/2019
+!----------------------------------------------------------
+! Se activa nueva version fosfec               29/Ago/2019
+!----------------------------------------------------------
+! Se ajusta la libreria GRSAPCOR para el problema
+! reportado con el EAMCUSTA                    04/Sep/2019
+!----------------------------------------------------------
+! Ajuste calculo vencimiento numeracion fiscal 11/Sep/2019
+!----------------------------------------------------------
+! Implementacion recaudo siga                  19/Sep/2019
+!----------------------------------------------------------
+! Se retira el mensaje de VARIABLE FRANQUEO de la user exit
+! usr2006.011 en exit2                         
+! Se ajusta carga numeracion fiscal, validando que el 
+! consecutivo este en el rango definido para la terminal
+!                                              28/Oct/2019
+!----------------------------------------------------------
+! Se activa nuevo desarrollo pago Fosfec       01/Nov/2019
+!----------------------------------------------------------
+! Ajuste modulo Fosfec cambio estructura       27/Nov/2019
+! comercial por PLU validacion excluidos
+!----------------------------------------------------------
+! Implementacion control bonos recompra utilizados como
+! forma de pago                                18/Dic/2019
+!----------------------------------------------------------
+! Se ajusta el proceso de pago credito empresarial
+! para evitar proceso de autorizaciones al realizar pago
+!                                              18/Feb/2020
+!----------------------------------------------------------
+! Se instala modulo tef con el manejo de Lifemiles
+! desarrollado por LineaDatascan.
+!                                              03/Mzo/2020
+! Ajustes LifeMiles                            12/Mzo/2020
+! Ajustes LifeMiles                            13/Mzo/2020
+! Ajustes LifeMiles                            16/Mzo/2020
+! Ajustes LifeMiles                            20/Mzo/2020
+!----------------------------------------------------------
+! Impresion mensaje venta productos excentos
+! decreto 551 de 20 Mzo 2020                   20/Abr/2020
+!----------------------------------------------------------
+! Se reversa modulo Lifemiles                  28/Abr/2020
+!----------------------------------------------------------
+! Se activa nueva version TEF con LifeMiles    26/May/2020
+! Ajuste modulo TEF LifeMiles                  01/Jun/2020
+!                                              02/Jun/2020
+!                                              03/Jun/2020
+!                                              05/Jun/2020
+!                                              12/Jun/2020
+!----------------------------------------------------------
+! Instalacion Dia No Iva                       16/Jun/2020
+!                                              17/Jun/2020
+!                                              18/Jun/2020
+! Ajustes integracion en linea                 30/Jun/2020
+!                                              01/Jul/2020
+!----------------------------------------------------------
+! Ajustes invocacion motor prmomociones para
+! manejo con Lifemiles                         16/Jul/2020
+!                                              29/Jul/2020
+!----------------------------------------------------------
+! Definicion tecla Tienda Virtual 247          22/Jul/2020
+!----------------------------------------------------------
+! Se adiciona impresion en SJ tiquete pes      30/Jul/2020
+! Ajuste promociones con lifemiles             31/Jul/2020
+!----------------------------------------------------------
+! Se ajusta procedimiento generacion y canje
+! bonos recompra de PDF-417 a EAN-128          10/Ago/2020
+!----------------------------------------------------------
+! Se cambia medio pago tienda virtual de 23 a 
+! 15                                           11/Ago/2020
+!----------------------------------------------------------
+! Instalacion simulacion secuencia venta       11/Sep/2020
+!----------------------------------------------------------
+! Cambio impresion flag items excentos y 
+! excluidos                                    24/Sep/2020
+!----------------------------------------------------------
+! Modulo Abbot con servicios Json
+!                                              11/Nov/2020
+!---------------------------------------------------------
+! Ajuste problema dia sin iva                  21/nov/2020
+!---------------------------------------------------------
+! Ajustes modulo Abbot servicios Abbot         09/Dic/2020
+!---------------------------------------------------------
+! Ajuste numero resolucion autorretenedor      28/Dic/2020
+!---------------------------------------------------------
+! Beneficios Abbot Json                        12/Ene/2021
+!---------------------------------------------------------
+! Modulo factura Electronica                   18/Ene/2021
+!---------------------------------------------------------
+! Ajuste Bonos Recompra                        26/Ene/2021
+!---------------------------------------------------------
+! Ajuste minifactura, captura tipos coopago
+! para tomarlos de tarifas.dat                 29/Ene/2021
+!---------------------------------------------------------
+! Se inhabilita modulo Factura electronica
+! y abbot para ajuste emergencia coopagos
+! minifacturas                                 08/Feb/2021
+!---------------------------------------------------------
+! Control cambios factura electronica con los
+! servicios de Saleforce y minifacturas        29/Mzo/2021
+!---------------------------------------------------------
+! Se ajusta modulo de recaudos para recibos de 
+! celsia y Celtsa con nuevo formato
+! Se pasa ajuste de factura electronica para saleforce
+! se retira el proceso de FE para minifacturas
+! se implementa funcionalidad TOTP para PES    27/May/2021
+!---------------------------------------------------------
+! Se instala nueva libreria TEF UEECRMOD.LBJ para
+! el manejo de diferente conceptos de pago de tarjeta
+! ajustado por LineaDatascan                   18/Jun/2021
+!---------------------------------------------------------
+! Se adiciona funcionalidad de registro con un codigo
+! de barras para la forma de pago tienda virtual con
+! el siguiente formtato:
+! 86 pppppppppp dddddddddd
+! La longitud es de 22 caracteres donde tiene un prefijo 
+! 86 despues el precio del recibo (pp) y el numero del 
+! documento (dd).                              23/Jun/2021
+!---------------------------------------------------------
+! Movimiento UE-8 modulo recaudos para problema con 
+! modulo Abbot - JS                            19/Jul/2021
+!---------------------------------------------------------
+! Grabacion en UD de recaudos Cetsa - Celsia EAN
+! con 13 digitos para proceso conciliacion     27/Jul/2021
+!---------------------------------------------------------
+! Se adiciona funcionalidad control cambio de precio
+! con niveles autorizacion y conceptos         20/Ago/2011
+!---------------------------------------------------------
+! Control en linea bono electrofiesta pago (32) 14/Sep/2011
+! Integracion Reservas pos - Zeus
+!---------------------------------------------------------
+! Activación modulos factura electronica, minifactura
+! y simple
+!                                              23/Sep/2021
+!---------------------------------------------------------
+! Instalacion bono electronico KUPI            24/Sep/2021
+!---------------------------------------------------------
+! Ajuste bug secuenc.bas con FE y Saleforce    05/Oct/2021
+!---------------------------------------------------------
+! Ajustes modulos numeracion fiscal, lealtad, dia sin 
+! iva para cumplimiento de ley con FE          26/10/2021
+!--------------------------------------------------------
+! Ajuste problemas apertura archivos bonos recompra
+! en controladores DD                          29/10/2021
+!--------------------------------------------------------
+! Activación dialogos pes y fosfec y bonos Kupi
+!                                             03/Nov/2021
+!--------------------------------------------------------
+! Ajustes modulo dia sin iva, se retira gabacion de 
+! string de información de cliente y productos.
+!                                             12/Nov/2021
+!--------------------------------------------------------
+! Ajuste bug motor promociones en procesos de 
+! reintegros fuera de tiquete con promociones 18/Nov/2021
+!--------------------------------------------------------
+! Activacion modulo pago pes TOTP             22/Nov/2021
+! se define como EAMTS18L.286               
+!--------------------------------------------------------
+! Unificación modulos SAPCORE (TOTP y Manual) 29/Nov/2021
+!--------------------------------------------------------
+! Ajuste problemas controlador DD 
+!                                             09/Dic/2021
+!--------------------------------------------------------
+! Ajuste modulos pago bonos recompra en falla de descuadre
+! con temas de anulacion total de trx y se rechaza
+! Ajuste modulo Abbot Json para no generacin tirilla
+! cuando no hay beneficios                    15/Dic/2021
+!---------------------------------------------------------
+! Ajuste proceso anulación total pago bonos
+! Ajuste control precios clave y grabacion ud remisiones
+!                                             22/Dic/2021
+!---------------------------------------------------------
+! Salida Produccion pago PES / TOTP           11/Ene/2022
+!---------------------------------------------------------
+! Activacion FE Minifacturas                  17/ene/2022
+!---------------------------------------------------------
+! Ajuste modulo cambio precio se retira modulo
+! FE minifacturas                             28/01/2022
+!---------------------------------------------------------
+! Ajuste modulo precio control reintegro fuera
+! de tiquete                                 31/Ene/2022
+!---------------------------------------------------------
+! Se activa modulo factura electrinonica MF  07/Feb/2022
+!---------------------------------------------------------
+! Se desarrollo captura domicilio tienda virtual
+!                                            09/Feb/2022
+!---------------------------------------------------------
+! Ajuste registro forma de pago bono descuentazo
+!                                            14/Feb/2022
+!---------------------------------------------------------
+! Se retira modulo de FE-Minifactura         01/Mzo/2022
+!---------------------------------------------------------
+! Control registro pago bono recompra pago
+! descuadre contabilidad                     07/Mzo/2022
+!---------------------------------------------------------
+! Se Activa modulo de FE-Minifactura         09/Mzo/2022
+!---------------------------------------------------------
+! Implementación recaudo credito social Online
+! Ajuste proceso confirmación pago PES
+!                                            01/Abr/2022
+!---------------------------------------------------------
+! Se retira modulo FE- minifactura           27/Abr/2022
+!---------------------------------------------------------
+! Se activa modulo FE- minifactura           28/Abr/2022
+!---------------------------------------------------------
+! Se adiciona mensaje en bonos recompra
+! PERSONAL E INTRANSFERIBLE APLICAN TERMINOS
+! Y CONDICONES                               03/MAY/2022
+!---------------------------------------------------------
+! Ajuste recaudo credito social numero de referencia
+!                                            05/May/2022
+!---------------------------------------------------------
+! Implementacion integracion POS - LEAL con proceso
+! de redención de puntos                     08/Jun/2022
+!---------------------------------------------------------
+! Ajuste modulos bonos recompra para no validacion
+! local de bonos                             16/Jun/2022
+!---------------------------------------------------------
+! Se activa modulo FE - Minifacturas         01/Jul/2022
+!---------------------------------------------------------
+! Activacion modulo LEAL                     12/Jul/2022
+! ajuste registro bonos recompra con domicilios y 
+! medicamentos
+! Modulo FE Personas Naturales
+!---------------------------------------------------------
+! Ajuste proceso anulación de transaccion    21/Jul/2022
+!---------------------------------------------------------
+! Se retira modulo Leal y se instala modulo 
+! vecino Fiel                                01/Ago/2022
+!---------------------------------------------------------
+! Se activa nuevamente proceso anterior de 
+! anulación total                            04/Ago/2022
+!---------------------------------------------------------
+! Se activa integracion modulo Leal          16/Ago/2022
+!---------------------------------------------------------
+! Se activa FE minifacturas                  18/Ago/2022
+!---------------------------------------------------------
+! Se refira FE minifactura se activa la 
+! redención puntos Leal                      08/Sep/2022
+!---------------------------------------------------------
+! Se permite el pago de credito social en los 
+! recaudos de SIGA                           09/Sep/2022
+!---------------------------------------------------------
+! Ajuste minifacturas FE para control generacion de
+! FE segun planes de minifacturas            12/Sep/2022
+!---------------------------------------------------------
+! Ajuste para manejo TC Visa Comfandi        19/Sep/2022
+!---------------------------------------------------------
+! Ajuste modulo bonos recompra forma de pago
+! validando bin tarj. visa comfandi          26/Sep/2022
+!---------------------------------------------------------
+! Control fecha sistema para factura detiene sistema
+! si fecha menor o igual a 2021              27/Sep/2022
+!---------------------------------------------------------
+! Ajuste bug motor promociones aplicación beneficios 
+! con tarjeta visa comfandi y otros medios pago 
+!                                            12/Oct/2022
+!---------------------------------------------------------
+! Ajuste secuencia anulacion total           14/Oct/2022
+!---------------------------------------------------------
+! Control cambios bonos recompra             21/Oct/2022
+!---------------------------------------------------------
+! Se adiciona grabacion UD 20221102 para detalle de 
+! tarifa de impuesto e impoconsumo realizado en la venta
+!                                            02/Nov/2022
+!---------------------------------------------------------
+! Se reversa modulo bonos recompra con control
+!                                            11/Nov/2022
+!---------------------------------------------------------
+! Activacion Bonos recompra 
+! Modulo pago Brilla                         15/Nov/2022
+!---------------------------------------------------------
+! Se retira nueva funcionalidad bonos recompra
+!                                            16/Nov/2022
+!---------------------------------------------------------
+! Implementacion pago brilla en linea
+! Retiro modulo de convenios                 06/Dic/2022
+!---------------------------------------------------------
+! Ajsute modulo TOTP inicializacion variables
+! error grabacion basura en UD               13/Ene/2023
+!---------------------------------------------------------
+! Ajuste registro factura electronica para 
+! personas naturales y juridicas             23/Ene/2023
+!---------------------------------------------------------
+! Ajuste motor de promociones                31/ene/2023
+!---------------------------------------------------------
+! Activación integracion reservas Zeus       01/Feb/2023
+!---------------------------------------------------------
+! Ajuste grabacion flag excento excluido iva
+! para FE naturales                          08/FEb/2023
+!---------------------------------------------------------
+! Ajuste validacion datos cliente FENAT      13/Feb/2023
+!---------------------------------------------------------
+! Ajuste modulo lealtad, retiro UD 15 para evitar
+! no procesamiento trx por caracteres especiales en el
+! nombre del cliente                         15/Feb/2023
+!---------------------------------------------------------
+! ajuste imresion datos credito MF           17/Mzo/2023
+!---------------------------------------------------------
+! Ajuste impresion colillas en todos los documentos 
+! de minifacturas                            23/Mzo/2023
+!---------------------------------------------------------
+! Pruebas certificacion                     14/Abr/2023
+!---------------------------------------------------------
+! Activacion recaudo reservas Zeus          17/Abr/2023
+!---------------------------------------------------------
+! Se inactiva recaudo reservas Zeus         25/Abr/2023
+!---------------------------------------------------------
+! Activacion recaudo reservas Zeus          05/May/2023
+!---------------------------------------------------------
+! Ajuste modulo minifacturas
+! Ajuste FECO para no reporte trx negativas
+! Ajuste reporte items fiscal dato negativo 16/May/2023
+!---------------------------------------------------------
+! Manejo barra pdf-417 TOTP desde telefono  18/May/2023
+!---------------------------------------------------------
+! Ajuste grabacion UD inventarios en modulos 
+! de remisiones saleforce y anchetas        24/May/2023
+!---------------------------------------------------------
+! Ajuste minifacturas planes 000-004 pra generar FECO
+! sin importar monto de compra              25/May/2023
+!---------------------------------------------------------
+! Se retira ajuste TOTP                     29/May/2023
+!---------------------------------------------------------
+! Se instala ajuste motor de promociones    31/May/2023
+!---------------------------------------------------------
+! Se reversan los modulos:
+! TOTP, FECO minifacturas 000-004 
+! manejo recaudo reservas zeus y saleforce en conjunto
+! Grabacion UD en anchetas inventarios      09/Jun/2023
+!---------------------------------------------------------
+! Se activa TOTP, FECO minifacturas 000-004
+!                                           21/Jun/2023
+!---------------------------------------------------------
+! Ajuste recaudos reservas hoteleras bug    27/jun/2023
+! reverso minifacturas y ajuste totp barra
+!---------------------------------------------------------
+! Instalacion nuevo modulo bonos recompra
+! TOTP, FECO minifacturas 000-004 
+! Ajuste inventarios                        28/Jun/2023
+!---------------------------------------------------------
+! Ajuste motor promociones venta a nits para FECO
+! Ajuste BR generacion bonos en FECO        29/Jun/2023
+!---------------------------------------------------------
+! Ajuste modulos pagos escaneados para control registro
+! 5 uvt BONOS RECOMPRA, BRILLA, TIENDA VIRTUAL
+!                                           30/Jun/2023
+!---------------------------------------------------------
+! Implementacion impuesto a la bolsa plastica
+!                                           18/Jul/2023
+!---------------------------------------------------------
+! Ajuste dato excento/excluido FECO         10/Ago/2023
+!---------------------------------------------------------
+! Se adiciona funcionalidad bonos supermercado y drogueria
+!                                           01/Sep/2023
+!---------------------------------------------------------
+! Activacion desarrollos FECO-minifactiras  05/Sep/2023
+!---------------------------------------------------------
+! Ajuste control cambios modulo TOTP        06/Oct/2023
+!---------------------------------------------------------
+! Retiro minifactura electrnica e instalacion
+! modulo manejo impuesto ICUI               25/Oct/2023
+!---------------------------------------------------------
+! Activacion campo nuevo en TOTP            02/Nov/2023
+!---------------------------------------------------------
+! Activacion FECO minifacturas y ajuste 
+! impresion flag tax en linea item          08/Nov/2023
+!---------------------------------------------------------
+! Se retira nuevo TOTP, FECO Minifac 
+! salida de emergencia ICUI                 09/Nov/2023
+! Autorizado Freddy Guerrero
+!---------------------------------------------------------
+! Se activa modulo feco minifacturas
+! Se activa nuevo TOTP                      15/Nov/2023
+!---------------------------------------------------------
+! Se retira modulo FECO minifacturas para 
+! liberación carga con proceso TOTP         19/Nov/2023
+!---------------------------------------------------------
+! Se adicionan recomendaciones de la DIAN como dato
+! tiquete pos y nombre fabricante app pos   29/Nov/2023
+!---------------------------------------------------------
+! Ajuste codigo barras bonos electro sup y Drg
+!                                           07/Dic/2023
+!--------------------------------------------------------
+! Impresión lineas para venta items Habadia 12/Dic/2023
+!--------------------------------------------------------
+! Ajuste aplicacion forma de pago bonos recompra 
+! para problemas descuadres de contabilidad 14/Dic/2023
+!-------------------------------------------------------
+! Ajuste proceso cambio precio para items pesables
+! evitar problemas FECO                     30/Ene/2024
+!-------------------------------------------------------
+! Ajuste desciptor item en recaudo simple   05/Feb/2024
+!-------------------------------------------------------
+! Ajuste reintegro minifacturas             12/Feb/2024
+!-------------------------------------------------------
+! Ajuste motor promociones init variables   28/Feb/2024
+!-------------------------------------------------------
+! Ajuste remisiones Saleforce reporte ICUI  15/Mzo/2024
+!-------------------------------------------------------
+! Implementacion FECO Ver. 1.9 - Contingencia
+!   Facturacion personas naturales 
+!   Facturacion Minifacturas
+! Implementacion TOTP pago bonos recompra   24/Abr/2024
+! Ajustes manejo minifacturas y reintegros  27/Abr/2024
+! Salida produccion Contingencia FECO       30/Abr/2024
+!-------------------------------------------------------
+! FECO Ver 1.9 - ONLINE                     01/May/2024
+!-------------------------------------------------------
+! Se retira tipificacion defalt VF a cltes 
+! para evitar beneficios a cliente consumidor
+! final                                     02/May/2024
+! Ajuste manejo consecutivos eFiscal        06/May/2024
+! Ajuste mensajeria FECO electronica        07/May/2024
+!-------------------------------------------------------
+! Manejo Versionamiento Aplicacion terminal
+! 1 -> Inicio control version año 2024
+! 4 -> Nuevas funcionalidades 
+! 2 -> Segunda version para Feco y ajustes  09/May/2024
+! 3 -> Ajuste tipo factura generada         09/May/2024
+! 4 -> Ajuste mensajeria reporte correcto 
+!      del numero de trx en FECO en linea   14/May/2024
+! 5 -> Ajuste minifacturas con pagos parciales diferente a 
+!      efectivo                             31/May/2024
+! 6 -> Retiro manejo numeracion fiscal en la nvram
+!                                           24/Jun/2024
+! 7 -> Ajuste control numeracion por procesos de caida
+!      o reinicion de terminal              03/Jul/2024
+! 8 -> Ajuste impresion datos fiscales solicitado por 
+!      Comfandi y control de caracteres especiales en
+!      las descripciones de producto        11/Jul/2024
+! 9 -> Ajuste IUT con dato almacenado en el tlog 
+!                                           15/Jul/2024
+!                                           22/Jul/2024
+!10 -> Control proceso numeracion fiscal con caida
+!      de terminal                          30/Jul/2024
+!11 -> Ajuste problema cufe quemado         12/Ago/2024
+!12 -> Ajuste registro doble facturas MF    13/Ago/2024
+!13 -> Control fallas acceso disco numeracion fiscal
+!      generando dump de controlador        14/Ago/2024
+!14 -> Ajuste calculo porcentaje creditos MF
+!      tomando valor descuentos para calculo 24/Sep/2024
+!15 -> Ajuste calculo precio unitario items minifactura
+!      cuando realizan cambios de precio     25/Oct/2024      
+!      Cmbio mensaje recaudo simple por limite de cambio
+!5.1 -> Implementacion de los siguientes modulos:
+!      Notas Credito POS
+!      Bono devolucion notas crédito
+!      Ajuste Lealtad manejo email 50 caract.26/Oct/2024
+!5.2 -> Implementacion proceso reintegro MF para 
+!       FECO                                 26/Nov/2024 
+!5.3 -> Ajuste mensaje de fecha resolución grandes contribuyentes
+!        GRANDES CONTRIBUYENTES RES 000200 27-12-2024 
+!                                            09/Ene/2025
+!5.4 -> Ajuste bug recuperacion notas credito calculo dsctos
+!                                            06/Feb/2025
+!5.5 -> Ajuste calculo precio unitario sin dscto 
+!       precio items en NC para reporte en plantilla 
+!       financiera                           21/Feb/2025
+!5.5A   Ajuste descuento para NC carvajal    13/Mzo/2025
+!5.6    Ajuste modulo recaudos para anulacion de movimiento
+!       por caida de maquina.
+!       Ajuste bonos recompra para no generar bono si en
+!       la transaccion se registra plu domicilio que esta
+!       parametrizado                        22/Mzo/2025
+!5.7    Ajuste modulo bonos devolucion para manejo de 
+!       intercambio formas de pago para anulación de 
+!       domicilios.                          
+!       Se controla que cualquier falla de integracion a 
+!       Carvajal o la DIAN queme los consecutivos fiscal 
+!       y contingencia                       11/Abr/2025
+!                                            24/Abr/2025
+!5.8    Ajuste grabacion UD items con descuento en notas
+!       credito parciales                    03/May/2025
+!       Ajuste mensajeria confirmacion bonos devolucion
+!       en intercambios de pago              07/May/2025
+!5.9    Ajuste bug recuperacion items de 3 o menos 
+!       digitos en plu para nota credito     15/May/2025
+!-------------------------------------------------------
+
+CALL U.IMPRIME("COMFANDI - CARGA DE TERMINAL         ",4101H)
+CFVERSION$ = "FACTURACION ELECTRONICA DIAN Ver 1.9 "  				! Fecha Compilacion 
+CALL U.IMPRIME(CFVERSION$,4101H)                							! Reporte Version al CR
+CALL U.IMPRIME(CFVERSION$,2100H)                							! Reporte Version al SJ
+CFVERSION$ = "COMPILACION   15-May-2025    11:10 am"  				! Fecha Compilacion 
+CALL U.IMPRIME(CFVERSION$,4101H)                							! Reporte Version al CR
+CALL U.IMPRIME(CFVERSION$,2100H)                							! Reporte Version al SJ
+GRVERAPP$ = "Ver. 1.5.9  "         														! Versionamiento Applicacion 
+CALL U.IMPRIME(GRVERAPP$,4101H)                								! Reporte Version al CR
+CALL U.IMPRIME(GRVERAPP$,2100H)                								! Reporte Version al CR
+CALL ESTADO.TERMINAL                            							! ESTADO DE LA TERMINAL

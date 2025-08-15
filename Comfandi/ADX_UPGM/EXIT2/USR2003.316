@@ -1,0 +1,269 @@
+!   ***************************************************************************
+!   **    Date       :  Junio de 1996                                        **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    Responsible:  IBM DE COLOMBIA                                      **
+!   **    User Exit  :  USR2003.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Estas lineas se insertaran en el archivo EAMTSU20.J86              **
+!   **    a manera  de INCLUDE para mostrar el  PLU en la linea              **
+!   **    de impresion, respetando  los  7  primeros caracteres              **
+!   **    cuando la aplicacion los tenga.                                    **
+!   **                                                                       **
+!   **    Adicionalmente analiza cada linea de Impresion que se              **
+!   **    registra en CR, buscando caracteres de multiplicaci¢n,             **
+!   **    abreviaturas de Autorizaci¢n para reintegros, Cambios              **
+!   **    precio, L¡mites etc. (PR, AS, CL, VF,etc)                          **
+!   **                                                                       **
+!   ***************************************************************************
+!-----------------------------------------------------------
+!  IMPRIME PLU EN TIRA DE CLIENTE Y TIRA DE AUDITORIA 
+!-----------------------------------------------------------
+
+!ON ERROR GOTO ERUS20                            !
+!  write #34;" entra a 20:"+str$(ts.linetype)
+
+CONTUS20:                                       !
+IF FRA.FAC$ = "" THEN BEGIN                     !
+   FRA.FEC$ = DATE$                             ! Toma Fecha Sistema
+   FRA.AA$  = LEFT$(FRA.FEC$,4)                 ! Arma ano
+   FRA.MM$  = MID$(FRA.FEC$,3,2)                ! Arma mes
+   FRA.DD$  = RIGHT$(FRA.FEC$,2)                ! Arma dia
+   FRA.FAC$ = FRA.AA$+FRA.MM$+"   "  +         \! Arma Linea Franq
+              FRA.DD$+"     "+TS.STORE$         ! con Fecha y C/Costo
+ENDIF                                           !
+
+USR.ITEMS$(0)=FRA.FAC$                          ! Primera Linea Fact
+IF TS.LINETYPE = 5 THEN BEGIN                  \! Si Cant/Prcio Item 
+   BUF$ = TS.PRTBUF$                            ! Toma Buffer
+   TYPE5% = 1                                   ! Marca de CANT y VAL
+   POSX% =  MATCH(CHR$(64),BUF$,1) - 1          ! Busca "x" para CANT
+   IF POSX%<1 THEN POSX%=MATCH("x",BUF$,1) - 1  ! Busca "x" para CANT
+   POSL% =  MATCH("# ",BUF$,POSX% + 2)          ! Busca Long VrUnit
+   POSL% =  POSL% - POSX% - 2                   ! Calcula Long VrUni
+   IF POSL% <= 0 THEN POSL% = 1
+   POSX% = POSX% - 1                            ! 
+   IF POSX% <= 0 THEN POSX% = 1
+   CAN.CRE$=RIGHT$("    "+MID$(BUF$,2,POSX%),4) ! Inicia con Cant
+   VAL.UNI$ = RIGHT$("          "    +         \!
+         MID$(BUF$,POSX%+4,POSL%),10)+"  "      ! Guarda Vr.Unit
+ENDIF
+ 
+IF IMPRIME% =  1 THEN BEGIN                               ! Si hay descuento
+   PESO1 = SL.IT.XPRICE                                   ! 
+   AUX$ = "Datos Trans:  "              +                \! Letrero de Factura
+   RIGHT$("000"+TS.STORE$,3) + "  "     +                \! con Num Almac
+   RIGHT$("000"+STR$(SL.HD.TERMINAL),3)+ "  "  +         \! la terminal
+   RIGHT$("0000"+STR$(SL.HD.TRANSNUM+1),3)                ! y la transaccion
+   CALL U.IMPRIMIR(AUX$,1100H)                            !
+   AUX$ = " FECHA DE VENTA:  "    +                      \! Letrero de Fecha
+          LEFT$(UNPACK$(SL.HD.DATETIME$),2)+"/" +        \! compaginada
+          MID$(UNPACK$(SL.HD.DATETIME$),3,2)+"/"+        \! para mejor
+          MID$(UNPACK$(SL.HD.DATETIME$),5,2)              ! presentacion 
+   CALL U.IMPRIMIR(AUX$,1100H)
+   TSPESO1$ = "Cupon Descuento  = $ "+STR$((PESO1*-1))    ! 
+   CALL U.IMPRIMIR(TSPESO1$,1100h)                        !
+   IMPRIME% = 0                                           !
+ENDIF                                                     !
+
+ IF YA.OK% = 1 THEN BEGIN
+    PRTLINE = "** DATOS DE LA FORMULA: "
+    CALL QXL.TSUPEC21(PRTLINE)
+ ENDIF
+
+IF TS.LINETYPE                =  1 AND                   \! Item sale
+   VAL(UNPACK$(IR.DEPARTME$)) = 16 AND                   \! Si fruver
+   SL.IE.QTYORWGT > 1 THEN BEGIN                          ! Si hay peso  
+      PESO = SL.IE.QTYORWGT*0.001                         !
+      TSPESO$ = "Peso = "+STR$(PESO)+                    \! Arma buffer
+      " Kgms x $"+STR$(SL.IE.SALEPRIC)+" Kgm"             !
+      PRTLINE = TSPESO$                                   !
+      CALL QXL.TSUPEC21(PRTLINE)                          !
+ENDIF                                                     !
+
+IF TS.LINETYPE = 1 THEN BEGIN                  \! Si es Item Sale
+   BUF$ = TS.PRTBUF$                            ! Toma Buffer
+   LF$  = LEFT$(TS.PRTBUF$,7)                   ! Halla contenido
+   POSX% =  MATCH(CHR$(64),BUF$,1) - 1          ! Busca "x" para CANT
+   POSL% =  MATCH("# ",BUF$,POSX% + 2)          ! Busca Long VrUnit
+   IF POSX% > 0 THEN BEGIN                      ! Si se usa CANT
+      IF LEFT$(BUF$,1) = " " THEN BEGIN         ! Si hay espacio
+         POSX% = POSX% - 1                      ! resta una posic
+      ENDIF                                     !   
+      POSL% = POSL% - POSX% - 1                 ! Calcula Long VrUni
+      IF POSX% <= 0 THEN POSX% = 1
+      IF POSL% <= 0 THEN POSL% = 1
+      CAN.CRE$=RIGHT$("    "+LEFT$(BUF$,POSX%),4)! Inicia con Cant
+
+      IF LEFT$(BUF$,1) = " " THEN BEGIN         ! Si hay espacio
+         POSX% = POSX% + 2                      ! suma 2 posic
+         POSL% = POSL% - 2                      ! Calcula Long VrUni
+      ENDIF                                     !   
+
+      VAL.UNI$ = RIGHT$("          "     +     \!
+          MID$(BUF$,POSX%+2,POSL%),10)+"  "     ! Guarda Vr.Unit 
+      BUF$ = "        " + RIGHT$(BUF$,30)       ! Rest. Cant x VrUni
+      TYPE5% = 1                                ! Marca de CANT y VAL
+   ENDIF ELSE BEGIN                             !
+      IF TYPE5% = 0 THEN BEGIN                  ! Si NO hubo CANT
+         CAN.CRE$ = "   1"                      ! Cantidad = 1
+         VAL.UNI$ = RIGHT$(BUF$,12)             ! Guarda Vr.Unit
+      ENDIF                                     ! Fin de Cantid
+   ENDIF                                        ! Fin de Condic
+   COD$ = UNPACK$(IR.ITEMCODE$)                 ! Desempaqueta Codigo
+   COD$ = STR$(VAL(COD$))                       ! y quita CEROS Izq
+   IF LEN(COD$) >=7 THEN BEGIN                  ! Si Cod > 7 Digitos
+      COD$ = ITEMCODE$                          ! Variable PLU EAMTSWKG
+      COD$ = STR$(VAL(UNPACK$(COD$)))           ! y desempaqueta
+   ENDIF                                        ! Fin de Condic
+   COD$ = RIGHT$("       " + COD$ ,7 )          ! Justifica a la Derecha
+   IF LEFT$(COD$,4) = " 888"  THEN BEGIN        ! Si es PLU Concesion
+      COD$ = "    " + RIGHT$(COD$,3)            ! muestra No.Concesion
+   ENDIF                                        !  
+   IF LEFT$(COD$,5) = " 9999" THEN BEGIN        ! Si es Tecla Deptal
+      COD$ = "       "                          ! No muestra el PLU
+   ENDIF                                        !  
+   IF LEFT$(COD$,2) = "  88"  THEN BEGIN        ! Si es PLU FRUVER
+      COD$ = "*fv " + RIGHT$(COD$,3)            ! lo marca
+   ENDIF                                        !  
+   IF LEFT$(COD$,4) = "  89"  THEN BEGIN        ! Si es PLU FRUVER
+      COD$ = "*sg " + RIGHT$(COD$,3)            ! lo marca
+   ENDIF                                        !  
+   IF LF$ <> "       " THEN BEGIN               ! Si hay Datos Item
+      IF RIGHT$(TS.PRTBUF$,20) <>              \! Con Descrip/Vr
+         STRING$(20," ") THEN BEGIN             ! en Blancos
+           AUX$ = LEFT$(TS.PRTBUF$,8)+"                              " ! BLANCOS
+           CALL U.IMPRIMIR(AUX$,6100H)
+           VR$ = RIGHT$(TS.PRTBUF$,30)          ! Toma vlr y descrip
+           TS.PRTBUF$ = COD$+" "+VR$            ! Arma string de nuevo
+           SUPER$ = LEFT$(BUF$,7)               ! Salva Tipo Autoriz
+           POSA% = MATCH("!",SUPER$,1)          ! Busca cualq Letra
+           IF POSA% = 0 THEN  : POSA% = 1       ! Rest a la Posic 1
+           IF CAN.CRE$ = "    " THEN BEGIN      !
+              CAN.CRE$ = "   1"                 ! *-*
+              VAL.UNI$ = MID$(TS.PRTBUF$,28,10) ! Agrega Total
+              VAL.UNI$ = VAL.UNI$ + " "         !
+           ENDIF                                !
+           
+           LIN.CRE$="   "+COD$+"      "     +  \! Agrega Codigo
+               MID$(TS.PRTBUF$,9,18)+"     "+  \! Descripcion
+               MID$(SUPER$,POSA%,2)+"    "  +  \! y Autoriz
+               CAN.CRE$+"     " + VAL.UNI$  +  \! Cant y Vr Unitario
+               "      "+ MID$(TS.PRTBUF$,28,10) ! Agrega Total
+      IF IR.INDICAT1 AND 80H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " A"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 40H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " B"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 20H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " C"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 10H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " D"     \! indica 16% = D
+          ELSE BEGIN                            !
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " *"     ! indica 16% = D
+          ENDIF    
+           USR.IND1% = USR.IND1% + 1            ! Incrementa Cont/Lin
+           USR.ITEMS$(USR.IND1%) = LIN.CRE$     ! Guarda Lin/Item
+           CAN.CRE$ = "    "                    !
+           VAL.UNI$ = STRING$(12," ")           !
+      ENDIF                                     !
+   ENDIF ELSE BEGIN                             !
+      VR$ = RIGHT$(TS.PRTBUF$,30)               ! Toma vlr y descrip
+      TS.PRTBUF$ = COD$+" "+VR$                 ! Arma string de nuevo
+      POSA% = MATCH("!",SUPER$,1)               ! Busca cualq Letra
+      IF POSA% = 0 THEN  : POSA% = 1            ! Rest a la Posic 1
+      IF CAN.CRE$ = "    " THEN BEGIN           !
+         CAN.CRE$ = "   1"+ " "                 ! *.*
+         VAL.UNI$ = MID$(TS.PRTBUF$,28,10)      ! Agrega Total
+         VAL.UNI$ = VAL.UNI$ + " "              !
+      ENDIF                                     !
+      LIN.CRE$="   "+COD$+"      "       +     \! Agrega Codigo
+          MID$(TS.PRTBUF$,9,18)+"     "  +     \! Descripcion
+          MID$(SUPER$,POSA%,2)+"    "    +     \! y Autoriz
+          CAN.CRE$+"     " + VAL.UNI$   +      \! Cant y Vr Unitario
+          "      " + MID$(TS.PRTBUF$,28,10)     ! Agrega Total
+      IF IR.INDICAT1 AND 80H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " A"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 40H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " B"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 20H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " C"     \! indica 16% = D
+          ELSE                                  \
+      IF IR.INDICAT1 AND 10H THEN               \! Si hay Indic Plan A
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " D"     \! indica 16% = D
+          ELSE BEGIN                            !
+         LIN.CRE$ = LEFT$(LIN.CRE$,             \! asigna letra que 
+                    LEN(LIN.CRE$)-1) + " *"     ! indica 16% = D
+          ENDIF    
+      USR.IND1% = USR.IND1% + 1                 ! Incrementa Cont/Lin
+      USR.ITEMS$(USR.IND1%) = LIN.CRE$          ! Guarda Lin/Item
+      CAN.CRE$ = "    "                         !
+      VAL.UNI$ = STRING$(12," ")                !
+   ENDIF                                        !
+ENDIF                                           ! Fin si Item Sale
+IF TS.LINETYPE = 2 OR                          \! Si es Linea de Pago
+   TS.LINETYPE = 4 THEN BEGIN                   ! Si es Linea de Change
+        PAGO.CH% = 0                            ! Reset de Forma Pago
+        USR.IND2% = USR.IND2% + 1               ! Incrementa Cont/Lin
+        USR.ITEMS$(450+USR.IND2%)=TS.PRTBUF$    ! Guarda Lin/Pago
+ENDIF
+IF TS.LINETYPE = 2 AND                          \! Si es Linea de Pago
+   (VRDAD$     = "61"  OR                       \! Con CR Confandi
+    VRDAD$     = "63"  OR                       \! Con CR Especial EPS
+    VRDAD$     = "64"  OR                       \! Con CR Especial EPS
+    VRDAD$     = "65"  OR                       \! Con CR CVC. 60%
+    VRDAD$     = "66") THEN BEGIN                ! Con CR sin Factura
+        USR.ITEMS$(490)=STRING$(26," ")     +   \! Cambia Linea TOTAL y
+        RIGHT$(TS.PRTBUF$,12)                    ! Guarda Linea del Vr CR
+ENDIF
+IF TS.LINETYPE = 2 AND                          \! Si es Linea de Pago
+   LEFT$(VRDAD$,1) = "2" THEN BEGIN              ! Con CHEQUE
+      PAGO.CH% = 0                               ! Reset Datos Cheque
+ENDIF
+GOTO NOERUS20
+
+!-----------------------------------------------------------------------
+! *                      RUTINA PARA ERRORES                          *
+!-----------------------------------------------------------------------
+ERUS20:
+!    HX% = ERRN
+!    ERRFX$=""
+!    FOR S% = 28 TO 0 STEP -4
+!        SX% = SHIFT(HX%,S%)
+!        SUM% = SX% AND 000FH
+!        IF SUM% > 9 THEN     \
+!           SUM% = SUM% + 55  \
+!        ELSE                 \
+!           SUM% = SUM% + 48
+!        Z$ = CHR$(SUM%)
+!        ERRFX$ = ERRFX$ + Z$
+!    NEXT S%
+
+! Estas lineas pasan a la UE usr0701.013
+!DIM USR.ITEMS$(500)                      ! Dimension y Reset del arreglo
+!USR.IND1% = 0                            ! Indice para Articulos
+!USR.IND2% = 0                            ! Indice para Linea de Totales
+!LINCR% = 25                              ! Lineas disponibles del CR
+!LINMF% = 25                              ! Lineas disponibles del CR (mf)
+
+!RESUME CONTUS20
+
+NOERUS20:
+!       REM Fin de las lineas incluidas para la funcion especifica 
+!-------------------------------------------------------------------------

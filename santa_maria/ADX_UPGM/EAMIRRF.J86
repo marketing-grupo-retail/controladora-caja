@@ -1,0 +1,97 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+!*****************************************************************************!
+!*                                                                           *!
+!*  Module      :   eamirrf.j86                                              *!
+!*                                                                           *!
+!*  Description :   External function and subprogram declarations for        *!
+!*                  common item record file functions.                       *!
+!*                                                                           *!
+!*  Notes       :                                                            *!
+!*                                                                           *!
+!*                                                                           *!
+!*                                                                           *!
+!*                                                                           *!
+!* ------------------------------------------------------------------------- *!
+!*                                                                           *!
+!*  Change History                                                           *!
+!*  ==============                                                           *!
+!*                                                                           *!
+!*  SA-V2       :   Created for Supermarket Application Version 2.           *!
+!*                  1992/1993 DRV MGV-A                                      *!
+!*                                                                           *!
+!*****************************************************************************!
+
+ !****************************************************************************!
+ !* IRRFEC.READ01:   Read the item record with key KEY$ into a single string *!
+ !*                  DATA$.  No local error handling in the subroutine.      *!
+ !****************************************************************************!
+ SUB IRRFEC.READ01 (RECKEY$, SESS.NO, DATA$, LOCK.IT) EXTERNAL
+   STRING    RECKEY$    !* KEY of the record to be read.                     *!
+   INTEGER*2 SESS.NO    !* SESSION number to be used.                        *!
+   STRING    DATA$      !* String to hold the data read from file.           *!
+   INTEGER*2 LOCK.IT    !* AUTOLOCK the record.                              *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.READ02:   Read the item record with key IR.ITEMCODE$ into the     *!
+ !*                  IR.???? variables.                                      *!
+ !****************************************************************************!
+ SUB IRRFEC.READ02 (SESS.NO, LOCK.IT) EXTERNAL
+   INTEGER*2 SESS.NO    !* SESSION number to be used.                        *!
+   INTEGER*2 LOCK.IT    !* Lock the record ?                                 *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.WRITE01:  Write the data to file.                                 *!
+ !****************************************************************************!
+ SUB IRRFEC.WRITE01 (SESS.NO, DATA$, LOCK.IT) EXTERNAL
+   INTEGER*2 SESS.NO    !* SESSION number to be used.                        *!
+   STRING    DATA$      !* String to hold the data read from file.           *!
+   INTEGER*2 LOCK.IT    !* AUTOUNLOCK the record on the write.               *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.WRITE02:  Write the item record with key IR.ITEMCODE$ and the     *!
+ !*                  IR.???? variables.                                      *!
+ !****************************************************************************!
+ SUB IRRFEC.WRITE02 (SESS.NO, LOCK.IT) EXTERNAL
+   INTEGER*2 SESS.NO    !* SESSION number to be used.                        *!
+   INTEGER*2 LOCK.IT    !* Unlock the record ?                               *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.DELREC:   Delete a keyed record with the passed key from file.    *!
+ !****************************************************************************!
+ SUB IRRFEC.DELREC (RECKEY$, SESS.NO) EXTERNAL
+   STRING    RECKEY$    !* KEY of record to be deleted                       *!
+   INTEGER*2 SESS.NO    !* SESSION number to be used.                        *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.OPENT:    Terminal PRIORITY Open of the passed keyed file         *!
+ !****************************************************************************!
+ SUB IRRFEC.OPENT(EAMITEMR$, SESS.NO, OPEN.MODE) EXTERNAL
+   STRING    EAMITEMR$  !* Filename to be opened.                            *!
+   INTEGER*2 SESS.NO    !* Session number to be used.                        *!
+   INTEGER*2 OPEN.MODE  !* Type of open to be issued.                        *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.OPENC:    Normal open of the passed keyed file                    *!
+ !****************************************************************************!
+ SUB IRRFEC.OPENC(EAMITEMR$, SESS.NO, OPEN.MODE) EXTERNAL
+   STRING    EAMITEMR$  !* Filename to be opened.                            *!
+   INTEGER*2 SESS.NO    !* Session number to be used.                        *!
+   INTEGER*2 OPEN.MODE  !* Type of open to be issued.                        *!
+ END SUB
+
+ !****************************************************************************!
+ !* IRRFEC.INIT:     Initialize the record length etc.                       *!
+ !****************************************************************************!
+ SUB IRRFEC.INIT (EAMITEMR$, SESS.NO) EXTERNAL
+   STRING    EAMITEMR$  !* FILENAME to be opened.                            *!
+   INTEGER*2 SESS.NO    !* SESSION number to be used                         *!
+ END SUB
+
+%INCLUDE EAMIRRFX.J86   !* Additional "local" functions                      *!

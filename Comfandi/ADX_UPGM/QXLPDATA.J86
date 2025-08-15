@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+  !980126 ELF Personalization
+
+  INTEGER*1 GLOBAL PaperOn          ! Parm '00'
+  INTEGER*1 GLOBAL JournalOff       ! Parm '00'
+  INTEGER*2 GLOBAL SaveDays         ! Parm '01'
+  INTEGER*2 GLOBAL CompressDays     ! Parm '02'
+
+
+  INTEGER*2 GLOBAL JournalSession   ! Parm '01'
+  INTEGER*1 GLOBAL LANEnv           ! Parm '02'
+  STRING    GLOBAL CtlrPipeID       ! Parm '03'
+  INTEGER*2 GLOBAL DeSpoolSession, SpoolSession, ControlFileSession ! 4-6
+  INTEGER*1 GLOBAL Prntr4610        ! Parm '07'
+  INTEGER*2 GLOBAL MaxPrintLines    ! Parm '08'
+  INTEGER*1 GLOBAL MedModel         ! Parm '09'
+
+  INTEGER*2 GLOBAL IndexSession     ! Parm '10'
+  STRING    GLOBAL SearchTransDesc  ! Parm '11'
+  STRING    GLOBAL SearchTransDesc2 ! Parm '12'!980126
+
+  !AIR40041
+  STRING    GLOBAL  QXLUTIME        ! Time to unload 4610 NV memory
+  !EIR40041

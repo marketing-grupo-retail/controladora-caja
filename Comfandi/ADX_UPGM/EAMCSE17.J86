@@ -1,0 +1,98 @@
+\/* TIME STAMP BLOCK ************************************************
+\* END OF TIME STAMP BLOCK *****************************************/
+!***** Include in EAMCSU17.J86 ************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+IF OP.NO.EM = 0 THEN BEGIN ! EM PROCESSING IS ACTIVE
+ 
+!!***** CODE FOR COUPON LOGGING    *****
+!!*******************************************************************
+!!** MIRROR COUPON FILE AT HOURLY CROSSING                         **
+!!*******************************************************************
+ IF OP.LOG.STR.COUP OR OP.LOG.MFR.COUP THEN \
+   TCLOSE 23                                    ! Mirror COUPON file
+ 
+!********************************************************************
+!*    START TRANSFER PROCESSING AT HOURLY CROSSING                  *
+!********************************************************************
+  IF OP.AUTO.XFER THEN BEGIN          ! PROCESS TRANSFERS AT EACH HOUR
+    ON ERROR GOTO FBACT.ERR                           ! Return on error
+    OPEN "EAMRDESC" RECL 49 AS 64 NOWRITE NODEL
+    READ #64, 4354; WORK3$, X$                 ! READ EAMRDESC
+    CLOSE 64
+    WORK1$ = "EAMUXFER"                               ! PROGRAM NAME
+    WORK2$ = STR$(OP.STR.LO) + "," + STR$(OP.STR.HI)  ! PARAMETERS
+ 
+    WORK1I2 = ADXSTART(WORK1$,WORK2$,WORK3$)  ! Start Staging program
+    IF WORK1I2 NE 0 THEN BEGIN                ! Error occurred
+      WORK4$ = "XFER" +                       \ Log PROGRAM NAME
+                "," + STR$(WORK1I2)           ! and error code
+      CALL ADXERROR (0,ASC("U"),0,1,9,WORK4$) ! Log the error
+    ENDIF
+  ENDIF
+ 
+!********************************************************************
+!*    CLOSE ACTIVITY FILE AT HOURLY CROSSING                        *
+!********************************************************************
+  ON ERROR GOTO FBACT.ERR                           ! Process errors
+  IF USER.FBACT.OPEN THEN BEGIN                     ! File is open
+    CLOSE 55                                        ! Close activity file
+    USER.FBACT.OPEN = 0                             ! Flag file not open
+  ENDIF
+ 
+!********************************************************************
+!*    CLOSE ACTIVITY TRANSFER FILE AT HOURLY CROSSING               *
+!********************************************************************
+  IF USER.FBXFER.OPEN THEN BEGIN                    ! File is open
+    CLOSE 11                                        ! Close transfer file
+    USER.FBXFER.OPEN = 0                            ! Flag file not open
+  ENDIF
+ 
+!********************************************************************
+!*    CLOSE REDEMPTION AUDIT FILE AT HOURLY CROSSING                *
+!********************************************************************
+  IF USER.FBAUD.OPEN THEN BEGIN                     ! File is open
+    CLOSE 9                                         ! Close Audit file
+    USER.FBAUD.OPEN = 0                             ! Flag file not open
+  ENDIF
+ 
+!********************************************************************
+!*    CLOSE PENDING TRANSFER FILE AT HOURLY CROSSING                *
+!********************************************************************
+  IF USER.FBPEND.OPEN THEN BEGIN                    ! File is open
+    CLOSE 54                                        ! Close pending file
+    USER.FBPEND.OPEN = 0                            ! Flag file not open
+  ENDIF
+ 
+!********************************************************************
+!*    TCLOSE PANEL FILE AT HOURLY CROSSING                          *
+!********************************************************************
+  TCLOSE 24                                    ! Mirror PANEL file
+ 
+!!*******************************************************************
+!!** CALL FOR AUTOMATIC START OF BATCH OR TRANSFER PROCESSING      **
+!!*******************************************************************
+ IF OP.BAT.AUTOTIME > 0 THEN              \ OPTION SELECTED
+   CALL AUTO.BATCH.TIME                   ! START IF NEEDED
+ 
+ IF OP.XFR.AUTOTIME > 0 THEN              \ OPTION SELECTED
+   CALL AUTO.UXFER.TIME                   ! START IF NEEDED
+ 
+ IF OP.REF.AUTOTIME > 0 THEN              \ OPTION SELECTED
+   CALL AUTO.UREFA.TIME                   ! START IF NEEDED
+ 
+ENDIF                      ! EM PROCESSING IS ACTIVE
+ 
+  GOTO NEXT.FB17
+FBACT.ERR:
+ CALL ADXERROR( 0,0,0,3,2, \ Log Error
+      "FB"+RIGHT$("00"+STR$(ERRF%),2)+ERR+ERRNHEX$)
+ IF ERR = "RN" THEN RESUME NEXT.FB17
+ RESUME
+ 
+NEXT.FB17:
+ 

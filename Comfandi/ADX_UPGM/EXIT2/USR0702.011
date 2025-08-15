@@ -1,0 +1,23 @@
+!   ***************************************************************************
+!   **    Date       :  Agosto 30 de 1996                                    **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR0702.011                                          **
+!   **    Inclu¡r en :  EAMTSU07.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  SOLSER49                                             **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report Descriptor 3058 needs to be updated to reflect User Option  **
+!   ***************************************************************************
+
+DIM MEX.VAT.TAB(4)              ! Definicion del Arreglo
+
+MEX.VAT.TAB(1) = 15             ! Set Impuesto 1 en 16%
+MEX.VAT.TAB(2) = 20             ! Set Impuesto 2 en 20%
+MEX.VAT.TAB(3) = 35             ! Set impuesto 3 en 35%
+MEX.VAT.TAB(4) = 10             ! Set impuesto 4 en 10%
+EXENTO = 1                      ! Default Indicator
+                                ! STATIC.JPC = 0
+                                ! write #36;"PRIVTS07 ",err,errf%
+!------------------------------------------------------------------------------

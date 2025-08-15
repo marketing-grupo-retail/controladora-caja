@@ -1,0 +1,13 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+SUB CKUPEC01 PUBLIC
+! CKUPEC01 - BEFORE FILLING IN CHECK TO PRINT
+!            USERS CAN SET UP FIELD.DATA$(13) TO FIELD.DATA$(32),
+!            WHICH CORRESPOND TO USER FIELDS 1 TO 20.
+!
+!            FYI..FIELD.DATA$(1) IS FOR DATE, FIELD.DATA$(2) IS FOR
+!                 PAYEE, ETC. (SEE SCREEN IN UTILITY AS ORDER MATCHES).
+
+END SUB
+

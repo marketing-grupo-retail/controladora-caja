@@ -1,0 +1,63 @@
+!   ***************************************************************************
+!   **    Date       :  Septiembre 22 de 1998                                **
+!   **    Project    :  IBM - CALI - COMFANDI                                **
+!   **    User Exit  :  USR2001.011                                          **
+!   **    Inclu¡r en :  EAMTSU20.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS11L.286                                         **
+!   **        Ajuste :  Tec Sistemas Punto de Venta                          **
+!   **                                                                       **
+!   **    Instrucciones para evitar la Linea de Iva de la SMA/4690 en la     **
+!   **    Tira del Cliente (CR)                                              **
+!   **                                                                       **
+!   **    Code for printing IVA on the customer receipt station.             **
+!   **    Report descriptor 3058 needs to be updated to reflect User Option  **
+!   **                                                                       **
+!   ***************************************************************************
+
+! LLAV1$ = TS.OPER$                                   ! Toma Cod. Operador
+ !IF LLAV1$ <> "" THEN                               \! Si Hay Llave
+  !  READ FORM "C32 C20 C20";#44 KEY LLAV1$;         \! Lee EAMOPERA
+   !            CE.NADA1$,NOMOPER$,CE.NADA2$          !
+ !IF NOMOPER$  = "" THEN BEGIN                        ! Si no leyo nombre
+  !  TS.DISP1$ = "CODIGO ARTICULO:"                   ! Modifica Linea 1
+   ! TS2.DISP1$ = TS.DISP1$                           ! Modifica Linea 1 D2
+! ENDIF
+ !OPE$  = STR$(VAL(UNPACK$(LLAV1$)))                  ! Guarda Cod Ope
+ !CAJA$ = TS.TERMINAL$                                ! Guarda No.Terminal
+!----------------------------------------------------------------------
+
+IF TS.LINETYPE = 7 THEN BEGIN                        ! Si es linea TOTAL
+    VR$ = RIGHT$(TS.PRTBUF$,12)                      ! Toma el Valor Total
+    TS.PRTBUF$="**SUBTOTAL/TOTAL --->   $ "+VR$      ! Arma STRING de nuevo
+        USR.ITEMS$(450) = TS.PRTBUF$                 ! Guarda Subtotal
+ENDIF                                                !
+
+!------------------------------------------------------------------------------
+
+IF TO.USEROPTS(4) <> 0 THEN BEGIN                    ! Si Opt Usuario=4 Iva 
+   IF TS.LINETYPE = 18 THEN UE.NIT = 1               ! Si es Header de Inicio
+   IF TS.LINETYPE = 1 OR                            \! Si es Vta Item
+      TS.LINETYPE = 5 THEN BEGIN                     ! 
+         IF UE.NIT = 1 THEN BEGIN                    ! y es Cabecera
+!           WRITE FORM "C38 A1"; #34 ;               ! Escribe Mensaje
+!           "         AGENTE RETENEDOR DE IVA"       !
+!           WRITE FORM "C38 A1"; #34 ;               ! y Nit
+!           "           NIT 123.456.789-0"           !
+            AUX$ = "    FACTURA DE VENTA # "      + \! Letrero de Factura
+            RIGHT$("000"+TS.STORE$,3)             + \! con Num Almac
+            RIGHT$("000"+STR$(SL.HD.TERMINAL),3)  + \! la terminal
+            RIGHT$("0000"+STR$(SL.HD.TRANSNUM+1),3)  ! y la transaccion
+            WRITE FORM "C38 A1"; #34 ; AUX$          ! Y lo Imprime en CR
+            WRITE FORM "C38 A1"; #36 ; AUX$          ! Y lo Imprime en SJ
+            AUX$ = "   FECHA DE EXPEDICION:  "    + \! Letrero de Fecha
+            LEFT$(UNPACK$(SL.HD.DATETIME$),2)+"/" + \! compaginada
+            MID$(UNPACK$(SL.HD.DATETIME$),3,2)+"/"+ \! para mejor
+            MID$(UNPACK$(SL.HD.DATETIME$),5,2)       ! presentacion 
+            WRITE FORM "C38 A2"; #34 ; AUX$          ! y lo Imprime
+            UE.NIT = 0                               ! Reset de Inicio
+         ENDIF                                       ! Fin de Cabecera
+   ENDIF                                             ! Fin de Impresion Plu
+ENDIF                                                !
+!----------------------------------------------------------------------------
+   

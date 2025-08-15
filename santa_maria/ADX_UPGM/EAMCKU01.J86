@@ -1,0 +1,179 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+SUB CKUPEC01 PUBLIC
+! CKUPEC01 - BEFORE FILLING IN CHECK TO PRINT
+!            USERS CAN SET UP FIELD.DATA$(13) TO FIELD.DATA$(32),
+!            WHICH CORRESPOND TO USER FIELDS 1 TO 20.
+!
+!            FYI..FIELD.DATA$(1) IS FOR DATE, FIELD.DATA$(2) IS FOR
+!                 PAYEE, ETC. (SEE SCREEN IN UTILITY AS ORDER MATCHES).
+!
+!AIO01022 A global REAL variable called PAD.INCHES has been added
+!         to the check printing support, defaulted to zero (0.0)
+!         in the cpcommon.j86 code.  The user can make a change to 
+!         the value of this variable in this check printing user 
+!         exit IF they plan to print large checks (7 inches or longer)
+!         using 4610 printers.  Increasing the value of this variable
+!         will add padding blanks to left side of the check printing
+!         output strings.  This extra blank padding will slide the
+!         output lines to the right and allow check printing to hit
+!         some previous hard to reach spots on the right hand side of
+!         large checks.  As the name of the variable implies, the padding
+!         is done in inches.  Setting PAD.INCHES = 1.0, for example, 
+!         will pad an inch worth of blank space to the left of the output
+!         strings.  The user should experiment with the setting and their
+!         check formats to determine the best value for their
+!         implementation.
+!
+!         The default value of zero means no change (thus not impacting
+!         current customers who have no problem because they do not print
+!         on larger checks on 4610 printers).
+!
+!         A customer utilizing this function might also need to add some
+!         code to other user exits if checks of varying size are to be printed
+!         on a 4610 printer (ie. store gets in various sizes of checks to
+!         be printed).  This might include some kind of prompt before the
+!         check is printed so the operator can indicate if its a larger
+!         sized (7 inches or more) or standard size (6 1/2 inches or so) one.
+!         If the customer is using the same check format when printing both
+!         larger and smaller checks, you would want to prompt the operator
+!         so the application knows the size and could set PAD.INCHES to
+!         a nonzero value for the larger check.
+!
+!         DO NOT use this variable if you are printing only with Model 3
+!
+!         Example line:  PAD.INCHES = 1.0
+!EIO01022
+
+!----------------------------------------------------------------------
+! Modificaciones
+! Mod 06/Oct/2014
+! Se modifica UE para manejo formato de fecha regulado por el gobierno
+! del Ecuador, solicitado por Santa Maria
+! Desarrollado por Grupo Retail - OVS 
+!---------------------------------------------------------------------
+
+STRING X.MES$(1)
+INTEGER*2 I%
+DIM X.MES$(13)
+
+X.MES$(01) = "Ene"
+X.MES$(02) = "Feb"
+X.MES$(03) = "Mzo"
+X.MES$(04) = "Abr"
+X.MES$(05) = "May"
+X.MES$(06) = "Jun"
+X.MES$(07) = "Jul"
+X.MES$(08) = "Ago"
+X.MES$(09) = "Sep"
+X.MES$(10) = "Oct"
+X.MES$(11) = "Nov"
+X.MES$(12) = "Dic"
+
+FIELD.DATA$(02) = "*MEGA SANTAMARIA S.A*"
+FIELD.DATA$(06) = "QUITO"
+
+!FIELD.DATA$(01) = Right$(DATE$,2) + "/"       +  \ Dia
+!                  X.MES$(Val(MID$(DATE$,3,2)))+  \ Nombre del mes
+!                  "/"+"20"+Left$(DATE$,2)        ! ANO
+
+!-- Cambio Formato Fecha AAAA/MM/DD - Regulacion Ecuador 6 Oct 2014
+
+FIELD.DATA$(01) = "20"+Left$(DATE$,2)   + "/" +  \ ! A¤o
+                       MID$(DATE$,3,2)  + "/" +  \ ! Mes
+                       Right$(DATE$,2)             ! Dia
+
+I%= MATCH( ",",FIELD.DATA$(04),1)
+IF I%> 0 THEN BEGIN
+   FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%-1) + \
+                     MID$(FIELD.DATA$(04),I%+ 2,LEN(FIELD.DATA$(04))-(I%+2))
+ENDIF
+IF RIGHT$(FIELD.DATA$(03),2)="00" THEN BEGIN
+   I%= MATCH( "Ctvos",FIELD.DATA$(04),1)
+   IF I%> 0 THEN BEGIN
+      FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%-1) + \
+                        MID$(FIELD.DATA$(04),I%+ 5,LEN(FIELD.DATA$(04))-(I%+4))
+   ENDIF
+ENDIF
+
+IF LEN(FIELD.DATA$(03))>4 THEN BEGIN
+   IF LEN(FIELD.DATA$(03))>5 THEN BEGIN
+      IF MID$(RIGHT$(FIELD.DATA$(03),6),1,3)="100" THEN BEGIN
+         I%= MATCH( "CIENTO",FIELD.DATA$(04),1)
+         IF I%> 0 THEN BEGIN
+            FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+3) + \
+                              MID$(FIELD.DATA$(04),I%+6,LEN(FIELD.DATA$(04))-(I%+4))
+         ENDIF
+      ENDIF
+   ENDIF
+
+   IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="2" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "VEINTE",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+6) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+7,LEN(FIELD.DATA$(04))-(I%+6))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="3" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "TREINTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+7) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+8,LEN(FIELD.DATA$(04))-(I%+7))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="4" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "CUARENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+8) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+9,LEN(FIELD.DATA$(04))-(I%+8))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="5" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "CINCUENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+9) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+10,LEN(FIELD.DATA$(04))-(I%+9))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="6" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "SESENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+7) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+8,LEN(FIELD.DATA$(04))-(I%+7))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="7" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "SETENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+7) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+8,LEN(FIELD.DATA$(04))-(I%+7))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="8" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "OCHENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+7) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+8,LEN(FIELD.DATA$(04))-(I%+7))
+      ENDIF
+   ENDIF \
+   ELSE IF MID$(RIGHT$(FIELD.DATA$(03),5),1,1)="9" AND \
+      VAL(MID$(RIGHT$(FIELD.DATA$(03),4),1,1))>0 THEN BEGIN
+      I%= MATCH( "NOVENTA",FIELD.DATA$(04),1)
+      IF I%> 0 THEN BEGIN
+         FIELD.DATA$(04) = MID$(FIELD.DATA$(04),1,I%+7) + "Y " + \
+                           MID$(FIELD.DATA$(04),I%+8,LEN(FIELD.DATA$(04))-(I%+7))
+      ENDIF
+   ENDIF
+ENDIF
+
+
+END SUB
+

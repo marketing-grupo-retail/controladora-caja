@@ -1,0 +1,183 @@
+!************************************************** 
+!Empresa       : ASIC S.A.  - UNIDAD DE RETAIL -  *
+!Programa      : POSPVARI.BAS                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!**************************************************
+
+!--- Definicion de Variables de trabajo
+
+STRING   GLOBAL       \
+         DM.OPCION$,  \         ! Variable Captura de opciones
+         DM.OPCION2$, \         ! Variable Captura de opciones
+         DM.NIT$,     \  	! Nit de la empresa
+         DM.RAZON$,   \		! Razon social empresa
+         DM.SIGLA$,   \ 	! Nombre Comercial
+         DM.ALMACEN$, \	        ! Codigo del punto de venta
+         DM.BASURA$,  \		! Resto del registro
+         DM.LLAVE$,   \         ! Llave registro de control
+         DM.NOMPRO$,  \         ! Nombre del proyecto
+         DM.CODIGO$,  \         ! Codigo del afiliado
+         DM.NOMBRE$,  \         ! Nombre del afiliado
+         DM.ESTPOR$,  \         ! Porcentaje del precio
+         DM.FECNAC$,  \         ! Fecha de nacimiento 
+         DM.PAREN$,   \         ! Parentesco           
+         DM.CUPON$,   \         ! Numero de cupon
+         DM.EMPRES$,  \
+         DM.REDPRE$,  \
+         DM.BUFFER$,  \
+         DM.FECFIN$,  \
+         TLOG$,       \         ! Nombre log de transacciones
+         DM.FECINI$,  \
+         DM.PUNTOS$,  \
+         DM.PRECIO$,  \
+         DM.FILLER$,  \         ! Campo Relleno
+         NVL1$, NVL2$, NVL3$, DCT.LV1$, DCT.LV2$, DCT.LV3$ 
+
+STRING   GLOBAL       \
+         DM.PLAN$,    \
+         DM.ESAF$,    \
+         DM.TPRE$,    \
+         DM.RDPR$,    \ 
+         DM.TIPB$,    \         ! Tipo de beneficiario     
+         DM.ESTO$,    \         ! Estrato
+         DM.TIPO$,    \         ! Tipo de identificacion
+         DM.DATO$,    \         ! Captura de dato en pantalla
+         TOT.CAM$,    \         ! Captura de dato en pantalla
+         CAMPO1$,     \
+         CAMPO2$,     \
+         AJUSTE$(1),  \         !
+         MSG$                   ! Mensajes temporales
+
+INTEGER*2 GLOBAL        \
+          DM.NOPROY%,   \	! Numero de proyectos definidos
+          DM.NOCAMPOS%, \	! Numero de campos en proyecto
+          RET.ERR%,     \       ! Numero de rutina para Display Manager
+          CALL.ORDER%,  \       ! Numero de orden de llamado de pantalla
+          DM.NOREG%,    \       ! Numero de registros
+          DM.NOCAMP%,   \       ! Numero de campos
+          INI.CAMPO%    \       ! Control despliege de proyectos en pantalla
+
+INTEGER*4  GLOBAL       \       ! Variables Modif. SEPT-01
+          DM.PNTNIV1, DM.VLRDSC1,  \  ! Puntos y Pesos o Dscto Cupon Escala
+          DM.PNTNIV2, DM.VLRDSC2,  \  ! Puntos y Pesos o Dscto Cupon Escala
+          DM.PNTNIV3, DM.VLRDSC3,  \  ! Puntos y Pesos o Dscto Cupon Escala
+          I%,        \		! Control de ciclos
+          J%,        \		! Control de ciclos
+          K%,        \		! Control de ciclos
+          L%,        \		! Control de ciclos
+          DM.PNTNIV4, DM.VLRDSC4      ! Puntos y Pesos o Dscto Cupon Escala
+
+STRING GLOBAL ARCH1$,   \	! Variable nombre arch.
+              ARCH2$,   \	! Variable nombre arch.        
+              ARCH3$,   \	! Variable nombre arch. 
+              ARCH4$,   \	! Variable nombre arch.          
+              BAN.PRG$, \	! Bandera del programa
+              LEC$,    	\	! Definicion formato registro
+              FIN$,     \	! Variable de control programa
+              FIN2$,    \	! Variable de control programa
+              CICLO$,   \	! Variable de control programa
+              TMP.MSG$, \       ! Variable temporal de trabajo
+              TMP.KEY$, \	! Almacena temporalmente la llave del registro
+              NOREG$,   \       ! Numero de registros
+              NOCAMP$,  \       ! Numero de campos
+              CADENA$   \       ! Cadena de caracteres parametrizacion
+
+INTEGER   GLOBAL     \
+          AREA1%,    \          ! Definicion area de trabajo
+          AREA2%,    \          ! Definicion area de trabajo
+          AREA3%,    \          ! Definicion area de trabajo
+          AREA4%,    \          ! Definicion area de trabajo
+          PNT.ANT%,  \          ! Captura de la pantalla anterior
+          CURR.FLD%, \          ! Campo actual 
+          ENTER.KEY, \         	! Definicion de la tecla Enter
+          TAB.KEY,   \          ! Definicion de la tecla TAB
+          ESC.KEY,   \        	! Definicion de la tecla ESCAPE
+          F1.AYUDA,  \         	! Deficion de la tecla de funcion F1 
+          F2.KEY  ,  \         	! Deficion de la tecla de funcion F2 
+          F3.SALIR,  \      	! Deficion de la tecla de funcion F3
+          F4.KEY  ,  \         	! Deficion de la tecla de funcion F4 
+          F5.KEY  ,  \         	! Deficion de la tecla de funcion F5 
+          F6.KEY  ,  \         	! Deficion de la tecla de funcion F6 
+          F7.KEY  ,  \         	! Deficion de la tecla de funcion F7 
+          F8.KEY  ,  \         	! Deficion de la tecla de funcion F8 
+          F9.KEY  ,  \         	! Deficion de la tecla de funcion F9 
+          FA.KEY  ,  \         	! Deficion de la tecla de funcion F10
+          HELP%   ,  \        	! Llamado Segunda Pantalla Display Manager
+          T%,        \
+          CAMPO%,    \          ! Captura posicion en pantalla del cursor
+          F%,        \          ! Variable de control ciclico
+          LONGITUD%, \          ! Logitud cadena de caracteres
+          NOREG%, NOCAMP%
+
+STRING  GLOBAL  INITDM$, OPNDIS$, DISPD$,  POSF$,   NXTF$,     \
+                PUTF$,   CURS$,   CLSDIS$, PRM.ON$, PRM.OFF$,  \
+                ON$,     OFF$,    TABS$,   TERM$,   INP$,      \
+                ATTR$,   RET$,    KEY$,    KEY2$,   ERRFX$,    \
+                Z$,      DM.USER$, DM.OPER$, CLAVE.MEM$, IVAXDEPT$(2)
+
+STRING GLOBAL  DM.VLRCON$, DM.VLRDES$, DM.VALMED$, DM.VALMCA$, \
+               DM.VALIPS$, DM.VALMET$, DM.METPRA$, DM.METPRB$, \
+               DM.METPRC$, DM.METPRD$, DM.CONVEN$, HLP.PRG$,   \
+               HLP.FILE$,  MSG1$,      REG.HLP$,   INP2$,      \
+               A$, B$, OPC1$, PRYT$, DM.VLRPRC$                ! SEPT-01
+
+STRING GLOBAL  DM.DIA01$, DM.HORA1A$, DM.HORA1B$, \
+               DM.DIA02$, DM.HORA2A$, DM.HORA2B$, \
+               DM.DIA03$, DM.HORA3A$, DM.HORA3B$, \
+               DM.DIA04$, DM.HORA4A$, DM.HORA4B$, \
+               DM.DIA05$, DM.HORA5A$, DM.HORA5B$, \
+               DM.DIA06$, DM.HORA6A$, DM.HORA6B$, \
+               DM.DIA07$, DM.HORA7A$, DM.HORA7B$
+               
+STRING GLOBAL  LET.CON$, LET.NOR$, LET.GRA$, LINEA$, H$, PZERO$, LISTA$
+
+INTEGER*4 GLOBAL HX%, S%, SX%, SUM%, NRG%, CNTI%, PAGI%, CONLI%, CNTREG%, \
+                 NRO.REG, STRINGS.COMPLETOS, DISGROUP%, VALOR.DESCTO%,    \
+                 AJUSTE(2), UE.LOC1%, UE.LOC2%
+
+INTEGER*4 GLOBAL REC.NO, BLK.NUM, REC.LEN, KEY.LEN, MAX.R.SEC, R.S, X, P, Q
+
+INTEGER*1 GLOBAL INDI0%, INDI1%, INDI1A%, NO.VENTA, TIPO.TRANS, BARRA%
+
+STRING GLOBAL INDI2$,    DEPARTME$, FAMILY$,   MPGROUP$, SALEQUAN$, \
+       SALEPRIC$, LINKEDTO$, ITEMNAME$, MOD$, COD.OPERA$, DM.ESTPRO$ 
+
+INTEGER*2 GLOBAL USEREXIT1%,USEREXIT2%, A, DATO3%
+
+STRING GLOBAL INDICAT1$, INDICAT2$, INDICAT3$, INDICAT4$
+
+!++++++++++++++++++++++++++  DECLARACION DE VARIABLES  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  STRING GLOBAL CADENA1$, OPC$, SLOGNAME$, \  Var. Lectura EAMCSCF1
+       OSLOGNAME$, FECHA.CIER$, RESERVED$
+
+  INTEGER*4 GLOBAL CLOSEPNT, ACUM.EFECT, NETMSC, TRANS.DUP, GRAN.TOTAL,\
+            DATO1%, DATO2%
+  INTEGER*4 GLOBAL FLAG,TOTAL.REG, NET , NRO.ERROR,CLIENTE.FREC,ACUMULADOR%, \
+		TRANS.AUTONOMO, TRANS.NORMAL, INDICAT1, INDICAT2,INDICAT3, \
+		TOT.TAMANO, TOT.LEIDO, TENDER.EXCHANGE, UE.INDI1%
+  INTEGER*4 GLOBAL ACULULA.ART.TR, DEPARTOS(2), J, K
+  INTEGER*2 GLOBAL NRO.ARTICULOS, NRO.STRINGS.FOUND, TOT.DEPTOS, DEPTO%,\
+	    TOT.TERM,TERM.INI, TRANSPAGO, ALMACEN%
+  INTEGER*1 GLOBAL B,I,JJ,TLOG,OUTFIL,INTERFAZ,SW.ITEM, SW.PAGO,\
+            CONTROLFILE,SW.MISC, REGISTRO.PENDIENTE,IVA%, NRO.MEDIOS, \
+	    NRO.MEDIOS.CORRECCION,PESO,SW.CLIENTE,           \
+	    ITEM.REC, ESCANEADO, LEE.ITEM, LISTRAN, DUPLICADA, NO.ENCONTRO
+  INTEGER*1 GLOBAL SERDIAN, PRIMERA.VEZ, RESP%, LOGINTERFAZ,	\
+	    NUM.ALMACEN
+  STRING GLOBAL \
+    INAREA$,FINR$,COD.ITEM$,SIGNO$,SIGNO.MISC$,CANTIDAD$,PRECIO$,\
+    NRO.TRANS$,FECHA.HORA$,TERMINAL$,GROSS.POSITIVO$,GROSS.NEGATIVO$,\
+    FORMA.PAGO$,NRO.CUENTA$,SIGNO.PAGO$,VALOR.PAGO$,NRO.TARJETA$,\
+    TIPO.DESCTO$,SIGNO.DESCTO$,VALOR.DESCTO$,PRECIO.COSTO$,PRECIO.NORMAL$, \
+    SIGNO.IVA$,CONSECUTIVO$,ERRORCOD$,NUM.SEP$,CUR.SYM$,FORMAT$,PARE$,FILEPCC$, \
+    FECHA.CIERRE$,NETO$,FECHA$, HORA$, ALMACEN$, IVA$(1), \
+    CANT.PESO$,CONTADOR$, DEPTO$, NRO.TARJ.FREC$, INSERTANDO$, BL$, \
+    TIPO.CAMBIO$,CAMBIO$, LLAVE$, BASURA1, TOTAL.TRANS, ALTO$, BAJO$, 	\
+    FAMILYNU1, FAMILYNU2, ESTADO$, PROCESO$, ARCHIVO.PROC$, MEN$, UE.BIN$
+
+  STRING GLOBAL FIRST.TIME$, SECOND.TIME$, TIME.IN$, AUX$, BARRA$, FALLA$, \
+                DM.PARAM$, DM.NOFIELD$
+!+++++++++++++++++++++++++++++INCLUSION DE LIBRERIAS+++++++++++++++++++++++++++++++++++++++++++++++++
+

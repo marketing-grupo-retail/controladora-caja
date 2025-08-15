@@ -1,0 +1,164 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!**********************************************************************
+!*               WIC CLAIMS FILE   Added for wic support 09/2004      *
+!**********************************************************************
+!* The following defines the format for the various WIC Claims File   *
+!* records.                                                           *
+!**********************************************************************
+!
+! Header Record
+!
+!**********************************************************************
+
+  STRING GLOBAL                   \
+     RECORD.ID$,                  \  "A1"  Header Rec,           offset =   0
+                                  \  "D4"  Detail Rec
+                                  \  "D3"  Addenda Rec
+                                  \  "Z1"  Trailer Rec
+     REC.SEQ.NUM$,                \  "000001" for header record, offset =   2
+     FILE.CREATE.DATE$,           \  "CCYYMMDD",                 offset =   8
+     FILE.CREATE.TIME$,           \  "HHMMSS",                   offset =  16
+     FILE.FMT.VERSION$,           \  "02",                       offset =  22
+     FORWARD.INSTITUTE$,          \  len  = 11,                  offset =  24
+     FILE.NAME$,                  \  "CLAIM FILE              ", offset =  35
+     FILE.TYPE$,                  \  "REPLACE",                  offset =  60
+     FILE.SEQ.NUM$,               \  "0000",                     offset =  68
+     RECEIVE.INSTITUTE$,          \  len = 11,                   offset =  72
+     ACQUIRING.INST.ID$,          \  len = 11,                   offset =  83
+     CLAIM.DATE$                  !  "CCYYMMDD",                 offset = 102
+
+!*************************************************************************
+! Detail Record Layout
+!    Starts with a RECORD.ID$ = "D4" and
+!                  REC.SEQ.NUM$  = the next sequence number
+!*************************************************************************
+
+  STRING GLOBAL                   \
+\    RECORD.ID$,                  \ "D4",                       offset =   0
+\    REC.SEQ.NUM$,                \ len = 6,                    offset =   2
+     MSG.TYPE.ID$,                \ "0220",                     offset =   8
+     PAN.LEN$,                    \ len = 2,                    offset =  12
+     PAN$,                        \ len = 19,                   offset =  14
+     PROC.CODE$,                  \ "009700",                   offset =  33
+     TRANS.AMT$,                  \ len = 12,                   offset =  39
+     SYS.TRACE.NUM$,              \  term num + tlog trans num, offset =  51
+     XMIT.DATE.TIME$,             \ "0000000000",               offset =  57
+     LOCAL.TRANS.DATE.TIME$,      \ "CCYYMMDDHHMMSS",           offset =  67
+     POS.DATA.CODE$,              \  "510111111334",            offset =  81
+                                  \  "510211111334" for self checkout
+\    ACQUIRING.INST.ID$,          \  "00000000000",             offset =  93
+     TERMINAL.NUM$,               \  len = 8,                   offset = 104
+     MERCHANT.ID$,                \  len = 15,                  offset = 112
+     STORE.NAME.LOC$,             \  len = 99,                  offset = 127
+     ITEM.CNT$,                   \  len = 3,                   offset = 226
+     BENEFIT.ISSUING.ID$,         \  len = 15,                  offset = 229
+     START.DATE$,                 \  len = 8,                   offset = 244
+     DISCOUNT.AMT$,               \  len = 12,                  offset = 252
+     ICC.SYS.DATA$                !  len = 99,                  offset = 264
+
+
+!*************************************************************************
+! Addenda Record Layout
+!    Starts with a RECORD.ID$ = "E3" and
+!                  REC.SEQ.NUM$  = the sequence number of the asssociated
+!                                   Detail Record
+!*************************************************************************
+
+  STRING GLOBAL                   \
+\    RECORD.ID$,                  \ "E3",                       offset =  0
+\    REC.SEQ.NUM$,                \ len = 6,                    offset =  2
+     ADDENDA.SEQ.NUM$,            \ len = 3,                    offset =  8
+     CAT.CODE$,                   \ len = 2,                    offset = 11
+     SUB.CAT.CODE$,               \ len = 3,                    offset = 13
+     PURCH.UNITS$,                \ len = 5,                    offset = 16
+     UPC$,                        \ len = 17,                   offset = 21
+     PURCH.QTY$,                  \ len = 5                     offset = 38
+     CLAIM.PRICE$                 ! len = 5                     offset = 43
+
+!*************************************************************************
+! Trailer Record Layout
+!    Starts ith a RECORD.ID$ = "Z1" and
+!                 REC.SEQ.NUM$ = the last detail record sequence number + 1
+!**************************************************************************
+
+  STRING GLOBAL                   \
+\    RECORD.ID$,                  \  "Z1"  Trailer Rec,          offset =  0
+\    REC.SEQ.NUM$,                \  len = 6,                    offset =  2
+\    FILE.CREATE.DATE$,           \  "CCYYMMDD",                 offset =  8
+\    FILE.CREATE.TIME$,           \  "HHMMSS",                   offset = 16
+\    FILE.FMT.VERSION$,           \  "02",                       offset = 22
+     CNT.RECS$,                   \  len = 7,                    offset = 24
+     TOT.AMT.CLAIMED$,            \  len = 16,                   offset = 31
+\     CLAIM.DATE$,                \  len = 8                     offset = 47
+     TOT.DISCOUNT.AMT$            !  len = 16                    offset = 55
+
+  STRING GLOBAL                   \
+     GMT.DATE$,                   \
+     GMT.TIME$,                   \
+     DAYLIGHT.SAVING$,            \
+     GMT.DIFF$,                   \
+     ERROR.CODE$,                 \
+     FORMAT.STR$,                 \
+     CRLF$,                       \
+     CLOSE.TIME$,                 \
+     INWE.ERR$,                   \
+     INWE.ERRN$,                  \
+     ERRNHEX$,                    \
+     FILENAME$,                   \
+     CONTROL.FMT$,                \
+     AGENCY.FMT$,                 \
+     NUM.AGENCIES$,               \
+     AGENCY.ARRAY$(1),            \
+     ACTIVE.FLAG.ARRAY$(1),       \
+     BIN.NUMBER.ARRAY$(1),        \
+     MERCHANT.ID.ARRAY$(1),       \
+     FORWARD.INSTITUTE.ARRAY$(1), \
+     RECEIVE.INSTITUTE.ARRAY$(1), \
+     STATUS.KEYS$(1),             \
+     WIC.TENDER$,                 \
+     BIN.NUMBER$,                 \
+     AGENCY.MAIN.OPTION$(1),      \
+     A1.REC$,                     \  claim file header record
+     D4.REC$,                     \  claim file detail record
+     E3.REC$,                     \  claim file addenda record
+     Z1.REC$,                     \  claim file trailer record
+     E3.STR$(1),                  \  addendum claim file strings
+     WIC.WORK$,                   \
+     WIC.STATUS.STR$,             \
+     WE.ERR.CODE$,                \
+     ICC.CODE$,                   \
+     STATE.ID$                    !  len = 2   two char alpha id
+
+
+  INTEGER*2 GLOBAL                \
+     IDENTIFIER,                  \
+     EOF,                         \
+     GMT,                         \
+     E3.INDEX,                    \
+     EAMWEOPT.SN,                 \
+     EAMWEOPT.RECL,               \
+     NUM.AGENCIES%,               \ Number of agencies supported
+     MAX.AGENCIES,                \ maximum number of agencies allowed
+     ORG.NUM.AGENCIES%,           \ number of agencies when file initially read
+     PARM1,                       \
+     ADDENDA.SEQ.NUM%,            \
+     REC.SEQ.NUM,                 \
+     SELF.CHK.ARRAY(1),           \
+     WIC.ITEM.INDEX               !
+
+  INTEGER*4 GLOBAL                \
+     INWE.ERRN%,                  \
+     THIS.DAY,                    \
+     TOT.WIC.AMT,                 \
+     TOT.WIC.DISCOUNT,            \
+     REC.CNT,                     \
+     RET                          !
+
+  INTEGER*1 GLOBAL                \
+     ERR.RESUME,                  \
+     INWE.ERRF%,                  \
+     SELF.CHKOUT,                 \
+     DAYLIGHT.SAVE%               !
+
+

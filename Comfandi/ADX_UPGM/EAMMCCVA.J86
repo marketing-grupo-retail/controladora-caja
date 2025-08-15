@@ -1,0 +1,298 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMMCCVA.J86                                 */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME: Variable Definitions for SA Multiple    */
+\/*                        Currency Feature.                       */
+\/*                                                                */
+\/*      COPYRIGHT:                                                */
+\/*      5696-536 THIS MODULE IS "RESTRICTED MATERIALS OF IBM"     */
+\/*      (C) COPYRIGHT IBM CORP 1986, 1993 ALL RIGHTS RESERVED     */
+\/*      LICENSED MATERIALS - PROPERTY OF IBM REFER TO COPYRIGHT   */
+\/*      INSTRUCTIONS FORM NUMBER G120-2083                        */
+\/*                                                                */
+\/*      AUTHOR: Michael Coffman                                   */
+\/*                                                                */
+\/*      CHANGE HISTORY:                                           */
+\/*      20 April 1998   Initial Version                           */
+\/*                                                                */
+\/*      IR38497 - Bring module up to coding standards.            */
+\/*                RDG IBM   09Sep98                               */
+\/*                                                                */
+\/*      IR39392 - Skip consolidated accounting screens.  Ensure   */
+\/*                auto loans are posted to foreign currency       */
+\/*                tracking file. Prevent record lock in Tender    */
+\/*                Count                                           */
+\/*                MBC IBM 03Feb99                                 */
+\/*                                                                */
+\/*      IR40090 - Design change for checkout support to handle    */
+\/*                new data format for tlog 05, 06, and 09 strings */
+\/*                as well as new string type 24.                  */
+\/*                RSH MGVA 17Mar99                                */
+\/*                                                                */
+\/*      IR40902 - Implement design change for MCF Accounting.     */
+\/*                - Use Arrow keys for selecting Currency         */
+\/*                - Present screens/get input similar to TBV      */
+\/*                - Process accounting updates similar to TBV     */
+\/*                  (Checkout support updates short EAMFCTR*)     */
+\/*                RSH MGVA 01Jul99                                */
+\/*                                                                */
+\/*      IR50860 - Work variables too small for tender listing rpt.*/
+\/*                CRM IBM 24FEB2003                               */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+
+INTEGER*1 GLOBAL FC.ST.RECON          ! store is reconciled, no more FC.INPUT
+INTEGER*1 GLOBAL FCTRK.OPEN           ! foreign currency tracking file open flag
+INTEGER*1 GLOBAL FC.ENTERED           ! foreign currency entered in loans/pickups
+INTEGER*1 GLOBAL FC.NOT.FOUND         ! foreign currency record not found
+INTEGER*1 GLOBAL FC.OBAL.START        ! foreign currency opening balance started
+!AIR40090 These variables are moved below
+!NTEGER*2 GLOBAL FC.LOAN.COUNT,       \ loan count in EAMFCTRn
+!                FC.PICK.COUNT,       \ pickup count in EAMFCTRn
+!                FC.TEND.COUNT,       \ tender count count in EAMFCTRn
+!                FC.NET.COUNT,        \ net tender amount in EAMFCTRn
+
+INTEGER*2 GLOBAL                      \
+\EIR40090
+                 FC.MAX.PAGE,         \ last foreign cur. screen no.
+                 FC.FILE,             \ session number for EAMFCTRn
+                 FC.LONG,             \ session number for EAMFCTCL
+                 FC.LINES,            \ extra report lines for foreign currency
+                 FC.PERIOD,           \ save period for reports
+                 FC.OPTERM            ! operator/terminal no., 0 = store
+!AIR40090 These variables are moved below
+!NTEGER*4 GLOBAL FC.LOAN.AMOUNT,      \ loan amount in EAMFCTRn
+!                FC.PICK.AMOUNT,      \ pickup amount in EAMFCTRn
+!                FC.TEND.AMOUNT,      \ tender count amount in EAMFCTRn
+!                FC.NET.AMOUNT,       \ net tender amount in EAMFCTRn
+!                FC.OBAL.AMOUNT,      \ opening balance amount in EAMFCTRn
+
+INTEGER*4 GLOBAL                      \
+\EIR40090
+                 FC.NTAMT(1),         \ net tender amounts from EAMACCTn
+                 FC.TLIST.AMT         ! save amount for EAMTLIST file
+STRING    GLOBAL FC.EXCPT.63$(1)      ! type 63 EAMEXCPT record save array
+STRING    GLOBAL FC.TENDER$(3)        ! descriptors/tenders for loans/pickups
+STRING    GLOBAL MNC.TV.DEFINED$(2)   ! descriptors for tender/variety descs
+STRING    GLOBAL FC.FILE26$,          \ logical name for session 26 file
+                 FC.FILE27$           ! logical name for session 27 file
+STRING    GLOBAL FC.COLUMN$(1)        ! report column headers
+STRING    GLOBAL FC.SUBTOT$           ! subtotal descriptor
+STRING    GLOBAL FC.PRT.LINE$(1)      ! report print/display lines
+STRING    GLOBAL FC.SCOPE$            ! scope of last report
+
+!AIR38497
+!%INCLUDE EAMEXCHV.J86                ! variables for EAMEXCHG.DAT files
+\ REM!!******************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE COMMON TO ALL EXCHANGE RATE RECORDS. !!
+\ REM!!******************************************************************!!
+
+STRING    GLOBAL                      \
+          REC.TYPE$,                  \ RECORD TYPE (ALL RECORDS)              PD 1
+          NUM.CURR$                   ! NUMB OF FC'S ACCEPTED (10 REC ONLY)    PD 1
+
+INTEGER*2 GLOBAL                      \
+          NUM.FCSA,                   \ NUMBER OF FOREIGN CURRENCIES ACCEPTED
+          RECORD.TYPE,                \ Record Type Field                       PD 1
+          RF.SESS%                    ! Session Number
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE TYPE X'20' RECORD.    !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL                      \
+          CMCICODE$,                  \ COUNTRY MONETARY CURRENCE ID (COMMON) ASCII 3
+          FCNAME$,                    \ FOREIGN CURRENCY NAME               ASCII V?
+          CURR.NUM$,                  \ FOREIGN CURRENCY NUMBER                PD 2
+          FC.SYMBOL$,                 \ FOREIGN CURRENCY SYMBOL                PD 2
+          PROC.METH$,                 \ PROCESSING METHOD                      PD 1
+          EXCHRATE$,                  \ EXCHANGE RATE                       ASCII 11
+          DECFLAG$,                   \ DECIMAL CURRENCY FLAG               ASCII 1
+          LOANABLE$,                  \ LOANABLE CURRENCY FLAG              ASCII 1
+          CURR.KEY.CODE$,             \ CURRENCY KEYING CODE                   PD 1
+          AUTHLEVEL$,                 \ MIN AUTHORIZATION LEVEL                PD 1
+          CHKINDFLD$,                 \ FIELD CONTAINING CHECK INDICATOR       PD 1
+                                      \ X'01' = TRANSIT NUMBER FIELD
+                                      \ X'02' = ACCOUNT NUMBER FIELD
+                                      \ X'03' = CHECK NUMBER FIELD
+          CHKINDOFF$,                 \ OFFSET INTO FIELD                      PD 1
+          CHECKIND$,                  \ INDICATOR FOR CURRENCY                 PD 1
+          USERDATA$,                  \ USER DATA FIELD                     ASCII V?
+          FCER.ARR$(2)                ! FOREIGN CURRENCY EXCHG RATE ARRAY
+
+INTEGER*1 GLOBAL                      \
+          CURR.KEYCODE,               \ CURRENCY KEYING CODE
+          DATA.CAPTURED,              \ Data Captured flag
+          DEC.FLAG,                   \ DECIMAL CURRENCY FLAG
+          ERROR.TYPE,                 \ Error Type
+          FIELD.ERROR,                \ Field Error Flag
+\IR50860  J,L,                        \ Work Variables
+          LOANABLE,                   \ LOANABLE TENDER FLAG
+          MIN.AUTH.LEV,               \ MIN AUTHORIZATION LEVEL FLAG
+          FCTRK.NOLOCK,               \ read EAMFCTRx with lock IR39392
+          PROCESSING.METHOD           ! Currency Processing Method
+
+INTEGER*2 GLOBAL                      \ IR50860
+          J,L                         ! Work Variables IR50860
+          
+REAL      GLOBAL                      \
+          EXCHG.RATE                  ! FOREIGN CURRENCY EXCHANGE RATE
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE TYPE X'30' RECORD.    !!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL                      \
+          TTAR.ARR$(2)                ! Tender Acceptance ARRAY
+
+
+\ REM!!***************************************************************!!
+\ REM!! RECORDS ARE READ USING THE INCLUDE:                           !!
+\ REM!!                                                               !!
+\ REM!!  EAMEXCHR.J86  READ EXCHANGE RATE FILE RECORD                 !!
+\ REM!!***************************************************************!!
+
+\ REM!!***************************************************************!!
+\ REM!! THE FOLLOWING VARIABLES ARE USED IN THE FOREIGN CURRENCY FEAT.!!
+\ REM!!***************************************************************!!
+
+STRING    GLOBAL                      \
+          CURR.KEYCODE$,              \ Current Keycode
+          ERROR.TYPE$,                \ Error Type
+          EXCHGRATE$,                 \ Exchange Rate
+          FC.ACCEPT$,                 \ FC Accept Field
+          FC.DESC.ARR$(2),            \ FC Descriptors Array
+          FC.MODULE.ID$,              \ FC Module ID for Logging
+          FC.NOT.FND.MSG$,            \ FC Not found message
+          FC.PM$,                     \ FC Processing Method
+          FC.TEMP1$,                  \ Work Variable
+          FC.TEMP2$,                  \ Work Variable
+          FC.TTYPE$,                  \ FC Tender Type
+          FC.TVAR$,                   \ FC Tender Variety
+          MC.ISO.ARR$(2),             \ MC ISO Array
+          NUM.ISO$,                   \ Number of ISO Entries
+          OEXCHGRATE$,                \ Old Exchange Rate
+          PROC.METHOD$,               \ Processing Method
+          PM.1.DESC$,                 \ PM 1 Descriptor
+          PM.26.DESC$,                \ PM 2,6 Descriptor
+          PM.345.DESC$,               \ PM 3,4, and 5 Descriptor
+          TVADEF$                     ! Tender Type,Varerity Accept Definition
+
+INTEGER*1 GLOBAL                      \
+          DESC.READ,                  \ Descriptor Read flag
+          EAMEXCHG.PROCESSED,         \ Exchange Rate File Processed flag
+          EAMEXISO.PROCESSED,         \ ISO File Processed flag
+          EOF.DETECTED,               \ End Of File detected flag
+          EVENT,                      \ error event number
+          FC.KEY,                     \ FC Key Number
+          FC.TEMP1I1,                 \ Work Variable
+          FC.TEMP1I2,                 \ Work Variable
+          MSGGRP,                     \ error message group
+          OPEN.ERROR,                 \ file open error flag
+          RD.FIRST.LINE,              \ Rd first Line flag
+          RD.ISO.FILE,                \ Rd ISO file flag
+          RD.EXCHG.FILE,              \ Rd Exchange Rate File flag
+          SVRTY                       ! error severity
+
+
+INTEGER*2 GLOBAL                      \
+          EOL,                        \ End of Line Position
+          MC.ENABLED,                 \ MULTIPLE CURRENCY ENABLED FLAG
+          FC.TEMP2I2,                 \ Work Variable
+          FC.TV.INDEX,                \ FC Type-Variety Index
+          FLD.END,                    \ Field End Pointer
+          FLD.LEN,                    \ Field Length
+          FLD.NUM,                    \ Field Number
+          FLD.START,                  \ Field Start Pointer
+          MSGNUM,                     \ error message number
+          NEXT.FC.INDEX,              \ Next FC Index pointer
+          NUM.DESCS,                  \ Number of Descriptors
+          NUM.ISO%,                   \ Number of ISO Entries
+          RECORD.LEN,                 \ Record Length
+          SLOT                        ! Slot Number
+
+INTEGER*4 GLOBAL                      \
+          EAMCDESC.PRESENT,           \ Feature Descriptor File Present Flag
+          EAMEXISO.PRESENT,           \ ISO File Present Flag
+          EAMEXCHG.PRESENT,           \ Exchange Rate File Present Flag
+          LC.AMTTENDE,                \ Local Amount Tendered Variable
+          FC.AMTTENDE                 ! FC Amount Tendered Variable
+
+
+!AIR40090 - The following variables are used for the Foreign Currency
+!           tracking file
+
+INTEGER*4 GLOBAL                      \
+          FC.RESTART,                 \ Restart Field
+          FC.LOAN.AMOUNT,             \ Loan Amount
+          FC.PICK.AMOUNT,             \ Pickup Amount
+          FC.TEND.AMOUNT,             \ Tender Count Amount
+          FC.NET.AMOUNT,              \ Net tender amount
+          FC.OBAL.AMOUNT,             \ Opening Balance Amount
+          FC.AMTMISCE,                \ Amount Of Misc Trx
+          LC.LOAN.AMOUNT,             \ Local Loan Amount
+          LC.PICK.AMOUNT,             \ Local Pickup Amount
+          LC.TEND.AMOUNT,             \ Local Tender Count Amount
+          LC.NET.AMOUNT,              \ Local Net tender amount
+          LC.OBAL.AMOUNT,             \ Local Opening Balance Amount
+          LC.AMTMISCE,                \ Local Amount Of Misc Trx
+          FC.USER1I4,                 \ User Integer
+          FC.USER2I4                  ! User Integer
+
+INTEGER*2 GLOBAL                      \
+          FC.LOAN.COUNT,              \ Count of Loans
+          FC.PICK.COUNT,              \ Count of Pickups
+          FC.TEND.COUNT,              \ Count of Tender Counts
+          FC.NET.COUNT,               \ Count of Tenders Taken
+          FC.MISCE.COUNT,             \ Count of Misc Trx
+          FC.USER1I2,                 \ User Integer
+          FC.USER2I2                  ! User Integer
+
+INTEGER*1 GLOBAL                      \
+          FC.UPDATE.REQD              ! Update Required
+
+STRING    GLOBAL                      \
+          FC.FILECHGED$,              \ For exception logging
+          FC.TENDTYPE$,               \ Tender type & variety
+          FC.DATETIME$,               \ Date/Time of Trx to last update
+          FC.TRANSNUM$,               \ Transaction Number of Last Update
+          FC.TERMINAL$,               \ Terminal Number of last update
+          FC.RESERVED$                ! Reserved byte
+
+INTEGER*4 GLOBAL                      \
+          POS.MC.LPTC.ACCUM(2),       \ FC Loan-Pickup-Tender Count
+                                      \  Accumulator.
+                                      \ TENDER/VARIETY
+          NEG.MC.LPTC.ACCUM(2),       \ FC Loan-Pickup-Tender Count
+                                      \  Accumulator.
+                                      \ TENDER/VARIETY
+          POS.LC.LPTC.ACCUM(2),       \ LC Loan-Pickup-Tender Count
+                                      \  Accumulator. LOCAL
+                                      \ TENDER/VARIETY
+          NEG.LC.LPTC.ACCUM(2),       \ LC Loan-Pickup-Tender Count
+                                      \  Accumulator. LOCAL
+                                      \ TENDER/VARIETY
+          ST.MC.LPTC.ACCUM(3),        \ FC Loan-Pickup-Tender Count
+                                      \  Accumulator for S'lone
+                                      \ SLOT/TENDER/VARIETY
+          ST.LC.LPTC.ACCUM(3)         \ LC Loan-Pickup-Tender Count
+                                      \  Accumulator for S'lone
+                                      ! SLOT/TENDER/VARIETY
+!EIR40090
+
+!AIR40902
+INTEGER*2 GLOBAL                      \
+          MC.TLOG,                    \ Count of tlog updates Ln/Pk/TC
+          CONSOLIDATED.ALLOWED        ! Consolidated allowed for Rpts
+
+STRING    GLOBAL                      \
+          MC.TLOG$(1)                 ! Tlog Update strings
+!EIR40902
+
+!*************************************************************************
+!                END OF INCLUDE : EAMMCCVA.J86
+!*************************************************************************
+!EIR38497

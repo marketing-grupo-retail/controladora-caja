@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+\/****************************************************************/
+\/*                                                              */
+\/* IR39146  Add user exit before writing an entry to the        */
+\/*          summary log array.                                  */
+\/*          RSH MGVA 12Nov98                                    */
+\/*                                                              */
+\/****************************************************************/
+
+SUB TSUPEC68(ENTRY$,ELEMENT) PUBLIC
+  STRING    ENTRY$
+  INTEGER*2 ELEMENT
+
+   ! Insert User Exit Code here
+
+  ENTRA$ = ENTRY$                 !
+  ELEMENTO% = ELEMENT             !
+  Gr.CrdSoc.Str$ = ENTRY$         ! CREDITO SOCIAL
+  CALL RECASRV(68,0)		          ! RECAUDO TERCEROS
+  CALL CFTSU68.011                ! Exit to ENTRY$ Log Str
+  CALL PTOMTS68.011(ENTRY$)       ! PUNTOS ADICIONALES
+!  CALL MKTPTS68.011               ! MODULO PROMOCIONES
+  
+END SUB
+

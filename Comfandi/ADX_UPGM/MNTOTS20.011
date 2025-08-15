@@ -1,0 +1,20 @@
+!------------------------------------------------------------------------------
+!   ***************************************************************************
+!   **    Fecha      :  Abril 04 de 2000                                     **
+!   **    Proyecto   :  GLOBAL DATATEL COLOMBIA *                            **
+!   **    User Exit  :  GLOBTS20.011                                         **
+!   **    Inclu¡r en :  EAMTSU20.J86  -  Antes de 1er entrada de Transacion  **
+!   **    Programa   :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **                                                                       **
+!   **    Restaura valor de variables al Inicio de Transaccion               **
+!   **                                                                       **
+!   ***************************************************************************
+!
+!------------------------------------------------------------------------------
+
+IF (UE.MNTO.FREEIT%) AND (TS.LINETYPE = 4) AND (TS.LINEDATA = 1)  THEN BEGIN
+	CALL DONA.IMPRIME(UE.MNTO.DESC$+RIGHT$(STRING$(9," ")+"-"+STR$(UE.MNTO.MONTOF%)+"  ",9), 6100H)
+	UE.MNTO.MONTOF% = 0
+	UE.MNTO.FREEIT% = 0
+ENDIF

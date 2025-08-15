@@ -1,0 +1,20 @@
+!******************************************************************!!
+! TITLE: Electronic Marketing Support
+!
+!!  ????-??? THIS MODULE IS "RESTRICTED MATERIALS OF IBM"
+!!  (c) COPYRIGHT IBM CORP 1991 ALL RIGHTS RESERVED LICENSED MATERIALS
+!!  PROPERTY OF IBM REFER TO COPYRIGHT INSTRUCTIONS FORM NUMBER G120-2083
+!
+!!*******************************************************************
+!!
+!! IR39149  Initial Version.
+!!          This include sets the user selected variety to
+!!          account for Electronic Manufacturer Coupons.
+!!          The user should edit this file to set the variety if
+!!          the Enhanced Manufacturer Coupon reporting option is
+!!          selected in base supermarket.  Valid values are 1-6.
+!!          RSH MGVA xxMon98
+!!
+!!*END-OF-SPECIFICATIONS*********************************************
+
+EMSS.EMC.VAR = 1            ! Set variety containing Electronic Cpns

@@ -1,0 +1,48 @@
+!**************************************************
+!Empresa       : Casa Informatica Unidad  Retail  *
+!Programa      : COMFTSVA.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Julio 8 de 2.003                 *
+!Observaciones : Definicion de variables          *
+!				                                  *  
+!**************************************************
+
+INTEGER*1 GLOBAL UE.COMF.BONOS%,   \! Control proyecto
+                 UE.COMF.SES1%,    \! Sesion temporal
+                 UE.COMF.TIPO%,    \! Tipo de pago
+                 UE.COMF.VARI%      ! Variedad de pago
+
+INTEGER*2 GLOBAL UE.COMF.NCHQ%,    \! Numero de cheques
+                 UE.COMF.N%         ! Temporal 
+
+STRING    GLOBAL UE.COMF.CHEQ$(2), \! Cheques recibidos
+                 UE.COMF.IND$,     \! Indicador de uso
+                 UE.COMF.VCHQ$,    \! Valor cheque a comparar
+                 UE.COMF.ALTA$,    \! Resaltado en la impresion
+				 UE.COMF.DATA$,    \! Temporal
+                 UE.COMF.NCHQ$      ! Numero del cheque
+
+INTEGER*4 GLOBAL UE.COMF.VCHQ%      ! Valor del cheque
+
+!---- Variables Modulo Promocion Proveedores
+
+INTEGER*1 GLOBAL UE.COMF.PROMO%,   \! Control proyecto
+                 UE.COMF.ENTRA%,   \! Numero entradas en UE 8
+                 UE.COMF.INDIMP%,  \! Control de impresion
+                 UE.COMF.STAT%,    \! Status de la aplicacion
+                 UE.COMF.SES2%      ! Sesion temporal
+
+INTEGER*4 GLOBAL UE.COMF.QTY%,     \! Qty de compra minima unidades
+                 UE.COMF.VLR%       ! Valor minimo de compra
+				 
+INTEGER*4 GLOBAL UE.COMF.VQTY%,    \! Qty de compra minima unidades
+                 UE.COMF.VVLR%      ! Valor minimo de compra				 
+
+STRING    GLOBAL UE.COMF.MSG1$,    \! Mensaje publicitario 1
+                 UE.COMF.MSG2$,    \! Mensaje publicitario 2
+				 UE.COMF.MSG3$,    \! Mensaje publicitario 3
+				 UE.COMF.MSG4$,    \! Mensaje publicitario 4
+				 UE.COMF.FECI$,    \! Fecha inicial promocion			 
+				 UE.COMF.FECF$      ! Fecha Final promocion 				 
+				 

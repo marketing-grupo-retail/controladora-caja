@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK ***************************************************
+\** END OF TIME STAMP BLOCK *******************************************/
+
+!*****************************************************************************!
+!* GLOBAL variables available for the Item Record File Data Maintenance Exits*!
+!*****************************************************************************!
+STRING    GLOBAL    SELECTION$        ! Selection screen choice
+INTEGER*1 GLOBAL    PRINT.PRESSED     ! PF10(PRINT) key pressed
+STRING    GLOBAL    CODE$             ! Item code selected
+STRING    GLOBAL    ITEM.PG1$(1)      ! Item Record display data, page 1
+STRING    GLOBAL    ITEM.PG2$(1)      ! Item Record display data, page 2
+

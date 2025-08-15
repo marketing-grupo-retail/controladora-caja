@@ -1,0 +1,52 @@
+!************************************************** 
+!Empresa       : Asic S.A.  Unidad de Retail      *
+!Programa      : DVLTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Fecha         : Junio 22 de 2.004                *
+!Observaciones : Rutinas Devolucion en Linea      *
+!**************************************************
+
+SUB SALVAR.VARIABLES External
+END SUB
+ 
+SUB RESTAURA.VARIABLES External
+END SUB
+
+Function  VISORES4690(U.D.VISOR%, U.D.LINEA1$, U.D.LINEA2$,U.D.TIEMPO%,U.D.POSICION$) External		! Msg Display
+String U.d.Linea1$, U.d.Linea2$, U.d.Posicion$								! Variables de
+Integer*2 U.d.visor%, U.d.tiempo%, u.t.visor%, ud.pos%							! trabajo
+String U.D.Linea1$, U.D.Linea2$										!
+End FUNCTION												!
+!--- Fin despliege de mensajes a los visores 
+
+FUNCTION ASIC.DATOS$(UMSG1$,UMSG2$) External     								! Captura de datos
+STRING UMSG1$, UMSG2$, ASIC.DATOS$
+END FUNCTION
+!--- Fin entrada de datos
+
+!Parametros a pasar UE.STRING$ = String a Imprimir
+!  	            UE.STATION = Destino de la impresion
+!                		4000H  - print on CR
+!                		2000H  - print on SJ
+!                		1000H  - print on DI
+!                   6000h  - print on CR and SJ 
+!                		0100H  - number of linefeeds (eg here = 1)
+Function U.IMPRIME(UE.STRING$,UE.STATION) External					! Rutina de Impresion
+String UE.STRING$, LF$ 											! Variables temporales
+INTEGER*2 UE.STATION											!
+End Function
+!--- Fin rutina de impresion 
+
+FUNCTION U.EXPLUSADI External										! Expulsa papel en el 
+END FUNCTION												!
+!--- Fin Rutina Expulsion Papel DI				
+
+FUNCTION U.CORTACR External										! Corta Papel en 
+END FUNCTION
+!--- Fin Rutina corte de papel
+
+Function Grabacion.String.Usuario(X.clave$,X.datos$) External
+String X.clave$, X.datos$
+End Function
+!--- Fin grabacion de datos

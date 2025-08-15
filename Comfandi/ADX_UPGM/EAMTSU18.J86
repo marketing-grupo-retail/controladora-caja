@@ -1,0 +1,26 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!*********************************************************************
+!Changes:
+!
+!IR35895
+!971015 Not all Non Sales Procedures were being logged properly
+!*********************************************************************
+
+FUNCTION TSUPEC18 PUBLIC
+! TSUPEC18 - BEFORE SL WRITE
+
+!AIR35895
+!971015 START
+IF SL.HD.TRANTYPE = 17 THEN BEGIN
+  CALL QXL.TSUPEC01
+ENDIF
+!971015 END
+!EIR35895
+%INCLUDE EAMTSE18.J86             ! EMS PRPQ
+CALL QXL.TSUPEC18                 ! EJ V2
+CALL LIBLINE(18,1)                ! VARIABLES OPERADOR
+
+END FUNCTION
+

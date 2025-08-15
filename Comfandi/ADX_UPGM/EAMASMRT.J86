@@ -1,0 +1,124 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ***************************************/
+\*
+\*  IR40389  Added routine GETADDR to return the return address
+\*           from the stack.
+\*           JAM 26Apr99
+\*
+\*END-OF-SPECIFICATIONS***********************************************
+
+!*********************************************************************
+!
+! ASSEMBLER SUBROUTNE DEFINITIONS
+!
+! These definitions should be copied by any routine which wishes to
+! use the performanced enhanced assembler routines.
+!
+!*********************************************************************
+
+!*********************************************************************
+!
+! SUBSTR
+!
+! This routine performs a merge of two strings. String P3$, offset P4
+! is merged into string P1$ offset P2 for a length of P5 bytes
+!
+! CAUTION: P1$ must be long enough to totally contain P3$
+!
+!*********************************************************************
+
+ FUNCTION SUBSTR(P1$,P2,P3$,P4,P5) EXTERNAL
+ STRING P1$,P3$
+ INTEGER*2 P2,P4,P5
+ END FUNCTION
+
+!*********************************************************************
+!
+! GETN1/GETN2/GETN4
+!
+! These routines extract a one/two/four byte integer from a string.
+! P2 is the offset within the string
+!
+!*********************************************************************
+
+ FUNCTION GETN1(P1$,P2) EXTERNAL
+ INTEGER*1 GETN1
+ STRING P1$
+ INTEGER*2 P2
+ END FUNCTION
+
+ FUNCTION GETN2(P1$,P2) EXTERNAL
+ INTEGER*2 GETN2
+ STRING P1$
+ INTEGER*2 P2
+ END FUNCTION
+
+ FUNCTION GETN4(P1$,P2) EXTERNAL
+ INTEGER*4 GETN4
+ STRING P1$
+ INTEGER*2 P2
+ END FUNCTION
+
+!*********************************************************************
+!
+! PUTN1/PUTN2/PUTN4
+!
+! These routines insert a one/two/four byte integer into a string.
+! P2 is the offset within the string and P3 is the source integer
+!
+!*********************************************************************
+
+ FUNCTION PUTN1(P1$,P2,P3) EXTERNAL
+ STRING P1$
+ INTEGER*2 P2
+ INTEGER*1 P3
+ END FUNCTION
+
+ FUNCTION PUTN2(P1$,P2,P3) EXTERNAL
+ STRING P1$
+ INTEGER*2 P2,P3
+ END FUNCTION
+
+ FUNCTION PUTN4(P1$,P2,P3) EXTERNAL
+ STRING P1$
+ INTEGER*2 P2
+ INTEGER*4 P3
+ END FUNCTION
+
+!*********************************************************************
+!
+! PACKBIN2/4
+!
+! These routines take a packed decimal string and convert to integer
+! (The equivalent of CBASIC INT%(VAL(UNPACK$())) )
+! P1 is the source string, P2 the string offset and P3 the length
+!
+!*********************************************************************
+
+ FUNCTION PACKBIN2(P1$,P2,P3) EXTERNAL
+ INTEGER*2 PACKBIN2
+ STRING P1$
+ INTEGER*2 P2,P3
+ END FUNCTION
+
+ FUNCTION PACKBIN4(P1$,P2,P3) EXTERNAL
+ INTEGER*4 PACKBIN4
+ STRING P1$
+ INTEGER*2 P2,P3
+ END FUNCTION
+
+
+!AIR40389
+!*********************************************************************
+!
+! GETADDR
+!
+! This function will return the return address of the calling routine
+!
+!*********************************************************************
+
+ FUNCTION GETADDR EXTERNAL
+ INTEGER*4 GETADDR
+ END FUNCTION
+
+!EIR40389

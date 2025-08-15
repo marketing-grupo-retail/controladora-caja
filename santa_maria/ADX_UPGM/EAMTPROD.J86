@@ -1,0 +1,74 @@
+\/* TIME STAMP BLOCK **********************************************             
+\** END OF TIME STAMP BLOCK **************************************/             
+!**********************************************************************         
+!*                TERMINAL PRODUCTIVITY FILE                          *         
+!**********************************************************************         
+!* The following defines the productivity record format for the       *         
+!* terminal productivity file.  The fields are defined in the         *         
+!* sequence in which they appear in the logical record                *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+         TP.PR.TERMINAL$,        \ TERMINAL NUMBER               UPD 2          
+         TP.PR.DATETIME$         ! DATE AND TIME -YYMMDDHHMM     UPD 5          
+\                                                                               
+STRING GLOBAL \                                                                 
+         TP.PR.NETSALES$,        \ NET SALES AMOUNT FOR THE      ASC V8         
+                                 \ ITEMS IN NUMITEMS                            
+\                                                                               
+         TP.PR.NUMITEMS$,        \ NET NUMBER OF ITEM SALES      ASC V8         
+                                 \ THIS COUNT INCLUDES SALES                    
+                                 \ LESS REFUNDS AND CANCELS.                    
+                                 \ NO ITEMS FROM TRAINING,                      
+                                 \ STANDALONE, OR VOIDED XACTS                  
+\                                                                               
+         TP.PR.NUMCOUPS$,        \ NET NUMBER OF STORE AND       ASC V8         
+                                 \ MANUFACTURER COUPONS.                        
+                                 \ NO COUPONS FROM TRAINING                     
+                                 \ STANDALONE OR VOIDED XACTS                   
+\                                                                               
+         TP.PR.NUMTRANS$,        \ NUMBER OF TRANSACTIONS.       ASC V8         
+                                 \ NO TRAINING, VOIDED OR                       
+                                 \ STANDALONE TRANSACTIONS                      
+\                                                                               
+         TP.PR.RINGTIME$,        \ TOTAL RING TIME IN SECONDS    ASC V8         
+                                 \ INCLUDES THE TIME FROM THE                   
+                                 \ FIRST ITEM UNTIL BALANCE DUE.                
+                                 \ ALSO INCLUDES THE TIME FROM                  
+                                 \ PREVIOUS TOTAL OR TENDER TO                  
+                                 \ SUBSEQUENT ITEM SALE.                        
+\                                                                               
+         TP.PR.TENDERTI$,        \ TOTAL TENDER TIME IN SECONDS  ASC V8         
+                                 \ INCLUDES TIME BETWEEN TOTAL AND              
+                                 \ TENDER, TIME BETWEEN TENDERS                 
+                                 \ AND TIME BETWEEN FINAL TENDER                
+                                 \ AND CLOSE OF THE CASH DRAWER.                
+\                                                                               
+         TP.PR.SPECIAL$,         \ TOTAL SPECIAL SIGN OFF TIME   ASC V8         
+                                 \ IN SECONDS.  INCLUDES TIME                   
+                                 \ BETWEEN SPECIAL SIGN OFF AND                 
+                                 \ SUBSEQUENT SPECIAL SIGN ON.                  
+\                                                                               
+         TP.PR.INACTIVE$,        \ TIME BETWEEN TRANSACTIONS IN  ASC V8         
+                                 \ SECONDS                                      
+\                                                                               
+         TP.PR.NONSALES$,        \ TIME IN SECONDS WHEN          ASC V8         
+                                 \ NON-SALES PROCEDURES ARE BEING RUN.          
+                                 \ VOIDED, STANDALONE, AND TRAINING             
+                                 \ TRANSACTION ARE INCLUDED                     
+\                                                                               
+        TP.PR.USEREXIT$         ! USER FIELD FOR USE WITH EXITS ASC V?          
+                                                                                
+!**********************************************************************         
+!* The following defines the end of period record format for the      *         
+!* terminal productivity file.  The fields are defined in the         *         
+!**********************************************************************         
+                                                                                
+STRING GLOBAL \                                                                 
+        TP.EP.TERMINAL$,        \ TERMINAL NUMBER = 9999        UPD 2           
+        TP.EP.DATETIME$         ! DATE AND TIME - YYMMDDHHMM    UPD 5           
+                                ! OF PERIOD CLOSE                               
+                                                                                
+!**********************************************************************         
+!* End of declarations for the terminal productivity file             *         
+!**********************************************************************         

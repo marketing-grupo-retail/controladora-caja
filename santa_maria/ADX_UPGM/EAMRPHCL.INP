@@ -1,0 +1,13 @@
+eamrphcl=eamrphcc[LI,S,M,DBI,NOSH], 
+eamwrcfc[m,li,lo], 
+eamrpcfc[m,li,lo], 
+eamcsasc[m,li,lo], 
+eammmcfc[s], 
+eamweesc[m,li,lo], 
+eamirrcc[s], 
+eamirrfc[s], 
+eamiruec[s], 
+sysfunc.l86[s], 
+hclc.l86[s], 
+adxacrcl.l86[s], 
+adxadmbl.l86[s,li,lo,m,stack[max[800]]] 

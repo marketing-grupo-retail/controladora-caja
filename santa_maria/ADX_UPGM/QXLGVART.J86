@@ -1,0 +1,62 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+!****************************************************************************
+!****************************************************************************
+! QXLGVART.J86
+!
+!
+!
+!
+!
+!****************************************************************************
+!       DEV IR35895 -
+!                     970414 Keep CurrentTrans in an array
+!
+!                     971112
+!****************************************************************************
+
+  STRING    global Header       !
+! STRING    global CurrentTrans !970414     !IR35895
+  INTEGER*2 global LineCount    !
+  STRING    global TransArray(1)!970414     !IR35895
+
+  STRING GLOBAL Copyright                       !
+                                                !
+
+  STRING GLOBAL ApplName                        ! "GSA" for GSA
+                                                ! "SA"  for Supermarket
+                                                ! "CDSA" for Chain Drug
+  INTEGER*1 GLOBAL Offline
+  !*****************************************************************
+  !
+  !*****************************************************************
+  INTEGER*1 global ?4610Prntr      ! -1 = yes
+  INTEGER*1 global Storing, Unloading
+  STRING    GLOBAL TotalLine
+ !*********************************************
+ ! The following vars used to build FileName
+ !*********************************************
+  STRING   GLOBAL DateDirectory
+  STRING   GLOBAL TerminalDirectory
+
+  INTEGER*4 GLOBAL DeSpoolPtr
+  STRING    GLOBAL DeSpoolFrom, SpoolTo
+  STRING    GLOBAL SpoolA, SpoolB, SpoolControlFile
+  INTEGER*1 GLOBAL Spooling, DeSpooling
+  INTEGER*1 GLOBAL AnySpooled
+  INTEGER*1 GLOBAL Unused !971112
+
+  INTEGER*1 GLOBAL AnyStored
+
+  STRING    GLOBAL CRLF
+  STRING   global JournalName, IndexName
+  INTEGER*2 GLOBAL QXL.SESSION
+
+
+  STRING GLOBAL QXL.MSGS(1)
+  INTEGER*2 GLOBAL QXL.MSG.COUNT
+
+  INTEGER*1 GLOBAL QXL.DEBUG
+
+  INTEGER*2 GLOBAL PrntrSession

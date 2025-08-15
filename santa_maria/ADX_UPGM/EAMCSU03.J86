@@ -1,0 +1,8 @@
+!-----------------------------------------------------------
+! Antes de procesar un articulo en una transaccion de venta
+!-----------------------------------------------------------
+!User exit called before processing any item in a sales transaction
+FUNCTION CSUPEC03 PUBLIC
+
+
+END FUNCTION

@@ -1,0 +1,37 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : EPAYCSSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Funciones para CS Pago Electro.  *
+!**************************************************
+
+Function Asic.Getunpk(X.B$,X.J%) External
+Integer*2 X.J%, X.K%
+String    X.B$, Asic.Getunpk
+End Function
+
+Function Rutina.Java(Java.CLASS$, Java.METHOD$, Java.MESSAGE$) External 					! Inicializacion Clases de Java
+String Java.METHOD$, Java.REQUEST$, Java.EXCEPTION$, Java.CLASS$,             			       \! Def. Variables Tmp
+       Java.RETURNVALUE$, Java.MESSAGE$, Rutina.Java            					!
+End Function
+!--- Fin invocacion rutinas de Java
+
+
+! Parametros de la funcion
+!U.X1$ --> codigo de la aplicacion
+!U.X2$ --> codigo de la funcion
+!U.X3$ --> trama del mensaje
+!U.X4$ --> Estado del requerimiento
+!U.X5$ --> Codigo de la cadena
+!U.X6$ --> Factura de venta
+!U.X7$ --> numero almacen
+!U.X8$ --> numero de la terminal
+!U.X9$ --> cajero
+!U.XA$ --> numero de la trx
+!U.XB$ --> Fecha y hora de la trx
+         
+Function Armar.Trama.Msg(U.X1$, U.X2$, U.X3$,U.X4$,U.X5$,U.X6$,U.X7$,U.X8$,U.X9$, U.XA$, U.XB$) External            ! Armar trama mensajeria
+String U.X1$, U.X2$, U.X3$, U.X4$, Armar.Trama.Msg, U.Tmp1$, U.Tmp2$			  ! Definicion Variables
+String U.Tmp3$, U.X5$, U.X6$, HORA.MUNDIAL$, U.X7$,U.X8$,U.X9$, U.XA$, U.XB$
+End Function 

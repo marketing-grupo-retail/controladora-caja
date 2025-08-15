@@ -1,0 +1,46 @@
+!************************************************** 
+!Empresa       : Grupo Retail Ltda                *
+!Programa      : MKTTSUSU.011                     *
+!Autor         : Oscar Valencia Sarmiento         *
+!Lenguaje      : Basic 4690 IBM                   * 
+!Observaciones : Rutinas Market Plus              *
+!**************************************************
+
+Sub MKTPTE01.011 EXTERNAL
+End Sub
+
+Sub MKTPTS01.011 EXTERNAL
+End Sub
+
+Sub MKTPTS02.011 EXTERNAL
+End Sub
+
+Sub MKTPTS07.011 EXTERNAL
+End Sub
+
+Sub MKTPTS08.011 EXTERNAL
+End Sub
+
+Sub MKTPTS14.011 EXTERNAL
+End Sub
+
+Sub MKTPTS20.011 EXTERNAL
+End Sub
+
+Sub MKTPTS27.011 EXTERNAL
+End Sub
+
+Sub MKTPTS43.011 EXTERNAL
+End Sub
+
+Sub MKTPTS53.011 EXTERNAL
+End Sub
+
+Sub MKTPTS56.011 EXTERNAL
+End Sub
+
+Sub MKTPTS60.011 EXTERNAL
+End Sub
+
+Sub MKTPTS68.011 EXTERNAL
+End Sub

@@ -1,0 +1,12 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+
+FUNCTION CSUPEC15(P1) PUBLIC
+ INTEGER*1 P1
+! insert user exit code here
+ OVS% = P1
+ Asc.Err.Proceso$ = "CSE15"
+ %INCLUDE EAMCSE15.J86            ! Electronic Marketing PRPQ
+ Asc.Err.Proceso$ = "CSU15"
+
+END FUNCTION

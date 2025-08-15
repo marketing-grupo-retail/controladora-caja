@@ -1,0 +1,45 @@
+!At Item Entry Limit Checking, Edit Checking, and Cancel Validation
+!En la comprobación de los limites de entrada, edición y cancelación de artículos
+! TSUPEC39 - ERROR STACKING EXIT
+FUNCTION TSUPEC39 PUBLIC
+   INTEGER*1 TSUPEC39                        ! define variable !IR89474
+
+!integer*1 i
+!string    s$
+!call traceNUO( "UE39 XXMOD=[" + str$(TS.XXMOD) + "] REASON=[" + str$(TS.MO.REASON) + \
+!     "] OPTIONS=[" + str$(TS.OPTIONS) + "] TS.IO.KEYS(1)=" + str$(TS.IO.KEYS(1)) )
+!call traceNUO( "UE39 LT=" + str$(TS.LINETYPE) + "] LD=[" + str$(TS.LINEDATA) + " DISP1$=[" + TS.DISP1$ + "] DISP2$=[" + TS.DISP2$ + "]" )
+!s$ = "UE39 STACERR "
+!for i=0 to 8
+!   s$ = s$ + "(" + str$(i) + ")=" + str$(TS.STACKERR(i)) + " "
+!next
+!call traceNUO( s$)
+
+   !se debe modificar TS.LINETYPE para cambiar el error
+   !TS.STACKERR(0) Limits in effect
+   !               = 1 Manager override
+   !               = 2 Operator override
+   !               = 4 Not overridable
+   !TS.STACKERR(1) Limit
+   !               = 0 Item lookup
+   !TS.STACKERR(2) Amount
+   !TS.STACKERR(3) Item descriptor
+   !TS.STACKERR(4) Amount field
+   !TS.STACKERR(5) Item type indicator
+   !TS.STACKERR(6) Item print indicator
+   !               = 1 Print 'MO' on item print line
+   !               = 2 Print 'OP' on item print line
+   !TS.OPTIONS     = 0 No validation exception
+   !               = 1 Cancel validation exception
+   !TS.DISP1$ Top line of the operator display
+   !TS.DISP2$ Bottom line of the operator display
+   !TS.USER.RETURN User exit work field, para no mostrar el error = -1
+
+   ! Tarjetas Bancarias
+   call MSMTTARB39
+
+   ! Tarjeta de REGALO
+   call MSMTGIFT39
+
+END FUNCTION
+

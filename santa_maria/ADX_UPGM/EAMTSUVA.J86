@@ -1,0 +1,17 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!
+!THIS INCLUDE FILE PROVIDES A PLACE FOR THE USER TO DEFINE VARIABLES
+!WHICH ARE COMMON TO SEVERAL OF HIS USER EXIT FUNCTIONS IN EAMTSUPC.
+!
+!
+%INCLUDE NUOTVARI.J86
+
+integer*1 global \
+          TS.RECOVERY,                    \ in recovery flag
+          TS.SUSP.IN.PROGRESS,            \ suspension in progress
+          TS.RETV.IN.PROGRESS,            \ retrieval in progress
+          TS.RETV.BEGIN                   ! on to begin retrieve in progress, off to end it AIO22151
+
+INTEGER*1 GLOBAL \
+          JAVA.INIT

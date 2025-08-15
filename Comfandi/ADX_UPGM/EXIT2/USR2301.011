@@ -1,0 +1,42 @@
+!         **  PROYECTO COMFANDI   **
+!
+!     USER EXIT          =  USR2301.011 
+!     Punto de Entrada   =  EAMTSU23.J86
+!     Fecha de Revisi¢n  =  Oct. 10 de 1995
+!     Unidad Responsable =  T‚cnicos de Sistemas POS
+!-----------------------------------------------------------
+!            ***    Descripci¢n del Fuente      ***
+!
+!     Se agregan las siguientes instrucciones para OMITIR el 
+!     mensaje de IVA en la pantalla del Operador.            
+!-----------------------------------------------------------
+
+IF TS.LINETYPE = 3 THEN BEGIN                 ! Si es linea de IVA
+   IF TO.USEROPTS(3) <> 0 THEN BEGIN          ! UsrOpts 3=Y Scroll Disply
+      IF PROCE% = 1 THEN BEGIN                ! Avisa el estado
+         WRITE FORM "C40";#30;AVISO$          ! del Flag de
+      ENDIF ELSE BEGIN                        ! Uso de la
+         WRITE FORM "C40";#30;AVISA$          ! Mini-Factura
+      ENDIF                                   !
+      WAIT ; 500                              ! Y Continua
+   ENDIF                                      !
+   WAIT ; 300                                    ! Y Continua
+   TS.DISP1$   = "SU CUENTA VA EN ..."        ! Modifica linea
+   TS2.DISP1$  =  TS.DISP1$                   ! Modifica linea Disply 2
+ENDIF                                         !
+
+
+! MUESTRA ERROR EN CAPTURA TELEFONO 
+
+
+
+
+!IF IMPRE% = 1 THEN BEGIN
+!WRITE FORM "C40";#30;"REVISE EL No DEL  TELEFONO ... !!"          ! del Flag de
+!WAIT ; 1500                                   ! Y Continua
+!IMPRE% = 0
+!ENDIF 
+!------------------------------------------------------------
+
+
+!------------------------------------------------------------

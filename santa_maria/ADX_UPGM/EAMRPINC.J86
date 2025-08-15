@@ -1,0 +1,41 @@
+\/* TIME STAMP BLOCK ************************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\ REM!!============================================================!!
+\ REM!! These are the global variables used by the report common
+\ REM!! functions EAMRPCFC
+\ REM!!============================================================!!
+
+ INTEGER   GLOBAL        \
+                         \
+    LINE.NO,             \ position on screen/printer
+                         \
+    DESTINATION,         \ destination for report
+    DISPLAY,             \   = 1
+    PRINTER,             \   = 2
+    FILE,                \   = 3
+                         \
+    PERIOD,              \ period reported on
+    CURRENT,             \   = 1
+    PREVIOUS,            \   = 2
+                         \
+    MM.PRINTLEN,         \ printer form length
+    COMPRESSED.PRINT,    \ compressed print flag (ENH01)
+                         \
+    FIRST.HEADER,        \ first header for a report ON1
+    NO.MAX.PAGE,         \ no "of xxx" in page string
+                         \
+    OP.OR.TERM,          \ operator or terminal flag set by EC05
+                         \ = 1   operator
+                         \ = 2   terminal
+    ASTERISK.NEEDED      ! asterisk needed infront of term nos
+
+
+  STRING    GLOBAL       \
+                         \
+    NULL$,               \ null string
+    RP.TITLE$,           \ report title
+    RP.DATETIME$,        \ packed date and time field from store record
+    COMPRESSED.PRINT.ON$, \ string to turn on compressed print  (ENH01)
+    COMPRESSED.PRINT.OFF$,\ string to turn off compressed print (ENH01)
+    AUTO.REPORT$         ! name of auto reports procedure
+

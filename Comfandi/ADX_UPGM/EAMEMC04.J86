@@ -1,0 +1,7 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+ FUNCTION CSEMEC04 PUBLIC ! BEFORE THE WRITE OF A CUSTOMER TRANSFER RECORD
+ 
+! insert user exit code here
+ 
+ END FUNCTION

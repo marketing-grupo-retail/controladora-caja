@@ -1,0 +1,40 @@
+!   ***************************************************************************
+!   **    Date       :  Enero 04 de 1999                                     **
+!   **    User Exit  :  USR0802.011                                          **
+!   **    Inclu¡r en :  EAMTSU08.J86                                         **
+!   **    Program    :  EAMTSUPC.BAS                                         **
+!   **    Executable :  EAMTS10L.286                                         **
+!   **        Ajuste :  Tecnicos Sistemas POS                                **
+!   **                                                                       **
+!   **                                                                       **
+!   **  TOTAL COUPONS: prende el flag para acumular el total descontado      **
+!   **                por medio de coupons                                   **
+!   ***************************************************************************
+
+IF VAL(UNPACK$(IR.DEPARTME$))          = 38    AND      \! CUPON FRUVER
+    VAL(UNPACK$(IR.ITEMCODE$)) =         440000040332   THEN BEGIN ! CUPON CLIENTES
+            COU.PON1   = 1                                !
+ENDIF 
+
+IF VAL(UNPACK$(IR.DEPARTME$))          = 20    AND      \! CUPON FRUVER
+    VAL(UNPACK$(IR.ITEMCODE$)) =         999999921      THEN BEGIN ! CUPON CLIENTES
+            VERIFICA% = 0                                 !
+ENDIF 
+!ELSE BEGIN 
+!COU.PON1 = 0
+!ENDIF 
+
+
+
+
+!IF IR.INDICAT1A AND 02H               THEN BEGIN   ! CUPON dcto
+!DCTO.COUP = 10                                     ! Osfarma 
+!ENDIF ELSE BEGIN
+!DCTO.COUP = 0
+!ENDIF
+
+!IF IR.INDICAT1A AND 01H               THEN BEGIN   ! CUPON dcto
+!DCTO.COUP = 10
+!ENDIF
+
+!CANAN 6812704------------------------------------------------------------------

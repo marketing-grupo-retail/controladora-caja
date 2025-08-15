@@ -1,0 +1,13 @@
+!
+! jguiusu.j86
+!
+
+! insert user subroutine definitions here
+
+!-------------------------------------------
+!graba un mensaje en archivo de trace
+!-------------------------------------------
+!sub traceNUO( d$ ) external
+!   string    d$
+!end sub
+
